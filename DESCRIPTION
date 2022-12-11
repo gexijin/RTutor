@@ -11,7 +11,7 @@ License: MIT + file LICENSE
 Imports: 
     config (>= 0.3.1),
     golem (>= 0.3.5.9001),
-    shiny (>= 1.7.2)
+    shiny (>= 1.7.2),
     openai,
     tidyverse,
     tippy,
