@@ -16,7 +16,7 @@ Imports:
     tidyverse,
     tippy,
     gridExtra,
-    shinyBS, 
+    shinyBS
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1
