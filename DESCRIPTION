@@ -9,9 +9,9 @@ Authors@R:
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Imports: 
-    config (>= 0.3.1),
-    golem (>= 0.3.5.9001),
-    shiny (>= 1.7.2),
+    config,
+    golem,
+    shiny,
     openai,
     tidyverse,
     tippy,
