@@ -61,52 +61,6 @@ fluidPage(
           width = 6,
           actionButton("api_button", "Settings")
         )
-      ),
-      shinyBS::bsModal(
-        id = "modalAPI",
-        title = "Advanced AI is not free!",
-        trigger = "api_button",
-        size = "large",
-        h4("If you use this regularily, 
-        please use your own OpenAI account. 
-        Otherwise, the minimal fee for many users adds up.
-        Do not bankrupt a math professor!
-        It only take a a few minutes: "),
-
-        tags$ul(
-            tags$li(
-              "Create a personal account at",
-              a(
-                "OpenAI.",
-                href = "https://openai.com/api/",
-                target = "_blank"
-              )
-            ),
-            tags$li("After logging in, click on \"Personal\" from top left."),
-            tags$li(
-              "Click \"Manage Account\" and then \"Billing\",
-               where you can add \"Payment methods\" and set \"Usage 
-              limits\". $5 per month is more than enough."
-            ),
-            tags$li(
-              "Click on \"API keys\" to create a new key, 
-              which can be copied and pasted it below."
-            ),
-        ),
-        textInput(
-          inputId = "api_key",
-          label = "Paste your API key from OpenAI, then close this window.",
-          value = NULL,
-          placeholder = "sk-..... (51 characters)"
-        ),
-        h5(
-          "This key will used just for this session. 
-          It will not be saved on our server."
-        ),
-        uiOutput("valid_key"),
-        br(),
-        uiOutput("save_api_ui"),
-        textOutput("session_api_source")
       )
     ),
 
@@ -196,6 +150,7 @@ fluidPage(
     )
   ),
   tags$head(includeHTML(("inst/app/www/ga.html")))
+  ,tags$head(includeScript("inst/app/www/ga.js")) # old covid tracker called "virus"
 )
 }
 
