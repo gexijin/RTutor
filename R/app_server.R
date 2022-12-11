@@ -566,7 +566,7 @@ The generated code only works correctly some of the times."
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("user_data()$df[1:20, ]")))
     } else {
-      eval(parse(text = paste0(input$select_data, "[1:20, ]")))
+      eval(parse(text = paste0(input$select_data, "[1:20, ]")), envir = .GlobalEnv)
     }
   },
   striped = TRUE,
