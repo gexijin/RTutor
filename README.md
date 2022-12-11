@@ -16,10 +16,13 @@ install_github("gexijin/RTutor")
 3.  Click **Manage Account** and then **Billing**, where you can add **Payment methods** and set **Usage limits**. $5 per month is more than enough.
 4. Click on **API keys** to create a new key, which can be copied.
 
+## Use the API key with RTutor
+There are several ways to do this. 
+- After the app is started, you can click on **Settings** and paste the API key.
+- You can also save this key as a text file called **api_key.txt** in the working directory. 
+- Finally, you can create an environment variable called **OPEN_API_KEY** in your Windows, Mac, or Linux OS. 
 
-
-This is a basic example which shows you how to solve a common problem:
-
+## To start RTutor
 ```{r example}
 library(RTutor)
 run_app()
