@@ -16,6 +16,7 @@ golem::document_and_reload()
 run_app()
 }
 
+# for testing R package
 if(0){
 remove.packages("RTutor")
 

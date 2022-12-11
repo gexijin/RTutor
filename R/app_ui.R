@@ -93,7 +93,7 @@ fluidPage(
           br(),
           downloadButton(
             outputId = "Rmd_source",
-            label = "Download RMarkdown file"
+            label = "RMarkdown"
           ),
           tippy::tippy_this(
             "Rmd_source",
@@ -140,8 +140,13 @@ fluidPage(
               "gexijin@gmail.com.",
               href = "mailto:gexijin@gmail.com?Subject=RTutor"
             ),
+            " Source code at ",
+            a(
+              "GitHub.",
+              href = "https://github.com/gexijin/RTutor"
+            ),
 
-            "Version 1.0 12/8/2022."
+            "Version 0.1 12/11/2022."
           ),
           uiOutput("session_info")
         )

@@ -623,9 +623,22 @@ The generated code only works correctly some of the times."
 
     Rmd_script <- ""
 
-    # if the first chunk & data is uploaded, 
+    # if first chuck
+    if(input$submit_button == 1) {
+      Rmd_script <- paste0(
+        Rmd_script,
+        # Get the data from the params list-----------
+        "\n\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) based on the 
+        [openai](https://cran.rstudio.com/web/packages/openai/index.html) R package.",
+        "\n\nWebsite: [http://RTutor.ai](http://RTutor.ai)",
+        "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)"
+      )
+    }
+
+    # if the first chunk & data is uploaded,
     # insert script for reading data
     if(input$submit_button == 1 && input$select_data == uploaded_data) {
+
       # Read file
       file_name <- input$user_file$name
       if(user_data()$file_type == "read_excel") {
@@ -636,14 +649,14 @@ The generated code only works correctly some of the times."
         )
 
       }
-      if(user_data()$file_type == "read.csv") {
+      if (user_data()$file_type == "read.csv") {
         txt <- paste0(
           "df <- read.csv(\"",
           file_name,
           "\")"
         )
       }
-      if(user_data()$file_type == "read.table") {
+      if (user_data()$file_type == "read.table") {
         txt <- paste0(
           "df <- read.table(\"",
           file_name,
@@ -666,7 +679,7 @@ The generated code only works correctly some of the times."
       counter$requests,
       ". ",
       paste(
-        openAI_prompt(),
+        gsub("\n", " ", openAI_prompt()),
         collapse = "\n"
       ),
       "\n\n"
@@ -740,17 +753,12 @@ output$rmd_chuck_output <- renderText({
     content = function(file) {
       Rmd_script <- paste0(
         "---\n",
-        "title: \"RTutor Report\"\n",
+        "title: \"RTutor report\"\n",
         "author: \"RTutor, Powered by ChatGPT\"\n",
         "date: \"",
         date(), "\"\n",
         "output: html_document\n",
         "---\n",
-        Rmd_total$code
-      )
-
-      Rmd_script <- paste0(
-        Rmd_script,
         Rmd_total$code
       )
       writeLines(Rmd_script, file)
@@ -775,8 +783,10 @@ output$rmd_chuck_output <- renderText({
         #RMarkdown file's Header
         Rmd_script <- paste0(
           "---\n",
-          "title: \"RTutor Report\"\n",
-          "author: \"RTutor, Powered by ChatGPT\"\n",
+          "title: \"RTutor.ai report\"\n",
+          "author: \"RTutor v.",
+          release,
+          ", Powered by ChatGPT\"\n",
           "date: \"",
           date(), "\"\n",
           "output: html_document\n",
@@ -787,6 +797,15 @@ output$rmd_chuck_output <- renderText({
           "  value: TRUE\n",
           "  input: checkbox\n",
           "---\n"
+        )
+
+        Rmd_script <- paste0(
+          Rmd_script,
+          # Get the data from the params list-----------
+          "\n\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) based on the 
+          [openai](https://cran.rstudio.com/web/packages/openai/index.html) R package.",
+          "\n\nWebsite: [http://RTutor.ai](http://RTutor.ai)",
+          "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)"
         )
 
         Rmd_script <- paste0(
