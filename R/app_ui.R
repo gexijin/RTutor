@@ -149,9 +149,9 @@ fluidPage(
     )
   ),
   tags$head(includeHTML(app_sys("app", "www", "ga.html")))
+
   ,tags$head(includeScript(app_sys("app", "www", "ga.js")))
-  # tags$head(includeHTML (("inst/app/www/ga.html")))
-# ,tags$head(includeScript(("inst/app/www/ga.js"))) # old covid tracker called "virus"
+  # old covid tracker called "virus"
 )
 }
 

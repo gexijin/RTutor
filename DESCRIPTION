@@ -11,11 +11,12 @@ License: MIT + file LICENSE
 Imports: 
     config,
     golem,
-    shiny,
-    openai,
     tidyverse,
     tippy,
     gridExtra
+Depends:
+    tidyverse,
+    openai
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1

@@ -323,7 +323,6 @@ The generated code only works correctly some of the times."
           max_tokens = 500
         ),
         error = function(e) {
-
           # remove spinner, show message for 5s, & reload
           shinybusy::remove_modal_spinner()
           shiny::showModal(api_error_modal)
