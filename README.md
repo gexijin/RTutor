@@ -1,54 +1,20 @@
----
-output: github_document
----
+# RTutor, Chat with your data, in English!
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
-
-# RTutor
-
-<!-- badges: start -->
-<!-- badges: end -->
-
-The goal of RTutor is to ...
+RTutor is a Shiny App that can quickly generating and testing R code. Powered by API call's to OpenAI's language models, natural languages are translated into R scripts, which are then executed within the Shiny platform. An R Markdown source file and HTML report can be generated. 
 
 ## Installation
 
-You can install the development version of RTutor like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+library(remotes)
+install_github("gexijin/RTutor")
 ```
 
-## Example
+## Setting up the API key
 
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
 library(RTutor)
-## basic example code
+run_app()
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
