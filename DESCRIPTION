@@ -13,10 +13,10 @@ Imports:
     golem,
     tidyverse,
     tippy,
-    gridExtra
-Depends:
-    tidyverse,
+    gridExtra,
     openai
+Depends:
+    tidyverse
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1

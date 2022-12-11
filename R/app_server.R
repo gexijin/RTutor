@@ -392,6 +392,8 @@ The generated code only works correctly some of the times."
       title = "API connection error!",
       tags$h4("Is the API key is correct?", style = "color:red"),
       tags$h4("How about the WiFi?", style = "color:red"),
+      tags$h4("If you are using it from RTutor.ai, maybe Dr G's API usage 
+      is more than he can affort.", style = "color:red"),
       tags$h4(
         "Auto-reset ...", 
         style = "color:blue; text-align:right"
