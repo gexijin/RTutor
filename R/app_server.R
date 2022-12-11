@@ -326,6 +326,7 @@ The generated code only works correctly some of the times."
           # remove spinner, show message for 5s, & reload
           shinybusy::remove_modal_spinner()
           shiny::showModal(api_error_modal)
+          browser()
           Sys.sleep(5)
           session$reload()
 
@@ -563,6 +564,7 @@ The generated code only works correctly some of the times."
 
   output$data_table <- renderTable({
     req(input$select_data)
+    # otherwise built-in data is unavailable when running from R package.
     library(tidyverse)
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("user_data()$df[1:20, ]")))
