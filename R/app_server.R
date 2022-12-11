@@ -316,7 +316,7 @@ The generated code only works correctly some of the times."
 
       # Send to openAI
       tryCatch(
-        response <- create_completion(
+        response <- openai::create_completion(
           engine_id = language_model,
           prompt = prepared_request,
           openai_api_key = api_key_session()$api_key,
@@ -326,7 +326,6 @@ The generated code only works correctly some of the times."
           # remove spinner, show message for 5s, & reload
           shinybusy::remove_modal_spinner()
           shiny::showModal(api_error_modal)
-          browser()
           Sys.sleep(5)
           session$reload()
 
@@ -339,23 +338,25 @@ The generated code only works correctly some of the times."
       )
 
 
-    error_api <- FALSE
-    # if error returns true, otherwise 
-    #  that slot does not exist, returning false.
-    # or be NULL
-    error_api <- tryCatch(
-      !is.null(response$error_status),
-      error = function(e) {
-        return(TRUE)
+      error_api <- FALSE
+      # if error returns true, otherwise 
+      #  that slot does not exist, returning false.
+      # or be NULL
+      error_api <- tryCatch(
+        !is.null(response$error_status),
+        error = function(e) {
+          return(TRUE)
+        }
+      )
+      
+      error_message <- NULL
+      if(error_api) {
+        cmd <- NULL
+        response <- NULL
+        error_message <- response$message
+      } else {
+        cmd <- clean_cmd(response$choices[1, 1], input$select_data)
       }
-    )
-
-    if(error_api) {
-      cmd <- NULL
-      response <- NULL
-    } else {
-      cmd <- clean_cmd(response$choices[1, 1], input$select_data)
-    }
 
       api_time <- difftime(
         Sys.time(),
@@ -379,7 +380,8 @@ The generated code only works correctly some of the times."
           cmd = cmd,
           response = response,
           time = round(api_time, 0),
-          error = error_api
+          error = error_api,
+          error_message = error_message
         )
       )
     })
