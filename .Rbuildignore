@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^data-raw$
+dev_history.R
+^dev$
+$run_dev.*
+^LICENSE\.md$
+^README\.Rmd$
+^doc$
+^Meta$
