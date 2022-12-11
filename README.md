@@ -27,3 +27,61 @@ There are several ways to do this.
 library(RTutor)
 run_app()
 ```
+
+## Examples
+**"Use the mpg data frame.  Use ggplot2 to create a boxplot of hwy vs. class. Color by class."**
+```{R}
+library(ggplot2)
+ggplot(mpg, aes(x=class, y=hwy, fill=class)) +
+  geom_boxplot()
+```
+**"Use the mpg data frame.  Conduct ANOVA of log-transformed hwy by class and drv."**
+```{R}
+#Load necessary libraries
+library(tidyverse)
+#Create log-transformed hwy variable
+data <- mpg %>% 
+  mutate(hwyLog = log(hwy))
+#Perform ANOVA
+modelResults <- aov(hwyLog ~ class * drv, data = data)
+#View output
+summary(modelResults)
+```
+**"Use the mpg data frame.  Create a correlation map of all the columns that contain numbers."**
+
+```{R}
+cor_data <- cor(select_if(mpg, is.numeric))
+library(corrplot) 
+corrplot(cor_data)
+```
+
+**"Use the mpg data frame.  hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively.
+Only keep cars more efficient than 15 MPG, but less than 40, on the highway.
+Add 0.5 to city MPG for correction.
+Perform log transformation on city MPG.
+Raise highway MPG to the second power.
+Calculate correlation coefficient of  the two transformed variables."**
+
+```{R, eval = FALSE}
+# filter for cars more efficient than 15 on the highway, but less than 40
+mpg_filtered <- mpg %>% 
+    filter(hwy > 15 & hwy < 40)
+# add 0.5 to city MPG
+mpg_filtered$cty <- mpg_filtered$cty + 0.5
+# perform log transformation on city MPG
+mpg_filtered$cty <- log(mpg_filtered$cty)
+# raise highway MPG to the second power
+mpg_filtered$hwy2 <- mpg_filtered$hwy^2
+# calculate correlation coefficient
+cor(mpg_filtered$hwy2, mpg_filtered$cty)
+```
+Alternative solution:
+```{R}
+library(tidyverse)
+mpg %>%
+  filter(hwy > 15 & hwy < 40) %>%
+  mutate(cty = cty + 0.5,
+         cty = log(cty),
+         hwy = hwy^2) %>%
+  summarise(corr = cor(cty, hwy))
+```
