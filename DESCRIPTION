@@ -2,16 +2,21 @@ Package: RTutor
 Title: An Amazing Shiny App
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "firstname",
-           family = "lastname",
+    person(given = "Steven",
+           family = "Ge",
            role = c("aut", "cre"),
-           email = "your@email.com")
+           email = "gexijin@email.com")
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Imports: 
     config (>= 0.3.1),
     golem (>= 0.3.5.9001),
     shiny (>= 1.7.2)
+    openai,
+    tidyverse,
+    tippy,
+    gridExtra,
+    shinyBS, 
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1
