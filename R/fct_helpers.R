@@ -271,12 +271,12 @@ api_key_global <- Sys.getenv("OPEN_API_KEY")
 key_source <- "from OS environment variable."
 # If there is an key file in the current folder, use that instead.
 if (file.exists("api_key.txt")) {
-  api_key <- readLines("api_key.txt")
-  api_key <- clean_api_key(api_key)
+  api_key_file <- readLines("api_key.txt")
+  api_key <- clean_api_key(api_key_file)
 
   # if valid, replace with file
-  if(validate_api_key(api_key)) {
-    api_key_global <- api_key
+  if(validate_api_key(api_key_file)) {
+    api_key_global <- api_key_file
     key_source <- "from file."
   }
 

@@ -62,56 +62,58 @@ The generated code only works correctly some of the times."
     )
   })
 
+  #____________________________________________________________________________
+  # UI for loading data
+  #____________________________________________________________________________
+  # pop up modal for selections ----
+  observeEvent(input$api_button, {
+    shiny::showModal(
+      shiny::modalDialog(
+        size = "l",
+        h3("Advanced AI is not free!"),
+        h4("If you use this regularily, 
+        please create your own OpenAI account. 
+        Otherwise, the small fee for many users adds up quickly.
+        Do not bankrupt a math professor!
+        It only take a a few minutes: "),
 
-    # pop up modal for selections ----
-    observeEvent(input$api_button, {
-      shiny::showModal(
-        shiny::modalDialog(
-          size = "l",
-          h3("Advanced AI is not free!"),
-          h4("If you use this regularily, 
-          please use your own OpenAI account. 
-          Otherwise, the minimal fee for many users adds up.
-          Do not bankrupt a math professor!
-          It only take a a few minutes: "),
-
-          tags$ul(
-              tags$li(
-                "Create a personal account at",
-                a(
-                  "OpenAI.",
-                  href = "https://openai.com/api/",
-                  target = "_blank"
-                )
-              ),
-              tags$li("After logging in, click on \"Personal\" from top left."),
-              tags$li(
-                "Click \"Manage Account\" and then \"Billing\",
-                where you can add \"Payment methods\" and set \"Usage 
-                limits\". $5 per month is more than enough."
-              ),
-              tags$li(
-                "Click on \"API keys\" to create a new key, 
-                which can be copied and pasted it below."
-              ),
-          ),
-          textInput(
-            inputId = "api_key",
-            label = "Paste your API key from OpenAI, then close this window.",
-            value = NULL,
-            placeholder = "sk-..... (51 characters)"
-          ),
-          h5(
-            "This key will used just for this session. 
-            It will not be saved on our server."
-          ),
-          uiOutput("valid_key"),
-          br(),
-          uiOutput("save_api_ui"),
-          textOutput("session_api_source")
-        )
+        tags$ul(
+            tags$li(
+              "Create a personal account at",
+              a(
+                "OpenAI.",
+                href = "https://openai.com/api/",
+                target = "_blank"
+              )
+            ),
+            tags$li("After logging in, click on \"Personal\" from top left."),
+            tags$li(
+              "Click \"Manage Account\" and then \"Billing\",
+              where you can add \"Payment methods\" and set \"Usage 
+              limits\". $5 per month is more than enough."
+            ),
+            tags$li(
+              "Click on \"API keys\" to create a new key, 
+              which can be copied and pasted it below."
+            ),
+        ),
+        textInput(
+          inputId = "api_key",
+          label = "Paste your API key from OpenAI, then close this window.",
+          value = NULL,
+          placeholder = "sk-..... (51 characters)"
+        ),
+        h5(
+          "This key will used just for this session. 
+          It will not be saved on our server."
+        ),
+        uiOutput("valid_key"),
+        br(),
+        uiOutput("save_api_ui"),
+        textOutput("session_api_source")
       )
-    })
+    )
+  })
 
   # uploaded data
   user_data <- reactive({
@@ -205,6 +207,10 @@ The generated code only works correctly some of the times."
     }
   })
 
+  #____________________________________________________________________________
+  # API key management
+  #____________________________________________________________________________
+
   # api key for the session
   api_key_session <- reactive({
 
@@ -286,6 +292,11 @@ The generated code only works correctly some of the times."
     req(input$api_key)
     writeLines(input$api_key, "api_key.txt")
   })
+
+
+  #____________________________________________________________________________
+  # Send API Request, handle API errors
+  #____________________________________________________________________________
 
   openAI_prompt <- reactive({
     req(input$submit_button)
@@ -390,8 +401,8 @@ The generated code only works correctly some of the times."
       title = "API connection error!",
       tags$h4("Is the API key is correct?", style = "color:red"),
       tags$h4("How about the WiFi?", style = "color:red"),
-      tags$h4("If you are using it from RTutor.ai, maybe Dr G's API usage 
-      is more than he can affort.", style = "color:red"),
+      tags$h5("If you are on RTutor.ai, maybe Dr G's API usage 
+      is more than he can affort this month.", style = "color:red"),
       tags$h4(
         "Auto-reset ...", 
         style = "color:blue; text-align:right"
@@ -476,6 +487,11 @@ The generated code only works correctly some of the times."
       openAI_response()$response$usage$completion_tokens
     counter$requests <- counter$requests + 1
   })
+
+
+  #____________________________________________________________________________
+  # Shows plots, code, and errors
+  #____________________________________________________________________________
 
   # stores the results after running the generated code.
   # return error indicator and message
@@ -581,9 +597,9 @@ The generated code only works correctly some of the times."
   )
 
 
-#------------------------------------------------------------------------------
-#   Log and report
-#------------------------------------------------------------------------------
+  #____________________________________________________________________________
+  # Logs and Reports
+  #____________________________________________________________________________
 
   output$session_info <- renderUI({
     i <- c("<br><h4>R session info: </h4>")
@@ -595,7 +611,6 @@ The generated code only works correctly some of the times."
   Rmd_total <- reactiveValues(code = "")
 
   observeEvent(input$submit_button, {
-#    browser()
     Rmd_total$code <- paste0(Rmd_total$code, Rmd_chuck())
   })
 
@@ -759,7 +774,7 @@ output$rmd_chuck_output <- renderText({
         #RMarkdown file's Header
         Rmd_script <- paste0(
           "---\n",
-          "title: \"Report\"\n",
+          "title: \"RTutor Report\"\n",
           "author: \"RTutor, Powered by ChatGPT\"\n",
           "date: \"",
           date(), "\"\n",
