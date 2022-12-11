@@ -148,8 +148,8 @@ fluidPage(
       )
     )
   ),
-  tags$head(includeHTML(("inst/app/www/ga.html")))
-  ,tags$head(includeScript(("inst/app/www/ga.js"))) # old covid tracker called "virus"
+  tags$head(includeHTML  (("inst/app/www/ga.html")))
+# ,tags$head(includeScript(("inst/app/www/ga.js"))) # old covid tracker called "virus"
 )
 }
 
