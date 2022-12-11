@@ -563,10 +563,11 @@ The generated code only works correctly some of the times."
 
   output$data_table <- renderTable({
     req(input$select_data)
+    library(tidyverse)
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("user_data()$df[1:20, ]")))
     } else {
-      eval(parse(text = paste0(input$select_data, "[1:20, ]")), envir = parent.env())
+      eval(parse(text = paste0(input$select_data, "[1:20, ]")))
     }
   },
   striped = TRUE,
