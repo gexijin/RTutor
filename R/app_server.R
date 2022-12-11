@@ -296,8 +296,6 @@ The generated code only works correctly some of the times."
   openAI_response <- reactive({
 
     req(input$submit_button)
-    req(input$select_data)
-    req(api_key_session())
 
     isolate({  # so that it will not responde to text, until submitted
       req(input$input_text)
@@ -413,6 +411,7 @@ The generated code only works correctly some of the times."
         shiny::showModal(
           shiny::modalDialog(
             size = "s",
+            easyClose	= TRUE,
             h4(
               paste0(
                 "Cumulative API Cost reached ",
