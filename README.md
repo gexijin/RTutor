@@ -9,9 +9,9 @@ install_github("gexijin/RTutor")
 ```
 
 ## Obtain an API key from OpenAI
-1.  Create an account at [OpenAI](https://openai.com/api/).
+1.  Create a personal account at [OpenAI](https://openai.com/api/).
 2.  After logging in, click on **Personal** from top left.
-3.  Click **Manage Account** and then **Billing**, where you can add **Payment methods** and set **Usage limits**. $5 per month is more than enough.
+3.  Click **Manage Account** and then **Billing**, where you can add **Payment methods** and set **Usage limits**. $3-$5 per month is more than enough for most people.
 4. Click on **API keys** to create a new key, which can be copied.
 
 ## Use the API key with RTutor
