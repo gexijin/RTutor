@@ -110,6 +110,7 @@ The generated code only works correctly some of the times."
         uiOutput("valid_key"),
         br(),
         uiOutput("save_api_ui"),
+        br(),
         textOutput("session_api_source")
       )
     )
