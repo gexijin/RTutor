@@ -62,7 +62,7 @@ fluidPage(
           actionButton("api_button", "Settings")
         )
       ),
-      shinybs::bsModal(
+      shinyBS::bsModal(
         id = "modalAPI",
         title = "Advanced AI is not free!",
         trigger = "api_button",
