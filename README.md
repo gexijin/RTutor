@@ -18,7 +18,9 @@ install_github("gexijin/RTutor")
 There are several ways to do this. 
 - After the app is started, you can click on **Settings** and paste the API key.
 - You can also save this key as a text file called **api_key.txt** in the working directory. 
-- Finally, you can create an environment variable called **OPEN_API_KEY** in your Windows, Mac, or Linux OS. 
+- Finally, you can create an environment variable called **OPEN_API_KEY**. Instructions for [Windows](https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html), 
+[Mac](https://phoenixnap.com/kb/set-environment-variable-mac), and 
+[Linux](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/). 
 
 ## To start RTutor
 ```{r example}
