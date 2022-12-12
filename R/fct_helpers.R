@@ -1,4 +1,13 @@
 ###################################################
+# RTutor.AI, a Shiny app for chating with your data
+# Author: Xijin Ge    gexijin@gmail.com
+# Dec. 6-12, 2022.
+###################################################
+
+
+
+
+###################################################
 # Global variables
 ###################################################
 
@@ -113,37 +122,57 @@ clean_cmd <- function(cmd, selected_data){
 # Prepare data
 ###################################################################
 demos <- c(
-  'Example requests:' = 'Example requests',
+  ' ... ' = 'Example requests',
 
-  'Boxplot ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. Color by class.",
-  'Boxplot in Base R' = "Create a boxplot of cty vs. class.",
-  Scatter = "Use ggplot2. Plot hwy vs. cty, colored by class. Change shape by drv.",
-  ANOVA = "Conduct ANOVA of hwy by class.",
-  Boxplot2 = "Use ggplot2 to create a boxplot of hwy vs. class.  Color by class.
-Add jitter.
-Remove x label.",
-  ANOVA2 = "Conduct ANOVA of log-transformed hwy by class and drv.",
-  Correlation = "Create a correlation map of all the columns that contain numbers.",
-  Barplot = "Calculate average cty by year and class.
-Then use ggplot2 to create a barplot of average mpg by class,
-colored by year. The years should be side by side.",
-  Analysis = "Calculate the correlation of cty vs hwy.
+  'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
+Color by class.
+Add jitter",
+
+  'Correlation with context' = "Calculate the correlation coefficient of cty vs hwy.
 Repeat that after log transformation.
 Collect these results and show them.",
-Analysis2 = "Only keep cars with hwy bigger than 15, but less than 40.
+
+"High level Qs, 1" = "Are suvs more fuel efficient than compact cars?",
+
+  'ANOVA, after log' = "Conduct ANOVA of log-transformed hwy by class and drv.",
+
+  "Barplot, summarized" = "Calculate average cty by year and class.
+Then use ggplot2 to create a barplot of average mpg by class,
+colored by year. The years should be side by side.",
+
+  "Analysis, step by step" = "Only keep cars with hwy bigger than 15, but less than 40.
 Add 0.5 to cty.
 Perform log transformation on cty.
 Raise hwy to the second power.
 Calculate correlation coefficient of transformed hwy and cty.",
-Analysis_complex = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively.
+
+  "Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
+
+  'Regression, simple' = "Build a regression model of hwy.",
+
+  'Regression, specific' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
+  Give me diagnositic plots.",
+
+  "Analysis, complex" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively.
 Only keep cars more efficient than 15 MPG, but less than 40, on the highway.
 Add 0.5 to city MPG for correction.
 Perform log transformation on city MPG.
 Raise highway MPG to the second power.
 Calculate correlation coefficient of  the two transformed variables.",
-Neural_net = "Build a neural network model to predict 
+
+  "Neural network" = "Build a neural network model to predict 
 hwy based on displ, cyl, and class.  
-Use the nnet package. Plot the residules."
+Use the nnet package. Plot the distribution of residuals.",
+
+  "Scatter, refined" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
+Change shape by drv. Change size by displ.
+Change x label to 'Highway mpg'.
+Change y label to 'City mpg'.
+Change background to white.
+Increase font for labels to 15.",
+
+"High level Qs, 2" = "Are hwy increasing over the years?"
+
 )
 
 # prepare a list of available data sets.

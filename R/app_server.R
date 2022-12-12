@@ -34,7 +34,7 @@ app_server <- function(input, output, session) {
 
 To see alternative solutions, try again with the same request.
 
-The generated code only works correctly some of the times."
+The generated code works correctly some of the times."
       )
     }
   })
@@ -75,7 +75,7 @@ The generated code only works correctly some of the times."
         please create your own OpenAI account. 
         Otherwise, the small fee for many users adds up quickly.
         Do not bankrupt a math professor!
-        It only take a a few minutes: "),
+        It only take a a few minutes to get your own API key: "),
 
         tags$ul(
             tags$li(
@@ -201,7 +201,7 @@ The generated code only works correctly some of the times."
       selectInput(
         inputId = "demo_prompt",
         choices = demos,
-        label = NULL
+        label = "Example requests:"
       )
     } else {
       return(NULL)
@@ -344,7 +344,7 @@ The generated code only works correctly some of the times."
           session$reload()
 
           list(
-            value = -1,
+            error_value = -1,
             message = capture.output(print(e$message)),
             error_status = TRUE
           )
@@ -362,7 +362,7 @@ The generated code only works correctly some of the times."
           return(TRUE)
         }
       )
-      
+
       error_message <- NULL
       if(error_api) {
         cmd <- NULL
@@ -502,6 +502,9 @@ The generated code only works correctly some of the times."
   # return error indicator and message
 
   # Note that the code is run three times!!!!!
+
+  # Sometimes returns NULL, even when code run fine. Especially when
+  # a base R plot is generated.
   run_result <- reactive({
     req(openAI_response()$cmd)
 
@@ -509,7 +512,7 @@ The generated code only works correctly some of the times."
       eval(parse(text = openAI_response()$cmd)),
       error = function(e) {
         list(
-          value = -1,
+          error_value = -1,
           message = capture.output(print(e$message)),
           error_status = TRUE
         )
@@ -556,7 +559,7 @@ The generated code only works correctly some of the times."
 
   # Error when run the generated code?
   code_error <- reactive({
-    req(run_result())
+#    req(run_result()) This causes error, as it can be null when base R plot.
     req(input$submit_button)
     req(openAI_response()$cmd)
 
@@ -565,10 +568,11 @@ The generated code only works correctly some of the times."
     # if error returns true, otherwise 
     #  that slot does not exist, returning false.
     # or be NULL
-    error_status <- tryCatch(
-      !is.null(run_result()$error_status),
-      error = function(e) {
-        return(TRUE)
+    try(  # if you do not 'try', the entire app quits! :-)
+      if (is.list(run_result())) {
+        if (names(run_result())[1] == "error_value") {
+          error_status <- TRUE
+        }
       }
     )
     return(error_status)
@@ -576,9 +580,8 @@ The generated code only works correctly some of the times."
 
 
   output$error_message <- renderUI({
-    req(run_result())
+    req(!is.null(code_error()))
     if(code_error()) {
-
       h4(paste("Error!", run_result()$message), style = "color:red")
     } else {
       return(NULL)
