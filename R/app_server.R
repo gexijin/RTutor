@@ -299,7 +299,6 @@ The generated code only works correctly some of the times."
     writeLines(input$api_key, "api_key.txt")
   })
 
-
   #____________________________________________________________________________
   # Send API Request, handle API errors
   #____________________________________________________________________________
@@ -557,7 +556,7 @@ The generated code only works correctly some of the times."
 
   # Error when run the generated code?
   code_error <- reactive({
-    req(!is.null(run_result()))
+    req(run_result())
     req(input$submit_button)
     req(openAI_response()$cmd)
 
