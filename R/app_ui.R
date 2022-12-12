@@ -141,7 +141,7 @@ fluidPage(
           h4("7.	Can private companies use RTutor? "),
           p("No. It can be tried as a demo. RTutor website 
           nd source code are freely available for non-profit organizations
-           only. It uses GNU General Public License v3.0."),
+           only. It uses CC NC 3.0 license."),
 
           h4("8.	Can you run RTutor locally?"),
           p("Yes. Download the R package and install it locally. 
