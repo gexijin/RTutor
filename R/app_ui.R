@@ -123,7 +123,7 @@ fluidPage(
             and just analyze it in plain English. 
             Your results can be downloaded as an HTML report in minutes!"
           ),
-          h5("NO WARRANTY! Some of the scripts runs but are incorrect. 
+          h5("NO WARRANTY! Some of the scripts run but yield incorrect result. 
           Please use the auto-generated code as a starting 
           point for further refinement and validation."),
 

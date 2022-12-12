@@ -238,7 +238,11 @@ The generated code only works correctly some of the times."
 
   output$session_api_source <- renderText({
     txt <- api_key_session()$api_key
+
+    # The following is essential for correctly getting the 
+    # environment variable on Linux!!! Don't ask.
     tem <- Sys.getenv("OPEN_API_KEY")
+
     paste0(
       "Current API key: ",
       substr(txt, 1, 4),
@@ -688,7 +692,7 @@ The generated code only works correctly some of the times."
 
     # R Markdown code chuck----------------------
     #if error when running the code, do not run
-    if (code_error()) {
+    if (code_error() == TRUE) {
       Rmd_script <- paste0(
         Rmd_script,
         "```{R, eval = FALSE}\n"
