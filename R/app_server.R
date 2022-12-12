@@ -238,12 +238,9 @@ The generated code only works correctly some of the times."
 
   output$session_api_source <- renderText({
     txt <- api_key_session()$api_key
+    tem <- Sys.getenv("OPEN_API_KEY")
     paste0(
-      "Environment:",
-      substr(Sys.getenv("OPEN_API_KEY"), 1, 10),
-      "Current folder:",
-      getwd(),
-      " Current API key: ",
+      "Current API key: ",
       substr(txt, 1, 4),
       ".....",
       substr(txt, nchar(txt) - 4, nchar(txt)),
