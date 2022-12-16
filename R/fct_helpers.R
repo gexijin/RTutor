@@ -151,7 +151,7 @@ Calculate correlation coefficient of transformed hwy and cty.",
   'Regression, simple' = "Build a regression model of hwy.",
 
   'Regression, specific' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
-  Give me diagnositic plots.",
+Give me diagnostic plots.",
 
   "Analysis, complex" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively.
 Only keep cars more efficient than 15 MPG, but less than 40, on the highway.
@@ -169,7 +169,8 @@ Change shape by drv. Change size by displ.
 Change x label to 'Highway mpg'.
 Change y label to 'City mpg'.
 Change background to white.
-Increase font for labels to 15.",
+Increase font for labels to 15.
+Remove all grids.",
 
 "High level Qs, 2" = "Are hwy increasing over the years?"
 

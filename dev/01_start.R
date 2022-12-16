@@ -60,7 +60,13 @@ golem::use_favicon() # path = "path/to/ico". Can be an online file.
 golem::use_utils_ui(with_test = TRUE)
 golem::use_utils_server(with_test = TRUE)
 
+# If you want to change the favicon (default is golem's one)
+golem::use_favicon("C:/work/temp/flag.png") # path = "path/to/ico". Can be an online file. 
+
+golem::remove_favicon("inst/app/www/favicon.png")
+
 # You're now set! ----
 
 # go to dev/02_dev.R
 rstudioapi::navigateToFile("dev/02_dev.R")
+

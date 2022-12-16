@@ -62,6 +62,23 @@ The generated code works correctly some of the times."
     )
   })
 
+    welcome_modal <- shiny::modalDialog(
+      title = "Non-commercial only!",
+      tags$p(
+        "For commercial use of RTutor.ai website or source code 
+        beyond demo and testing, please contact",
+      a(
+        "gexijin@gmail.com.",
+        href = "mailto:gexijin@gmail.com?Subject=RTutor"
+       )
+      ),
+      easyClose = TRUE,
+      size = "s"
+    )
+
+    shiny::showModal(welcome_modal)
+
+
   #____________________________________________________________________________
   # UI for loading data
   #____________________________________________________________________________
@@ -865,7 +882,48 @@ output$rmd_chuck_output <- renderText({
     }
   )
 
+#______________________________________________________________________________
+#
+#  Server rebooting every 2 hours; this gives a warning
+#______________________________________________________________________________
 
+  # Initialize the timer, 180 seconds
+  timer <- reactiveVal(180)
+
+  # returns hour and minutes
+  time_var <- reactive({
+    tem = input$submit_button
+    min <- format(Sys.time(), "%M")
+    hr <- format(Sys.time(), "%H")
+    return(list(
+      min = as.integer(min),
+      hr = as.integer(hr)
+    ))
+  })
+
+  # observer that invalidates every second.
+  observe({
+    invalidateLater(1000, session)
+    isolate({
+      timer(timer() - 1)
+    })
+  })
+
+  output$timer_ui <- renderUI({
+    #rebot at 1:57, 3:57, 5:57 ...
+    if (time_var()$min >= 56 & time_var()$hr %% 2 == 1)
+      {
+      h4(
+        paste(
+          lubridate::seconds_to_period(timer()),
+          ": server rebooting. ",
+          " Knit and download your files."
+        ),
+        style = "color:red"
+      )
+
+    }
+  })
 # Run the application
 # shiny::runApp("app.R")
 

@@ -57,7 +57,9 @@ fluidPage(
           width = 6,
           actionButton("api_button", "Settings")
         )
-      )
+      ),
+      uiOutput("timer_ui")
+
     ),
 
 ###############################################################################
@@ -244,7 +246,12 @@ golem_add_external_resources <- function() {
   )
 
   tags$head(
-    favicon(),
+    favicon(
+      ico = "icon",
+      rel = "shortcut icon",
+      resources_path = "www",
+      ext = "png"
+    ),
     bundle_resources(
       path = app_sys("app/www"),
       app_title = "RTutor"
