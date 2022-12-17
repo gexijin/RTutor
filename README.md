@@ -1,7 +1,7 @@
 # RTutor.ai - Chat with your data via AI
 Hosted at [RTutor.ai](http://RTutor.ai).  Contact Steven Ge on [Twitter](https://twitter.com/StevenXGe)
 
-RTutor is an AI-based app that can quickly generate and test R code. Powered by API calls to OpenAI's Davinci (ChatGPT's sibling), natural languages are translated into R scripts, which are then executed within the Shiny platform. An R Markdown source file and HTML report can be generated. 
+RTutor is an AI-based app that can quickly generate and test R code. Powered by API calls to OpenAI's Davinci (ChatGPT's sibling), RTutor translates natural languages into R scripts, which are then executed within the Shiny platform. An R Markdown source file and HTML report can be generated. 
 
 ## Installation
 This repository is updated frequently, sometimes a few times a day. We suggest users reinstall everytime before using it, so that you always have the most recent version.
