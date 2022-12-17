@@ -16,6 +16,8 @@ uploaded_data <- "Upload"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 language_model <- "text-davinci-003"
+default_temperature <- 0.1
+pre_text <- "Generate R code, not R Markdown. "
 
 
 # if this file exists, running on the server. Otherwise local.
@@ -63,7 +65,7 @@ prep_input <- function(txt, selected_data){
     }
     txt <- paste("Use the", selected_data, "data frame. ", txt)
   }
-  txt <- paste("Generate R code, not R Markdown. ", txt)
+  txt <- paste(pre_text, txt)
 
   # If the last character is not a stop, add it. 
   # Otherwise, GPT3 will add a sentence.
@@ -172,7 +174,10 @@ Change background to white.
 Increase font for labels to 15.
 Remove all grids.",
 
-"High level Qs, 2" = "Are hwy increasing over the years?"
+"High level Qs, 2" = "Are hwy increasing over the years?",
+"Ask for info, R packages" = "Show me the R packages for regression.",
+"Hierarchical clustering" = "Conduct hierarchical clustering"
+
 
 )
 

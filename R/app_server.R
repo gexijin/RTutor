@@ -63,16 +63,21 @@ The generated code works correctly some of the times."
   })
 
     welcome_modal <- shiny::modalDialog(
-      title = "Non-commercial only!",
+      title = "Terms & Conditions",
       tags$p(
-        "For commercial use of RTutor.ai website or source code 
-        beyond demo and testing, please contact",
+        "No guarantee for the correctness of the generated code."
+      ),
+      tags$p(" 
+        The RTutor.ai website and the 
+        source code are freely availble for non-profit organizations. 
+        Commercial use beyond testing please contact",
       a(
         "gexijin@gmail.com.",
         href = "mailto:gexijin@gmail.com?Subject=RTutor"
        )
       ),
-      easyClose = TRUE,
+      footer = modalButton("Accept"),
+      easyClose = FALSE,
       size = "s"
     )
 
@@ -87,6 +92,33 @@ The generated code works correctly some of the times."
     shiny::showModal(
       shiny::modalDialog(
         size = "l",
+        footer = modalButton("Confirm"),
+        fluidRow(
+          column(
+            width = 4,
+            sliderInput(
+              inputId = "temperature",
+              label = "Sampling temperature",
+              min = 0,
+              max = 1,
+              value = sample_temp(),
+              step = .1,
+              round = FALSE,
+              width = "100%"
+            )
+          ),
+          column(
+            width = 8,
+            p("Controls how the language model chooses among possible answers. 
+            Higher sampling temperature tells the model to take 
+            more risks. Chose 0.9 for creative solutions. It will also 
+            yield more variety when the same request is repeated. 
+            Lower value (0) gives conservative, well-defined solutions,
+            but less diversity when repeated.
+            "),
+          )
+        ),
+
         h3("Advanced AI is not free!"),
         h4("If you use this regularily, 
         please create your own OpenAI account. 
@@ -320,6 +352,15 @@ The generated code works correctly some of the times."
   # Send API Request, handle API errors
   #____________________________________________________________________________
 
+
+  sample_temp <- reactive({
+      temperature <- default_temperature #default
+      if(!is.null(input$temperature)) {
+         temperature <- input$temperature
+      }
+      return(temperature)
+  })
+
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
@@ -351,7 +392,8 @@ The generated code works correctly some of the times."
           engine_id = language_model,
           prompt = prepared_request,
           openai_api_key = api_key_session()$api_key,
-          max_tokens = 500
+          max_tokens = 500,
+          temperature = sample_temp()
         ),
         error = function(e) {
           # remove spinner, show message for 5s, & reload
@@ -498,10 +540,27 @@ The generated code works correctly some of the times."
         "Cumulative API Cost: ",
         sprintf("%6.2f", counter$tokens * 2e-3),
         "¢"
+
       )
     }
   })
 
+  output$temperature <- renderText({
+    req(openAI_response()$cmd)
+
+    paste0(
+        "Temperature: ",
+        sample_temp()
+    )
+  })
+
+   output$retry_on_error <- renderText({
+     req(code_error())
+     if(code_error()) {
+      "Error! Click Re-submit or try the code on a local computer."
+     }
+
+   })
  # Defining & initializing the reactiveValues object
   counter <- reactiveValues(tokens = 0, requests = 0)
   observeEvent(input$submit_button, {
@@ -652,9 +711,14 @@ The generated code works correctly some of the times."
       Rmd_script <- paste0(
         Rmd_script,
         # Get the data from the params list-----------
-        "\n\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) based on the 
-        [openai](https://cran.rstudio.com/web/packages/openai/index.html) R package.",
-        "\n\nWebsite: [http://RTutor.ai](http://RTutor.ai)",
+        "\n\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) using 
+        API access (via the 
+        [openai](https://cran.rstudio.com/web/packages/openai/index.html)
+        package ) to 
+        [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
+        language_model,
+        "\" model.",
+        "\n\nRTutor Website: [http://RTutor.ai](http://RTutor.ai)",
         "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)"
       )
     }
@@ -703,10 +767,26 @@ The generated code works correctly some of the times."
       counter$requests,
       ". ",
       paste(
-        gsub("\n", " ", openAI_prompt()),
-        collapse = "\n"
+        #remove pre-inserted commands
+        gsub(
+          paste0(
+            "\n|",
+            pre_text,
+            "|",
+            "Use the ", 
+            input$select_data, 
+            " data frame. "
+          ),
+          "",
+          openAI_prompt()
+        ),
+        collapse = " "
       ),
-      "\n\n"
+      paste(
+        "\n Sampling temperature:",
+        sample_temp()
+      ),
+      "\n"
     )
 
     # R Markdown code chuck----------------------
@@ -821,15 +901,6 @@ output$rmd_chuck_output <- renderText({
           "  value: TRUE\n",
           "  input: checkbox\n",
           "---\n"
-        )
-
-        Rmd_script <- paste0(
-          Rmd_script,
-          # Get the data from the params list-----------
-          "\n\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) based on the 
-          [openai](https://cran.rstudio.com/web/packages/openai/index.html) R package.",
-          "\n\nWebsite: [http://RTutor.ai](http://RTutor.ai)",
-          "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)"
         )
 
         Rmd_script <- paste0(

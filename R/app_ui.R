@@ -35,18 +35,30 @@ fluidPage(
       ),
 
       br(), br(),
-        actionButton("submit_button", strong("Submit")),
-        tags$head(tags$style(
-          "#submit_button{font-size: 16px;color: red}"
-        )),
-        tippy::tippy_this(
-          "submit_button",
-          "ChatGPT can return different results for the same request.",
-          theme = "light-border"
+      fluidRow(
+        column(
+          width = 4,
+          actionButton("submit_button", strong("Submit")),
+          tags$head(tags$style(
+            "#submit_button{font-size: 16px;color: red}"
+          )),
+          tippy::tippy_this(
+            "submit_button",
+            "ChatGPT can return different results for the same request.",
+            theme = "light-border"
+          )
         ),
+        column(
+          width = 8,
+          textOutput("retry_on_error"),
+        )
+      ),
+
+
       br(), br(),
       textOutput("usage"),
       textOutput("total_cost"),
+      textOutput("temperature"),
       br(),
       fluidRow(
         column(
@@ -177,6 +189,7 @@ fluidPage(
         tabPanel(
           title = "About",
           value = "About",
+          h4("RTutor Version 0.2"),
           h5("RTutor uses ",
             a(
               "OpenAI's",
@@ -214,10 +227,11 @@ fluidPage(
             a(
               "GitHub.",
               href = "https://github.com/gexijin/RTutor"
-            ),
-
-            "Version 0.1 12/11/2022."
+            )
           ),
+          h4("Update log"),
+          p("V 0.2 12/16/2022. Add temperature control."),
+          p("V0.1 12/11/2022. Initial launch"),
 
           uiOutput("session_info")
         )
