@@ -115,6 +115,32 @@ fluidPage(
           br(), br(),
           verbatimTextOutput("rmd_chuck_output")
         ),
+
+        tabPanel(
+          title = "Learn",
+          value = "Learn",
+          br(),
+          selectInput(
+            inputId = "demo_question",
+            choices = demo_questions,
+            label = "Example questions:"
+          ),
+          tags$style(type = "text/css", "textarea {width:100%}"),
+          tags$textarea(
+            id = "ask_question",
+            placeholder = NULL,
+            rows = 2, ""
+          ),
+
+
+          #textInput(
+          #  inputId = "ask_question",
+          #  label = NULL
+          #),
+          actionButton("ask_button", strong("Ask")),
+          uiOutput("answer")
+        ),
+
         tabPanel(
           title = "FAQs",
           value = "FAQs",

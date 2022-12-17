@@ -175,10 +175,27 @@ Remove all grids.",
 
 "High level Qs, 2" = "Are hwy increasing over the years?",
 "Ask for info, R packages" = "Show me the R packages for regression.",
+"Ask for info, demo" = "Show me how to do model-based clustering.",
 "Hierarchical clustering" = "Conduct hierarchical clustering"
 
 
+
 )
+
+demo_questions <- c(
+'...' = "Example questions:",
+'Lookup R package' = "List the top R packages for regression.",
+'Explain concepts' = "What is cook's distance?",
+'Explain algorithm' = "How does k-means algorith work?",
+'How to, methods' = "How do you choose k in k-means clustering?",
+'How to, evaluation' = "How do you evaluate the results of multiple linear regression?",
+'How to, interpretation' = "What does P value = 0.04 mean in t-test?",
+'Statistic test' = "What statistics test to use to examine the 
+correlation of two categorical variable?"
+)
+
+
+
 
 # prepare a list of available data sets.
 datasets <- data()$results[, 3] # name of datasets

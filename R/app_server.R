@@ -1029,13 +1029,58 @@ output$rmd_chuck_output <- renderText({
         paste(
           lubridate::seconds_to_period(timer()),
           ": server rebooting. ",
-          " Knit and download your files."
+          " Download your files."
         ),
         style = "color:red"
       )
 
     }
   })
+
+#______________________________________________________________________________
+#
+#  Q and A
+#______________________________________________________________________________
+  # load demo data when clicked
+  observe({
+    req(input$demo_question)
+
+    if(input$demo_question != demo_questions[1]) {
+      updateTextInput(
+        session,
+        "ask_question",
+        value = input$demo_question
+      )
+    } else { # if not mpg data, reset
+      updateTextInput(
+        session,
+        "ask_question",
+        value = "",
+        placeholder = "Ask a short question about statistics."
+      )
+    }
+  })
+
+output$answer <- renderUI({
+
+  req(input$ask_button)
+  isolate({
+    req(input$ask_question)
+    response <- openai::create_completion(
+      engine_id = language_model,
+      prompt = input$ask_question,
+      openai_api_key = api_key_session()$api_key,
+      max_tokens = 100,
+      temperature = sample_temp()
+    )
+
+   response$choices[1, 1]
+  })
+
+
+
+})
+
 # Run the application
 # shiny::runApp("app.R")
 
