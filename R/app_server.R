@@ -993,9 +993,12 @@ output$rmd_chuck_output <- renderText({
   })
 
   output$timer_ui <- renderUI({
-    #rebot at 1:57, 3:57, 5:57 ...
-    if (time_var()$min >= 56 & time_var()$hr %% 2 == 1)
-      {
+    #rebot at 7:56, 15:56, 23:56 ...
+    if (
+      time_var()$min >= 56 &
+      time_var()$hr %% 8 == 7 &
+      & file.exists(on_server)
+      ) {
       h4(
         paste(
           lubridate::seconds_to_period(timer()),
