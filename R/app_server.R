@@ -56,7 +56,7 @@ The generated code works correctly some of the times."
   # Switch to Main tab when Submit button is clicked
   observeEvent(input$submit_button, {
     updateTabsetPanel(
-      session, 
+      session,
       "tabs",
       selected = "Main"
     )
@@ -69,8 +69,10 @@ The generated code works correctly some of the times."
       ),
       tags$p(" 
         The RTutor.ai website and the 
-        source code are freely availble for non-profit organizations. 
-        Commercial use beyond testing please contact",
+        source code (CC BY-NC 3.0 license) are freely 
+        availble for academic and 
+        non-profit organizations only. 
+        Commercial use beyond testing please contact ",
       a(
         "gexijin@gmail.com.",
         href = "mailto:gexijin@gmail.com?Subject=RTutor"
@@ -515,6 +517,13 @@ The generated code works correctly some of the times."
 
   })
 
+#output$code_out <- renderCode({
+#    req(openAI_response()$cmd)
+#    res <- openAI_response()$response$choices[1, 1]
+#    paste("f <- function(x) {2*x + 3}", "f(1)", "#> 5", sep = "\n")
+#})
+
+
   output$usage <- renderText({
     req(openAI_response()$cmd)
 
@@ -849,6 +858,9 @@ output$rmd_chuck_output <- renderText({
   req(Rmd_chuck())
   Rmd_total$code
 })
+
+
+
 
   # Markdown report
   output$Rmd_source <- downloadHandler(

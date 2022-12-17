@@ -86,6 +86,7 @@ fluidPage(
           title = "Main",
           value = "Main",
           h4("AI generated R code:"),
+          #codeModules::codeOutput("code_out"),
           verbatimTextOutput("openAI"),
           uiOutput("error_message"),
           h4("Results:"),
@@ -117,25 +118,26 @@ fluidPage(
           value = "FAQs",
           h4("1.	What is RTutor?"),
           p("It is an artificial intelligence (AI)-based app that enables 
-          you to interact with your data via natural language.
+          users to interact with your data via natural language.
            After uploading a 
           dataset, users ask questions about or request analyses in 
           English. The app generates and runs R code to answer that question 
           with plots and numeric results."),
 
           h4("2.	How does RTutor work?"),
-          p("The requests are structured and sent to OpenAI’s advanced AI
+          p("The requests are structured and sent to OpenAI’s AI
            system, which returns R code. The R code is cleaned up and 
            executed in a Shiny 
-           environment, showing results and error messages. Multiple 
+           environment, showing results or error messages. Multiple 
            requests are logged to produce an R Markdown file, which can be
-            knitted into an HTML report. This enables users to gain 
-            insights into their data quickly."),
+            knitted into an HTML report. This enables record keeping 
+            and reproducibility."),
 
           h4("3.	Can people without R coding experience use RTutor for statistical analysis? "),
           p("Not entirely. This is because the generated code can be wrong.
-           However, it could be used for exploratory data analysis and data 
-           visualization. Just be mindful of this experimental technology. "),
+           However, it could be used to quickly conduct data 
+           visualization, and exploratory data analysis (EDA). 
+           Just be mindful of this experimental technology. "),
 
           h4("4.	Who is it for?"),
           p("The primary goal is to help people with some R experience to learn
@@ -145,8 +147,10 @@ fluidPage(
 
           h4("5.	How do you make sure the results are correct? "),
           p("Try to word your question differently. And try 
-          the same request several time. Double-check to see 
-          if you get the same answer."),
+          the same request several time. A higher temperature parameter will give 
+          diverse choices. Then users can double-check to see 
+          if you get the same results from different runs."),
+
           h4("6.	Can you use RTutor to do R coding homework?"),
           p("No. That will defy the purpose. You need to learn
            R coding properly to be able to tell if the generated 
@@ -154,8 +158,8 @@ fluidPage(
 
           h4("7.	Can private companies use RTutor? "),
           p("No. It can be tried as a demo. RTutor website 
-          nd source code are freely available for non-profit organizations
-           only. It uses CC NC 3.0 license."),
+          dnd source code are freely available for non-profit organizations
+           only and distributed using the CC NC 3.0 license."),
 
           h4("8.	Can you run RTutor locally?"),
           p("Yes. Download the R package and install it locally. 
@@ -163,22 +167,22 @@ fluidPage(
 
           h4("9.	Why do I get different results with the same request? "),
           p("OpenAI’s language model has a certain degree of randomness 
-          that could be adjusted by parameters called \"temperature\". "),
+          that could be adjusted by parameters called \"temperature\". 
+          Set this in  Settings"),
 
           h4("10.	How much does the OpenAI’s cost per session?"),
           p("About $0.05 to $0.1, if you send 25 to 50 requests. I have a
            monthly usage limit. Once that is exceeded, the website will
             not work for the month. If you use it regularly, please use 
-            your API key. If this gets popular, I will have to figure 
-            out how to cover the expenses for the API and the AWS
-             web server. Currently, RTutor is a weekend hobby 
-             with no funding. "),
+            your API key. Currently, RTutor receives no funding. 
+            I will ask people to contribute later.
+            "),
 
           h4("11.	Can this replace statisticians or data scientists?"),
           p("No. But RTutor can make them more efficient."),
 
-          h4("12.	How to effectively write my request?"),
-          p("Imagine you have a summer intern who is a collge student 
+          h4("12.	How do I effectively write my request?"),
+          p("Imagine you have a summer intern, a collge student 
           who took one semester of statistics and R. You send the 
           intern emails with instructions and he/she sends 
           back code and results. The intern is not experienced, 
@@ -229,9 +233,23 @@ fluidPage(
               href = "https://github.com/gexijin/RTutor"
             )
           ),
-          h4("Update log"),
+
+          h4("Update log:"),
           p("V 0.2 12/16/2022. Add temperature control."),
           p("V0.1 12/11/2022. Initial launch"),
+
+          h4("RTutor went viral!"),
+          p(
+            a(
+              "Initial post on LinkedIn.",
+              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+            ),
+            " ",
+            a(
+              "@Physacourses on Twitter.",
+              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+            )
+          ),
 
           uiOutput("session_info")
         )
@@ -261,7 +279,7 @@ golem_add_external_resources <- function() {
 
   tags$head(
     favicon(
-      ico = "icon",
+      ico = "favicon",
       rel = "shortcut icon",
       resources_path = "www",
       ext = "png"
