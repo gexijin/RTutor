@@ -10,7 +10,8 @@ app_server <- function(input, output, session) {
 ###################################################################
 # Server
 ###################################################################
-
+  # increase max input file size
+  options(shiny.maxRequestSize = 10 * 1024^2) # 10MB
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
@@ -254,6 +255,14 @@ The generated code works correctly some of the times."
       return(NULL)
     }
   })
+
+  output$slava_ukraini <- renderUI({
+    if(input$submit_button == 0) {
+    h5("Slava Ukraini!")
+    }
+  })  
+
+
 
   #____________________________________________________________________________
   # API key management
@@ -683,6 +692,29 @@ The generated code works correctly some of the times."
   hover = TRUE
   )
 
+  output$data_table_DT <-DT::renderDataTable({
+    req(input$select_data)
+    # otherwise built-in data is unavailable when running from R package.
+    library(tidyverse)
+
+    
+    if(input$select_data == uploaded_data) {
+      eval(parse(text = paste0("df <- user_data()$df")))
+    } else {
+      eval(parse(text = paste0("df <- ", input$select_data)))
+    }
+    DT::datatable(
+      df, 
+      options = list(
+        lengthMenu = c(5, 20, 50, 100),
+        pageLength = 20,
+        dom = 'ftp',
+        scrollX = "400px"
+      ),
+      rownames = FALSE
+    )
+  }
+  )
 
   #____________________________________________________________________________
   # Logs and Reports

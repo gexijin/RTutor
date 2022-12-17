@@ -14,7 +14,8 @@ Imports:
     tidyverse,
     tippy,
     gridExtra,
-    openai
+    openai,
+    DT
 Depends:
     tidyverse
 Encoding: UTF-8

@@ -70,8 +70,8 @@ fluidPage(
           actionButton("api_button", "Settings")
         )
       ),
+      uiOutput("slava_ukraini"),
       uiOutput("timer_ui")
-
     ),
 
 ###############################################################################
@@ -94,7 +94,9 @@ fluidPage(
           # shows error message in local machine, but not on the server
           verbatimTextOutput("console_output"),
           uiOutput("plot_ui"),
-          tableOutput("data_table")
+          hr(),
+          DT::dataTableOutput("data_table_DT")
+          #,tableOutput("data_table")
         ),
 
         tabPanel(
@@ -286,7 +288,7 @@ golem_add_external_resources <- function() {
     favicon(
       ico = "favicon",
       rel = "shortcut icon",
-      resources_path = "www",
+      resources_path = "inst/app/www",
       ext = "png"
     ),
     bundle_resources(
