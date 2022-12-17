@@ -218,7 +218,7 @@ fluidPage(
 
           p(" Personal hobby project by",
             a(
-              "Xijin Ge.",
+              "Steven Ge.",
                href = "https://twitter.com/StevenXGe",
                target = "_blank"
             ),
@@ -248,6 +248,11 @@ fluidPage(
             a(
               "@Physacourses on Twitter.",
               href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+            ),
+            " ",
+            a(
+              "Carlo Pecoraro Facebook.",
+              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
             )
           ),
 
