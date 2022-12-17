@@ -111,22 +111,22 @@ The generated code works correctly some of the times."
           ),
           column(
             width = 8,
-            p("Controls how the language model chooses among possible answers. 
-            Higher sampling temperature tells the model to take 
-            more risks. Chose 0.9 for creative solutions. It will also 
-            yield more variety when the same request is repeated. 
+            p("This important parameter controls the AI's behavior in 
+            choosing among possible answers. 
+            Higher sampling temperature tells it to take 
+            more risks. Chose 0.9 for creative solutions. It will  
+            produce more variety when the same request is repeated. 
             Lower value (0) gives conservative, well-defined solutions,
             but less diversity when repeated.
             "),
           )
         ),
-
-        h3("Advanced AI is not free!"),
-        h4("If you use this regularily, 
-        please create your own OpenAI account. 
-        Otherwise, the small fee for many users adds up quickly.
-        Do not bankrupt a math professor!
-        It only take a a few minutes to get your own API key: "),
+        hr(),
+        h4("Use your own API key"),
+        h5("We pays a small amount to access to OpenAI for every session.
+           If you use this regularily, 
+           please create your own API key and paste it below. 
+           It only take a a few minutes to get your own API key: "),
 
         tags$ul(
             tags$li(
@@ -150,18 +150,14 @@ The generated code works correctly some of the times."
         ),
         textInput(
           inputId = "api_key",
-          label = "Paste your API key from OpenAI, then close this window.",
+          label = "Paste your API key from OpenAI:",
           value = NULL,
           placeholder = "sk-..... (51 characters)"
-        ),
-        h5(
-          "This key will used just for this session. 
-          It will not be saved on our server."
         ),
         uiOutput("valid_key"),
         br(),
         uiOutput("save_api_ui"),
-        br(),
+        hr(),
         textOutput("session_api_source")
       )
     )
@@ -446,8 +442,10 @@ The generated code works correctly some of the times."
       if(counter$requests > 50 && file.exists(on_server)) {
         Sys.sleep(counter$requests / 10 + runif(1, 0, 10))
       }
+      if(counter$requests > 100 && file.exists(on_server)) {
+        Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
+      }
 
-      #issue: check status
 
       shinybusy::remove_modal_spinner()
       return(
@@ -484,7 +482,7 @@ The generated code works correctly some of the times."
       req(!openAI_response()$error)
 
       cost_session <-  round(counter$tokens * 2e-3, 0)
-      if( cost_session %% 10  == 0 & cost_session != 0) {
+      if( cost_session %% 20  == 0 & cost_session != 0) {
         shiny::showModal(
           shiny::modalDialog(
             size = "s",
@@ -496,9 +494,7 @@ The generated code works correctly some of the times."
                 "¢"
               )
             ),
-            h4("Slow down. Please do not bankrupt Dr. Ge. 
-            Use your own API key. 
-            Or PayPal him some funds (gexijin@gmail.com)!")
+            h4("Slow down. Please try to use your own API key.")
           )
         )
       }
@@ -523,7 +519,6 @@ The generated code works correctly some of the times."
 #    paste("f <- function(x) {2*x + 3}", "f(1)", "#> 5", sep = "\n")
 #})
 
-
   output$usage <- renderText({
     req(openAI_response()$cmd)
 
@@ -539,17 +534,16 @@ The generated code works correctly some of the times."
 
   output$total_cost <- renderText({
     if(input$submit_button == 0) {
-      return("OpenAI charges 0.2¢ per 1k tokens/words 
-      from Dr. Ge's account. Heavy users 
+      return("OpenAI charges 2¢ per 10k tokens/words 
+      from our account. Heavy users 
       please use your own account (below)."
       )
     } else {
     req(openAI_response()$cmd)
       paste0(
         "Cumulative API Cost: ",
-        sprintf("%6.2f", counter$tokens * 2e-3),
+        sprintf("%5.1f", counter$tokens * 2e-3),
         "¢"
-
       )
     }
   })
@@ -995,9 +989,9 @@ output$rmd_chuck_output <- renderText({
   output$timer_ui <- renderUI({
     #rebot at 7:56, 15:56, 23:56 ...
     if (
-      time_var()$min >= 56 &
-      time_var()$hr %% 8 == 7 &
-      & file.exists(on_server)
+      time_var()$min >= 56 &&
+      time_var()$hr %% 8 == 7 &&
+      file.exists(on_server)
       ) {
       h4(
         paste(

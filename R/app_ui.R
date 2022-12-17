@@ -171,11 +171,11 @@ fluidPage(
           Set this in  Settings"),
 
           h4("10.	How much does the OpenAI’s cost per session?"),
-          p("About $0.05 to $0.1, if you send 25 to 50 requests. I have a
+          p("About $0.01 to $0.1, if you send 10 to 50 requests. We have a
            monthly usage limit. Once that is exceeded, the website will
             not work for the month. If you use it regularly, please use 
             your API key. Currently, RTutor receives no funding. 
-            I will ask people to contribute later.
+            We might ask users to contribute later.
             "),
 
           h4("11.	Can this replace statisticians or data scientists?"),
