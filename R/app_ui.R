@@ -120,25 +120,31 @@ fluidPage(
           title = "Learn",
           value = "Learn",
           br(),
-          selectInput(
-            inputId = "demo_question",
-            choices = demo_questions,
-            label = "Example questions:"
+          fluidRow(
+            column(
+              width = 7,
+              tags$style(type = "text/css", "textarea {width:100%}"),
+              tags$textarea(
+                id = "ask_question",
+                placeholder = NULL,
+                rows = 2,
+                ""
+              )
+            ),
+            column(
+              width = 5,
+              selectInput(
+                inputId = "demo_question",
+                choices = demo_questions,
+                label = NULL
+              )
+            )
           ),
-          tags$style(type = "text/css", "textarea {width:100%}"),
-          tags$textarea(
-            id = "ask_question",
-            placeholder = NULL,
-            rows = 2, ""
-          ),
-
-
-          #textInput(
-          #  inputId = "ask_question",
-          #  label = NULL
-          #),
           actionButton("ask_button", strong("Ask")),
-          uiOutput("answer")
+          br(),
+          hr(),
+          wellPanel(textOutput("answer"))
+          #,textOutput("usage_question")
         ),
 
         tabPanel(

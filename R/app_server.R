@@ -63,28 +63,28 @@ The generated code works correctly some of the times."
     )
   })
 
-    welcome_modal <- shiny::modalDialog(
-      title = "Terms & Conditions",
-      tags$p(
-        "No guarantee for the correctness of the generated code."
-      ),
-      tags$p(" 
-        The RTutor.ai website and the 
-        source code (CC BY-NC 3.0 license) are freely 
-        availble for academic and 
-        non-profit organizations only. 
-        Commercial use beyond testing please contact ",
-      a(
-        "gexijin@gmail.com.",
-        href = "mailto:gexijin@gmail.com?Subject=RTutor"
-       )
-      ),
-      footer = modalButton("Accept"),
-      easyClose = FALSE,
-      size = "s"
-    )
+  welcome_modal <- shiny::modalDialog(
+    title = "Terms & Conditions",
+    tags$p(
+      "No guarantee for the correctness of the generated code."
+    ),
+    tags$p(" 
+      The RTutor.ai website and the 
+      source code (CC BY-NC 3.0 license) are freely 
+      availble for academic and 
+      non-profit organizations only. 
+      Commercial use beyond testing please contact ",
+    a(
+      "gexijin@gmail.com.",
+      href = "mailto:gexijin@gmail.com?Subject=RTutor"
+      )
+    ),
+    footer = modalButton("Accept"),
+    easyClose = FALSE,
+    size = "s"
+  )
 
-    shiny::showModal(welcome_modal)
+  shiny::showModal(welcome_modal)
 
 
   #____________________________________________________________________________
@@ -257,7 +257,7 @@ The generated code works correctly some of the times."
   })
 
   output$slava_ukraini <- renderUI({
-    if(input$submit_button == 0) {
+    if(input$submit_button == 0 && input$ask_button == 0) {
     h5("Slava Ukraini!")
     }
   })  
@@ -1061,22 +1061,138 @@ output$rmd_chuck_output <- renderText({
     }
   })
 
-output$answer <- renderUI({
+output$answer <- renderText({
 
   req(input$ask_button)
+
   isolate({
-    req(input$ask_question)
-    response <- openai::create_completion(
-      engine_id = language_model,
-      prompt = input$ask_question,
-      openai_api_key = api_key_session()$api_key,
-      max_tokens = 100,
-      temperature = sample_temp()
+    req(input$ask_question) 
+
+    prepared_request <- paste(
+      "If the next question is not related to statistic or algorithm, 
+      just say 'Statistics only.' ",
+      input$ask_question
     )
 
-   response$choices[1, 1]
+
+      shinybusy::show_modal_spinner(
+        spin = "orbit",
+        text = paste(
+          sample(jokes, 1)
+        ),
+        color = "#000000"
+      )
+
+      start_time <- Sys.time()
+
+      # Send to openAI
+      tryCatch(
+        response <- openai::create_completion(
+          engine_id = language_model,
+          prompt = prepared_request,
+          openai_api_key = api_key_session()$api_key,
+          max_tokens = 200,
+          temperature = sample_temp()
+        ),
+        error = function(e) {
+          # remove spinner, show message for 5s, & reload
+          shinybusy::remove_modal_spinner()
+          shiny::showModal(api_error_modal)
+          Sys.sleep(5)
+          session$reload()
+
+          list(
+            error_value = -1,
+            message = capture.output(print(e$message)),
+            error_status = TRUE
+          )
+        }
+      )
+
+
+      error_api <- FALSE
+      # if error returns true, otherwise 
+      #  that slot does not exist, returning false.
+      # or be NULL
+      error_api <- tryCatch(
+        !is.null(response$error_status),
+        error = function(e) {
+          return(TRUE)
+        }
+      )
+
+      error_message <- NULL
+      if(error_api) {
+        cmd <- NULL
+        response <- NULL
+        error_message <- response$message
+      } else {
+        cmd <- clean_cmd(response$choices[1, 1], input$select_data)
+      }
+
+      api_time <- difftime(
+        Sys.time(),
+        start_time,
+        units = "secs"
+      )[[1]]
+
+      # if more than 10 requests, slow down. Only on server.
+      if(counter$requests > 20 && file.exists(on_server)) {
+        Sys.sleep(counter$requests / 5 + runif(1, 0, 5))
+      }
+      if(counter$requests > 50 && file.exists(on_server)) {
+        Sys.sleep(counter$requests / 10 + runif(1, 0, 10))
+      }
+      if(counter$requests > 100 && file.exists(on_server)) {
+        Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
+      }
+
+
+      shinybusy::remove_modal_spinner()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # update usage
+    counter$tokens <- counter$tokens + response$usage$completion_tokens
+    counter$requests <- counter$requests + 1
+
+    return(response$choices[1, 1])
   })
 
+  output$usage_question <- renderText({
+    req(input$ask_button)
+
+    paste0(
+      "R",
+      counter$requests, ":  ",
+      #openAI_response()$response$usage$completion_tokens,
+      " tokens, ",
+      #openAI_response()$time,
+      " second(s)"
+    )
+  })
 
 
 })

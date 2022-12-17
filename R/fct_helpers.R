@@ -183,8 +183,8 @@ Remove all grids.",
 )
 
 demo_questions <- c(
-'...' = "Example questions:",
-'Lookup R package' = "List the top R packages for regression.",
+'Example questions:' = "Example questions:",
+'Lookup R package' = "List popular R packages for forecast.",
 'Explain concepts' = "What is cook's distance?",
 'Explain algorithm' = "How does k-means algorith work?",
 'How to, methods' = "How do you choose k in k-means clustering?",
