@@ -183,16 +183,20 @@ Remove all grids.",
 )
 
 demo_questions <- c(
-'Example questions:' = "Example questions:",
-'Lookup R package' = "List popular R packages for forecast.",
-'Explain concepts' = "What is cook's distance?",
-'Explain algorithm' = "How does k-means algorith work?",
-'How to, methods' = "How do you choose k in k-means clustering?",
-'How to, evaluation' = "How do you evaluate the results of multiple linear regression?",
-'How to, interpretation' = "What does P value = 0.04 mean in t-test?",
-'Statistic test' = "What statistics test to use to examine the 
-correlation of two categorical variable?"
-)
+  'Example questions:' = "Example questions:",
+  'Lookup R package' = "List popular R packages for time-series forecast.",
+  'Explain concepts' = "What is Moran's I in sptatial statistics?",
+  'Find statistic method' = "What statistics test should I use to examine the 
+  correlation of two categorical variable?",
+  'How to, situation' = "How do you do regression when there are
+predictor variables that are highly correlated?",
+  'How to, methods' = "How do you choose k in k-means clustering?",
+  'How to, evaluation' = "How do you assess linear regression models?",
+  'How to, outliers' = "How to deal with outliers?",
+  'How to, interpretation' = "What does P value = 0.02 mean in ANOVA?",
+  'Vague question, rejected' = "How does k-means clustering work?",
+  'Vague question, w/ context' = "How does k-means clustering work in statistics?"
+  )
 
 
 

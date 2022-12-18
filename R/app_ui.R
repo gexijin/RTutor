@@ -72,6 +72,10 @@ fluidPage(
       ),
       uiOutput("slava_ukraini"),
       uiOutput("timer_ui")
+#      downloadButton(
+#        outputId = "eda_report",
+#        label = "EDA"
+#      ),
     ),
 
 ###############################################################################
@@ -117,9 +121,14 @@ fluidPage(
         ),
 
         tabPanel(
-          title = "Learn",
-          value = "Learn",
+          title = "Ask me anything",
+          value = "Ask me anything",
           br(),
+          #img(
+          #  src = "inst/app/www/tutor.png",
+          #  width = "688",
+          #  height = "618"
+          #),
           fluidRow(
             column(
               width = 7,
@@ -140,11 +149,20 @@ fluidPage(
               )
             )
           ),
-          actionButton("ask_button", strong("Ask")),
+
+          actionButton("ask_button", strong("Ask RTutor")),
           br(),
           hr(),
-          wellPanel(textOutput("answer"))
-          #,textOutput("usage_question")
+          wellPanel(textOutput("answer")),
+          tags$head(
+            tags$style(
+              "#answer{
+                color: purple;
+                font-size: 16px
+              }"
+            )
+          ),
+
         ),
 
         tabPanel(
@@ -275,17 +293,17 @@ fluidPage(
           h4("RTutor went viral!"),
           p(
             a(
-              "Initial post on LinkedIn.",
+              "Initial post on LinkedIn;  ",
               href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
             ),
             " ",
             a(
-              "@Physacourses on Twitter.",
+              "@Physacourses on Twitter;  ",
               href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
             ),
             " ",
             a(
-              "Carlo Pecoraro Facebook.",
+              "Carlo Pecoraro on Facebook.",
               href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
             )
           ),
@@ -312,15 +330,14 @@ fluidPage(
 #' @noRd
 golem_add_external_resources <- function() {
   add_resource_path(
-    "www",
-    app_sys("app/www")
+    "www", app_sys("app/www")
   )
 
   tags$head(
     favicon(
       ico = "favicon",
       rel = "shortcut icon",
-      resources_path = "inst/app/www",
+      resources_path = "www",
       ext = "png"
     ),
     bundle_resources(
