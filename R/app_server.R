@@ -1016,7 +1016,7 @@ output$rmd_chuck_output <- renderText({
 #______________________________________________________________________________
 
   # Initialize the timer, 180 seconds
-  timer <- reactiveVal(180)
+  timer <- reactiveVal(150)
 
   # returns hour and minutes
   time_var <- reactive({
@@ -1041,7 +1041,7 @@ output$rmd_chuck_output <- renderText({
     #rebot at 7:56, 15:56, 23:56 ...
     if (
       time_var()$min >= 56 &&
-      time_var()$hr %% 8 == 7 &&
+      time_var()$hr %% 2 == 1 &&  # time_var()$hr %% 8 == 7 &&
       file.exists(on_server)
       ) {
       h4(
