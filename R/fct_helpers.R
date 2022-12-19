@@ -133,13 +133,13 @@ Add jitter",
 Repeat that after log transformation.
 Collect these results and show them.",
 
-"High level Qs, 1" = "Are suvs more fuel efficient than compact cars?",
+"High level Qs, 1" = "Are SUVs more fuel efficient than compact cars?",
 
   'ANOVA, after log' = "Conduct ANOVA of log-transformed hwy by class and drv.",
 
   "Barplot, summarized" = "Calculate average cty by year and class.
 Then use ggplot2 to create a barplot of average mpg by class,
-colored by year. The years should be side by side.",
+colored by year. The bars for different years should be side by side.",
 
   "Analysis, step by step" = "Only keep cars with hwy bigger than 15, but less than 40.
 Add 0.5 to cty.
@@ -174,7 +174,6 @@ Increase font for labels to 15.
 Remove all grids.",
 
 "High level Qs, 2" = "Are hwy increasing over the years?",
-"Ask for info, R packages" = "Show me the R packages for regression.",
 "Ask for info, demo" = "Show me how to do model-based clustering.",
 "Hierarchical clustering" = "Conduct hierarchical clustering"
 

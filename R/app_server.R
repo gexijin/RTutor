@@ -555,7 +555,7 @@ The generated code works correctly some of the times."
       please use your own account (below)."
       )
     } else {
-    req(openAI_response()$cmd)
+    #req(openAI_response()$cmd)
       paste0(
         "Cumulative API Cost: ",
         sprintf("%5.1f", counter$tokens * 2e-3),
