@@ -171,7 +171,7 @@ fluidPage(
           title = "About",
           value = "About",
           h4("RTutor Version 0.2"),
-          h5("RTutor uses ",
+          p("RTutor uses ",
             a(
               "OpenAI's",
               href = "https://openai.com/",
@@ -187,13 +187,15 @@ fluidPage(
             and just analyze it in plain English. 
             Your results can be downloaded as an HTML report in minutes!"
           ),
-          h5("NO WARRANTY! Some of the scripts run but yield incorrect result. 
+          p("NO WARRANTY! Some of the scripts run but yield incorrect result. 
           Please use the auto-generated code as a starting 
           point for further refinement and validation."),
 
-          h5("OpenAI's models are accessed via API, which is not free. Please do not abuse it."),
+          p("OpenAI's models are accessed via API, which is not free. 
+          Please do not abuse it. Otherwise, this service might disappear."),
 
-          p(" Personal hobby project by",
+          hr(),
+          p(" Entirely personal project by",
             a(
               "Steven Ge.",
                href = "https://twitter.com/StevenXGe",
@@ -212,31 +214,38 @@ fluidPage(
           ),
           hr(),
           h4("Update log:"),
-          p("V 0.2 12/16/2022. Add temperature control."),
+          p("V0.2 12/16/2022. Add temperature control. Server reboot reminder."),
           p("V0.1 12/11/2022. Initial launch"),
 
+          hr(),
           h4("RTutor went viral!"),
-          p(
-            a(
-              "Initial post on LinkedIn;  ",
-              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+          tags$ul(
+            tags$li(
+              a(
+                "LinkedIn",
+                href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+              )
             ),
-            " ",
-            a(
-              "@Physacourses on Twitter;  ",
-              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+            tags$li(
+              a(
+                "Twitter",
+                href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+              )
             ),
-            " ",
-            a(
-              "Carlo Pecoraro on Facebook.",
-              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+            tags$li(
+              a(
+                "Twitter(Physacourses)",
+                href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+            )
             ),
-            " ",
-            a(
-              "Dr Ge on Twitter.",
-              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+            tags$li(
+              a(
+                "Facebook (Carlo Pecoraro)",
+                href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+              )
             )
           ),
+
 
           hr(),
 

@@ -112,22 +112,22 @@ The generated code works correctly some of the times."
           ),
           column(
             width = 8,
-            p("This important parameter controls the AI's behavior in 
-            choosing among possible answers. 
-            Higher sampling temperature tells it to take 
-            more risks. Chose 0.9 for creative solutions. It will  
-            produce more variety when the same request is repeated. 
-            Lower value (0) gives conservative, well-defined solutions,
-            but less diversity when repeated.
+            p("This important parameter controls the AI's behavior in choosing 
+            among possible answers. A higher sampling temperature tells the AI 
+            to take more risks, which can produce more diverse and creative 
+            solutions when the same request is repeated. On the other hand, 
+            a lower sampling temperature (such as 0) results in more
+             conservative and well-defined solutions, 
+             but less variety when the same 
+            request is repeated..
             "),
           )
         ),
         hr(),
         h4("Use your own API key"),
-        h5("We pay a small amount to access OpenAI for every session.
+        h5("We pay a small fee to use the AI for every request.
            If you use this regularily, 
-           please create your own API key and paste it below. 
-           It only take a a few minutes to get your own API key: "),
+           please take a few minutes to create your own API key: "),
 
         tags$ul(
             tags$li(
@@ -138,14 +138,14 @@ The generated code works correctly some of the times."
                 target = "_blank"
               )
             ),
-            tags$li("After logging in, click on \"Personal\" from top left."),
+            tags$li("After logging in, click \"Personal\" from top right."),
             tags$li(
               "Click \"Manage Account\" and then \"Billing\",
               where you can add \"Payment methods\" and set \"Usage 
               limits\". $5 per month is more than enough."
             ),
             tags$li(
-              "Click on \"API keys\" to create a new key, 
+              "Click \"API keys\" to create a new key, 
               which can be copied and pasted it below."
             ),
         ),
@@ -1047,7 +1047,7 @@ output$rmd_chuck_output <- renderText({
       h4(
         paste(
           lubridate::seconds_to_period(timer()),
-          ": server rebooting. ",
+          ": server reboots every 2hrs at the top of the hour. ",
           " Download your files."
         ),
         style = "color:red"
@@ -1193,11 +1193,23 @@ output$answer <- renderText({
     counter$time <- round(api_time, 0)
     counter$tokens_current <- response$usage$completion_tokens
 
+    humor <- c(
+      "Seriously? Statistics only!",
+      "Come on. Statistics only!",
+      "You know better. Statistics only!",
+      "Bruh... I am a statistics tutor! ",
+      "Are you kidding? Statistics only!",
+      "Gee..., Statistics only!!"
+    )
+
     ans <- response$choices[1, 1]
     if(grepl("Statistics only!", ans)) {
-      ans <- "Bruh... I am a statistics tutor!  If you are not
+      ans <- paste(
+        sample(humor, 1),
+        "   If you are not
        trying to be funny, ask again with more context. It might
         be helpful to add \"in statistics\" to the question."
+      )
     }
     return(ans)
   })
