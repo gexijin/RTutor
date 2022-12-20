@@ -124,7 +124,7 @@ The generated code works correctly some of the times."
         ),
         hr(),
         h4("Use your own API key"),
-        h5("We pays a small amount to access to OpenAI for every session.
+        h5("We pay a small amount to access OpenAI for every session.
            If you use this regularily, 
            please create your own API key and paste it below. 
            It only take a a few minutes to get your own API key: "),
@@ -1016,7 +1016,7 @@ output$rmd_chuck_output <- renderText({
 #______________________________________________________________________________
 
   # Initialize the timer, 180 seconds
-  timer <- reactiveVal(150)
+  timer <- reactiveVal(180)
 
   # returns hour and minutes
   time_var <- reactive({

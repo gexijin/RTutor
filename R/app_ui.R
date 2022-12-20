@@ -230,6 +230,11 @@ fluidPage(
             a(
               "Carlo Pecoraro on Facebook.",
               href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+            ),
+            " ",
+            a(
+              "Dr Ge on Twitter.",
+              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
             )
           ),
 
@@ -322,6 +327,9 @@ fluidPage(
            laptop. Alternatively, download RTutor R package, and use it from your
            own computer."),
 
+           h5("15. The server is busy. What do I do?"),
+           p("Start a new browser window, not another tab. You will be assigned
+           to a new worker process."),
            hr(),
 
 
