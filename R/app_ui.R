@@ -11,8 +11,7 @@ fluidPage(
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
-        # Application title
-
+      uiOutput("timer_ui"),
       p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>")),
       fluidRow(
         column(
@@ -70,12 +69,7 @@ fluidPage(
           actionButton("api_button", "Settings")
         )
       ),
-      uiOutput("slava_ukraini"),
-      uiOutput("timer_ui")
-#      downloadButton(
-#        outputId = "eda_report",
-#        label = "EDA"
-#      ),
+      uiOutput("slava_ukraini")
     ),
 
 ###############################################################################
@@ -208,9 +202,11 @@ fluidPage(
             ),
             " Source code at ",
             a(
-              "GitHub.",
+              "GitHub,",
               href = "https://github.com/gexijin/RTutor"
-            )
+            ),
+            " from where you can also find 
+            instruction to install RTutor as an R package."
           ),
           hr(),
           h4("Update log:"),
