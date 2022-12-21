@@ -80,7 +80,7 @@ app_server <- function(input, output, session) {
     size = "s"
   )
 
-#  shiny::showModal(welcome_modal)
+  shiny::showModal(welcome_modal)
 
    # read the speech input
   observeEvent(input$hey_cmd, {
