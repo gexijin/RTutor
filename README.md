@@ -6,7 +6,12 @@ RTutor is an AI-based app that can quickly generate and test R code. Powered by 
 ## Installation
 This repository is updated frequently, sometimes a few times a day. We suggest users reinstall everytime before using it, so that you always have the most recent version.
 ``` r
+if (!require("remotes")) {
+  install.packages("remotes")
+}
 library(remotes)
+#voice input package heyshiny
+install_github("jcrodriguez1989/heyshiny", dependencies = TRUE)
 install_github("gexijin/RTutor")
 ```
 
