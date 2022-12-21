@@ -111,7 +111,7 @@ clean_cmd <- function(cmd, selected_data){
 
   # if data is uploaded, add a line to get the data.
   if(selected_data == uploaded_data) {
-    cmd <- c("df <- user_data()$df", cmd)
+    cmd <- c("df <- user_data()$df", "df <- as.data.frame(df)", cmd)
   }
 
   return(cmd)
@@ -203,6 +203,8 @@ predictor variables that are highly correlated?",
 # prepare a list of available data sets.
 datasets <- data()$results[, 3] # name of datasets
 datasets <- gsub(" .*", "", datasets)
+
+datasets <- sort(datasets)
 datasets <- move_front(datasets, "state.x77")
 datasets <- move_front(datasets, "iris")
 datasets <- move_front(datasets, "mtcars")
