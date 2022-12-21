@@ -31,7 +31,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload data, or use demo. Then just ask questions or request analysis in plain English. See examples above. To see different answers, try again with the same request. Increase \"temperature\" for variety. Code works correctly some of the times. To use voice input, allow microphone access and say \"Hey Cox ...\""
+"Upload data, or use demo. Then just ask questions or request analyses in plain English. See examples above. To see different answers, try again with the same request. Increase \"temperature\" for variety. Code works correctly some of the times. To use voice input, allow microphone access and say \"Hey Cox ...\""
       )
     }
   })
@@ -80,7 +80,7 @@ app_server <- function(input, output, session) {
     size = "s"
   )
 
-  shiny::showModal(welcome_modal)
+#  shiny::showModal(welcome_modal)
 
    # read the speech input
   observeEvent(input$hey_cmd, {
