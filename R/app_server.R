@@ -293,7 +293,7 @@ app_server <- function(input, output, session) {
       tagList(
         hr(),
         h5("To use your voice, just say \"Hey Cox ...\" after 
-        allowing microphone access. 
+        allowing microphone access (often blocked by browser).
         This is in honor of the statistician Dr. David Cox. 
         Make sure there is only one tab 
         using the microphone.         
@@ -304,7 +304,7 @@ app_server <- function(input, output, session) {
       )
 
     }
-  })  
+  })
 
 
 

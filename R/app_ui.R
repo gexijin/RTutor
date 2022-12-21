@@ -352,8 +352,8 @@ fluidPage(
            h5("16. Voice input does not work!"),
            p("The voice input feature is still glitchy. One of the main reason
            is that most browsers block the RTutor.ai site from accessing microphone, 
-           probably due to it uses http, not https. We are working on it.
-           Otehrwise, check if the microphone access is allowed. 
+           probably due to its use of http, not https. We are working on this.
+           Check if you can allow microphone access. 
            Speak closer to the mic. Make sure there 
            is only one browser tab using the mic. "),
 
