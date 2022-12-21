@@ -31,11 +31,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Clearly state the desired statistical analysis in plain English. See examples above.
-
-To see alternative solutions, try again with the same request.
-
-The generated code works correctly some of the times."
+"Upload data, or use demo. Then just ask questions or request analysis in plain English. See examples above. To see different answers, try again with the same request. Increase \"temperature\" for variety. Code works correctly some of the times. To use voice input, allow microphone access and say \"Hey Cox ...\""
       )
     }
   })
@@ -86,6 +82,42 @@ The generated code works correctly some of the times."
 
   shiny::showModal(welcome_modal)
 
+   # read the speech input
+  observeEvent(input$hey_cmd, {
+    speech <- input$hey_cmd
+    message(speech)
+
+    if (input$tabs == "Main")    {
+      if (grepl("^continue", speech)) {
+
+        speech <- paste0(
+          input$input_text, # current prompt
+          ". ",  # add . and space.
+          gsub("^continue", "", speech) # remove the continue
+        )
+      }
+
+      updateTextInput(
+        session,
+        "input_text",
+        value = speech
+      )
+    } else if (input$tabs == "AMA") {
+
+      speech <- paste0(
+        input$input_text, # current prompt
+        ". ",  # add . and space.
+        gsub("^continue", "", speech) # remove the continue
+      )
+      updateTextInput(
+        session,
+        "ask_question",
+        value = speech
+      )
+
+    }
+
+  })
 
   #____________________________________________________________________________
   # UI for loading data
@@ -258,7 +290,19 @@ The generated code works correctly some of the times."
 
   output$slava_ukraini <- renderUI({
     if(input$submit_button == 0 && input$ask_button == 0) {
-    h5("Slava Ukraini!")
+      tagList(
+        hr(),
+        h5("To use your voice, just say \"Hey Cox ...\" after 
+        allowing microphone access. 
+        This is in honor of the statistician Dr. David Cox. 
+        Make sure there is only one tab 
+        using the microphone.         
+        If not satisfied, try again; the old text will 
+        be overwritten. To continue, say \"Hey Cox Continue ...\""),
+        br(),
+        h4("Slava Ukraini!")
+      )
+
     }
   })  
 
@@ -1075,8 +1119,7 @@ output$rmd_chuck_output <- renderText({
         session,
         "ask_question",
         value = "",
-        placeholder = "Ask RTutor anything about statistics.
-Select an example from the right."
+        placeholder = "Ask RTutor anything statistics. See examples. For voice, say \" Hey Cox\""
       )
     }
   })

@@ -6,8 +6,15 @@
 #' @noRd
 app_ui <- function(request) {
 fluidPage(
-  titlePanel("RTutor - Chat with your data via AI"),
+  titlePanel("RTutor - Talk to your data via AI"),
   windowTitle = "RTutor",
+  
+  heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny package
+  heyshiny::speechInput(
+    inputId = "hey_cmd",
+    command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
+  ), # set the input
+
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
@@ -116,7 +123,7 @@ fluidPage(
 
         tabPanel(
           title = "Ask Me Anything",
-          value = "Ask me anything",
+          value = "AMA",
           br(),
           #img(
           #  src = "inst/app/www/tutor.png",
@@ -156,15 +163,12 @@ fluidPage(
               }"
             )
           ),
-
         ),
-
-
 
         tabPanel(
           title = "About",
           value = "About",
-          h4("RTutor Version 0.2"),
+          h4("RTutor Version 0.3"),
           p("RTutor uses ",
             a(
               "OpenAI's",
@@ -210,8 +214,17 @@ fluidPage(
           ),
           hr(),
           h4("Update log:"),
-          p("V0.2 12/16/2022. Add temperature control. Server reboot reminder."),
-          p("V0.1 12/11/2022. Initial launch"),
+          tags$ul(
+            tags$li(
+              "v0.3 12/20/2022. Add voice recognition."
+            ),
+            tags$li(
+              "V0.2 12/16/2022. Add temperature control. Server reboot reminder."
+            ),
+            tags$li(
+              "V0.1 12/11/2022. Initial launch"
+            )
+          ),
 
           hr(),
           h4("RTutor went viral!"),
@@ -335,6 +348,13 @@ fluidPage(
            h5("15. The server is busy. What do I do?"),
            p("Start a new browser window, not another tab. You will be assigned
            to a new worker process."),
+
+           h5("16. Voice input does not work!"),
+           p("The voice input feature is still glitchy. 
+           Check if the microphone access is allowed. 
+           Speak closer to the mic. Make sure there 
+           is only one browser tab using the mic. "),
+
            hr(),
 
 

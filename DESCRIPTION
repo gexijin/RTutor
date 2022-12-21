@@ -15,7 +15,10 @@ Imports:
     tippy,
     gridExtra,
     openai,
-    DT
+    DT,
+    shinybusy
+Remotes:
+    github::jcrodriguez1989/heyshiny
 Depends:
     tidyverse
 Encoding: UTF-8
