@@ -232,6 +232,25 @@ app_server <- function(input, output, session) {
     })
   })
 
+
+  # showing the current dataset. Warning if no is uploaded.
+  output$selected_dataset <- renderText({
+      req(input$submit_button)
+      # when submit is clicked, but no data is uploaded.
+
+      if(input$select_data == uploaded_data) {
+        if(is.null(input$user_file)) {
+          txt <- "No file uploaded! Please Reset and upload your data first."
+        } else {
+          txt <- "Dataset: uploaded."
+        }
+      } else {
+        txt <- paste("Dataset:", input$select_data)
+      }
+
+      return(txt)
+  })
+
   output$data_upload_ui <- renderUI({
 
     # Hide this input box after the first run.
@@ -426,6 +445,11 @@ app_server <- function(input, output, session) {
       req(input$input_text)
       prepared_request <- openAI_prompt()
       req(prepared_request)
+
+      # when submit is clicked, but no data is uploaded.
+      if(input$select_data == uploaded_data) {
+        req(user_data())
+      }
 
       shinybusy::show_modal_spinner(
         spin = "orbit",
@@ -1085,14 +1109,14 @@ output$rmd_chuck_output <- renderText({
     #rebot at 7:56, 15:56, 23:56 ...
     if (
       time_var()$min >= 56 &&
-      time_var()$hr %% 2 == 1 &&  # time_var()$hr %% 8 == 7 &&
+      time_var()$hr %% 24 == 23 &&  # time_var()$hr %% 8 == 7 &&
       file.exists(on_server)
       ) {
       h4(
         paste(
           lubridate::seconds_to_period(timer()),
-          ": server reboots every 2hrs at the top of the hour. ",
-          " Download your files."
+          ": server reboots at midnight UTC. ",
+          " Download your files. Refresh at the top of the hr."
         ),
         style = "color:red"
       )

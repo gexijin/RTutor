@@ -19,6 +19,7 @@ fluidPage(
   sidebarLayout(
     sidebarPanel(
       uiOutput("timer_ui"),
+      textOutput("selected_dataset"),      
       p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>")),
       fluidRow(
         column(
@@ -168,7 +169,7 @@ fluidPage(
         tabPanel(
           title = "About",
           value = "About",
-          h4("RTutor Version 0.3"),
+          h4("RTutor Version 0.3.1"),
           p("RTutor uses ",
             a(
               "OpenAI's",
