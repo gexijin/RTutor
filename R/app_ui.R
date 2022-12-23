@@ -96,7 +96,13 @@ fluidPage(
           # shows error message in local machine, but not on the server
           verbatimTextOutput("console_output"),
           uiOutput("plot_ui"),
+          br(),
           uiOutput("make_ggplot_interactive_ui"),
+          checkboxInput(
+            inputId = "make_ggplot_interactive",
+            label = NULL,
+            value = FALSE
+          ),
           uiOutput("tips_interactive"),
           hr(),
           DT::dataTableOutput("data_table_DT"),
@@ -171,7 +177,7 @@ fluidPage(
         tabPanel(
           title = "About",
           value = "About",
-          h4("RTutor Version 0.3.1"),
+          h4("RTutor Version 0.4"),
           p("RTutor uses ",
             a(
               "OpenAI's",
@@ -218,6 +224,9 @@ fluidPage(
           hr(),
           h4("Update log:"),
           tags$ul(
+            tags$li(
+              "v 0.4 12/23/2022. Interactive plot. Voice input optional."
+            ),
             tags$li(
               "v0.3 12/20/2022. Add voice recognition."
             ),

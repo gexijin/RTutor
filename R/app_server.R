@@ -736,19 +736,31 @@ app_server <- function(input, output, session) {
 
   output$result_plotly <- plotly::renderPlotly({
     req(openAI_response()$cmd)
-      withProgress(message = "Plotting ...", {
-        incProgress(0.4)
-        tryCatch(
-          eval(parse(text = openAI_response()$cmd)),
-          error = function(e) {
-            list(
-              value = -1,
-              message = capture.output(print(e$message)),
-              error_status = TRUE
-            )
-          }
-        )
-      })
+    req(
+      is_interactive_plot() ||   # natively interactive
+      turned_on(input$make_ggplot_interactive)
+    )
+    withProgress(message = "Plotting ...", {
+      incProgress(0.4)
+      tryCatch(
+        g <- eval(parse(text = openAI_response()$cmd)),
+        error = function(e) {
+          list(
+            value = -1,
+            message = capture.output(print(e$message)),
+            error_status = TRUE
+          )
+        }
+      )
+
+      # still errors some times, when the returned list is not a plot
+      if(is.character(g) || is.data.frame(g) || is.numeric(g)) {
+        return(NULL)
+      } else {
+        return(g)
+      }
+    })
+
   })
 
   output$plot_ui <- renderUI({
@@ -759,36 +771,39 @@ app_server <- function(input, output, session) {
       return()
     } else if (
       is_interactive_plot() ||   # natively interactive
-      turned_on (input$make_ggplot_interactive) # converted
+      turned_on(input$make_ggplot_interactive) # converted
     ){
       plotly::plotlyOutput("result_plotly")
     } else {
       plotOutput("result_plot")
     }
-
   })
 
-  
-  output$make_ggplot_interactive_ui <- renderUI({
-    req(input$submit_button)
-    req(openAI_response()$cmd)
-    req(openAI_prompt())
+  # reset to FALSE after each submission
+  observeEvent(input$submit_button, {
+    updateCheckboxInput(
+      session = session,
+      inputId = "make_ggplot_interactive",
+      label = "Make it interactive!",
+      value = FALSE
+    )
+  })
 
-    # uses ggplot, but not already interactive
-    # convert it to interactive plot by shiny?
-    if(grepl("ggplot", openAI_prompt()) && 
-      !is_interactive_plot()
+  # remaining issue. Hide when app starts up.
+  observe({
+    # hide it by default
+    shinyjs::hideElement(id = "make_ggplot_interactive")
+    # if  ggplot2, and it is not already an interactive plot, show
+    if(grepl("ggplot", openAI_prompt()) &&
+      !is_interactive_plot() 
     ) {
-      checkboxInput(
-        inputId = "make_ggplot_interactive",
-        label = strong("Make it interactive"),
-        value = FALSE
-      )
+    shinyjs::showElement(id = "make_ggplot_interactive")
     }
   })
 
   is_interactive_plot <- reactive({
     # only true if the plot is interactive, natively.
+    req(input$submit_button)
     if(
       grepl(
         "plotly|plot_ly|ggplotly",
@@ -806,11 +821,10 @@ app_server <- function(input, output, session) {
     req(openAI_response()$cmd)
     req(openAI_prompt())
     if(is_interactive_plot() ||   # natively interactive
-      turned_on (input$make_ggplot_interactive) 
+      turned_on (input$make_ggplot_interactive)
      ) {
       tagList(
-        br(),
-        p("Mouse over to see values. Select a region to zoom. 
+        p("Interactive plot. Mouse over to see values. Select a region to zoom. 
         Click on the legends to deselect a group. 
         Double click a category to hide all others. 
         Use the menu on the top right for other functions."

@@ -164,19 +164,22 @@ Calculate correlation coefficient of  the two transformed variables.",
 hwy based on displ, cyl, and class.  
 Use the nnet package. Plot the distribution of residuals.",
 
-  'Scatter plot, interactive' = "Plot hwy vs. displ group by class. Make it interactive with ggplotly.",
+"High level Qs, 2" = "Are hwy increasing over the years?",
 
-  "Scatter, refined" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
+"Ask for info, demo" = "Show me how to do model-based clustering.",
+
+  'Scatter plot, interactive' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
+
+  "Scatter plot, refined" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
 Change shape by drv. Change size by displ.
 Change x label to 'Highway mpg'.
 Change y label to 'City mpg'.
 Change background to white.
 Increase font for labels to 15.
 Remove all grids.",
-"High level Qs, 2" = "Are hwy increasing over the years?",
-"Ask for info, demo" = "Show me how to do model-based clustering.",
+
 "Hierarchical clustering" = "Conduct hierarchical clustering",
-"Density plot" = "Create a density plot of hwy group by class.",
+"Density plot" = "Create a density plot of hwy group by year.",
  "Pie chart" = "Create an pie chart of  class. "
 
 
