@@ -670,17 +670,19 @@ app_server <- function(input, output, session) {
   # a base R plot is generated.
   run_result <- reactive({
     req(openAI_response()$cmd)
-
-    tryCatch(
-      eval(parse(text = openAI_response()$cmd)),
-      error = function(e) {
-        list(
-          error_value = -1,
-          message = capture.output(print(e$message)),
-          error_status = TRUE
-        )
-      }
-    )
+    withProgress(message = "Running the code ...", {
+      incProgress(0.4)
+      tryCatch(
+        eval(parse(text = openAI_response()$cmd)),
+        error = function(e) {
+          list(
+            error_value = -1,
+            message = capture.output(print(e$message)),
+            error_status = TRUE
+          )
+        }
+      )
+    })
 
   })
 
@@ -695,18 +697,19 @@ app_server <- function(input, output, session) {
 
   output$result_plot <- renderPlot({
     req(openAI_response()$cmd)
-
-    tryCatch(
-      eval(parse(text = openAI_response()$cmd)),
-      error = function(e) {
-        list(
-          value = -1,
-          message = capture.output(print(e$message)),
-          error_status = TRUE
+      withProgress(message = "Plotting ...", {
+        incProgress(0.4)
+        tryCatch(
+          eval(parse(text = openAI_response()$cmd)),
+          error = function(e) {
+            list(
+              value = -1,
+              message = capture.output(print(e$message)),
+              error_status = TRUE
+            )
+          }
         )
-      }
-    )
-
+      })
   })
 
   output$plot_ui <- renderUI({
