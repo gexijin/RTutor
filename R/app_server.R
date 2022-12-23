@@ -275,7 +275,7 @@ app_server <- function(input, output, session) {
           txt <- "Dataset: uploaded."
         }
       } else {
-        txt <- paste("Dataset:", input$select_data)
+        txt <- paste0("Dataset: ", input$select_data, ". To switch, click Reset.")
       }
 
       return(txt)
@@ -288,7 +288,7 @@ app_server <- function(input, output, session) {
 
     fileInput(
       inputId = "user_file",
-      label = "Upload a file",
+      label = "File Upload",
       accept = c(
         "text/csv",
         "text/comma-separated-values",

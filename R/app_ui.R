@@ -19,11 +19,11 @@ fluidPage(
       p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>")),
       fluidRow(
         column(
-          width = 4,
+          width = 5,
           uiOutput("demo_data_ui")
         ),
         column(
-          width = 8,
+          width = 7,
           uiOutput("data_upload_ui")
         )
       ),
