@@ -766,7 +766,6 @@ app_server <- function(input, output, session) {
   output$plot_ui <- renderUI({
     req(input$submit_button)
     req(openAI_response()$cmd)
-    req(openAI_prompt())
     if(code_error() || input$submit_button == 0) {
       return()
     } else if (
@@ -793,9 +792,11 @@ app_server <- function(input, output, session) {
   observe({
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
+    req(openAI_prompt())
+
     # if  ggplot2, and it is not already an interactive plot, show
-    if(grepl("ggplot", openAI_prompt()) &&
-      !is_interactive_plot() 
+    if(grepl("ggplot", paste(openAI_response()$cmd, collapse = " ")) &&
+      !is_interactive_plot()
     ) {
     shinyjs::showElement(id = "make_ggplot_interactive")
     }

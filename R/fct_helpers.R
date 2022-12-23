@@ -165,8 +165,9 @@ hwy based on displ, cyl, and class.
 Use the nnet package. Plot the distribution of residuals.",
 
 "High level Qs, 2" = "Are hwy increasing over the years?",
+"High level Qs, 3" = "Are drv and cyl independent?",
 
-"Ask for info, demo" = "Show me how to do model-based clustering.",
+#"Ask for info, demo" = "Show me how to do model-based clustering.",
 
   'Scatter plot, interactive' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
 
@@ -179,9 +180,9 @@ Increase font for labels to 15.
 Remove all grids.",
 
 "Hierarchical clustering" = "Conduct hierarchical clustering",
-"Density plot" = "Create a density plot of hwy group by year.",
+"Density plot, panels" = "Only keep 4, 6, and 8 cylinders. 
+Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
  "Pie chart" = "Create an pie chart of  class. "
-
 
 )
 
