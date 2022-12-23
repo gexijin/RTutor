@@ -31,7 +31,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload data, or use demo. Then just ask questions or request analyses in plain English. See examples above. To see different answers, try again with the same request. Increase \"temperature\" for variety. Code works correctly some of the times. To use voice input, allow microphone access and say \"Hey Cox ...\""
+"Upload data, or use demo. Then just ask questions or request analyses in plain English. See examples above. For a different solution, try again with the same request. Increase \"temperature\" for variety. Code works correctly some of the times. To use voice input, change Settings and say \"Hey Cox ...\""
       )
     }
   })
@@ -1259,7 +1259,7 @@ output$rmd_chuck_output <- renderText({
         session,
         "ask_question",
         value = "",
-        placeholder = "Ask RTutor anything statistics. See examples. For voice, say \" Hey Cox\""
+        placeholder = "Ask RTutor anything statistics. See examples. For voice, say \" Hey Cox\" after enable it in Settings."
       )
     }
   })

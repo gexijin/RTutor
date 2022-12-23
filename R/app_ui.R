@@ -56,12 +56,6 @@ fluidPage(
           textOutput("retry_on_error"),
         )
       ),
-
-
-      br(), br(),
-      textOutput("usage"),
-      textOutput("total_cost"),
-      textOutput("temperature"),
       br(),
       fluidRow(
         column(
@@ -73,6 +67,10 @@ fluidPage(
           actionButton("api_button", "Settings")
         )
       ),
+      br(),
+      textOutput("usage"),
+      textOutput("total_cost"),
+      textOutput("temperature"),
       uiOutput("slava_ukraini")
     ),
 
@@ -95,14 +93,13 @@ fluidPage(
 
           # shows error message in local machine, but not on the server
           verbatimTextOutput("console_output"),
-          uiOutput("plot_ui"),
-          br(),
-          uiOutput("make_ggplot_interactive_ui"),
           checkboxInput(
             inputId = "make_ggplot_interactive",
             label = NULL,
             value = FALSE
           ),
+          uiOutput("plot_ui"),
+          br(),
           uiOutput("tips_interactive"),
           hr(),
           DT::dataTableOutput("data_table_DT"),
