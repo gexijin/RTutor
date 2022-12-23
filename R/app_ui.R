@@ -85,7 +85,7 @@ fluidPage(
 ###############################################################################
 
     mainPanel(
-
+      shinyjs::useShinyjs(),
       tabsetPanel(
         id = "tabs",
         tabPanel(
@@ -101,8 +101,12 @@ fluidPage(
           verbatimTextOutput("console_output"),
           uiOutput("plot_ui"),
           hr(),
-          DT::dataTableOutput("data_table_DT")
+          DT::dataTableOutput("data_table_DT"),
           #,tableOutput("data_table")
+          div(
+            id = "load_message",
+            h1("Loading R packages, please wait ... ... ...")
+          ),
         ),
 
         tabPanel(

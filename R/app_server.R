@@ -64,6 +64,7 @@ app_server <- function(input, output, session) {
     tags$p(
       "No guarantee for the correctness of the generated code."
     ),
+    shinyjs::hideElement(id = "load_message"),
     tags$p(" 
       The RTutor.ai website and the 
       source code (CC BY-NC 3.0 license) are freely 
@@ -81,6 +82,9 @@ app_server <- function(input, output, session) {
   )
 
   shiny::showModal(welcome_modal)
+
+
+
 
    # read the speech input
   observeEvent(input$hey_cmd, {
