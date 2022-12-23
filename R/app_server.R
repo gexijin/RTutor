@@ -59,11 +59,24 @@ app_server <- function(input, output, session) {
     )
   })
 
+  # Use voice input?
+  output$use_heyshiny <- renderUI({
+    req(input$use_voice)
+      tagList(
+        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny package
+        heyshiny::speechInput(
+          inputId = "hey_cmd",
+          command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
+        ), # set the input
+      )
+  })
+
   welcome_modal <- shiny::modalDialog(
     title = "Terms & Conditions",
     tags$p(
       "No guarantee for the correctness of the generated code."
     ),
+    # hides the loading message
     shinyjs::hideElement(id = "load_message"),
     tags$p(" 
       The RTutor.ai website and the 
@@ -194,8 +207,21 @@ app_server <- function(input, output, session) {
         uiOutput("valid_key"),
         br(),
         uiOutput("save_api_ui"),
+        verbatimTextOutput("session_api_source"),
         hr(),
-        textOutput("session_api_source")
+        checkboxInput(
+          inputId = "use_voice",
+          label = "Vocie Input",
+          value = FALSE
+        ),
+        h5("To use voice naration in the main and the 
+        Ask Me Anything tabs, just say \"Hey Cox ...\" 
+        (in honor of the statistician Dr. David Cox) after 
+        allowing microphone access, which is sometimes blocked by browser.
+        Make sure there is only one tab 
+        using the microphone.         
+        If not satisfied, try again, The old text will 
+        be overwritten. To continue, say \"Hey Cox Continue ...\""),
       )
     )
   })
@@ -314,14 +340,6 @@ app_server <- function(input, output, session) {
   output$slava_ukraini <- renderUI({
     if(input$submit_button == 0 && input$ask_button == 0) {
       tagList(
-        hr(),
-        h5("To use your voice, just say \"Hey Cox ...\" after 
-        allowing microphone access (often blocked by browser).
-        This is in honor of the statistician Dr. David Cox. 
-        Make sure there is only one tab 
-        using the microphone.         
-        If not satisfied, try again; the old text will 
-        be overwritten. To continue, say \"Hey Cox Continue ...\""),
         br(),
         h4("Slava Ukraini!")
       )

@@ -8,12 +8,8 @@ app_ui <- function(request) {
 fluidPage(
   titlePanel("RTutor.ai - Talk to your data via AI"),
   windowTitle = "RTutor",
-  
-  heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny package
-  heyshiny::speechInput(
-    inputId = "hey_cmd",
-    command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
-  ), # set the input
+  uiOutput("use_heyshiny"),
+
 
   # Sidebar with a slider input for number of bins
   sidebarLayout(
@@ -105,7 +101,7 @@ fluidPage(
           #,tableOutput("data_table")
           div(
             id = "load_message",
-            h1("Loading R packages, please wait ... ... ...")
+            h1("Loading R packages... ... ...")
           ),
         ),
 
