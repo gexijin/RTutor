@@ -200,7 +200,7 @@ app_server <- function(input, output, session) {
         ),
         textInput(
           inputId = "api_key",
-          label = "Paste your API key from OpenAI:",
+          label = h5("Paste your API key from OpenAI:"),
           value = NULL,
           placeholder = "sk-..... (51 characters)"
         ),
@@ -211,15 +211,15 @@ app_server <- function(input, output, session) {
         hr(),
         checkboxInput(
           inputId = "use_voice",
-          label = "Vocie Input",
+          label = strong("Voice Input"),
           value = FALSE
         ),
-        h5("To use voice naration in the main and the 
+        h5("To use voice naration in the Main and the 
         Ask Me Anything tabs, just say \"Hey Cox ...\" 
         (in honor of the statistician Dr. David Cox) after 
-        allowing microphone access, which is sometimes blocked by browser.
+        allowing microphone access, which is sometimes blocked by browsers.
         Make sure there is only one tab 
-        using the microphone.         
+        using the microphone. Stay close to the mic.        
         If not satisfied, try again, The old text will 
         be overwritten. To continue, say \"Hey Cox Continue ...\""),
       )
@@ -642,7 +642,7 @@ app_server <- function(input, output, session) {
     if(input$submit_button == 0 & input$ask_button == 0) {
       return("OpenAI charges 2¢ per 10k tokens/words 
       from our account. Heavy users 
-      please use your own account (below)."
+      please use your own account. See Settings."
       )
     } else {
     #req(openAI_response()$cmd)
@@ -1259,7 +1259,7 @@ output$rmd_chuck_output <- renderText({
         session,
         "ask_question",
         value = "",
-        placeholder = "Ask RTutor anything statistics. See examples. For voice, say \" Hey Cox\" after enable it in Settings."
+        placeholder = "Ask RTutor anything statistics. See examples. Voice naration can be enabled in Settings."
       )
     }
   })
