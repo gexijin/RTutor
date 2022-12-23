@@ -17,7 +17,8 @@ Imports:
     openai,
     DT,
     shinybusy,
-    shinyjs
+    shinyjs,
+    plotly
 Remotes:
     github::jcrodriguez1989/heyshiny
 Depends:

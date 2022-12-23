@@ -127,7 +127,7 @@ demos <- c(
 
   'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
 Color by class.
-Add jitter",
+Add jitter.",
 
   'Correlation with context' = "Calculate the correlation coefficient of cty vs hwy.
 Repeat that after log transformation.
@@ -172,11 +172,11 @@ Change y label to 'City mpg'.
 Change background to white.
 Increase font for labels to 15.
 Remove all grids.",
-
 "High level Qs, 2" = "Are hwy increasing over the years?",
 "Ask for info, demo" = "Show me how to do model-based clustering.",
-"Hierarchical clustering" = "Conduct hierarchical clustering"
-
+"Hierarchical clustering" = "Conduct hierarchical clustering",
+"Density plot" = "Create a density plot of hwy group by class.",
+ "Pie chart" = "Create an pie chart of  class. "
 
 
 )

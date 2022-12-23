@@ -734,11 +734,31 @@ app_server <- function(input, output, session) {
       })
   })
 
+  output$result_plotly <- plotly::renderPlotly({
+    req(openAI_response()$cmd)
+      withProgress(message = "Plotting ...", {
+        incProgress(0.4)
+        tryCatch(
+          eval(parse(text = openAI_response()$cmd)),
+          error = function(e) {
+            list(
+              value = -1,
+              message = capture.output(print(e$message)),
+              error_status = TRUE
+            )
+          }
+        )
+      })
+  })
+
   output$plot_ui <- renderUI({
     req(input$submit_button)
     req(openAI_response()$cmd)
+    req(openAI_prompt())
     if(code_error() || input$submit_button == 0) {
       return()
+    } else if (grepl("interactive", tolower(openAI_prompt()))){
+      plotly::plotlyOutput("result_plotly")
     } else {
       plotOutput("result_plot")
     }
