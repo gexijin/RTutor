@@ -757,13 +757,69 @@ app_server <- function(input, output, session) {
     req(openAI_prompt())
     if(code_error() || input$submit_button == 0) {
       return()
-    } else if (grepl("interactive", tolower(openAI_prompt()))){
+    } else if (
+      is_interactive_plot() ||   # natively interactive
+      turned_on (input$make_ggplot_interactive) # converted
+    ){
       plotly::plotlyOutput("result_plotly")
     } else {
       plotOutput("result_plot")
     }
 
   })
+
+  
+  output$make_ggplot_interactive_ui <- renderUI({
+    req(input$submit_button)
+    req(openAI_response()$cmd)
+    req(openAI_prompt())
+
+    # uses ggplot, but not already interactive
+    # convert it to interactive plot by shiny?
+    if(grepl("ggplot", openAI_prompt()) && 
+      !is_interactive_plot()
+    ) {
+      checkboxInput(
+        inputId = "make_ggplot_interactive",
+        label = strong("Make it interactive"),
+        value = FALSE
+      )
+    }
+  })
+
+  is_interactive_plot <- reactive({
+    # only true if the plot is interactive, natively.
+    if(
+      grepl(
+        "plotly|plot_ly|ggplotly",
+        paste(openAI_response()$cmd, collapse = " ")
+      )
+    ) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  })
+
+  output$tips_interactive <- renderUI({
+    req(input$submit_button)
+    req(openAI_response()$cmd)
+    req(openAI_prompt())
+    if(is_interactive_plot() ||   # natively interactive
+      turned_on (input$make_ggplot_interactive) 
+     ) {
+      tagList(
+        br(),
+        p("Mouse over to see values. Select a region to zoom. 
+        Click on the legends to deselect a group. 
+        Double click a category to hide all others. 
+        Use the menu on the top right for other functions."
+        )
+      )
+    }
+
+  })
+
 
   # Error when run the generated code?
   code_error <- reactive({

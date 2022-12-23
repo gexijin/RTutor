@@ -128,7 +128,6 @@ demos <- c(
   'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
 Color by class.
 Add jitter.",
-
   'Correlation with context' = "Calculate the correlation coefficient of cty vs hwy.
 Repeat that after log transformation.
 Collect these results and show them.",
@@ -164,6 +163,8 @@ Calculate correlation coefficient of  the two transformed variables.",
   "Neural network" = "Build a neural network model to predict 
 hwy based on displ, cyl, and class.  
 Use the nnet package. Plot the distribution of residuals.",
+
+  'Scatter plot, interactive' = "Plot hwy vs. displ group by class. Make it interactive with ggplotly.",
 
   "Scatter, refined" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
 Change shape by drv. Change size by displ.
@@ -347,4 +348,31 @@ if (file.exists("api_key.txt")) {
     key_source <- "from file."
   }
 
+}
+
+
+#' Returns true only defined and has a value of true
+#'
+#' This is used when some the input variables are not defined globally,
+#' But could be turned on. if you use if(input$selected), it will
+#' give an error.
+#'
+#' @param x
+#'
+#' @return Returns TRUE or FALSE
+turned_on <- function(x) {
+
+  # length = 0 when NULL, length = 3 if vector
+  if (length(x) != 1) {
+    return(FALSE)
+  } else {
+
+    # contain logical value?
+    if (!is.logical(x)) {
+      return(FALSE)
+    } else {
+      # return the logical value.
+      return(x)
+    }
+  }
 }

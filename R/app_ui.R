@@ -96,6 +96,8 @@ fluidPage(
           # shows error message in local machine, but not on the server
           verbatimTextOutput("console_output"),
           uiOutput("plot_ui"),
+          uiOutput("make_ggplot_interactive_ui"),
+          uiOutput("tips_interactive"),
           hr(),
           DT::dataTableOutput("data_table_DT"),
           #,tableOutput("data_table")
