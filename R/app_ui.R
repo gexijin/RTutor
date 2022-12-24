@@ -10,12 +10,15 @@ fluidPage(
   windowTitle = "RTutor",
   uiOutput("use_heyshiny"),
 
-
+  div(
+    id = "load_message",
+    h1("Loading ... ...")
+  ),
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
       uiOutput("timer_ui"),
-      textOutput("selected_dataset"),      
+      textOutput("selected_dataset"),
       p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>")),
       fluidRow(
         column(
@@ -102,12 +105,9 @@ fluidPage(
           br(),
           uiOutput("tips_interactive"),
           hr(),
-          DT::dataTableOutput("data_table_DT"),
+          DT::dataTableOutput("data_table_DT")
           #,tableOutput("data_table")
-          div(
-            id = "load_message",
-            h1("Loading R packages... ... ...")
-          ),
+
         ),
 
         tabPanel(
@@ -354,7 +354,7 @@ fluidPage(
            laptop. Alternatively, download RTutor R package, and use it from your
            own computer."),
 
-           h5("15. The server is busy. What do I do?"),
+           h5("15. The server is busy. Or the website is stuck!"),
            p("Start a new browser window, not another tab. You will be assigned
            to a new worker process."),
 

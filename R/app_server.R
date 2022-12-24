@@ -59,9 +59,20 @@ app_server <- function(input, output, session) {
     )
   })
 
+  # had to use this. Otherwise, the checkbox returns to false
+  # when the popup is closed and openned again.
+  use_voice <- reactive({
+      use_voice <- FALSE #default
+      tem <- is.null(input$use_voice_button)
+      if(!is.null(input$use_voice)) {
+        use_voice <- input$use_voice
+      }
+      return(use_voice)
+  })
+
   # Use voice input?
   output$use_heyshiny <- renderUI({
-    req(input$use_voice)
+    req(use_voice())
       tagList(
         heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny package
         heyshiny::speechInput(
@@ -95,8 +106,6 @@ app_server <- function(input, output, session) {
   )
 
   shiny::showModal(welcome_modal)
-
-
 
 
    # read the speech input
@@ -163,12 +172,11 @@ app_server <- function(input, output, session) {
             width = 8,
             p("This important parameter controls the AI's behavior in choosing 
             among possible answers. A higher sampling temperature tells the AI 
-            to take more risks, which can produce more diverse and creative 
-            solutions when the same request is repeated. On the other hand, 
-            a lower sampling temperature (such as 0) results in more
+            to take more risks, producing more diverse and creative 
+            solutions when the same request is repeated. A lower  temperature
+             (such as 0) results in more
              conservative and well-defined solutions, 
-             but less variety when the same 
-            request is repeated..
+             but less variety when repeated.
             "),
           )
         ),
@@ -205,23 +213,38 @@ app_server <- function(input, output, session) {
           placeholder = "sk-..... (51 characters)"
         ),
         uiOutput("valid_key"),
-        br(),
         uiOutput("save_api_ui"),
         verbatimTextOutput("session_api_source"),
         hr(),
-        checkboxInput(
-          inputId = "use_voice",
-          label = strong("Voice Input"),
-          value = FALSE
+
+        fluidRow(
+          column(
+            width = 6,
+            checkboxInput(
+              inputId = "use_voice",
+              label = strong("Enable voice narration"),
+              value = use_voice()
+            )
+          ),
+          column(
+            width = 6,
+            # this causes the use_voice() to refresh twice,
+            # triggering the permission seeking in Chrome.
+            # Don't know why, but this works. I'm a stable genius.
+            actionButton("use_voice_button", strong("Seek mic permission"))
+          )
         ),
-        h5("To use voice naration in the Main and the 
-        Ask Me Anything tabs, just say \"Hey Cox ...\" 
-        (in honor of the statistician Dr. David Cox) after 
-        allowing microphone access, which is sometimes blocked by browsers.
-        Make sure there is only one tab 
-        using the microphone. Stay close to the mic.        
-        If not satisfied, try again, The old text will 
-        be overwritten. To continue, say \"Hey Cox Continue ...\""),
+        h5("First select the checkbox and then seek 
+        permission to use the microphone. Your browser should have a popup 
+        window. Otherwise, check the both ends of the URL bar for a 
+        blocked icon, which
+        could be clicked to grant permission. If successful, you will see 
+        a red dot on top of the tab in Chrome.
+        Voice naration can be used in both the Main and the 
+        Ask Me Anything tabs by just saying \"Hey Cox ...\" 
+        in honor of the statistician David Cox.     
+        If not satisfied, try again to overwrite. 
+        To continue, say \"Hey Cox Continue ...\""),
       )
     )
   })
