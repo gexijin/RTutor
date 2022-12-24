@@ -6,7 +6,7 @@
 #' @noRd
 app_ui <- function(request) {
 fluidPage(
-  titlePanel("RTutor.ai - Talk to your data via AI"),
+  titlePanel("RTutor - Talk to your data via AI"),
   windowTitle = "RTutor",
   uiOutput("use_heyshiny"),
 

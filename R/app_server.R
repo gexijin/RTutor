@@ -19,7 +19,7 @@ app_server <- function(input, output, session) {
   observe({
     req(input$demo_prompt)
     req(input$select_data)
-    if(input$select_data == "mpg" && input$demo_prompt != demos[1]) {
+    if(input$demo_prompt != demos_mpg[1]) {
       updateTextInput(
         session,
         "input_text",
@@ -31,7 +31,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload data, or use demo. Then just ask questions or request analyses in plain English. See examples above. For a different solution, try again with the same request. Increase \"temperature\" for variety. Code works correctly some of the times. To use voice input, change Settings and say \"Hey Cox ...\""
+"Upload a file or use demo data. Then just ask questions or request analyses in plain English. See examples above. For different solutions, try again with the same request. Code works correctly some of the times. To use voice input, click Settings."
       )
     }
   })
@@ -333,7 +333,7 @@ app_server <- function(input, output, session) {
 
     selectInput(
       inputId = "select_data",
-      label = "Demo data",
+      label = "Data",
       choices = datasets,
       selected = "mpg",
       multiple = FALSE,
@@ -352,9 +352,22 @@ app_server <- function(input, output, session) {
     if (input$select_data == "mpg") {
       selectInput(
         inputId = "demo_prompt",
-        choices = demos,
+        choices = demos_mpg,
         label = "Example requests:"
       )
+    } else if (input$select_data == no_data) {
+      selectInput(
+        inputId = "demo_prompt",
+        choices = demos_no_data,
+        label = "Example requests:"
+      )
+    } else if (input$select_data == "diamonds") {
+      selectInput(
+        inputId = "demo_prompt",
+        choices = demos_diamond,
+        label = "Example requests:"
+      )
+
     } else {
       return(NULL)
     }
@@ -914,6 +927,8 @@ app_server <- function(input, output, session) {
     
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
+    } else if(input$select_data == no_data){
+      df = as.data.frame("No data selected or uploaded.")
     } else {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }

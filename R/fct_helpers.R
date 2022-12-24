@@ -10,8 +10,9 @@
 # Global variables
 ###################################################
 
-release <- 0.1 # RTutor
-uploaded_data <- "User Upload"
+release <- 0.4 # RTutor
+uploaded_data <- "User Upload" # used for drop down
+no_data <- "Generate data" # no data is uploaded or selected
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 language_model <- "text-davinci-003"
@@ -62,7 +63,12 @@ prep_input <- function(txt, selected_data){
     if(selected_data == uploaded_data) {
       selected_data <- "df"
     }
-    txt <- paste("Use the", selected_data, "data frame. ", txt)
+
+    # do nothing when no data is selected.
+    # otherwise, add "Use the mpg data frame."
+    if(selected_data != no_data) {
+      txt <- paste("Use the", selected_data, "data frame. ", txt)
+    }
   }
   txt <- paste(pre_text, txt)
 
@@ -122,7 +128,9 @@ clean_cmd <- function(cmd, selected_data){
 ###################################################################
 # Prepare data
 ###################################################################
-demos <- c(
+
+# demo requests for mpg dataset
+demos_mpg <- c(
   ' ... ' = 'Example requests',
 
   'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
@@ -166,6 +174,7 @@ Use the nnet package. Plot the distribution of residuals.",
 
 "High level Qs, 2" = "Are hwy increasing over the years?",
 "High level Qs, 3" = "Are drv and cyl independent?",
+"High level Qs, 4" = "Is hwy normally distributed?",
 
 #"Ask for info, demo" = "Show me how to do model-based clustering.",
 
@@ -185,6 +194,35 @@ Create a density plot of cty, colored by year. Split into panels with one column
  "Pie chart" = "Create an pie chart of  class. "
 
 )
+
+# demo requests when no dataset is selected.
+demos_no_data <- c(
+  'Random number' = "Generate 100 random numbers. Plot their distribution.",
+  'Hierarchical tree' = "Provide a demo for hierarchical clustering tree.",
+  'Heat map' = "Create a heatmap with hierarchical tree.",
+  "Ridge regression" = "Provide a demo for ridge regression.",
+  'PCA' = "Create a matrix with 100 columns and 20 rows. Fill it with random numbers from the normal distribution. 
+The mean is 1 for the first 10 rows, but 3 for the rest.
+Conduct PCA. Plot using the first two principal components."
+)
+
+
+demos_diamond <- c(
+  'Distribution, cut' = "Plot the distribution of cut.",
+  'Distribution, price' = "Plot the distribution of price, with and without log transformation.",
+  'Scatter, price vs. carat' = "Plot price vs. carat. Change color by clarity. ",
+  'Combinations' = "Plot the combinations of cut and clarity.",
+  'Modelling' = "Remove diamonds larger than 3 carat.
+Build a model of price vs. carat.
+Create a violin plot of the residuals by clarity.
+Limit ploting to -10000 to 10000."
+
+)
+
+
+
+
+
 
 demo_questions <- c(
   'Example questions:' = "Example questions:",
@@ -233,13 +271,21 @@ datasets <- datasets[which(ix)]
 datasets <- move_front(datasets, "state.x77")
 datasets <- move_front(datasets, "iris")
 datasets <- move_front(datasets, "mtcars")
-datasets <- move_front(datasets, "diamonds")
+
+
+
 
 # append a dummy value, used when user upload their data.
 datasets <- c(datasets, uploaded_data)
 # move it to 2nd place
 datasets <- move_front(datasets, uploaded_data)
 
+# append a dummy value, used when user do not use any data
+datasets <- c(datasets, no_data)
+# move it to 2nd place
+datasets <- move_front(datasets, no_data)
+
+datasets <- move_front(datasets, "diamonds")
 # default
 datasets <- move_front(datasets, "mpg")
 
