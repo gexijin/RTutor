@@ -1,3 +1,10 @@
+###################################################
+# RTutor.AI, a Shiny app for chating with your data
+# Author: Xijin Ge    gexijin@gmail.com
+# Dec. 6-12, 2022.
+# No warranty and not for commercial use.
+###################################################
+
 #' The application server-side
 #'
 #' @param input,output,session Internal parameters for {shiny}.
@@ -646,7 +653,7 @@ app_server <- function(input, output, session) {
 
   output$openAI <- renderText({
     req(openAI_response()$cmd)
-    res <- openAI_response()$response$choices[1, 1]
+    res <- r_code$raw
     # Replace multiple newlines with just one.
     res <- gsub("\n+", "\n", res)
     # Replace emplty lines,  [ ]{0, }--> zero or more space
@@ -654,6 +661,36 @@ app_server <- function(input, output, session) {
     res <- gsub("```", "", res)
 
   })
+
+ # Defining & initializing the reactiveValues object
+  r_code <- reactiveValues(
+    code = "", # cumulative code
+    raw = "",  # cumulative orginal code for print out
+    cmd = "" # last code for Rmarkdown
+  )
+
+  observeEvent(input$submit_button, {
+    # if not continue
+    if(!input$continue) {
+      r_code$code <- openAI_response()$cmd
+      r_code$raw <- openAI_response()$response$choices[1, 1]
+      r_code$cmd <- ""
+      
+    } else { # if continue
+      r_code$cmd <- r_code$code  # last code
+      r_code$code <- c(r_code$code, openAI_response()$cmd)
+      r_code$raw <- paste(r_code$raw, openAI_response()$response$choices[1, 1])
+    }
+
+    updateCheckboxInput(
+      session = session,
+      inputId = "continue",
+      label = "Continue",
+      value = FALSE
+    )
+  })
+
+
 
 #output$code_out <- renderCode({
 #    req(openAI_response()$cmd)
@@ -702,7 +739,7 @@ app_server <- function(input, output, session) {
    output$retry_on_error <- renderText({
      req(code_error())
      if(code_error()) {
-      "Error! Click Re-submit or try the code on a local computer."
+      "Error! Try again or change request."
      }
 
    })
@@ -731,7 +768,7 @@ app_server <- function(input, output, session) {
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
-        eval(parse(text = openAI_response()$cmd)),
+        eval(parse(text = r_code$code)),
         error = function(e) {
           list(
             error_value = -1,
@@ -748,7 +785,7 @@ app_server <- function(input, output, session) {
   output$console_output <- renderText({
     req(openAI_response()$cmd)
     out <- capture.output(
-        eval(parse(text = openAI_response()$cmd))
+        eval(parse(text = r_code$code))
     )
     paste(out, collapse = "\n")
   })
@@ -758,7 +795,7 @@ app_server <- function(input, output, session) {
       withProgress(message = "Plotting ...", {
         incProgress(0.4)
         tryCatch(
-          eval(parse(text = openAI_response()$cmd)),
+          eval(parse(text = r_code$code)),
           error = function(e) {
             list(
               value = -1,
@@ -779,7 +816,7 @@ app_server <- function(input, output, session) {
     withProgress(message = "Plotting ...", {
       incProgress(0.4)
       tryCatch(
-        g <- eval(parse(text = openAI_response()$cmd)),
+        g <- eval(parse(text = r_code$code)),
         error = function(e) {
           list(
             value = -1,
@@ -1071,6 +1108,10 @@ app_server <- function(input, output, session) {
     cmd <- openAI_response()$cmd
     if(input$select_data == uploaded_data) {
       cmd <- cmd[-1]
+    }
+
+    if(input$continue) {
+      cmd <- c(r_code$cmd, cmd)
     }
 
     # Add R code

@@ -2,6 +2,7 @@
 # RTutor.AI, a Shiny app for chating with your data
 # Author: Xijin Ge    gexijin@gmail.com
 # Dec. 6-12, 2022.
+# No warranty and not for commercial use.
 ###################################################
 
 

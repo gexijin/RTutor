@@ -1,3 +1,11 @@
+###################################################
+# RTutor.AI, a Shiny app for chating with your data
+# Author: Xijin Ge    gexijin@gmail.com
+# Dec. 6-12, 2022.
+# No warranty and not for commercial use.
+###################################################
+
+
 #' The application User-Interface
 #'
 #' @param request Internal parameter for `{shiny}`.
@@ -43,7 +51,7 @@ fluidPage(
       br(), br(),
       fluidRow(
         column(
-          width = 4,
+          width = 6,
           actionButton("submit_button", strong("Submit")),
           tags$head(tags$style(
             "#submit_button{font-size: 16px;color: red}"
@@ -55,8 +63,17 @@ fluidPage(
           )
         ),
         column(
-          width = 8,
-          textOutput("retry_on_error"),
+          width = 6,
+          checkboxInput(
+            inputId = "continue",
+            label = "Continue",
+            value = FALSE
+          ),
+          tippy::tippy_this(
+            "continue",
+            "If selected, the current R scripts will be kept in the next questions. We build upon this script.",
+            theme = "light-border"
+          )
         )
       ),
       br(),
@@ -71,6 +88,7 @@ fluidPage(
         )
       ),
       br(),
+      textOutput("retry_on_error"),
       textOutput("usage"),
       textOutput("total_cost"),
       textOutput("temperature"),
@@ -174,7 +192,7 @@ fluidPage(
         tabPanel(
           title = "About",
           value = "About",
-          h4("RTutor Version 0.4"),
+          h4("RTutor Version 0.5"),
           p("RTutor uses ",
             a(
               "OpenAI's",
@@ -220,6 +238,10 @@ fluidPage(
           ),
           hr(),
           h4("Update log:"),
+          tags$ul(
+            tags$li(
+              "v 0.5 12/24/2022. Keep current code and continue."
+            ),
           tags$ul(
             tags$li(
               "v 0.4 12/23/2022. Interactive plot. Voice input optional."
