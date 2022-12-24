@@ -242,7 +242,6 @@ fluidPage(
             tags$li(
               "v 0.5 12/24/2022. Keep current code and continue."
             ),
-          tags$ul(
             tags$li(
               "v 0.4 12/23/2022. Interactive plot. Voice input optional."
             ),
