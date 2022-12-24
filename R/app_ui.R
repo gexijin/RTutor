@@ -334,8 +334,9 @@ fluidPage(
           h5("11.	Can this replace statisticians or data scientists?"),
           p("No. But RTutor can make them more efficient."),
 
-          h5("12.	How do I effectively write my request?"),
-          p("Imagine you have a summer intern, a collge student 
+          h5("12.	How do I  write my request effectively?"),
+          p("Imagine you have a summer intern, 
+          a collge student 
           who took one semester of statistics and R. You send the 
           intern emails with instructions and he/she sends 
           back code and results. The intern is not experienced, 
@@ -356,13 +357,22 @@ fluidPage(
 
            h5("15. The server is busy. Or the website is stuck!"),
            p("Start a new browser window, not another tab. You will be assigned
-           to a new worker process."),
+           to a new worker process. You can also try our mirror site ",
+           a(
+             "https://bcloud.org.",
+             href = "https://bcloud.org"
+           )
+           ),
 
            h5("16. Voice input does not work!"),
-           p("The voice input feature is still glitchy. One of the main reason
-           is that most browsers block the RTutor.ai site from accessing microphone, 
-           probably due to its use of http, not https. We are working on this.
-           Check if you can allow microphone access. 
+           p("One of the main reason
+           is that your browser block the website site from accessing the microphone. 
+           Make sure you access the site using",
+           a(
+             "https://RTutor.ai.",
+             href = "https://RTutor.ai"
+           ),
+           "With http, mic access is automatically blocked in Chrome.
            Speak closer to the mic. Make sure there 
            is only one browser tab using the mic. "),
 
