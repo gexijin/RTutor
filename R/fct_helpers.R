@@ -61,14 +61,8 @@ prep_input <- function(txt, selected_data){
   }
 
   if(!is.null(selected_data)) {
-    if(selected_data == uploaded_data) {
-      selected_data <- "df"
-    }
-
-    # do nothing when no data is selected.
-    # otherwise, add "Use the mpg data frame."
     if(selected_data != no_data) {
-      txt <- paste("Use the", selected_data, "data frame. ", txt)
+      txt <- paste("Use the df data frame. ", txt)
     }
   }
   txt <- paste(pre_text, txt)
@@ -118,7 +112,9 @@ clean_cmd <- function(cmd, selected_data){
 
   # if data is uploaded, add a line to get the data.
   if(selected_data == uploaded_data) {
-    cmd <- c("df <- user_data()$df", "df <- as.data.frame(df)", cmd)
+    cmd <- c("df <- as.data.frame(user_data()$df)", cmd)
+  } else if ( selected_data != no_data) {
+    cmd <- c(paste("df <- as.data.frame(", selected_data, ")"), cmd)
   }
 
   return(cmd)
