@@ -922,6 +922,7 @@ app_server <- function(input, output, session) {
     # or be NULL
     try(  # if you do not 'try', the entire app quits! :-)
       if (is.list(run_result())) {
+        req(!is.null(names(run_result())[1]))
         if (names(run_result())[1] == "error_value") {
           error_status <- TRUE
         }
@@ -965,7 +966,7 @@ app_server <- function(input, output, session) {
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
-      df = as.data.frame("No data selected or uploaded.")
+      df = NULL #as.data.frame("No data selected or uploaded.")
     } else {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }

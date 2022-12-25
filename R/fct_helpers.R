@@ -13,7 +13,7 @@
 
 release <- 0.5 # RTutor
 uploaded_data <- "User Upload" # used for drop down
-no_data <- "Generate data" # no data is uploaded or selected
+no_data <- "No data (examples)" # no data is uploaded or selected
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 language_model <- "text-davinci-003"
@@ -61,14 +61,8 @@ prep_input <- function(txt, selected_data){
   }
 
   if(!is.null(selected_data)) {
-    if(selected_data == uploaded_data) {
-      selected_data <- "df"
-    }
-
-    # do nothing when no data is selected.
-    # otherwise, add "Use the mpg data frame."
     if(selected_data != no_data) {
-      txt <- paste("Use the", selected_data, "data frame. ", txt)
+      txt <- paste("Use the df data frame. ", txt)
     }
   }
   txt <- paste(pre_text, txt)
@@ -118,7 +112,9 @@ clean_cmd <- function(cmd, selected_data){
 
   # if data is uploaded, add a line to get the data.
   if(selected_data == uploaded_data) {
-    cmd <- c("df <- user_data()$df", "df <- as.data.frame(df)", cmd)
+    cmd <- c("df <- as.data.frame(user_data()$df)", cmd)
+  } else if ( selected_data != no_data) {
+    cmd <- c(paste("df <- as.data.frame(", selected_data, ")"), cmd)
   }
 
   return(cmd)
@@ -141,8 +137,6 @@ Add jitter.",
 Repeat that after log transformation.
 Collect these results and show them.",
 
-"High level Qs, 1" = "Are SUVs more fuel efficient than compact cars?",
-
   'ANOVA, after log' = "Conduct ANOVA of log-transformed hwy by class and drv.",
 
   "Barplot, summarized" = "Calculate average cty by year and class.
@@ -156,8 +150,6 @@ Raise hwy to the second power.
 Calculate correlation coefficient of transformed hwy and cty.",
 
   "Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
-
-  'Regression, simple' = "Build a regression model of hwy.",
 
   'Regression, specific' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
 Give me diagnostic plots.",
@@ -173,9 +165,9 @@ Calculate correlation coefficient of  the two transformed variables.",
 hwy based on displ, cyl, and class.  
 Use the nnet package. Plot the distribution of residuals.",
 
-"High level Qs, 2" = "Are hwy increasing over the years?",
-"High level Qs, 3" = "Are drv and cyl independent?",
-"High level Qs, 4" = "Is hwy normally distributed?",
+"High level Qs, 1" = "Are hwy increasing over the years?",
+"High level Qs, 2" = "Are drv and cyl independent?",
+"High level Qs, 3" = "Is hwy normally distributed?",
 
 #"Ask for info, demo" = "Show me how to do model-based clustering.",
 
@@ -193,7 +185,6 @@ Remove all grids.",
 "Density plot, panels" = "Only keep 4, 6, and 8 cylinders. 
 Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
  "Pie chart" = "Create an pie chart of  class. "
-
 )
 
 # demo requests when no dataset is selected.
@@ -204,13 +195,20 @@ demos_no_data <- c(
   "Ridge regression" = "Provide a demo for ridge regression.",
   'PCA' = "Create a matrix with 100 columns and 20 rows. Fill it with random numbers from the normal distribution. 
 The mean is 1 for the first 10 rows, but 3 for the rest.
-Conduct PCA. Plot using the first two principal components."
+Conduct PCA. Plot using the first two principal components.",
+'Map' = "Create an world map. ",
+'Map, US' = "Create a US map.",
+'Map, state' = "Crate a county level map of South Dakota.",
+'Bioinformatics, genes' = "Use the biomaRt package to retrieve all human genes on Chr.Y.",
+'Bioinformatics, position' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y.",
+'Bioinformatics, length' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y. Calculate the length as the absolute difference between the start and end positions. Create a density plot of the length after log10 transformation.",
+'Financial, stocks' = "Retieve and plot the stock price of Apple in 2022. Add 20 day moving average."
 )
 
 
 demos_diamond <- c(
-  'Distribution, cut' = "Plot the distribution of cut.",
-  'Distribution, price' = "Plot the distribution of price, with and without log transformation.",
+  'Distribution, cut' = "Plot the distribution of cut using a pie chart.",
+  'Distribution, price' = "Plot the distribution of price after log transformation.",
   'Scatter, price vs. carat' = "Plot price vs. carat. Change color by clarity. ",
   'Combinations' = "Plot the combinations of cut and clarity.",
   'Modelling' = "Remove diamonds larger than 3 carat.
@@ -290,6 +288,9 @@ datasets <- move_front(datasets, "diamonds")
 # default
 datasets <- move_front(datasets, "mpg")
 
+datasets <- setNames(datasets, datasets)
+names(datasets)[1] <- "mpg (examples)"
+names(datasets)[2] <- "diamonds (examples)"
 
 
 
