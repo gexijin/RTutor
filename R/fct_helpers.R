@@ -137,8 +137,6 @@ Add jitter.",
 Repeat that after log transformation.
 Collect these results and show them.",
 
-"High level Qs, 1" = "Are SUVs more fuel efficient than compact cars?",
-
   'ANOVA, after log' = "Conduct ANOVA of log-transformed hwy by class and drv.",
 
   "Barplot, summarized" = "Calculate average cty by year and class.
@@ -152,8 +150,6 @@ Raise hwy to the second power.
 Calculate correlation coefficient of transformed hwy and cty.",
 
   "Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
-
-  'Regression, simple' = "Build a regression model of hwy.",
 
   'Regression, specific' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
 Give me diagnostic plots.",
@@ -169,9 +165,9 @@ Calculate correlation coefficient of  the two transformed variables.",
 hwy based on displ, cyl, and class.  
 Use the nnet package. Plot the distribution of residuals.",
 
-"High level Qs, 2" = "Are hwy increasing over the years?",
-"High level Qs, 3" = "Are drv and cyl independent?",
-"High level Qs, 4" = "Is hwy normally distributed?",
+"High level Qs, 1" = "Are hwy increasing over the years?",
+"High level Qs, 2" = "Are drv and cyl independent?",
+"High level Qs, 3" = "Is hwy normally distributed?",
 
 #"Ask for info, demo" = "Show me how to do model-based clustering.",
 
@@ -189,7 +185,6 @@ Remove all grids.",
 "Density plot, panels" = "Only keep 4, 6, and 8 cylinders. 
 Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
  "Pie chart" = "Create an pie chart of  class. "
-
 )
 
 # demo requests when no dataset is selected.
@@ -205,8 +200,8 @@ Conduct PCA. Plot using the first two principal components."
 
 
 demos_diamond <- c(
-  'Distribution, cut' = "Plot the distribution of cut.",
-  'Distribution, price' = "Plot the distribution of price, with and without log transformation.",
+  'Distribution, cut' = "Plot the distribution of cut using a pie chart.",
+  'Distribution, price' = "Plot the distribution of price after log transformation.",
   'Scatter, price vs. carat' = "Plot price vs. carat. Change color by clarity. ",
   'Combinations' = "Plot the combinations of cut and clarity.",
   'Modelling' = "Remove diamonds larger than 3 carat.
