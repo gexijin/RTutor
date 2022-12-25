@@ -922,6 +922,7 @@ app_server <- function(input, output, session) {
     # or be NULL
     try(  # if you do not 'try', the entire app quits! :-)
       if (is.list(run_result())) {
+        req(!is.null(names(run_result())[1]))
         if (names(run_result())[1] == "error_value") {
           error_status <- TRUE
         }
