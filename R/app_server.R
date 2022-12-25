@@ -966,7 +966,7 @@ app_server <- function(input, output, session) {
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
-      df = as.data.frame("No data selected or uploaded.")
+      df = NULL #as.data.frame("No data selected or uploaded.")
     } else {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }

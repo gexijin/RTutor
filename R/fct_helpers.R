@@ -13,7 +13,7 @@
 
 release <- 0.5 # RTutor
 uploaded_data <- "User Upload" # used for drop down
-no_data <- "Generate data" # no data is uploaded or selected
+no_data <- "No data (examples)" # no data is uploaded or selected
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 language_model <- "text-davinci-003"
@@ -195,7 +195,14 @@ demos_no_data <- c(
   "Ridge regression" = "Provide a demo for ridge regression.",
   'PCA' = "Create a matrix with 100 columns and 20 rows. Fill it with random numbers from the normal distribution. 
 The mean is 1 for the first 10 rows, but 3 for the rest.
-Conduct PCA. Plot using the first two principal components."
+Conduct PCA. Plot using the first two principal components.",
+'Map' = "Create an world map. ",
+'Map, US' = "Create a US map.",
+'Map, state' = "Crate a county level map of South Dakota.",
+'Bioinformatics, genes' = "Use the biomaRt package to retrieve all human genes on Chr.Y.",
+'Bioinformatics, position' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y.",
+'Bioinformatics, length' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y. Calculate the length as the absolute difference between the start and end positions. Create a density plot of the length after log10 transformation.",
+'Financial, stocks' = "Retieve and plot the stock price of Apple in 2022. Add 20 day moving average."
 )
 
 
@@ -281,6 +288,9 @@ datasets <- move_front(datasets, "diamonds")
 # default
 datasets <- move_front(datasets, "mpg")
 
+datasets <- setNames(datasets, datasets)
+names(datasets)[1] <- "mpg (examples)"
+names(datasets)[2] <- "diamonds (examples)"
 
 
 
