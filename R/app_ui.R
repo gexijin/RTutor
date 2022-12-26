@@ -22,11 +22,13 @@ fluidPage(
     id = "load_message",
     h1("Loading ... ...")
   ),
-  tags$head( # move message to the center of screen
+
+  # move notifications and progress bar to the center of screen
+  tags$head( 
     tags$style(
       HTML(".shiny-notification {
             position:fixed;
-            top: calc(50%);
+            top: calc(20%);
             left: calc(50%);
             }
             "

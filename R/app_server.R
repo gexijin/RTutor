@@ -638,7 +638,7 @@ app_server <- function(input, output, session) {
     req(!openAI_response()$error)
 
     cost_session <-  round(counter$tokens * 2e-3, 0)
-    if( cost_session %% 20  == 0 & cost_session != 0) {
+    if (cost_session %% 20  == 0 & cost_session != 0) {
       shiny::showModal(
         shiny::modalDialog(
           size = "s",
@@ -710,7 +710,7 @@ app_server <- function(input, output, session) {
 
   output$total_cost <- renderText({
     if(input$submit_button == 0 & input$ask_button == 0) {
-      return("OpenAI charges 2¢ per 10k tokens/words 
+      return("OpenAI charges 2¢ per 1000 tokens/words 
       from our account. Heavy users 
       please use your own account. See Settings."
       )
@@ -749,7 +749,6 @@ app_server <- function(input, output, session) {
   )
 
 
-
   #                            6.
   #____________________________________________________________________________
   # Run the code, shows plots, code, and errors
@@ -778,6 +777,38 @@ app_server <- function(input, output, session) {
       )
     })
   })
+
+  # Error when run the generated code?
+  code_error <- reactive({
+    req(!is.null(names(run_result())[1]))
+    error_status <- FALSE
+
+    # if error returns true, otherwise 
+    #  that slot does not exist, returning false.
+    # or be NULL
+    try(  # if you do not 'try', the entire app quits! :-)
+      if (is.list(run_result())) {
+        if (names(run_result())[1] == "error_value") {
+          error_status <- TRUE
+        }
+      }
+    )
+    return(error_status)
+  })
+
+
+  output$error_message <- renderUI({
+    req(!is.null(code_error()))
+    if(code_error()) {
+      h4(paste("Error!", run_result()$message), style = "color:red")
+    } else {
+      return(NULL)
+    }
+
+  })
+
+
+
 
   # just capture the screen output
   output$console_output <- renderText({
@@ -910,38 +941,7 @@ app_server <- function(input, output, session) {
   })
 
 
-  # Error when run the generated code?
-  code_error <- reactive({
-#    req(run_result()) This causes error, as it can be null when base R plot.
-    req(input$submit_button)
-    req(openAI_response()$cmd)
 
-    error_status <- FALSE
-
-    # if error returns true, otherwise 
-    #  that slot does not exist, returning false.
-    # or be NULL
-    try(  # if you do not 'try', the entire app quits! :-)
-      if (is.list(run_result())) {
-        req(!is.null(names(run_result())[1]))
-        if (names(run_result())[1] == "error_value") {
-          error_status <- TRUE
-        }
-      }
-    )
-    return(error_status)
-  })
-
-
-  output$error_message <- renderUI({
-    req(!is.null(code_error()))
-    if(code_error()) {
-      h4(paste("Error!", run_result()$message), style = "color:red")
-    } else {
-      return(NULL)
-    }
-
-  })
 
   output$data_table <- renderTable({
     req(input$select_data)
