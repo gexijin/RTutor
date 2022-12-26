@@ -257,9 +257,7 @@ app_server <- function(input, output, session) {
   })
 
   output$prompt_ui <- renderUI({
-
     req(input$select_data)
-
     # hide after data is uploaded
     req(is.null(input$user_file))
 
@@ -281,19 +279,8 @@ app_server <- function(input, output, session) {
         choices = demos_diamond,
         label = "Example requests:"
       )
-
     } else {
       return(NULL)
-    }
-  })
-
-  output$slava_ukraini <- renderUI({
-    if (input$submit_button == 0 && input$ask_button == 0) {
-      tagList(
-        br(),
-        h4("Slava Ukraini!")
-      )
-
     }
   })
 
@@ -490,16 +477,14 @@ app_server <- function(input, output, session) {
 
 
 
-
   #                        5.
   #____________________________________________________________________________
   # Send API Request, handle API errors
   #____________________________________________________________________________
 
-
   sample_temp <- reactive({
       temperature <- default_temperature #default
-      if(!is.null(input$temperature)) {
+      if (!is.null(input$temperature)) {
          temperature <- input$temperature
       }
       return(temperature)
@@ -512,7 +497,6 @@ app_server <- function(input, output, session) {
   })
 
   openAI_response <- reactive({
-
     req(input$submit_button)
 
     isolate({  # so that it will not responde to text, until submitted
@@ -559,7 +543,6 @@ app_server <- function(input, output, session) {
         }
       )
 
-
       error_api <- FALSE
       # if error returns true, otherwise 
       #  that slot does not exist, returning false.
@@ -605,7 +588,6 @@ app_server <- function(input, output, session) {
     counter$time <- round(api_time, 0)
     counter$tokens_current <- response$usage$completion_tokens
 
-
       return(
         list(
           cmd = cmd,
@@ -618,47 +600,45 @@ app_server <- function(input, output, session) {
     })
   })
 
-    # a modal shows api connection error
-    api_error_modal <- shiny::modalDialog(
-      title = "API connection error!",
-      tags$h4("Is the API key is correct?", style = "color:red"),
-      tags$h4("How about the WiFi?", style = "color:red"),
-      tags$h5("If you are on RTutor.ai, maybe Dr G's API usage 
-      is more than he can affort this month.", style = "color:red"),
-      tags$h4(
-        "Auto-reset ...", 
-        style = "color:blue; text-align:right"
-      ),
-      easyClose = TRUE,
-      size = "s"
-    )
+  # a modal shows api connection error
+  api_error_modal <- shiny::modalDialog(
+    title = "API connection error!",
+    tags$h4("Is the API key is correct?", style = "color:red"),
+    tags$h4("How about the WiFi?", style = "color:red"),
+    tags$h5("If you are on RTutor.ai, maybe Dr G's API usage 
+    is more than he can affort this month.", style = "color:red"),
+    tags$h4(
+      "Auto-reset ...", 
+      style = "color:blue; text-align:right"
+    ),
+    easyClose = TRUE,
+    size = "s"
+  )
 
 
-    # show a warning message when reached 10c, 20c, 30c ...
-    observe({
-      req(file.exists(on_server))
-      req(!openAI_response()$error)
+  # show a warning message when reached 10c, 20c, 30c ...
+  observe({
+    req(file.exists(on_server))
+    req(!openAI_response()$error)
 
-      cost_session <-  round(counter$tokens * 2e-3, 0)
-      if( cost_session %% 20  == 0 & cost_session != 0) {
-        shiny::showModal(
-          shiny::modalDialog(
-            size = "s",
-            easyClose	= TRUE,
-            h4(
-              paste0(
-                "Cumulative API Cost reached ",
-                cost_session,
-                "¢"
-              )
-            ),
-            h4("Slow down. Please try to use your own API key.")
-          )
+    cost_session <-  round(counter$tokens * 2e-3, 0)
+    if( cost_session %% 20  == 0 & cost_session != 0) {
+      shiny::showModal(
+        shiny::modalDialog(
+          size = "s",
+          easyClose	= TRUE,
+          h4(
+            paste0(
+              "Cumulative API Cost reached ",
+              cost_session,
+              "¢"
+            )
+          ),
+          h4("Slow down. Please try to use your own API key.")
         )
-      }
-
-    })
-
+      )
+    }
+  })
 
   output$openAI <- renderText({
     req(openAI_response()$cmd)
@@ -751,9 +731,6 @@ app_server <- function(input, output, session) {
     tokens_current = 0,  # tokens for current query
     time = 0 # response time for current
   )
-
-
-
 
 
 
@@ -989,10 +966,6 @@ app_server <- function(input, output, session) {
     )
   }
   )
-
-
-
-
 
   #                                 7.
   #____________________________________________________________________________
@@ -1486,7 +1459,7 @@ output$answer <- renderText({
     )
 
     ans <- response$choices[1, 1]
-    if(grepl("Statistics only!", ans)) {
+    if (grepl("Statistics only!", ans)) {
       ans <- paste(
         sample(humor, 1),
         "     If you are not
@@ -1522,6 +1495,16 @@ output$answer <- renderText({
       selectize = TRUE,
       selected = NULL
     )
+  })
+
+  output$slava_ukraini <- renderUI({
+    if (input$submit_button == 0 && input$ask_button == 0) {
+      tagList(
+        br(),
+        h4("Slava Ukraini!")
+      )
+
+    }
   })
 
 }
