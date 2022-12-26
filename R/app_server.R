@@ -678,7 +678,7 @@ app_server <- function(input, output, session) {
       
     } else { # if continue
       r_code$cmd <- r_code$code  # last code
-      r_code$code <- c(r_code$code, openAI_response()$cmd)
+      r_code$code <- c(r_code$code, "\n", openAI_response()$cmd)
       r_code$raw <- paste(r_code$raw, openAI_response()$response$choices[1, 1])
     }
 
@@ -691,12 +691,6 @@ app_server <- function(input, output, session) {
   })
 
 
-
-#output$code_out <- renderCode({
-#    req(openAI_response()$cmd)
-#    res <- openAI_response()$response$choices[1, 1]
-#    paste("f <- function(x) {2*x + 3}", "f(1)", "#> 5", sep = "\n")
-#})
 
   output$usage <- renderText({
     req(input$submit_button != 0 || input$ask_button != 0)
@@ -751,6 +745,23 @@ app_server <- function(input, output, session) {
     time = 0 # response time for current
   )
 
+  output$RTutor_version <- renderUI({
+    h4(paste("RTutor Version", release))
+  })
+
+  output$list_of_packages <- renderUI({
+    all <- .packages(all.available = TRUE)
+    all <- sapply(all, function(x) paste(x, paste0(packageVersion(x), collapse = ".")))
+    all <- unname(all)
+    all <- c("", all)
+    selectInput(
+      inputId = "installed_packages",
+      label = paste0("Search for installed packages ( ", length(all), " total)"),
+      choices = all,
+      selectize = TRUE,
+      selected = NULL
+    )
+  })
 
   #____________________________________________________________________________
   # Shows plots, code, and errors
@@ -784,10 +795,13 @@ app_server <- function(input, output, session) {
   # just capture the screen output
   output$console_output <- renderText({
     req(openAI_response()$cmd)
-    out <- capture.output(
-        eval(parse(text = r_code$code))
-    )
-    paste(out, collapse = "\n")
+    withProgress(message = "Running the code for console...", {
+      incProgress(0.4)    
+      out <- capture.output(
+          eval(parse(text = r_code$code))
+      )
+      paste(out, collapse = "\n")
+    })
   })
 
   output$result_plot <- renderPlot({
@@ -1112,7 +1126,7 @@ app_server <- function(input, output, session) {
     }
 
     if(input$continue) {
-      cmd <- c(r_code$cmd, cmd)
+      cmd <- c(r_code$cmd, "\n", cmd)
     }
 
     # Add R code

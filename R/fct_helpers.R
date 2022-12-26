@@ -16,6 +16,7 @@ uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
+#language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
 pre_text <- "Generate R code, not R Markdown. "

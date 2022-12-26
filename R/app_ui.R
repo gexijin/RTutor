@@ -192,7 +192,7 @@ fluidPage(
         tabPanel(
           title = "About",
           value = "About",
-          h4("RTutor Version 0.5"),
+          uiOutput("RTutor_version"),
           p("RTutor uses ",
             a(
               "OpenAI's",
@@ -236,6 +236,8 @@ fluidPage(
             " from where you can also find 
             instruction to install RTutor as an R package."
           ),
+          hr(),
+          uiOutput("list_of_packages"),
           hr(),
           h4("Update log:"),
           tags$ul(
