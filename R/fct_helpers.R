@@ -20,6 +20,7 @@ max_query_length <- 500 # max # of characters
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
 pre_text <- "Generate R code, not R Markdown. "
+max_char_question <- 280 # max n. of characters in the Q&A
 
 
 # if this file exists, running on the server. Otherwise local.

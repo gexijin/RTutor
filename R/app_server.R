@@ -152,109 +152,10 @@ app_server <- function(input, output, session) {
 
   })
 
+  #
   #____________________________________________________________________________
-  # UI for loading data
+  # Loading data
   #____________________________________________________________________________
-  # pop up modal for selections ----
-  observeEvent(input$api_button, {
-    shiny::showModal(
-      shiny::modalDialog(
-        size = "l",
-        footer = modalButton("Confirm"),
-        fluidRow(
-          column(
-            width = 4,
-            sliderInput(
-              inputId = "temperature",
-              label = "Sampling temperature",
-              min = 0,
-              max = 1,
-              value = sample_temp(),
-              step = .1,
-              round = FALSE,
-              width = "100%"
-            )
-          ),
-          column(
-            width = 8,
-            p("This important parameter controls the AI's behavior in choosing 
-            among possible answers. A higher sampling temperature tells the AI 
-            to take more risks, producing more diverse and creative 
-            solutions when the same request is repeated. A lower  temperature
-             (such as 0) results in more
-             conservative and well-defined solutions, 
-             but less variety when repeated.
-            "),
-          )
-        ),
-        hr(),
-        h4("Use your own API key"),
-        h5("We pay a small fee to use the AI for every request.
-           If you use this regularily, 
-           please take a few minutes to create your own API key: "),
-
-        tags$ul(
-            tags$li(
-              "Create a personal account at",
-              a(
-                "OpenAI.",
-                href = "https://openai.com/api/",
-                target = "_blank"
-              )
-            ),
-            tags$li("After logging in, click \"Personal\" from top right."),
-            tags$li(
-              "Click \"Manage Account\" and then \"Billing\",
-              where you can add \"Payment methods\" and set \"Usage 
-              limits\". $5 per month is more than enough."
-            ),
-            tags$li(
-              "Click \"API keys\" to create a new key, 
-              which can be copied and pasted it below."
-            ),
-        ),
-        textInput(
-          inputId = "api_key",
-          label = h5("Paste your API key from OpenAI:"),
-          value = NULL,
-          placeholder = "sk-..... (51 characters)"
-        ),
-        uiOutput("valid_key"),
-        uiOutput("save_api_ui"),
-        verbatimTextOutput("session_api_source"),
-        hr(),
-
-        fluidRow(
-          column(
-            width = 6,
-            checkboxInput(
-              inputId = "use_voice",
-              label = strong("Enable voice narration"),
-              value = use_voice()
-            )
-          ),
-          column(
-            width = 6,
-            # this causes the use_voice() to refresh twice,
-            # triggering the permission seeking in Chrome.
-            # Don't know why, but this works. I'm a stable genius.
-            actionButton("use_voice_button", strong("Seek mic permission"))
-          )
-        ),
-        h5("First select the checkbox and then seek 
-        permission to use the microphone. Your browser should have a popup 
-        window. Otherwise, check the both ends of the URL bar for a 
-        blocked icon, which
-        could be clicked to grant permission. If successful, you will see 
-        a red dot on top of the tab in Chrome.
-        Voice naration can be used in both the Main and the 
-        Ask Me Anything tabs by just saying \"Hey Cox ...\" 
-        in honor of the statistician David Cox.     
-        If not satisfied, try again to overwrite. 
-        To continue, say \"Hey Cox Continue ...\""),
-      )
-    )
-  })
 
   # uploaded data
   user_data <- reactive({
@@ -381,7 +282,7 @@ app_server <- function(input, output, session) {
   })
 
   output$slava_ukraini <- renderUI({
-    if(input$submit_button == 0 && input$ask_button == 0) {
+    if (input$submit_button == 0 && input$ask_button == 0) {
       tagList(
         br(),
         h4("Slava Ukraini!")
@@ -392,10 +293,110 @@ app_server <- function(input, output, session) {
 
 
 
+
   #____________________________________________________________________________
   # API key management
   #____________________________________________________________________________
+  # pop up modal for Settings
+  observeEvent(input$api_button, {
+    shiny::showModal(
+      shiny::modalDialog(
+        size = "l",
+        footer = modalButton("Confirm"),
+        fluidRow(
+          column(
+            width = 4,
+            sliderInput(
+              inputId = "temperature",
+              label = "Sampling temperature",
+              min = 0,
+              max = 1,
+              value = sample_temp(),
+              step = .1,
+              round = FALSE,
+              width = "100%"
+            )
+          ),
+          column(
+            width = 8,
+            p("This important parameter controls the AI's behavior in choosing 
+            among possible answers. A higher sampling temperature tells the AI 
+            to take more risks, producing more diverse and creative 
+            solutions when the same request is repeated. A lower  temperature
+             (such as 0) results in more
+             conservative and well-defined solutions, 
+             but less variety when repeated.
+            "),
+          )
+        ),
+        hr(),
+        h4("Use your own API key"),
+        h5("We pay a small fee to use the AI for every request.
+           If you use this regularily, 
+           please take a few minutes to create your own API key: "),
 
+        tags$ul(
+            tags$li(
+              "Create a personal account at",
+              a(
+                "OpenAI.",
+                href = "https://openai.com/api/",
+                target = "_blank"
+              )
+            ),
+            tags$li("After logging in, click \"Personal\" from top right."),
+            tags$li(
+              "Click \"Manage Account\" and then \"Billing\",
+              where you can add \"Payment methods\" and set \"Usage 
+              limits\". $5 per month is more than enough."
+            ),
+            tags$li(
+              "Click \"API keys\" to create a new key, 
+              which can be copied and pasted it below."
+            ),
+        ),
+        textInput(
+          inputId = "api_key",
+          label = h5("Paste your API key from OpenAI:"),
+          value = NULL,
+          placeholder = "sk-..... (51 characters)"
+        ),
+        uiOutput("valid_key"),
+        uiOutput("save_api_ui"),
+        verbatimTextOutput("session_api_source"),
+        hr(),
+
+        fluidRow(
+          column(
+            width = 6,
+            checkboxInput(
+              inputId = "use_voice",
+              label = strong("Enable voice narration"),
+              value = use_voice()
+            )
+          ),
+          column(
+            width = 6,
+            # this causes the use_voice() to refresh twice,
+            # triggering the permission seeking in Chrome.
+            # Don't know why, but this works. I'm a stable genius.
+            actionButton("use_voice_button", strong("Seek mic permission"))
+          )
+        ),
+        h5("First select the checkbox and then seek 
+        permission to use the microphone. Your browser should have a popup 
+        window. Otherwise, check the both ends of the URL bar for a 
+        blocked icon, which
+        could be clicked to grant permission. If successful, you will see 
+        a red dot on top of the tab in Chrome.
+        Voice naration can be used in both the Main and the 
+        Ask Me Anything tabs by just saying \"Hey Cox ...\" 
+        in honor of the statistician David Cox.     
+        If not satisfied, try again to overwrite. 
+        To continue, say \"Hey Cox Continue ...\""),
+      )
+    )
+  })
   # api key for the session
   api_key_session <- reactive({
 
@@ -403,7 +404,6 @@ app_server <- function(input, output, session) {
     session_key_source <- key_source
 
     if(!is.null(input$api_key)) {
-
       key1 <- input$api_key
       key1 <- clean_api_key(key1)
 
@@ -426,7 +426,6 @@ app_server <- function(input, output, session) {
     # The following is essential for correctly getting the 
     # environment variable on Linux!!! Don't ask.
     tem <- Sys.getenv("OPEN_API_KEY")
-
     paste0(
       "Current API key: ",
       substr(txt, 1, 4),
@@ -443,7 +442,6 @@ app_server <- function(input, output, session) {
 
     # only show this when running locally.
     req(!file.exists(on_server))
-
     req(validate_api_key(input$api_key))
 
     tagList(
@@ -482,6 +480,11 @@ app_server <- function(input, output, session) {
     req(input$api_key)
     writeLines(input$api_key, "api_key.txt")
   })
+
+
+
+
+
 
   #____________________________________________________________________________
   # Send API Request, handle API errors
@@ -690,8 +693,6 @@ app_server <- function(input, output, session) {
     )
   })
 
-
-
   output$usage <- renderText({
     req(input$submit_button != 0 || input$ask_button != 0)
 
@@ -745,26 +746,14 @@ app_server <- function(input, output, session) {
     time = 0 # response time for current
   )
 
-  output$RTutor_version <- renderUI({
-    h4(paste("RTutor Version", release))
-  })
 
-  output$list_of_packages <- renderUI({
-    all <- .packages(all.available = TRUE)
-    all <- sapply(all, function(x) paste(x, paste0(packageVersion(x), collapse = ".")))
-    all <- unname(all)
-    all <- c("", all)
-    selectInput(
-      inputId = "installed_packages",
-      label = paste0("Search for installed packages ( ", length(all), " total)"),
-      choices = all,
-      selectize = TRUE,
-      selected = NULL
-    )
-  })
+
+
+
+
 
   #____________________________________________________________________________
-  # Shows plots, code, and errors
+  # Run the code, shows plots, code, and errors
   #____________________________________________________________________________
 
   # stores the results after running the generated code.
@@ -789,7 +778,6 @@ app_server <- function(input, output, session) {
         }
       )
     })
-
   })
 
   # just capture the screen output
@@ -976,7 +964,6 @@ app_server <- function(input, output, session) {
     # otherwise built-in data is unavailable when running from R package.
     library(tidyverse)
 
-    
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
@@ -996,6 +983,11 @@ app_server <- function(input, output, session) {
     )
   }
   )
+
+
+
+
+
 
   #____________________________________________________________________________
   # Logs and Reports
@@ -1041,7 +1033,7 @@ app_server <- function(input, output, session) {
 
     # if the first chunk & data is uploaded,
     # insert script for reading data
-    if(input$submit_button == 1 && input$select_data == uploaded_data) {
+    if (input$submit_button == 1 && input$select_data == uploaded_data) {
 
       # Read file
       file_name <- input$user_file$name
@@ -1288,6 +1280,9 @@ output$rmd_chuck_output <- renderText({
     }
   )
 
+
+
+
 #______________________________________________________________________________
 #
 #  Server rebooting every 2 hours; this gives a warning
@@ -1298,7 +1293,7 @@ output$rmd_chuck_output <- renderText({
 
   # returns hour and minutes
   time_var <- reactive({
-    tem = input$submit_button
+    input$submit_button
     min <- format(Sys.time(), "%M")
     hr <- format(Sys.time(), "%H")
     return(list(
@@ -1334,6 +1329,8 @@ output$rmd_chuck_output <- renderText({
     }
   })
 
+
+
 #______________________________________________________________________________
 #
 #  Q and A
@@ -1353,13 +1350,12 @@ output$rmd_chuck_output <- renderText({
         session,
         "ask_question",
         value = "",
-        placeholder = "Ask RTutor anything statistics. See examples. Voice naration can be enabled in Settings."
+        placeholder = "Ask RTutor anything statistics. See examples. Enable voice naration in Settings."
       )
     }
   })
 
 output$answer <- renderText({
-
   req(input$ask_button)
 
   isolate({
@@ -1369,16 +1365,20 @@ output$answer <- renderText({
     txt <- input$ask_question
 
     # force to within 280 characters
-    if(nchar(txt) > 280) {
-      txt <- substr(txt, 1, 280)
+    if (nchar(txt) > max_char_question) {
+      txt <- substr(txt, 1, max_char_question)
+      showNotification(
+        paste("Only the first", max_char_question, " characters will be used."),
+        duration = 10
+      )
     }
 
-    # If the last character is not a stop, add it. 
+    # If the last character is not a stop, add it.
     # Otherwise, GPT3 will add a sentence.
 
     # The following 5 lines were generated by ChatGPT!!!!!
     # Check if the last character is not a period
-    if(substr(txt, nchar(txt), nchar(txt)) != ".") {
+    if (substr(txt, nchar(txt), nchar(txt)) != ".") {
     # If the last character is not a period, add it to the end
       txt <- paste(txt, ".", sep = "")
     }
@@ -1437,7 +1437,7 @@ output$answer <- renderText({
     )
 
     error_message <- NULL
-    if(error_api) {
+    if (error_api) {
       cmd <- NULL
       response <- NULL
       error_message <- response$message
@@ -1452,13 +1452,13 @@ output$answer <- renderText({
     )[[1]]
 
     # if more than 10 requests, slow down. Only on server.
-    if(counter$requests > 20 && file.exists(on_server)) {
+    if (counter$requests > 20 && file.exists(on_server)) {
       Sys.sleep(counter$requests / 5 + runif(1, 0, 5))
     }
-    if(counter$requests > 50 && file.exists(on_server)) {
+    if (counter$requests > 50 && file.exists(on_server)) {
       Sys.sleep(counter$requests / 10 + runif(1, 0, 10))
     }
-    if(counter$requests > 100 && file.exists(on_server)) {
+    if (counter$requests > 100 && file.exists(on_server)) {
       Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
     }
 
@@ -1483,7 +1483,7 @@ output$answer <- renderText({
     if(grepl("Statistics only!", ans)) {
       ans <- paste(
         sample(humor, 1),
-        "   If you are not
+        "     If you are not
        trying to be funny, ask again with more context. It might
         be helpful to add \"in statistics\" to the question."
       )
@@ -1492,6 +1492,31 @@ output$answer <- renderText({
   })
 
 })
+
+
+
+#______________________________________________________________________________
+#
+#  Miscellaneous
+#______________________________________________________________________________
+
+  output$RTutor_version <- renderUI({
+    h4(paste("RTutor Version", release))
+  })
+
+  output$list_of_packages <- renderUI({
+    all <- .packages(all.available = TRUE)
+    all <- sapply(all, function(x) paste(x, paste0(packageVersion(x), collapse = ".")))
+    all <- unname(all)
+    all <- c("", all)
+    selectInput(
+      inputId = "installed_packages",
+      label = paste0("Search for installed packages ( ", length(all), " total)"),
+      choices = all,
+      selectize = TRUE,
+      selected = NULL
+    )
+  })
 
 # Run the application
 # shiny::runApp("app.R")
