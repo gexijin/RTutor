@@ -13,10 +13,11 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
+#                            1.
+#____________________________________________________________________________
+#  General UI, observers, etc.
+#____________________________________________________________________________
 
-###################################################################
-# Server
-###################################################################
   # increase max input file size
   options(shiny.maxRequestSize = 10 * 1024^2) # 10MB
 
@@ -26,7 +27,7 @@ app_server <- function(input, output, session) {
   observe({
     req(input$demo_prompt)
     req(input$select_data)
-    if(input$demo_prompt != demos_mpg[1]) {
+    if (input$demo_prompt != demos_mpg[1]) {
       updateTextInput(
         session,
         "input_text",
@@ -66,30 +67,7 @@ app_server <- function(input, output, session) {
     )
   })
 
-  # had to use this. Otherwise, the checkbox returns to false
-  # when the popup is closed and openned again.
-  use_voice <- reactive({
-      use_voice <- FALSE #default
-      tem <- is.null(input$use_voice_button)
-      if(!is.null(input$use_voice)) {
-        use_voice <- input$use_voice
-      }
-      return(use_voice)
-  })
-
-  # Use voice input?
-  output$use_heyshiny <- renderUI({
-    req(use_voice())
-      tagList(
-        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny package
-        heyshiny::speechInput(
-          inputId = "hey_cmd",
-          command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
-        ), # set the input
-      )
-  })
-
-  welcome_modal <- shiny::modalDialog(
+    welcome_modal <- shiny::modalDialog(
     title = "Terms & Conditions",
     tags$p(
       "No guarantee for the correctness of the generated code."
@@ -114,6 +92,34 @@ app_server <- function(input, output, session) {
 
   shiny::showModal(welcome_modal)
 
+
+#                                    2.
+#____________________________________________________________________________
+#  Voice naration
+#____________________________________________________________________________
+
+  # had to use this. Otherwise, the checkbox returns to false
+  # when the popup is closed and openned again.
+  use_voice <- reactive({
+      use_voice <- FALSE #default
+      tem <- is.null(input$use_voice_button)
+      if(!is.null(input$use_voice)) {
+        use_voice <- input$use_voice
+      }
+      return(use_voice)
+  })
+
+  # Use voice input?
+  output$use_heyshiny <- renderUI({
+    req(use_voice())
+      tagList(
+        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
+        heyshiny::speechInput(
+          inputId = "hey_cmd",
+          command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
+        ), # set the input
+      )
+  })
 
    # read the speech input
   observeEvent(input$hey_cmd, {
@@ -152,9 +158,9 @@ app_server <- function(input, output, session) {
 
   })
 
-  #
+  #                             3.
   #____________________________________________________________________________
-  # Loading data
+  #  Loading data
   #____________________________________________________________________________
 
   # uploaded data
@@ -293,7 +299,7 @@ app_server <- function(input, output, session) {
 
 
 
-
+  #                             4.
   #____________________________________________________________________________
   # API key management
   #____________________________________________________________________________
@@ -485,7 +491,7 @@ app_server <- function(input, output, session) {
 
 
 
-
+  #                        5.
   #____________________________________________________________________________
   # Send API Request, handle API errors
   #____________________________________________________________________________
@@ -678,7 +684,7 @@ app_server <- function(input, output, session) {
       r_code$code <- openAI_response()$cmd
       r_code$raw <- openAI_response()$response$choices[1, 1]
       r_code$cmd <- ""
-      
+
     } else { # if continue
       r_code$cmd <- r_code$code  # last code
       r_code$code <- c(r_code$code, "\n", openAI_response()$cmd)
@@ -751,7 +757,7 @@ app_server <- function(input, output, session) {
 
 
 
-
+  #                            6.
   #____________________________________________________________________________
   # Run the code, shows plots, code, and errors
   #____________________________________________________________________________
@@ -988,7 +994,7 @@ app_server <- function(input, output, session) {
 
 
 
-
+  #                                 7.
   #____________________________________________________________________________
   # Logs and Reports
   #____________________________________________________________________________
@@ -1282,7 +1288,7 @@ output$rmd_chuck_output <- renderText({
 
 
 
-
+#                                  8.
 #______________________________________________________________________________
 #
 #  Server rebooting every 2 hours; this gives a warning
@@ -1330,7 +1336,7 @@ output$rmd_chuck_output <- renderText({
   })
 
 
-
+#                                  9.
 #______________________________________________________________________________
 #
 #  Q and A
@@ -1494,7 +1500,7 @@ output$answer <- renderText({
 })
 
 
-
+#                                      10.
 #______________________________________________________________________________
 #
 #  Miscellaneous
@@ -1517,8 +1523,5 @@ output$answer <- renderText({
       selected = NULL
     )
   })
-
-# Run the application
-# shiny::runApp("app.R")
 
 }
