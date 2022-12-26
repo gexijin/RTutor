@@ -22,6 +22,17 @@ fluidPage(
     id = "load_message",
     h1("Loading ... ...")
   ),
+  tags$head( # move message to the center of screen
+    tags$style(
+      HTML(".shiny-notification {
+            position:fixed;
+            top: calc(50%);
+            left: calc(50%);
+            }
+            "
+          )
+      )
+  ),
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(

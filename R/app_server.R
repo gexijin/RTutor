@@ -474,7 +474,23 @@ app_server <- function(input, output, session) {
     writeLines(input$api_key, "api_key.txt")
   })
 
-
+  # only save key, if app is running locally.
+  observeEvent(input$submit_button, {
+    # if too short, do not send.
+    if (nchar(input$input_text) < min_query_length) {
+      showNotification(
+        paste("Request too short! Should be more than ", min_query_length, " characters."),
+        duration = 10
+      )
+    }
+    # if too short, do not send. 
+    if (nchar(input$input_text) > max_query_length) {
+        showNotification(
+          paste("Request too long! Should be less than ", max_query_length, " characters."),
+          duration = 10
+        )
+    }
+  })
 
 
   #                        5.
