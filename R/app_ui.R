@@ -137,8 +137,8 @@ fluidPage(
           br(),
           uiOutput("tips_interactive"),
           hr(),
-          DT::dataTableOutput("data_table_DT")
-          #,tableOutput("data_table")
+          DT::dataTableOutput("data_table_DT"),
+          verbatimTextOutput("data_structure")
 
         ),
 

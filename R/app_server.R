@@ -92,7 +92,6 @@ app_server <- function(input, output, session) {
 
   shiny::showModal(welcome_modal)
 
-
 #                                    2.
 #____________________________________________________________________________
 #  Voice naration
@@ -826,15 +825,8 @@ app_server <- function(input, output, session) {
     req(!code_error())
       withProgress(message = "Plotting ...", {
         incProgress(0.4)
-        tryCatch(
-          eval(parse(text = r_code$code)),
-          error = function(e) {
-            list(
-              value = -1,
-              message = capture.output(print(e$message)),
-              error_status = TRUE
-            )
-          }
+        try(
+          eval(parse(text = r_code$code))
         )
       })
   })
@@ -926,7 +918,8 @@ app_server <- function(input, output, session) {
   })
 
 
-  output$data_table_DT <-DT::renderDataTable({
+  current_data <- reactive({
+
     req(input$select_data)
     # otherwise built-in data is unavailable when running from R package.
     library(tidyverse)
@@ -938,8 +931,15 @@ app_server <- function(input, output, session) {
     } else {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
+
+    return(df)
+
+  })
+
+  output$data_table_DT <- DT::renderDataTable({
+    req(current_data())
     DT::datatable(
-      df,
+      current_data(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
         pageLength = 20,
@@ -949,6 +949,11 @@ app_server <- function(input, output, session) {
       rownames = FALSE
     )
   })
+
+  output$data_structure <- renderPrint({
+    str(current_data())
+  })
+
 
   #                                 7.
   #____________________________________________________________________________
