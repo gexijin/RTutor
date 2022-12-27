@@ -917,9 +917,8 @@ app_server <- function(input, output, session) {
 
   })
 
-
+  # The current data, just for showing.
   current_data <- reactive({
-
     req(input$select_data)
     # otherwise built-in data is unavailable when running from R package.
     library(tidyverse)
@@ -932,9 +931,19 @@ app_server <- function(input, output, session) {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
+    # This updates the data by running hte entire code one more time.
+    if (code_error() == FALSE){
+      withProgress(message = "Updating values ...", {
+        incProgress(0.4)
+        try(
+          eval(parse(text = r_code$code))
+        )
+      })
+    }
     return(df)
-
   })
+
+
 
   output$data_table_DT <- DT::renderDataTable({
     req(current_data())
@@ -942,7 +951,7 @@ app_server <- function(input, output, session) {
       current_data(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
-        pageLength = 20,
+        pageLength = 10,
         dom = 'ftp',
         scrollX = "400px"
       ),
@@ -950,10 +959,20 @@ app_server <- function(input, output, session) {
     )
   })
 
+  output$data_size <- renderText({
+    paste(
+      dim(current_data())[1], "rows X ",
+      dim(current_data())[2], "columns"
+    )
+  })
   output$data_structure <- renderPrint({
-    str(current_data())
+      str(current_data())
   })
 
+  output$data_summary <- renderText({
+      txt  <- capture.output(summary(current_data()))
+      paste(txt, collapse = "\n")
+  })
 
   #                                 7.
   #____________________________________________________________________________

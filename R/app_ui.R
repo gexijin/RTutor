@@ -137,9 +137,10 @@ fluidPage(
           br(),
           uiOutput("tips_interactive"),
           hr(),
+          textOutput("data_size"),
           DT::dataTableOutput("data_table_DT"),
-          verbatimTextOutput("data_structure")
-
+          verbatimTextOutput("data_structure"),
+          verbatimTextOutput("data_summary")
         ),
 
         tabPanel(
