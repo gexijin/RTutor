@@ -960,18 +960,25 @@ app_server <- function(input, output, session) {
   })
 
   output$data_size <- renderText({
+    req(!is.null(current_data()))
     paste(
       dim(current_data())[1], "rows X ",
       dim(current_data())[2], "columns"
     )
   })
   output$data_structure <- renderPrint({
-      str(current_data())
+    req(!is.null(current_data()))
+    str(current_data())
   })
 
   output$data_summary <- renderText({
-      txt  <- capture.output(summary(current_data()))
-      paste(txt, collapse = "\n")
+    req(!is.null(current_data()))
+    paste(
+      capture.output(
+        summary(current_data())
+      ),
+      collapse = "\n"
+    )
   })
 
   #                                 7.
