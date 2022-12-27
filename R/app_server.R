@@ -478,14 +478,22 @@ app_server <- function(input, output, session) {
     # if too short, do not send.
     if (nchar(input$input_text) < min_query_length) {
       showNotification(
-        paste("Request too short! Should be more than ", min_query_length, " characters."),
+        paste(
+          "Request too short! Should be more than ", 
+          min_query_length, 
+          " characters."
+        ),
         duration = 10
       )
     }
     # if too short, do not send. 
     if (nchar(input$input_text) > max_query_length) {
         showNotification(
-          paste("Request too long! Should be less than ", max_query_length, " characters."),
+          paste(
+            "Request too long! Should be less than ", 
+            max_query_length, 
+            " characters."
+          ),
           duration = 10
         )
     }
@@ -575,7 +583,7 @@ app_server <- function(input, output, session) {
         response <- NULL
         error_message <- response$message
       } else {
-        cmd <- clean_cmd(response$choices[1, 1], input$select_data)
+        cmd <- response$choices[1, 1]
       }
 
       api_time <- difftime(
@@ -658,6 +666,7 @@ app_server <- function(input, output, session) {
   output$openAI <- renderText({
     req(openAI_response()$cmd)
     res <- logs$raw
+    res <- logs$code
     # Replace multiple newlines with just one.
     #res <- gsub("\n+", "\n", res)
     # Replace emplty lines,  [ ]{0, }--> zero or more space
@@ -689,8 +698,9 @@ app_server <- function(input, output, session) {
 
     } else { # if continue
       logs$last_code <- logs$code  # last code
-      logs$code <- c(
+      logs$code <- paste(
         logs$code,
+        "\n",
         "#-------------------------------",
         openAI_response()$cmd
       )
@@ -815,7 +825,11 @@ app_server <- function(input, output, session) {
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
-        eval(parse(text = logs$code)),
+        eval(
+          parse(
+            text =  clean_cmd(logs$code, input$select_data)
+          )
+        ),
         error = function(e) {
           list(
             error_value = -1,
@@ -875,7 +889,11 @@ app_server <- function(input, output, session) {
       withProgress(message = "Plotting ...", {
         incProgress(0.4)
         try(
-          eval(parse(text = logs$code))
+          eval(
+            parse(
+              text =  clean_cmd(logs$code, input$select_data)
+            )
+          ),
         )
       })
   })
@@ -985,7 +1003,11 @@ app_server <- function(input, output, session) {
       withProgress(message = "Updating values ...", {
         incProgress(0.4)
         try(
-          eval(parse(text = logs$code))
+          eval(
+            parse(
+              text =  clean_cmd(logs$code, input$select_data)
+            )
+          ),
         )
       })
     }
@@ -1478,7 +1500,7 @@ output$answer <- renderText({
       response <- NULL
       error_message <- response$message
     } else {
-      cmd <- response$choices[1, 1], input$select_data
+      cmd <- response$choices[1, 1]
     }
 
     api_time <- difftime(
