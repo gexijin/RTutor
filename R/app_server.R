@@ -814,12 +814,14 @@ app_server <- function(input, output, session) {
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
       out <- capture.output(
-          eval(parse(text = r_code$code))
+          run_result()
       )
       paste(out, collapse = "\n")
     })
   })
 
+  # base R plots can not be auto generated from the run_results() object
+  # must run the code again.
   output$result_plot <- renderPlot({
     req(!code_error())
       withProgress(message = "Plotting ...", {
@@ -843,26 +845,14 @@ app_server <- function(input, output, session) {
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive)
     )
-    withProgress(message = "Plotting ...", {
-      incProgress(0.4)
-      tryCatch(
-        g <- eval(parse(text = r_code$code)),
-        error = function(e) {
-          list(
-            value = -1,
-            message = capture.output(print(e$message)),
-            error_status = TRUE
-          )
-        }
-      )
 
-      # still errors some times, when the returned list is not a plot
-      if(is.character(g) || is.data.frame(g) || is.numeric(g)) {
-        return(NULL)
-      } else {
-        return(g)
-      }
-    })
+    g <- run_result()
+    # still errors some times, when the returned list is not a plot
+    if(is.character(g) || is.data.frame(g) || is.numeric(g)) {
+      return(NULL)
+    } else {
+      return(g)
+    }
 
   })
 
@@ -921,7 +911,6 @@ app_server <- function(input, output, session) {
   output$tips_interactive <- renderUI({
     req(input$submit_button)
     req(openAI_response()$cmd)
-    req(openAI_prompt())
     if(is_interactive_plot() ||   # natively interactive
       turned_on (input$make_ggplot_interactive)
      ) {
@@ -959,8 +948,7 @@ app_server <- function(input, output, session) {
       ),
       rownames = FALSE
     )
-  }
-  )
+  })
 
   #                                 7.
   #____________________________________________________________________________
