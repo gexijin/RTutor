@@ -115,8 +115,8 @@ clean_cmd <- function(cmd, selected_data){
   # if data is uploaded, add a line to get the data.
   if(selected_data == uploaded_data) {
     cmd <- c("df <- as.data.frame(user_data()$df)", cmd)
-  } else if ( selected_data != no_data) {
-    cmd <- c(paste("df <- as.data.frame(", selected_data, ")"), cmd)
+  } else if (selected_data != no_data) {
+    cmd <- c(paste0("df <- as.data.frame(", selected_data, ")"), cmd)
   }
 
   return(cmd)

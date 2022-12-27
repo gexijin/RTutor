@@ -657,7 +657,7 @@ app_server <- function(input, output, session) {
 
   output$openAI <- renderText({
     req(openAI_response()$cmd)
-    res <- r_code$raw
+    res <- logs$raw
     # Replace multiple newlines with just one.
     #res <- gsub("\n+", "\n", res)
     # Replace emplty lines,  [ ]{0, }--> zero or more space
@@ -667,7 +667,7 @@ app_server <- function(input, output, session) {
   })
 
  # Defining & initializing the reactiveValues object
-  r_code <- reactiveValues(
+  logs <- reactiveValues(
     id = 0, # 1, 2, 3, id for code chuck
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
@@ -676,46 +676,54 @@ app_server <- function(input, output, session) {
   )
 
   observeEvent(input$submit_button, {
-    r_code$id <- r_code$id + 1
+    logs$id <- logs$id + 1
     # if not continue
     if(!input$continue) {
-      r_code$code <- openAI_response()$cmd
+      logs$code <- openAI_response()$cmd
 
-      r_code$raw <- openAI_response()$response$choices[1, 1]
+      logs$raw <- openAI_response()$response$choices[1, 1]
       # remove one or more blank lines in the beginning.
-      r_code$raw <- gsub("^\n+", "", r_code$raw)
+      logs$raw <- gsub("^\n+", "", logs$raw)
 
-      r_code$last_code <- ""
+      logs$last_code <- ""
 
     } else { # if continue
-      r_code$last_code <- r_code$code  # last code
-      r_code$code <- c(r_code$code, "\n", openAI_response()$cmd)
-      r_code$raw <- paste(r_code$raw, openAI_response()$response$choices[1, 1])
+      logs$last_code <- logs$code  # last code
+      logs$code <- c(
+        logs$code,
+        "#-------------------------------",
+        openAI_response()$cmd
+      )
+      logs$raw <- paste(
+        logs$raw,
+        "\n\n#-------------------------\n",
+        gsub("^\n+", "", openAI_response()$response$choices[1, 1])
+      )
     }
 
     # A list holds current request
     current_code <- list(
-      id = r_code$id,
-      code = r_code$code,
-      raw = r_code$raw, # for print
+      id = logs$id,
+      code = logs$code,
+      raw = logs$raw, # for print
       prompt = input$input_text
     )
 
-    r_code$code_history <- append(r_code$code_history, list(current_code))
+    logs$code_history <- append(logs$code_history, list(current_code))
 
     # update chuck choices
     updateSelectInput(
       inputId = "selected_chuck",
-      label = "Select one or more code chuck",
-      choices = 1:length(r_code$code_history),
-      selected = r_code$id
+      label = "Code chunks",
+      choices = 1:length(logs$code_history),
+      selected = logs$id
     )
 
     # turn off continue button
     updateCheckboxInput(
       session = session,
       inputId = "continue",
-      label = "Continue",
+      label = "Include this chuck",
       value = FALSE
     )
   })
@@ -725,31 +733,14 @@ app_server <- function(input, output, session) {
     req(run_result())
 
     id <- as.integer(input$selected_chuck)
-    r_code$code <- r_code$code_history[[id]]$code
-    r_code$raw <- r_code$code_history[[id]]$raw
+    logs$code <- logs$code_history[[id]]$code
+    logs$raw <- logs$code_history[[id]]$raw
     updateTextInput(
       session,
       "input_text",
-      value = r_code$code_history[[id]]$prompt
+      value = logs$code_history[[id]]$prompt
     )
 
-
-  })
-
-
-  output$selected_request <- renderText({
-    req(r_code$code_history)
-    req(input$selected_chuck)
-    id <- as.integer(input$selected_chuck)
-    r_code$code_history[[id]]$prompt
-
-  })
-
-  output$selected_code <- renderText({
-    req(r_code$code_history)
-    req(input$selected_chuck)
-    id <- as.integer(input$selected_chuck)
-    r_code$code_history[[id]]$raw
 
   })
 
@@ -824,7 +815,7 @@ app_server <- function(input, output, session) {
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
-        eval(parse(text = r_code$code)),
+        eval(parse(text = logs$code)),
         error = function(e) {
           list(
             error_value = -1,
@@ -884,7 +875,7 @@ app_server <- function(input, output, session) {
       withProgress(message = "Plotting ...", {
         incProgress(0.4)
         try(
-          eval(parse(text = r_code$code))
+          eval(parse(text = logs$code))
         )
       })
   })
@@ -994,7 +985,7 @@ app_server <- function(input, output, session) {
       withProgress(message = "Updating values ...", {
         incProgress(0.4)
         try(
-          eval(parse(text = r_code$code))
+          eval(parse(text = logs$code))
         )
       })
     }
@@ -1125,7 +1116,7 @@ app_server <- function(input, output, session) {
             pre_text,
             "|",
             "Use the ", 
-            input$select_data, 
+            input$select_data,
             " data frame. "
           ),
           "",
@@ -1161,7 +1152,7 @@ app_server <- function(input, output, session) {
     }
 
     if(input$continue) {
-      cmd <- c(r_code$last_code, "\n", cmd)
+      cmd <- c(logs$last_code, "\n#-------new code----------", cmd)
     }
 
     # Add R code
@@ -1487,7 +1478,7 @@ output$answer <- renderText({
       response <- NULL
       error_message <- response$message
     } else {
-      cmd <- clean_cmd(response$choices[1, 1], input$select_data)
+      cmd <- response$choices[1, 1], input$select_data
     }
 
     api_time <- difftime(

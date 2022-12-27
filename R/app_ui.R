@@ -77,9 +77,26 @@ fluidPage(
         ),
         column(
           width = 6,
+          actionButton("api_button", "Settings")
+        )
+      ),
+      br(), br(),
+      fluidRow(
+        column(
+          width = 6,
+          selectInput(
+            inputId = "selected_chuck",
+            label = "Code Chucks",
+            selected = NULL,
+            choices = NULL
+          )
+        ),
+        column(
+          width = 6,
+          style = "margin-top: 10px;",
           checkboxInput(
             inputId = "continue",
-            label = "Continue",
+            label = "Include this code",
             value = FALSE
           ),
           tippy::tippy_this(
@@ -90,29 +107,13 @@ fluidPage(
         )
       ),
       br(),
-      fluidRow(
-        column(
-          width = 6,
-          uiOutput("html_report")
-        ),
-        column(
-          width = 6,
-          actionButton("api_button", "Settings")
-        )
-      ),
-      br(),
       textOutput("usage"),
       textOutput("total_cost"),
       textOutput("temperature"),
       uiOutput("slava_ukraini"),
       br(),
-      textOutput("retry_on_error"),
-      selectInput(
-        inputId = "selected_chuck",
-        label = "Select one or more code chuck",
-        selected = NULL,
-        choices = NULL
-      )
+      textOutput("retry_on_error")
+
     ),
 
 ###############################################################################
@@ -150,19 +151,28 @@ fluidPage(
         ),
 
         tabPanel(
-          title = "Log",
-          value = "Log",
+          title = "Report",
+          value = "Report",
           br(),
-          downloadButton(
-            outputId = "Rmd_source",
-            label = "RMarkdown"
+          fluidRow(
+            column(
+              width = 6,
+              uiOutput("html_report")
+            ),
+            column(
+              width = 6,
+              downloadButton(
+                outputId = "Rmd_source",
+                label = "RMarkdown"
+              ),
+              tippy::tippy_this(
+                "Rmd_source",
+                "Download a R Markdown source file.",
+                theme = "light-border"
+              )
+            )
           ),
-          tippy::tippy_this(
-            "Rmd_source",
-            "Download a R Markdown source file.",
-            theme = "light-border"
-          ),
-          br(), br(),
+          br(),
           verbatimTextOutput("rmd_chuck_output")
         ),
 
