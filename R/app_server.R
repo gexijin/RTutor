@@ -698,7 +698,7 @@ app_server <- function(input, output, session) {
       id = r_code$id,
       code = r_code$code,
       raw = r_code$raw, # for print
-      prompt = openAI_prompt()
+      prompt = input$input_text
     )
 
     r_code$code_history <- append(r_code$code_history, list(current_code))
@@ -708,7 +708,7 @@ app_server <- function(input, output, session) {
       inputId = "selected_chuck",
       label = "Select one or more code chuck",
       choices = 1:length(r_code$code_history),
-      selected = 1
+      selected = r_code$id
     )
 
     # turn off continue button
@@ -719,6 +719,23 @@ app_server <- function(input, output, session) {
       value = FALSE
     )
   })
+
+  # change code when past code is selected.
+  observeEvent(input$selected_chuck, {
+    req(run_result())
+
+    id <- as.integer(input$selected_chuck)
+    r_code$code <- r_code$code_history[[id]]$code
+    r_code$raw <- r_code$code_history[[id]]$raw
+    updateTextInput(
+      session,
+      "input_text",
+      value = r_code$code_history[[id]]$prompt
+    )
+
+
+  })
+
 
   output$selected_request <- renderText({
     req(r_code$code_history)
@@ -821,7 +838,6 @@ app_server <- function(input, output, session) {
 
   # Error when run the generated code?
   code_error <- reactive({
-
     error_status <- FALSE
 
     # if error returns true, otherwise 
