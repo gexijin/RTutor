@@ -101,11 +101,12 @@ fluidPage(
         )
       ),
       br(),
-      textOutput("retry_on_error"),
       textOutput("usage"),
       textOutput("total_cost"),
       textOutput("temperature"),
-      uiOutput("slava_ukraini")
+      uiOutput("slava_ukraini"),
+      br(),
+      textOutput("retry_on_error"),
     ),
 
 ###############################################################################

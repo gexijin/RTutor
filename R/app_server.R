@@ -780,7 +780,7 @@ app_server <- function(input, output, session) {
 
   # Error when run the generated code?
   code_error <- reactive({
-    req(!is.null(names(run_result())[1]))
+
     error_status <- FALSE
 
     # if error returns true, otherwise 
@@ -788,6 +788,7 @@ app_server <- function(input, output, session) {
     # or be NULL
     try(  # if you do not 'try', the entire app quits! :-)
       if (is.list(run_result())) {
+      req(!is.null(names(run_result())[1]))
         if (names(run_result())[1] == "error_value") {
           error_status <- TRUE
         }
@@ -807,14 +808,11 @@ app_server <- function(input, output, session) {
 
   })
 
-
-
-
   # just capture the screen output
   output$console_output <- renderText({
-    req(openAI_response()$cmd)
+    req(!code_error())
     withProgress(message = "Running the code for console...", {
-      incProgress(0.4)    
+      incProgress(0.4)
       out <- capture.output(
           eval(parse(text = r_code$code))
       )
@@ -823,7 +821,7 @@ app_server <- function(input, output, session) {
   })
 
   output$result_plot <- renderPlot({
-    req(openAI_response()$cmd)
+    req(!code_error())
       withProgress(message = "Plotting ...", {
         incProgress(0.4)
         tryCatch(
@@ -840,7 +838,7 @@ app_server <- function(input, output, session) {
   })
 
   output$result_plotly <- plotly::renderPlotly({
-    req(openAI_response()$cmd)
+    req(!code_error())
     req(
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive)
@@ -870,8 +868,7 @@ app_server <- function(input, output, session) {
 
   output$plot_ui <- renderUI({
     req(input$submit_button)
-    req(openAI_response()$cmd)
-    if(code_error() || input$submit_button == 0) {
+    if (code_error() || input$submit_button == 0) {
       return()
     } else if (
       is_interactive_plot() ||   # natively interactive
@@ -893,14 +890,13 @@ app_server <- function(input, output, session) {
     )
   })
 
-  # remaining issue. Hide when app starts up.
   observe({
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
-    req(openAI_prompt())
+    req(!code_error())
 
     # if  ggplot2, and it is not already an interactive plot, show
-    if(grepl("ggplot", paste(openAI_response()$cmd, collapse = " ")) &&
+    if (grepl("ggplot", paste(openAI_response()$cmd, collapse = " ")) &&
       !is_interactive_plot()
     ) {
     shinyjs::showElement(id = "make_ggplot_interactive")
@@ -910,7 +906,7 @@ app_server <- function(input, output, session) {
   is_interactive_plot <- reactive({
     # only true if the plot is interactive, natively.
     req(input$submit_button)
-    if(
+    if (
       grepl(
         "plotly|plot_ly|ggplotly",
         paste(openAI_response()$cmd, collapse = " ")
@@ -941,23 +937,6 @@ app_server <- function(input, output, session) {
   })
 
 
-
-
-  output$data_table <- renderTable({
-    req(input$select_data)
-    # otherwise built-in data is unavailable when running from R package.
-    library(tidyverse)
-    if(input$select_data == uploaded_data) {
-      eval(parse(text = paste0("user_data()$df[1:20, ]")))
-    } else {
-      eval(parse(text = paste0(input$select_data, "[1:20, ]")))
-    }
-  },
-  striped = TRUE,
-  bordered = TRUE,
-  hover = TRUE
-  )
-
   output$data_table_DT <-DT::renderDataTable({
     req(input$select_data)
     # otherwise built-in data is unavailable when running from R package.
@@ -966,12 +945,12 @@ app_server <- function(input, output, session) {
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
-      df = NULL #as.data.frame("No data selected or uploaded.")
+      df <- NULL #as.data.frame("No data selected or uploaded.")
     } else {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
     DT::datatable(
-      df, 
+      df,
       options = list(
         lengthMenu = c(5, 20, 50, 100),
         pageLength = 20,
@@ -988,13 +967,7 @@ app_server <- function(input, output, session) {
   # Logs and Reports
   #____________________________________________________________________________
 
-  output$session_info <- renderUI({
-    i <- c("<br><h4>R session info: </h4>")
-    i <- c(i, capture.output(sessionInfo()))
-    HTML(paste(i, collapse = "<br/>"))
-  })
-
- # Defining & initializing the reactiveValues object
+  # Defining & initializing the reactiveValues object
   Rmd_total <- reactiveValues(code = "")
 
   observeEvent(input$submit_button, {
@@ -1521,6 +1494,12 @@ output$answer <- renderText({
       )
 
     }
+  })
+
+  output$session_info <- renderUI({
+    i <- c("<br><h4>R session info: </h4>")
+    i <- c(i, capture.output(sessionInfo()))
+    HTML(paste(i, collapse = "<br/>"))
   })
 
 }
