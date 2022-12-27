@@ -659,39 +659,81 @@ app_server <- function(input, output, session) {
     req(openAI_response()$cmd)
     res <- r_code$raw
     # Replace multiple newlines with just one.
-    res <- gsub("\n+", "\n", res)
+    #res <- gsub("\n+", "\n", res)
     # Replace emplty lines,  [ ]{0, }--> zero or more space
-    res <- gsub("^[ ]{0, }\n", "", res)
+    #res <- gsub("^[ ]{0, }\n", "", res)
     res <- gsub("```", "", res)
 
   })
 
  # Defining & initializing the reactiveValues object
   r_code <- reactiveValues(
+    id = 0, # 1, 2, 3, id for code chuck
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
-    cmd = "" # last code for Rmarkdown
+    last_code = "", # last code for Rmarkdown
+    code_history = list() # keep all code chucks    
   )
 
   observeEvent(input$submit_button, {
+    r_code$id <- r_code$id + 1
     # if not continue
     if(!input$continue) {
       r_code$code <- openAI_response()$cmd
+
       r_code$raw <- openAI_response()$response$choices[1, 1]
-      r_code$cmd <- ""
+      # remove one or more blank lines in the beginning.
+      r_code$raw <- gsub("^\n+", "", r_code$raw)
+
+      r_code$last_code <- ""
 
     } else { # if continue
-      r_code$cmd <- r_code$code  # last code
+      r_code$last_code <- r_code$code  # last code
       r_code$code <- c(r_code$code, "\n", openAI_response()$cmd)
       r_code$raw <- paste(r_code$raw, openAI_response()$response$choices[1, 1])
     }
 
+    # A list holds current request
+    current_code <- list(
+      id = r_code$id,
+      code = r_code$code,
+      raw = r_code$raw, # for print
+      prompt = openAI_prompt()
+    )
+
+    r_code$code_history <- append(r_code$code_history, list(current_code))
+
+    # update chuck choices
+    updateSelectInput(
+      inputId = "selected_chuck",
+      label = "Select one or more code chuck",
+      choices = 1:length(r_code$code_history),
+      selected = 1
+    )
+
+    # turn off continue button
     updateCheckboxInput(
       session = session,
       inputId = "continue",
       label = "Continue",
       value = FALSE
     )
+  })
+
+  output$selected_request <- renderText({
+    req(r_code$code_history)
+    req(input$selected_chuck)
+    id <- as.integer(input$selected_chuck)
+    r_code$code_history[[id]]$prompt
+
+  })
+
+  output$selected_code <- renderText({
+    req(r_code$code_history)
+    req(input$selected_chuck)
+    id <- as.integer(input$selected_chuck)
+    r_code$code_history[[id]]$raw
+
   })
 
   output$usage <- renderText({
@@ -943,8 +985,6 @@ app_server <- function(input, output, session) {
     return(df)
   })
 
-
-
   output$data_table_DT <- DT::renderDataTable({
     req(current_data())
     DT::datatable(
@@ -1105,7 +1145,7 @@ app_server <- function(input, output, session) {
     }
 
     if(input$continue) {
-      cmd <- c(r_code$cmd, "\n", cmd)
+      cmd <- c(r_code$last_code, "\n", cmd)
     }
 
     # Add R code
@@ -1266,6 +1306,8 @@ output$rmd_chuck_output <- renderText({
       })
     }
   )
+
+
 
 
 

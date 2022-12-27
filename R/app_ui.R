@@ -147,6 +147,15 @@ fluidPage(
           title = "Log",
           value = "Log",
           br(),
+          selectInput(
+            inputId = "selected_chuck",
+            label = "Select one or more code chuck",
+            selected = NULL,
+            choices = NULL
+          ),
+          textOutput("selected_request"),
+          verbatimTextOutput("selected_code"),
+          verbatimTextOutput("selected_result"),          
           downloadButton(
             outputId = "Rmd_source",
             label = "RMarkdown"
