@@ -1654,10 +1654,19 @@ output$answer <- renderText({
     df <- df[,sapply(df, is.numeric)]
     M <- cor(df)
     testRes = corrplot::cor.mtest(df, conf.level = 0.95)
-    corrplot::corrplot(M, p.mat = testRes$p, method = 'circle', type = 'lower', insig='blank',
-         addCoef.col ='black', number.cex = 0.8, order = 'AOE', diag=FALSE) 
+    corrplot::corrplot(
+      M, 
+      p.mat = testRes$p, 
+      method = 'circle', 
+      type = 'lower', 
+      insig='blank',
+      addCoef.col ='black', 
+      number.cex = 0.8, 
+      order = 'AOE', 
+      diag=FALSE
+    ) 
          
-         })
+  })
 
 #                                      11.
 #______________________________________________________________________________
@@ -1679,9 +1688,12 @@ output$answer <- renderText({
       label = paste0("Search for installed packages ( ", length(all), " total)"),
       choices = all,
       selectize = TRUE,
-      selected = NULL
+      selected = NULL,
+      server = TRUE
     )
   })
+  
+
 
   output$slava_ukraini <- renderUI({
     if (input$submit_button == 0 && input$ask_button == 0) {
