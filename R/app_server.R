@@ -980,7 +980,7 @@ app_server <- function(input, output, session) {
     if (
       grepl(
         "plotly|plot_ly|ggplotly",
-        paste(openAI_response()$cmd, collapse = " ")
+        paste(logs$code, collapse = " ")
       )
     ) {
       return(TRUE)
