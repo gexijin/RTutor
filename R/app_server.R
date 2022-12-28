@@ -1653,7 +1653,7 @@ output$answer <- renderText({
     df <- current_data()
     df <- df[, sapply(df, is.numeric)]
     M <- cor(df)
-    testRes f<- corrplot::cor.mtest(df, conf.level = 0.95)
+    testRes <- corrplot::cor.mtest(df, conf.level = 0.95)
     corrplot::corrplot(
       M,
       p.mat = testRes$p,
@@ -1665,7 +1665,6 @@ output$answer <- renderText({
       order = 'AOE',
       diag = FALSE
     ) 
-         
   })
 
 #                                      11.
