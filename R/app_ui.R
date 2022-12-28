@@ -175,6 +175,15 @@ fluidPage(
             )
           ),
           br(),
+          selectInput(
+            inputId = "selected_chuck_report",
+            label = "Code Chucks to include:",
+            selected = NULL,
+            choices = NULL,
+            multiple = TRUE
+          ),
+
+          br(),
           verbatimTextOutput("rmd_chuck_output")
         ),
 

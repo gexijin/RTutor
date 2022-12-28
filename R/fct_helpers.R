@@ -23,6 +23,7 @@ pre_text <- "Generate R code, not R Markdown. "
 max_char_question <- 280 # max n. of characters in the Q&A
 
 
+
 # if this file exists, running on the server. Otherwise local.
 # this is used to change app behavior.
 on_server <- "on_server.txt"

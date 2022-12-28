@@ -689,7 +689,7 @@ app_server <- function(input, output, session) {
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
     last_code = "", # last code for Rmarkdown
-    code_history = list() # keep all code chucks    
+    code_history = list() # keep all code chucks
   )
 
   observeEvent(input$submit_button, {
@@ -724,7 +724,9 @@ app_server <- function(input, output, session) {
       id = logs$id,
       code = logs$code,
       raw = logs$raw, # for print
-      prompt = input$input_text
+      prompt = input$input_text,
+      error = code_error(),
+      rmd = Rmd_chuck()
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -732,10 +734,22 @@ app_server <- function(input, output, session) {
     # update chuck choices
     updateSelectInput(
       inputId = "selected_chuck",
-      label = "All Code chunks",
+      label = "All code chunks",
       choices = 1:length(logs$code_history),
       selected = logs$id
     )
+
+    updateSelectInput(
+      inputId = "selected_chuck_report",
+      label = "Code chunks to include:",
+      selected = "All",
+      choices = c(
+        "All",
+        "Remove error",
+        as.character(1:length(logs$code_history))
+      )
+    )
+
 
     # turn off continue button
     updateCheckboxInput(
@@ -1063,79 +1077,119 @@ app_server <- function(input, output, session) {
   # Logs and Reports
   #____________________________________________________________________________
 
-  # Defining & initializing the reactiveValues object
-  Rmd_total <- reactiveValues(code = "")
 
   observeEvent(input$submit_button, {
-    Rmd_total$code <- paste0(Rmd_total$code, Rmd_chuck())
+    updateSelectInput(
+      inputId = "selected_chuck_report",
+      label = "Code chunks to include:",
+      selected = "All Chucks",
+      choices = c(
+        "All Chucks",
+        "Chucks without errors",
+        as.character(1:length(logs$code_history))
+      )
+    )
+
   })
+
+  # collect all RMarkdown chucks
+  Rmd_total <- reactive({
+
+
+  Rmd_script <- ""
+
+  # if first chuck
+  Rmd_script <- paste0(
+    Rmd_script,
+    # Get the data from the params list-----------
+    "Developed by [Steven Ge](https://twitter.com/StevenXGe) using 
+    API access (via the 
+    [openai](https://cran.rstudio.com/web/packages/openai/index.html)
+    package ) to 
+    [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
+    language_model,
+    "\" model.",
+    "\n\nRTutor Website: [http://RTutor.ai](http://RTutor.ai)",
+    "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)\n"
+  )
+
+  # if the first chunk & data is uploaded,
+  # insert script for reading data
+  if (input$select_data == uploaded_data) {
+
+    # Read file
+    file_name <- input$user_file$name
+    if(user_data()$file_type == "read_excel") {
+      txt <- paste0(
+        "# install.packages(readxl)\nlibrary(readxl)\ndf <- read_excel(\"",
+        file_name,
+        "\")"
+      )
+
+    }
+    if (user_data()$file_type == "read.csv") {
+      txt <- paste0(
+        "df <- read.csv(\"",
+        file_name,
+        "\")"
+      )
+    }
+    if (user_data()$file_type == "read.table") {
+      txt <- paste0(
+        "df <- read.table(\"",
+        file_name,
+        "\", sep = \"\t\", header = TRUE)"
+      )
+    }
+
+    Rmd_script <- paste0(
+      "\n### 0. Read File\n",
+      "```{R, eval = FALSE}\n",
+      txt,
+      "\n```\n"
+    )
+  }
+
+  #------------------Add selected chucks
+  if("All Chucks" %in% input$selected_chuck_report) {
+      ix <- 1:length(logs$code_history)
+  } else if("Chucks without errors" %in% input$selected_chuck_report) {
+    ix <- c()
+    for (i in 1:length(logs$code_history)) {
+      if(!logs$code_history[[i]]$error) {
+        ix <- c(ix, i)
+      }
+    }
+  } else {  # selected
+    ix <- as.integer(input$selected_chuck_report)
+  }
+
+  for (i in ix) {
+    Rmd_script <- paste0(Rmd_script, "\n", logs$code_history[[i]]$rmd)
+  }
+  return(Rmd_script)
+  })
+
+
 
   # Markdown chuck for the current request
   Rmd_chuck <- reactive({
-
     req(openAI_response()$cmd)
     req(openAI_prompt())
 
     Rmd_script <- ""
-
-    # if first chuck
-    if(input$submit_button == 1) {
-      Rmd_script <- paste0(
-        Rmd_script,
-        # Get the data from the params list-----------
-        "\n\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) using 
-        API access (via the 
-        [openai](https://cran.rstudio.com/web/packages/openai/index.html)
-        package ) to 
-        [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
-        language_model,
-        "\" model.",
-        "\n\nRTutor Website: [http://RTutor.ai](http://RTutor.ai)",
-        "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)"
-      )
-    }
-
-    # if the first chunk & data is uploaded,
-    # insert script for reading data
-    if (input$submit_button == 1 && input$select_data == uploaded_data) {
-
-      # Read file
-      file_name <- input$user_file$name
-      if(user_data()$file_type == "read_excel") {
-        txt <- paste0(
-          "# install.packages(readxl)\nlibrary(readxl)\ndf <- read_excel(\"",
-          file_name,
-          "\")"
-        )
-
-      }
-      if (user_data()$file_type == "read.csv") {
-        txt <- paste0(
-          "df <- read.csv(\"",
-          file_name,
-          "\")"
-        )
-      }
-      if (user_data()$file_type == "read.table") {
-        txt <- paste0(
-          "df <- read.table(\"",
-          file_name,
-          "\", sep = \"\t\", header = TRUE)"
-        )
-      }
-
-      Rmd_script <- paste0(
-        "\n### 0. Read File\n",
-        "```{R, eval = FALSE}\n",
-        txt,
-        "\n```\n"
-      )
-    }
+    Rmd_script <- paste0(
+      Rmd_script,
+      # Get the data from the params list for every chuck-----------
+      "```{R, echo = FALSE}\n",
+      "df <- params$df\n",
+      "```\n"
+    )
 
     # User request----------------------
     Rmd_script  <- paste0(
       Rmd_script,
-      "\n\n### ",
+      "\n### ",
       counter$requests,
       ". ",
       paste(
@@ -1166,23 +1220,23 @@ app_server <- function(input, output, session) {
     if (code_error() == TRUE) {
       Rmd_script <- paste0(
         Rmd_script,
-        "```{R, eval = FALSE}\n"
+        "```{R, eval = FALSE}"
       )
     } else {
       Rmd_script <- paste0(
         Rmd_script,
-        "```{R}\n"
+        "```{R}"
       )
     }
 
-    # if uploaded, remove the line: df <- user_data()$df
     cmd <- openAI_response()$cmd
-    if(input$select_data == uploaded_data) {
+    # remove empty line
+    if(nchar(cmd[1]) == 0) {
       cmd <- cmd[-1]
     }
 
     if(input$continue) {
-      cmd <- c(logs$last_code, "\n#-------new code----------", cmd)
+      cmd <- c(logs$last_code, "\n#-----------------", cmd)
     }
 
     # Add R code
@@ -1221,10 +1275,10 @@ app_server <- function(input, output, session) {
    )
   })
 
-output$rmd_chuck_output <- renderText({
-  req(Rmd_chuck())
-  Rmd_total$code
-})
+  output$rmd_chuck_output <- renderText({
+    req(Rmd_chuck())
+    Rmd_total()
+  })
 
   # Markdown report from DataExplorer package; does not work
 #  output$eda_report <- downloadHandler(
@@ -1240,7 +1294,6 @@ output$rmd_chuck_output <- renderText({
 #    }
 #  )
 
-
   # Markdown report
   output$Rmd_source <- downloadHandler(
     # For PDF output, change this to "report.pdf"
@@ -1254,7 +1307,11 @@ output$rmd_chuck_output <- renderText({
         date(), "\"\n",
         "output: html_document\n",
         "---\n",
-        Rmd_total$code
+        gsub(
+          "```\\{R, echo = FALSE\\}\ndf <- params\\$df\n```\n",
+          "", 
+          Rmd_total()
+        )
       )
       writeLines(Rmd_script, file)
     }
@@ -1296,10 +1353,6 @@ output$rmd_chuck_output <- renderText({
 
         Rmd_script <- paste0(
           Rmd_script,
-          # Get the data from the params list-----------
-          "\n\n```{R, echo = FALSE}\n",
-          "df <- params$df\n",
-          "\n```\n",
           "\n\n### "
         )
 
@@ -1308,7 +1361,7 @@ output$rmd_chuck_output <- renderText({
         # Add R code
         Rmd_script <- paste(
           Rmd_script,
-          Rmd_total$code
+          Rmd_total()
         )
 
         write(
@@ -1316,17 +1369,23 @@ output$rmd_chuck_output <- renderText({
           file = tempReport,
           append = FALSE
         )
-
+        
         # Set up parameters to pass to Rmd document
-        params <- list(
-          df = iris #dummy
-        )
+        params <- list(df = iris) # dummy
 
         # if uploaded, use that data
         req(input$select_data)
-        if(input$select_data == uploaded_data) {
+        if (input$select_data == uploaded_data) {
           params <- list(
             df = user_data()$df
+          )
+        } else if (input$select_data != no_data) {
+          params <- list(
+            df = eval(
+              parse(
+                text = paste0("as.data.frame(", input$select_data, ")")
+              )
+            )
           )
         }
 

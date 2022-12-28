@@ -1,0 +1,68 @@
+---
+title: "RTutor.ai report"
+author: "RTutor v.0.5, Powered by ChatGPT"
+date: "Tue Dec 27 19:16:41 2022"
+output: html_document
+params:
+  df:
+printcode:
+  label: "Display Code"
+  value: TRUE
+  input: checkbox
+---
+
+
+###  
+
+Developed by [Steven Ge](https://twitter.com/StevenXGe) using 
+        API access (via the 
+        [openai](https://cran.rstudio.com/web/packages/openai/index.html)
+        package ) to 
+        [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) "text-davinci-003" model.
+
+RTutor Website: [http://RTutor.ai](http://RTutor.ai)
+Source code: [GitHub.](https://github.com/gexijin/RTutor)
+
+```{R, echo = FALSE}
+df <- params$df
+
+```
+
+
+### 1.  Use the df data frame.  Define a new column called ratio by dividing cty by hwy. Plot histogram.
+ Sampling temperature: 0.1
+```{R}
+
+
+# Create new column
+df$ratio <- df$cty / df$hwy
+
+# Plot histogram
+hist(df$ratio)
+```
+
+
+```{R, echo = FALSE}
+df <- params$df
+
+```
+
+
+### 2.  Use the df data frame.  Plot ratio by hwy.
+ Sampling temperature: 0.1
+```{R}
+
+
+# Create new column
+df$ratio <- df$cty / df$hwy
+
+# Plot histogram
+hist(df$ratio)
+
+#-----------------
+
+
+# Create a scatterplot of ratio by hwy
+plot(df$hwy, df$ratio, xlab = "Highway Miles Per Gallon", ylab = "Ratio", main = "Ratio by Highway Miles Per Gallon")
+```
+
