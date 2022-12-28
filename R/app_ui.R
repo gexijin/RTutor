@@ -156,6 +156,14 @@ fluidPage(
           title = "Report",
           value = "Report",
           br(),
+          selectInput(
+            inputId = "selected_chuck_report",
+            label = "Code Chucks to include:",
+            selected = NULL,
+            choices = NULL,
+            multiple = TRUE
+          ),
+          br(),
           fluidRow(
             column(
               width = 6,
@@ -174,15 +182,6 @@ fluidPage(
               )
             )
           ),
-          br(),
-          selectInput(
-            inputId = "selected_chuck_report",
-            label = "Code Chucks to include:",
-            selected = NULL,
-            choices = NULL,
-            multiple = TRUE
-          ),
-
           br(),
           verbatimTextOutput("rmd_chuck_output")
         ),
@@ -283,6 +282,9 @@ fluidPage(
           hr(),
           h4("Update log:"),
           tags$ul(
+            tags$li(
+              "v 0.6 12/27/2022. Keeps record of all code chucks for resue and report."
+            ),            
             tags$li(
               "v 0.5 12/24/2022. Keep current code and continue."
             ),

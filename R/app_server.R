@@ -1081,8 +1081,8 @@ app_server <- function(input, output, session) {
   observeEvent(input$submit_button, {
     updateSelectInput(
       inputId = "selected_chuck_report",
-      label = "Code chunks to include:",
-      selected = "All Chucks",
+      label = "Code chunks to include (Use backspace to delete):",
+      selected = "Chucks without errors",
       choices = c(
         "All Chucks",
         "Chucks without errors",
@@ -1181,6 +1181,8 @@ app_server <- function(input, output, session) {
     Rmd_script <- paste0(
       Rmd_script,
       # Get the data from the params list for every chuck-----------
+      # Do not change this without changing the output$Rmd_source function
+      # this chuck is removed for local knitting.
       "```{R, echo = FALSE}\n",
       "df <- params$df\n",
       "```\n"
@@ -1307,6 +1309,7 @@ app_server <- function(input, output, session) {
         date(), "\"\n",
         "output: html_document\n",
         "---\n",
+        # this chuck is not needed when they download the Rmd and knit locally
         gsub(
           "```\\{R, echo = FALSE\\}\ndf <- params\\$df\n```\n",
           "", 
