@@ -13,10 +13,11 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
+#                            1.
+#____________________________________________________________________________
+#  General UI, observers, etc.
+#____________________________________________________________________________
 
-###################################################################
-# Server
-###################################################################
   # increase max input file size
   options(shiny.maxRequestSize = 10 * 1024^2) # 10MB
 
@@ -26,7 +27,7 @@ app_server <- function(input, output, session) {
   observe({
     req(input$demo_prompt)
     req(input$select_data)
-    if(input$demo_prompt != demos_mpg[1]) {
+    if (input$demo_prompt != demos_mpg[1]) {
       updateTextInput(
         session,
         "input_text",
@@ -58,6 +59,15 @@ app_server <- function(input, output, session) {
   })
 
   # Switch to Main tab when Submit button is clicked
+  observeEvent(input$submit_button == 0, {
+    updateTabsetPanel(
+      session,
+      "tabs",
+      selected = "Data"
+    )
+  })
+
+  # Switch to Main tab when Submit button is clicked
   observeEvent(input$submit_button, {
     updateTabsetPanel(
       session,
@@ -66,30 +76,7 @@ app_server <- function(input, output, session) {
     )
   })
 
-  # had to use this. Otherwise, the checkbox returns to false
-  # when the popup is closed and openned again.
-  use_voice <- reactive({
-      use_voice <- FALSE #default
-      tem <- is.null(input$use_voice_button)
-      if(!is.null(input$use_voice)) {
-        use_voice <- input$use_voice
-      }
-      return(use_voice)
-  })
-
-  # Use voice input?
-  output$use_heyshiny <- renderUI({
-    req(use_voice())
-      tagList(
-        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny package
-        heyshiny::speechInput(
-          inputId = "hey_cmd",
-          command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
-        ), # set the input
-      )
-  })
-
-  welcome_modal <- shiny::modalDialog(
+    welcome_modal <- shiny::modalDialog(
     title = "Terms & Conditions",
     tags$p(
       "No guarantee for the correctness of the generated code."
@@ -114,6 +101,33 @@ app_server <- function(input, output, session) {
 
   shiny::showModal(welcome_modal)
 
+#                                    2.
+#____________________________________________________________________________
+#  Voice naration
+#____________________________________________________________________________
+
+  # had to use this. Otherwise, the checkbox returns to false
+  # when the popup is closed and openned again.
+  use_voice <- reactive({
+      use_voice <- FALSE #default
+      tem <- is.null(input$use_voice_button)
+      if(!is.null(input$use_voice)) {
+        use_voice <- input$use_voice
+      }
+      return(use_voice)
+  })
+
+  # Use voice input?
+  output$use_heyshiny <- renderUI({
+    req(use_voice())
+      tagList(
+        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
+        heyshiny::speechInput(
+          inputId = "hey_cmd",
+          command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
+        ), # set the input
+      )
+  })
 
    # read the speech input
   observeEvent(input$hey_cmd, {
@@ -152,10 +166,139 @@ app_server <- function(input, output, session) {
 
   })
 
+  #                             3.
   #____________________________________________________________________________
-  # UI for loading data
+  #  Loading data
   #____________________________________________________________________________
-  # pop up modal for selections ----
+
+  # uploaded data
+  user_data <- reactive({
+    req(input$user_file)
+    in_file <- input$user_file
+    in_file <- in_file$datapath
+    req(!is.null(in_file))
+
+    isolate({
+      file_type <- "read_excel"
+      # Excel file ---------------
+      if(grepl("xls$|xlsx$", in_file, ignore.case = TRUE)) {
+        df <- readxl::read_excel(in_file)
+        df <- as.data.frame(df)
+      } else {
+        #CSV --------------------
+        df <- read.csv(in_file)
+        file_type <- "read.csv"
+        # Tab-delimented file ----------
+        if (ncol(df) == 2) {
+          df <- read.table(
+            in_file,
+            sep = "\t",
+            header = TRUE
+          )
+          file_type <- "read.table"
+        }
+      }
+      return(
+        list(
+          df = df,
+          file_type = file_type
+        )
+      )
+    })
+  })
+
+
+  # showing the current dataset. Warning if no is uploaded.
+  output$selected_dataset <- renderText({
+      req(input$submit_button)
+      # when submit is clicked, but no data is uploaded.
+
+      if(input$select_data == uploaded_data) {
+        if(is.null(input$user_file)) {
+          txt <- "No file uploaded! Please Reset and upload your data first."
+        } else {
+          txt <- "Dataset: uploaded."
+        }
+      } else {
+        txt <- paste0("Dataset: ", input$select_data, ". To switch, click Reset.")
+      }
+
+      return(txt)
+  })
+
+  output$data_upload_ui <- renderUI({
+
+    # Hide this input box after the first run.
+    req(input$submit_button == 0)
+
+    fileInput(
+      inputId = "user_file",
+      label = "File Upload",
+      accept = c(
+        "text/csv",
+        "text/comma-separated-values",
+        "text/tab-separated-values",
+        "text/plain",
+        ".csv",
+        ".tsv",
+        ".txt",
+        ".xls",
+        ".xlsx"
+      )
+    )
+  })
+
+  output$demo_data_ui <- renderUI({
+
+    # Hide this input box after the first run.
+    req(input$submit_button == 0)
+
+    selectInput(
+      inputId = "select_data",
+      label = "Data",
+      choices = datasets,
+      selected = "mpg",
+      multiple = FALSE,
+      selectize = FALSE
+    )
+
+  })
+
+  output$prompt_ui <- renderUI({
+    req(input$select_data)
+    # hide after data is uploaded
+    req(is.null(input$user_file))
+
+    if (input$select_data == "mpg") {
+      selectInput(
+        inputId = "demo_prompt",
+        choices = demos_mpg,
+        label = "Example requests:"
+      )
+    } else if (input$select_data == no_data) {
+      selectInput(
+        inputId = "demo_prompt",
+        choices = demos_no_data,
+        label = "Example requests:"
+      )
+    } else if (input$select_data == "diamonds") {
+      selectInput(
+        inputId = "demo_prompt",
+        choices = demos_diamond,
+        label = "Example requests:"
+      )
+    } else {
+      return(NULL)
+    }
+  })
+
+
+
+  #                             4.
+  #____________________________________________________________________________
+  # API key management
+  #____________________________________________________________________________
+  # pop up modal for Settings
   observeEvent(input$api_button, {
     shiny::showModal(
       shiny::modalDialog(
@@ -255,147 +398,6 @@ app_server <- function(input, output, session) {
       )
     )
   })
-
-  # uploaded data
-  user_data <- reactive({
-    req(input$user_file)
-    in_file <- input$user_file
-    in_file <- in_file$datapath
-    req(!is.null(in_file))
-
-    isolate({
-      file_type <- "read_excel"
-      # Excel file ---------------
-      if(grepl("xls$|xlsx$", in_file, ignore.case = TRUE)) {
-        df <- readxl::read_excel(in_file)
-        df <- as.data.frame(df)
-      } else {
-        #CSV --------------------
-        df <- read.csv(in_file)
-        file_type <- "read.csv"
-        # Tab-delimented file ----------
-        if (ncol(df) == 2) {
-          df <- read.table(
-            in_file,
-            sep = "\t",
-            header = TRUE
-          )
-          file_type <- "read.table"
-        }
-      }
-      return(
-        list(
-          df = df,
-          file_type = file_type
-        )
-      )
-    })
-  })
-
-
-  # showing the current dataset. Warning if no is uploaded.
-  output$selected_dataset <- renderText({
-      req(input$submit_button)
-      # when submit is clicked, but no data is uploaded.
-
-      if(input$select_data == uploaded_data) {
-        if(is.null(input$user_file)) {
-          txt <- "No file uploaded! Please Reset and upload your data first."
-        } else {
-          txt <- "Dataset: uploaded."
-        }
-      } else {
-        txt <- paste0("Dataset: ", input$select_data, ". To switch, click Reset.")
-      }
-
-      return(txt)
-  })
-
-  output$data_upload_ui <- renderUI({
-
-    # Hide this input box after the first run.
-    req(input$submit_button == 0)
-
-    fileInput(
-      inputId = "user_file",
-      label = "File Upload",
-      accept = c(
-        "text/csv",
-        "text/comma-separated-values",
-        "text/tab-separated-values",
-        "text/plain",
-        ".csv",
-        ".tsv",
-        ".txt",
-        ".xls",
-        ".xlsx"
-      )
-    )
-  })
-
-  output$demo_data_ui <- renderUI({
-
-    # Hide this input box after the first run.
-    req(input$submit_button == 0)
-
-    selectInput(
-      inputId = "select_data",
-      label = "Data",
-      choices = datasets,
-      selected = "mpg",
-      multiple = FALSE,
-      selectize = FALSE
-    )
-
-  })
-
-  output$prompt_ui <- renderUI({
-
-    req(input$select_data)
-
-    # hide after data is uploaded
-    req(is.null(input$user_file))
-
-    if (input$select_data == "mpg") {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_mpg,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == no_data) {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_no_data,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == "diamonds") {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_diamond,
-        label = "Example requests:"
-      )
-
-    } else {
-      return(NULL)
-    }
-  })
-
-  output$slava_ukraini <- renderUI({
-    if(input$submit_button == 0 && input$ask_button == 0) {
-      tagList(
-        br(),
-        h4("Slava Ukraini!")
-      )
-
-    }
-  })
-
-
-
-  #____________________________________________________________________________
-  # API key management
-  #____________________________________________________________________________
-
   # api key for the session
   api_key_session <- reactive({
 
@@ -403,7 +405,6 @@ app_server <- function(input, output, session) {
     session_key_source <- key_source
 
     if(!is.null(input$api_key)) {
-
       key1 <- input$api_key
       key1 <- clean_api_key(key1)
 
@@ -426,7 +427,6 @@ app_server <- function(input, output, session) {
     # The following is essential for correctly getting the 
     # environment variable on Linux!!! Don't ask.
     tem <- Sys.getenv("OPEN_API_KEY")
-
     paste0(
       "Current API key: ",
       substr(txt, 1, 4),
@@ -443,7 +443,6 @@ app_server <- function(input, output, session) {
 
     # only show this when running locally.
     req(!file.exists(on_server))
-
     req(validate_api_key(input$api_key))
 
     tagList(
@@ -483,14 +482,41 @@ app_server <- function(input, output, session) {
     writeLines(input$api_key, "api_key.txt")
   })
 
+  # only save key, if app is running locally.
+  observeEvent(input$submit_button, {
+    # if too short, do not send.
+    if (nchar(input$input_text) < min_query_length) {
+      showNotification(
+        paste(
+          "Request too short! Should be more than ", 
+          min_query_length, 
+          " characters."
+        ),
+        duration = 10
+      )
+    }
+    # if too short, do not send. 
+    if (nchar(input$input_text) > max_query_length) {
+        showNotification(
+          paste(
+            "Request too long! Should be less than ", 
+            max_query_length, 
+            " characters."
+          ),
+          duration = 10
+        )
+    }
+  })
+
+
+  #                        5.
   #____________________________________________________________________________
   # Send API Request, handle API errors
   #____________________________________________________________________________
 
-
   sample_temp <- reactive({
       temperature <- default_temperature #default
-      if(!is.null(input$temperature)) {
+      if (!is.null(input$temperature)) {
          temperature <- input$temperature
       }
       return(temperature)
@@ -503,7 +529,6 @@ app_server <- function(input, output, session) {
   })
 
   openAI_response <- reactive({
-
     req(input$submit_button)
 
     isolate({  # so that it will not responde to text, until submitted
@@ -550,7 +575,6 @@ app_server <- function(input, output, session) {
         }
       )
 
-
       error_api <- FALSE
       # if error returns true, otherwise 
       #  that slot does not exist, returning false.
@@ -568,7 +592,7 @@ app_server <- function(input, output, session) {
         response <- NULL
         error_message <- response$message
       } else {
-        cmd <- clean_cmd(response$choices[1, 1], input$select_data)
+        cmd <- response$choices[1, 1]
       }
 
       api_time <- difftime(
@@ -596,7 +620,6 @@ app_server <- function(input, output, session) {
     counter$time <- round(api_time, 0)
     counter$tokens_current <- response$usage$completion_tokens
 
-
       return(
         list(
           cmd = cmd,
@@ -609,94 +632,149 @@ app_server <- function(input, output, session) {
     })
   })
 
-    # a modal shows api connection error
-    api_error_modal <- shiny::modalDialog(
-      title = "API connection error!",
-      tags$h4("Is the API key is correct?", style = "color:red"),
-      tags$h4("How about the WiFi?", style = "color:red"),
-      tags$h5("If you are on RTutor.ai, maybe Dr G's API usage 
-      is more than he can affort this month.", style = "color:red"),
-      tags$h4(
-        "Auto-reset ...", 
-        style = "color:blue; text-align:right"
-      ),
-      easyClose = TRUE,
-      size = "s"
-    )
+  # a modal shows api connection error
+  api_error_modal <- shiny::modalDialog(
+    title = "API connection error!",
+    tags$h4("Is the API key is correct?", style = "color:red"),
+    tags$h4("How about the WiFi?", style = "color:red"),
+    tags$h5("If you are on RTutor.ai, maybe Dr G's API usage 
+    is more than he can affort this month.", style = "color:red"),
+    tags$h4(
+      "Auto-reset ...", 
+      style = "color:blue; text-align:right"
+    ),
+    easyClose = TRUE,
+    size = "s"
+  )
 
 
-    # show a warning message when reached 10c, 20c, 30c ...
-    observe({
-      req(file.exists(on_server))
-      req(!openAI_response()$error)
+  # show a warning message when reached 10c, 20c, 30c ...
+  observe({
+    req(file.exists(on_server))
+    req(!openAI_response()$error)
 
-      cost_session <-  round(counter$tokens * 2e-3, 0)
-      if( cost_session %% 20  == 0 & cost_session != 0) {
-        shiny::showModal(
-          shiny::modalDialog(
-            size = "s",
-            easyClose	= TRUE,
-            h4(
-              paste0(
-                "Cumulative API Cost reached ",
-                cost_session,
-                "¢"
-              )
-            ),
-            h4("Slow down. Please try to use your own API key.")
-          )
+    cost_session <-  round(counter$tokens * 2e-3, 0)
+    if (cost_session %% 20  == 0 & cost_session != 0) {
+      shiny::showModal(
+        shiny::modalDialog(
+          size = "s",
+          easyClose	= TRUE,
+          h4(
+            paste0(
+              "Cumulative API Cost reached ",
+              cost_session,
+              "¢"
+            )
+          ),
+          h4("Slow down. Please try to use your own API key.")
         )
-      }
-
-    })
-
+      )
+    }
+  })
 
   output$openAI <- renderText({
     req(openAI_response()$cmd)
-    res <- r_code$raw
+    res <- logs$raw
     # Replace multiple newlines with just one.
-    res <- gsub("\n+", "\n", res)
+    #res <- gsub("\n+", "\n", res)
     # Replace emplty lines,  [ ]{0, }--> zero or more space
-    res <- gsub("^[ ]{0, }\n", "", res)
+    #res <- gsub("^[ ]{0, }\n", "", res)
     res <- gsub("```", "", res)
 
   })
 
  # Defining & initializing the reactiveValues object
-  r_code <- reactiveValues(
+  logs <- reactiveValues(
+    id = 0, # 1, 2, 3, id for code chuck
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
-    cmd = "" # last code for Rmarkdown
+    last_code = "", # last code for Rmarkdown
+    code_history = list() # keep all code chucks
   )
 
   observeEvent(input$submit_button, {
+    logs$id <- logs$id + 1
     # if not continue
     if(!input$continue) {
-      r_code$code <- openAI_response()$cmd
-      r_code$raw <- openAI_response()$response$choices[1, 1]
-      r_code$cmd <- ""
-      
+      logs$code <- openAI_response()$cmd
+
+      logs$raw <- openAI_response()$response$choices[1, 1]
+      # remove one or more blank lines in the beginning.
+      logs$raw <- gsub("^\n+", "", logs$raw)
+
+      logs$last_code <- ""
+
     } else { # if continue
-      r_code$cmd <- r_code$code  # last code
-      r_code$code <- c(r_code$code, openAI_response()$cmd)
-      r_code$raw <- paste(r_code$raw, openAI_response()$response$choices[1, 1])
+      logs$last_code <- logs$code  # last code
+      logs$code <- paste(
+        logs$code,
+        "\n",
+        "#-------------------------------",
+        openAI_response()$cmd
+      )
+      logs$raw <- paste(
+        logs$raw,
+        "\n\n#-------------------------\n",
+        gsub("^\n+", "", openAI_response()$response$choices[1, 1])
+      )
     }
 
+    # A list holds current request
+    current_code <- list(
+      id = logs$id,
+      code = logs$code,
+      raw = logs$raw, # for print
+      prompt = input$input_text,
+      error = code_error(),
+      rmd = Rmd_chuck()
+    )
+
+    logs$code_history <- append(logs$code_history, list(current_code))
+
+    # update chuck choices
+    updateSelectInput(
+      inputId = "selected_chuck",
+      label = "All code chunks",
+      choices = 1:length(logs$code_history),
+      selected = logs$id
+    )
+
+    updateSelectInput(
+      inputId = "selected_chuck_report",
+      label = "Code chunks to include:",
+      selected = "All",
+      choices = c(
+        "All",
+        "Remove error",
+        as.character(1:length(logs$code_history))
+      )
+    )
+
+
+    # turn off continue button
     updateCheckboxInput(
       session = session,
       inputId = "continue",
-      label = "Continue",
+      label = "Contine from this chuck",
       value = FALSE
     )
   })
 
+  # change code when past code is selected.
+  observeEvent(input$selected_chuck, {
+    req(run_result())
+
+    id <- as.integer(input$selected_chuck)
+    logs$code <- logs$code_history[[id]]$code
+    logs$raw <- logs$code_history[[id]]$raw
+    updateTextInput(
+      session,
+      "input_text",
+      value = logs$code_history[[id]]$prompt
+    )
 
 
-#output$code_out <- renderCode({
-#    req(openAI_response()$cmd)
-#    res <- openAI_response()$response$choices[1, 1]
-#    paste("f <- function(x) {2*x + 3}", "f(1)", "#> 5", sep = "\n")
-#})
+  })
 
   output$usage <- renderText({
     req(input$submit_button != 0 || input$ask_button != 0)
@@ -713,7 +791,7 @@ app_server <- function(input, output, session) {
 
   output$total_cost <- renderText({
     if(input$submit_button == 0 & input$ask_button == 0) {
-      return("OpenAI charges 2¢ per 10k tokens/words 
+      return("OpenAI charges 2¢ per 1000 tokens/words 
       from our account. Heavy users 
       please use your own account. See Settings."
       )
@@ -752,8 +830,9 @@ app_server <- function(input, output, session) {
   )
 
 
+  #                            6.
   #____________________________________________________________________________
-  # Shows plots, code, and errors
+  # Run the code, shows plots, code, and errors
   #____________________________________________________________________________
 
   # stores the results after running the generated code.
@@ -768,7 +847,11 @@ app_server <- function(input, output, session) {
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
-        eval(parse(text = r_code$code)),
+        eval(
+          parse(
+            text =  clean_cmd(logs$code, input$select_data)
+          )
+        ),
         error = function(e) {
           list(
             error_value = -1,
@@ -778,68 +861,85 @@ app_server <- function(input, output, session) {
         }
       )
     })
+  })
+
+  # Error when run the generated code?
+  code_error <- reactive({
+    error_status <- FALSE
+
+    # if error returns true, otherwise 
+    #  that slot does not exist, returning false.
+    # or be NULL
+    try(  # if you do not 'try', the entire app quits! :-)
+      if (is.list(run_result())) {
+      req(!is.null(names(run_result())[1]))
+        if (names(run_result())[1] == "error_value") {
+          error_status <- TRUE
+        }
+      }
+    )
+    return(error_status)
+  })
+
+
+  output$error_message <- renderUI({
+    req(!is.null(code_error()))
+    if(code_error()) {
+      h4(paste("Error!", run_result()$message), style = "color:red")
+    } else {
+      return(NULL)
+    }
 
   })
 
   # just capture the screen output
   output$console_output <- renderText({
-    req(openAI_response()$cmd)
-    out <- capture.output(
-        eval(parse(text = r_code$code))
-    )
-    paste(out, collapse = "\n")
+    req(!code_error())
+    withProgress(message = "Running the code for console...", {
+      incProgress(0.4)
+      out <- capture.output(
+          run_result()
+      )
+      paste(out, collapse = "\n")
+    })
   })
 
+  # base R plots can not be auto generated from the run_results() object
+  # must run the code again.
   output$result_plot <- renderPlot({
-    req(openAI_response()$cmd)
+    req(!code_error())
       withProgress(message = "Plotting ...", {
         incProgress(0.4)
-        tryCatch(
-          eval(parse(text = r_code$code)),
-          error = function(e) {
-            list(
-              value = -1,
-              message = capture.output(print(e$message)),
-              error_status = TRUE
+        try(
+          eval(
+            parse(
+              text =  clean_cmd(logs$code, input$select_data)
             )
-          }
+          ),
         )
       })
   })
 
   output$result_plotly <- plotly::renderPlotly({
-    req(openAI_response()$cmd)
+    req(!code_error())
     req(
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive)
     )
-    withProgress(message = "Plotting ...", {
-      incProgress(0.4)
-      tryCatch(
-        g <- eval(parse(text = r_code$code)),
-        error = function(e) {
-          list(
-            value = -1,
-            message = capture.output(print(e$message)),
-            error_status = TRUE
-          )
-        }
-      )
 
-      # still errors some times, when the returned list is not a plot
-      if(is.character(g) || is.data.frame(g) || is.numeric(g)) {
-        return(NULL)
-      } else {
-        return(g)
-      }
-    })
+    g <- run_result()
+    # still errors some times, when the returned list is not a plot
+    if(is.character(g) || is.data.frame(g) || is.numeric(g)) {
+      return(NULL)
+    } else {
+      return(g)
+    }
 
   })
 
   output$plot_ui <- renderUI({
     req(input$submit_button)
-    req(openAI_response()$cmd)
-    if(code_error() || input$submit_button == 0) {
+    if (code_error() || input$submit_button == 0) {
       return()
     } else if (
       is_interactive_plot() ||   # natively interactive
@@ -861,14 +961,13 @@ app_server <- function(input, output, session) {
     )
   })
 
-  # remaining issue. Hide when app starts up.
   observe({
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
-    req(openAI_prompt())
+    req(!code_error())
 
     # if  ggplot2, and it is not already an interactive plot, show
-    if(grepl("ggplot", paste(openAI_response()$cmd, collapse = " ")) &&
+    if (grepl("ggplot", paste(openAI_response()$cmd, collapse = " ")) &&
       !is_interactive_plot()
     ) {
     shinyjs::showElement(id = "make_ggplot_interactive")
@@ -878,7 +977,7 @@ app_server <- function(input, output, session) {
   is_interactive_plot <- reactive({
     # only true if the plot is interactive, natively.
     req(input$submit_button)
-    if(
+    if (
       grepl(
         "plotly|plot_ly|ggplotly",
         paste(openAI_response()$cmd, collapse = " ")
@@ -893,7 +992,6 @@ app_server <- function(input, output, session) {
   output$tips_interactive <- renderUI({
     req(input$submit_button)
     req(openAI_response()$cmd)
-    req(openAI_prompt())
     if(is_interactive_plot() ||   # natively interactive
       turned_on (input$make_ggplot_interactive)
      ) {
@@ -908,164 +1006,192 @@ app_server <- function(input, output, session) {
 
   })
 
-
-  # Error when run the generated code?
-  code_error <- reactive({
-#    req(run_result()) This causes error, as it can be null when base R plot.
-    req(input$submit_button)
-    req(openAI_response()$cmd)
-
-    error_status <- FALSE
-
-    # if error returns true, otherwise 
-    #  that slot does not exist, returning false.
-    # or be NULL
-    try(  # if you do not 'try', the entire app quits! :-)
-      if (is.list(run_result())) {
-        req(!is.null(names(run_result())[1]))
-        if (names(run_result())[1] == "error_value") {
-          error_status <- TRUE
-        }
-      }
-    )
-    return(error_status)
-  })
-
-
-  output$error_message <- renderUI({
-    req(!is.null(code_error()))
-    if(code_error()) {
-      h4(paste("Error!", run_result()$message), style = "color:red")
-    } else {
-      return(NULL)
-    }
-
-  })
-
-  output$data_table <- renderTable({
-    req(input$select_data)
-    # otherwise built-in data is unavailable when running from R package.
-    library(tidyverse)
-    if(input$select_data == uploaded_data) {
-      eval(parse(text = paste0("user_data()$df[1:20, ]")))
-    } else {
-      eval(parse(text = paste0(input$select_data, "[1:20, ]")))
-    }
-  },
-  striped = TRUE,
-  bordered = TRUE,
-  hover = TRUE
-  )
-
-  output$data_table_DT <-DT::renderDataTable({
+  # The current data, just for showing.
+  current_data <- reactive({
     req(input$select_data)
     # otherwise built-in data is unavailable when running from R package.
     library(tidyverse)
 
-    
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
-      df = NULL #as.data.frame("No data selected or uploaded.")
+      df <- NULL #as.data.frame("No data selected or uploaded.")
     } else {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
+
+    # This updates the data by running hte entire code one more time.
+    if (code_error() == FALSE){
+      withProgress(message = "Updating values ...", {
+        incProgress(0.4)
+        try(
+          eval(
+            parse(
+              text =  clean_cmd(logs$code, input$select_data)
+            )
+          ),
+        )
+      })
+    }
+    return(df)
+  })
+
+  output$data_table_DT <- DT::renderDataTable({
+    req(current_data())
     DT::datatable(
-      df, 
+      current_data(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
-        pageLength = 20,
+        pageLength = 10,
         dom = 'ftp',
         scrollX = "400px"
       ),
       rownames = FALSE
     )
-  }
-  )
+  })
 
+  output$data_size <- renderText({
+    req(!is.null(current_data()))
+    paste(
+      dim(current_data())[1], "rows X ",
+      dim(current_data())[2], "columns"
+    )
+  })
+  output$data_structure <- renderPrint({
+    req(!is.null(current_data()))
+    str(current_data())
+  })
+
+  output$data_summary <- renderText({
+    req(!is.null(current_data()))
+    paste(
+      capture.output(
+        summary(current_data())
+      ),
+      collapse = "\n"
+    )
+  })
+
+  #                                 7.
   #____________________________________________________________________________
   # Logs and Reports
   #____________________________________________________________________________
 
-  output$session_info <- renderUI({
-    i <- c("<br><h4>R session info: </h4>")
-    i <- c(i, capture.output(sessionInfo()))
-    HTML(paste(i, collapse = "<br/>"))
-  })
-
- # Defining & initializing the reactiveValues object
-  Rmd_total <- reactiveValues(code = "")
 
   observeEvent(input$submit_button, {
-    Rmd_total$code <- paste0(Rmd_total$code, Rmd_chuck())
+    updateSelectInput(
+      inputId = "selected_chuck_report",
+      label = "Code chunks to include (Use backspace to delete):",
+      selected = "Chucks without errors",
+      choices = c(
+        "All Chucks",
+        "Chucks without errors",
+        as.character(1:length(logs$code_history))
+      )
+    )
+
   })
+
+  # collect all RMarkdown chucks
+  Rmd_total <- reactive({
+
+
+  Rmd_script <- ""
+
+  # if first chuck
+  Rmd_script <- paste0(
+    Rmd_script,
+    # Get the data from the params list-----------
+    "Developed by [Steven Ge](https://twitter.com/StevenXGe) using 
+    API access (via the 
+    [openai](https://cran.rstudio.com/web/packages/openai/index.html)
+    package ) to 
+    [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
+    language_model,
+    "\" model.",
+    "\n\nRTutor Website: [http://RTutor.ai](http://RTutor.ai)",
+    "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)\n"
+  )
+
+  # if the first chunk & data is uploaded,
+  # insert script for reading data
+  if (input$select_data == uploaded_data) {
+
+    # Read file
+    file_name <- input$user_file$name
+    if(user_data()$file_type == "read_excel") {
+      txt <- paste0(
+        "# install.packages(readxl)\nlibrary(readxl)\ndf <- read_excel(\"",
+        file_name,
+        "\")"
+      )
+
+    }
+    if (user_data()$file_type == "read.csv") {
+      txt <- paste0(
+        "df <- read.csv(\"",
+        file_name,
+        "\")"
+      )
+    }
+    if (user_data()$file_type == "read.table") {
+      txt <- paste0(
+        "df <- read.table(\"",
+        file_name,
+        "\", sep = \"\t\", header = TRUE)"
+      )
+    }
+
+    Rmd_script <- paste0(
+      "\n### 0. Read File\n",
+      "```{R, eval = FALSE}\n",
+      txt,
+      "\n```\n"
+    )
+  }
+
+  #------------------Add selected chucks
+  if("All Chucks" %in% input$selected_chuck_report) {
+      ix <- 1:length(logs$code_history)
+  } else if("Chucks without errors" %in% input$selected_chuck_report) {
+    ix <- c()
+    for (i in 1:length(logs$code_history)) {
+      if(!logs$code_history[[i]]$error) {
+        ix <- c(ix, i)
+      }
+    }
+  } else {  # selected
+    ix <- as.integer(input$selected_chuck_report)
+  }
+
+  for (i in ix) {
+    Rmd_script <- paste0(Rmd_script, "\n", logs$code_history[[i]]$rmd)
+  }
+  return(Rmd_script)
+  })
+
+
 
   # Markdown chuck for the current request
   Rmd_chuck <- reactive({
-
     req(openAI_response()$cmd)
     req(openAI_prompt())
 
     Rmd_script <- ""
-
-    # if first chuck
-    if(input$submit_button == 1) {
-      Rmd_script <- paste0(
-        Rmd_script,
-        # Get the data from the params list-----------
-        "\n\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) using 
-        API access (via the 
-        [openai](https://cran.rstudio.com/web/packages/openai/index.html)
-        package ) to 
-        [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
-        language_model,
-        "\" model.",
-        "\n\nRTutor Website: [http://RTutor.ai](http://RTutor.ai)",
-        "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)"
-      )
-    }
-
-    # if the first chunk & data is uploaded,
-    # insert script for reading data
-    if(input$submit_button == 1 && input$select_data == uploaded_data) {
-
-      # Read file
-      file_name <- input$user_file$name
-      if(user_data()$file_type == "read_excel") {
-        txt <- paste0(
-          "# install.packages(readxl)\nlibrary(readxl)\ndf <- read_excel(\"",
-          file_name,
-          "\")"
-        )
-
-      }
-      if (user_data()$file_type == "read.csv") {
-        txt <- paste0(
-          "df <- read.csv(\"",
-          file_name,
-          "\")"
-        )
-      }
-      if (user_data()$file_type == "read.table") {
-        txt <- paste0(
-          "df <- read.table(\"",
-          file_name,
-          "\", sep = \"\t\", header = TRUE)"
-        )
-      }
-
-      Rmd_script <- paste0(
-        "\n### 0. Read File\n",
-        "```{R, eval = FALSE}\n",
-        txt,
-        "\n```\n"
-      )
-    }
+    Rmd_script <- paste0(
+      Rmd_script,
+      # Get the data from the params list for every chuck-----------
+      # Do not change this without changing the output$Rmd_source function
+      # this chuck is removed for local knitting.
+      "```{R, echo = FALSE}\n",
+      "df <- params$df\n",
+      "```\n"
+    )
 
     # User request----------------------
     Rmd_script  <- paste0(
       Rmd_script,
-      "\n\n### ",
+      "\n### ",
       counter$requests,
       ". ",
       paste(
@@ -1076,7 +1202,7 @@ app_server <- function(input, output, session) {
             pre_text,
             "|",
             "Use the ", 
-            input$select_data, 
+            input$select_data,
             " data frame. "
           ),
           "",
@@ -1096,23 +1222,23 @@ app_server <- function(input, output, session) {
     if (code_error() == TRUE) {
       Rmd_script <- paste0(
         Rmd_script,
-        "```{R, eval = FALSE}\n"
+        "```{R, eval = FALSE}"
       )
     } else {
       Rmd_script <- paste0(
         Rmd_script,
-        "```{R}\n"
+        "```{R}"
       )
     }
 
-    # if uploaded, remove the line: df <- user_data()$df
     cmd <- openAI_response()$cmd
-    if(input$select_data == uploaded_data) {
+    # remove empty line
+    if(nchar(cmd[1]) == 0) {
       cmd <- cmd[-1]
     }
 
     if(input$continue) {
-      cmd <- c(r_code$cmd, cmd)
+      cmd <- c(logs$last_code, "\n#-----------------", cmd)
     }
 
     # Add R code
@@ -1151,10 +1277,10 @@ app_server <- function(input, output, session) {
    )
   })
 
-output$rmd_chuck_output <- renderText({
-  req(Rmd_chuck())
-  Rmd_total$code
-})
+  output$rmd_chuck_output <- renderText({
+    req(Rmd_chuck())
+    Rmd_total()
+  })
 
   # Markdown report from DataExplorer package; does not work
 #  output$eda_report <- downloadHandler(
@@ -1170,7 +1296,6 @@ output$rmd_chuck_output <- renderText({
 #    }
 #  )
 
-
   # Markdown report
   output$Rmd_source <- downloadHandler(
     # For PDF output, change this to "report.pdf"
@@ -1184,7 +1309,12 @@ output$rmd_chuck_output <- renderText({
         date(), "\"\n",
         "output: html_document\n",
         "---\n",
-        Rmd_total$code
+        # this chuck is not needed when they download the Rmd and knit locally
+        gsub(
+          "```\\{R, echo = FALSE\\}\ndf <- params\\$df\n```\n",
+          "", 
+          Rmd_total()
+        )
       )
       writeLines(Rmd_script, file)
     }
@@ -1226,10 +1356,6 @@ output$rmd_chuck_output <- renderText({
 
         Rmd_script <- paste0(
           Rmd_script,
-          # Get the data from the params list-----------
-          "\n\n```{R, echo = FALSE}\n",
-          "df <- params$df\n",
-          "\n```\n",
           "\n\n### "
         )
 
@@ -1238,7 +1364,7 @@ output$rmd_chuck_output <- renderText({
         # Add R code
         Rmd_script <- paste(
           Rmd_script,
-          Rmd_total$code
+          Rmd_total()
         )
 
         write(
@@ -1246,17 +1372,23 @@ output$rmd_chuck_output <- renderText({
           file = tempReport,
           append = FALSE
         )
-
+        
         # Set up parameters to pass to Rmd document
-        params <- list(
-          df = iris #dummy
-        )
+        params <- list(df = iris) # dummy
 
         # if uploaded, use that data
         req(input$select_data)
-        if(input$select_data == uploaded_data) {
+        if (input$select_data == uploaded_data) {
           params <- list(
             df = user_data()$df
+          )
+        } else if (input$select_data != no_data) {
+          params <- list(
+            df = eval(
+              parse(
+                text = paste0("as.data.frame(", input$select_data, ")")
+              )
+            )
           )
         }
 
@@ -1274,6 +1406,11 @@ output$rmd_chuck_output <- renderText({
     }
   )
 
+
+
+
+
+#                                  8.
 #______________________________________________________________________________
 #
 #  Server rebooting every 2 hours; this gives a warning
@@ -1284,7 +1421,7 @@ output$rmd_chuck_output <- renderText({
 
   # returns hour and minutes
   time_var <- reactive({
-    tem = input$submit_button
+    input$submit_button
     min <- format(Sys.time(), "%M")
     hr <- format(Sys.time(), "%H")
     return(list(
@@ -1320,6 +1457,8 @@ output$rmd_chuck_output <- renderText({
     }
   })
 
+
+#                                  9.
 #______________________________________________________________________________
 #
 #  Q and A
@@ -1339,13 +1478,12 @@ output$rmd_chuck_output <- renderText({
         session,
         "ask_question",
         value = "",
-        placeholder = "Ask RTutor anything statistics. See examples. Voice naration can be enabled in Settings."
+        placeholder = "Ask RTutor anything statistics. See examples. Enable voice naration in Settings."
       )
     }
   })
 
 output$answer <- renderText({
-
   req(input$ask_button)
 
   isolate({
@@ -1355,16 +1493,20 @@ output$answer <- renderText({
     txt <- input$ask_question
 
     # force to within 280 characters
-    if(nchar(txt) > 280) {
-      txt <- substr(txt, 1, 280)
+    if (nchar(txt) > max_char_question) {
+      txt <- substr(txt, 1, max_char_question)
+      showNotification(
+        paste("Only the first", max_char_question, " characters will be used."),
+        duration = 10
+      )
     }
 
-    # If the last character is not a stop, add it. 
+    # If the last character is not a stop, add it.
     # Otherwise, GPT3 will add a sentence.
 
     # The following 5 lines were generated by ChatGPT!!!!!
     # Check if the last character is not a period
-    if(substr(txt, nchar(txt), nchar(txt)) != ".") {
+    if (substr(txt, nchar(txt), nchar(txt)) != ".") {
     # If the last character is not a period, add it to the end
       txt <- paste(txt, ".", sep = "")
     }
@@ -1423,12 +1565,12 @@ output$answer <- renderText({
     )
 
     error_message <- NULL
-    if(error_api) {
+    if (error_api) {
       cmd <- NULL
       response <- NULL
       error_message <- response$message
     } else {
-      cmd <- clean_cmd(response$choices[1, 1], input$select_data)
+      cmd <- response$choices[1, 1]
     }
 
     api_time <- difftime(
@@ -1438,13 +1580,13 @@ output$answer <- renderText({
     )[[1]]
 
     # if more than 10 requests, slow down. Only on server.
-    if(counter$requests > 20 && file.exists(on_server)) {
+    if (counter$requests > 20 && file.exists(on_server)) {
       Sys.sleep(counter$requests / 5 + runif(1, 0, 5))
     }
-    if(counter$requests > 50 && file.exists(on_server)) {
+    if (counter$requests > 50 && file.exists(on_server)) {
       Sys.sleep(counter$requests / 10 + runif(1, 0, 10))
     }
-    if(counter$requests > 100 && file.exists(on_server)) {
+    if (counter$requests > 100 && file.exists(on_server)) {
       Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
     }
 
@@ -1466,10 +1608,10 @@ output$answer <- renderText({
     )
 
     ans <- response$choices[1, 1]
-    if(grepl("Statistics only!", ans)) {
+    if (grepl("Statistics only!", ans)) {
       ans <- paste(
         sample(humor, 1),
-        "   If you are not
+        "     If you are not
        trying to be funny, ask again with more context. It might
         be helpful to add \"in statistics\" to the question."
       )
@@ -1479,7 +1621,45 @@ output$answer <- renderText({
 
 })
 
-# Run the application
-# shiny::runApp("app.R")
+
+#                                      10.
+#______________________________________________________________________________
+#
+#  Miscellaneous
+#______________________________________________________________________________
+
+  output$RTutor_version <- renderUI({
+    h4(paste("RTutor Version", release))
+  })
+
+  output$list_of_packages <- renderUI({
+    all <- .packages(all.available = TRUE)
+    all <- sapply(all, function(x) paste(x, paste0(packageVersion(x), collapse = ".")))
+    all <- unname(all)
+    all <- c("", all)
+    selectInput(
+      inputId = "installed_packages",
+      label = paste0("Search for installed packages ( ", length(all), " total)"),
+      choices = all,
+      selectize = TRUE,
+      selected = NULL
+    )
+  })
+
+  output$slava_ukraini <- renderUI({
+    if (input$submit_button == 0 && input$ask_button == 0) {
+      tagList(
+        br(),
+        h4("Slava Ukraini!")
+      )
+
+    }
+  })
+
+  output$session_info <- renderUI({
+    i <- c("<br><h4>R session info: </h4>")
+    i <- c(i, capture.output(sessionInfo()))
+    HTML(paste(i, collapse = "<br/>"))
+  })
 
 }

@@ -11,14 +11,17 @@
 # Global variables
 ###################################################
 
-release <- 0.5 # RTutor
+release <- 0.6 # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
+#language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
 pre_text <- "Generate R code, not R Markdown. "
+max_char_question <- 280 # max n. of characters in the Q&A
+
 
 
 # if this file exists, running on the server. Otherwise local.
@@ -113,8 +116,8 @@ clean_cmd <- function(cmd, selected_data){
   # if data is uploaded, add a line to get the data.
   if(selected_data == uploaded_data) {
     cmd <- c("df <- as.data.frame(user_data()$df)", cmd)
-  } else if ( selected_data != no_data) {
-    cmd <- c(paste("df <- as.data.frame(", selected_data, ")"), cmd)
+  } else if (selected_data != no_data) {
+    cmd <- c(paste0("df <- as.data.frame(", selected_data, ")"), cmd)
   }
 
   return(cmd)

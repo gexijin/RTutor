@@ -22,6 +22,19 @@ fluidPage(
     id = "load_message",
     h1("Loading ... ...")
   ),
+
+  # move notifications and progress bar to the center of screen
+  tags$head( 
+    tags$style(
+      HTML(".shiny-notification {
+            position:fixed;
+            top: calc(20%);
+            left: calc(50%);
+            }
+            "
+          )
+      )
+  ),
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
@@ -64,9 +77,26 @@ fluidPage(
         ),
         column(
           width = 6,
+          actionButton("api_button", "Settings")
+        )
+      ),
+      br(), br(),
+      fluidRow(
+        column(
+          width = 6,
+          selectInput(
+            inputId = "selected_chuck",
+            label = "All Code chunks",
+            selected = NULL,
+            choices = NULL
+          )
+        ),
+        column(
+          width = 6,
+          style = "margin-top: 10px;",
           checkboxInput(
             inputId = "continue",
-            label = "Continue",
+            label = "Contine from this chuck",
             value = FALSE
           ),
           tippy::tippy_this(
@@ -77,22 +107,13 @@ fluidPage(
         )
       ),
       br(),
-      fluidRow(
-        column(
-          width = 6,
-          uiOutput("html_report")
-        ),
-        column(
-          width = 6,
-          actionButton("api_button", "Settings")
-        )
-      ),
-      br(),
-      textOutput("retry_on_error"),
       textOutput("usage"),
       textOutput("total_cost"),
       textOutput("temperature"),
-      uiOutput("slava_ukraini")
+      uiOutput("slava_ukraini"),
+      br(),
+      textOutput("retry_on_error")
+
     ),
 
 ###############################################################################
@@ -121,33 +142,53 @@ fluidPage(
           ),
           uiOutput("plot_ui"),
           br(),
-          uiOutput("tips_interactive"),
-          hr(),
-          DT::dataTableOutput("data_table_DT")
-          #,tableOutput("data_table")
-
+          uiOutput("tips_interactive")
         ),
-
         tabPanel(
-          title = "Log",
-          value = "Log",
+          title = "Data",
+          value = "Data",
+          textOutput("data_size"),
+          DT::dataTableOutput("data_table_DT"),
+          verbatimTextOutput("data_structure"),
+          verbatimTextOutput("data_summary")
+        ),
+        tabPanel(
+          title = "Report",
+          value = "Report",
           br(),
-          downloadButton(
-            outputId = "Rmd_source",
-            label = "RMarkdown"
+          selectInput(
+            inputId = "selected_chuck_report",
+            label = "Code Chucks to include:",
+            selected = NULL,
+            choices = NULL,
+            multiple = TRUE
           ),
-          tippy::tippy_this(
-            "Rmd_source",
-            "Download a R Markdown source file.",
-            theme = "light-border"
+          br(),
+          fluidRow(
+            column(
+              width = 6,
+              uiOutput("html_report")
+            ),
+            column(
+              width = 6,
+              downloadButton(
+                outputId = "Rmd_source",
+                label = "RMarkdown"
+              ),
+              tippy::tippy_this(
+                "Rmd_source",
+                "Download a R Markdown source file.",
+                theme = "light-border"
+              )
+            )
           ),
-          br(), br(),
+          br(),
           verbatimTextOutput("rmd_chuck_output")
         ),
 
         tabPanel(
-          title = "Ask Me Anything",
-          value = "AMA",
+          title = "Ask",
+          value = "Ask",
           br(),
           #img(
           #  src = "inst/app/www/tutor.png",
@@ -192,7 +233,7 @@ fluidPage(
         tabPanel(
           title = "About",
           value = "About",
-          h4("RTutor Version 0.5"),
+          uiOutput("RTutor_version"),
           p("RTutor uses ",
             a(
               "OpenAI's",
@@ -237,8 +278,13 @@ fluidPage(
             instruction to install RTutor as an R package."
           ),
           hr(),
+          uiOutput("list_of_packages"),
+          hr(),
           h4("Update log:"),
           tags$ul(
+            tags$li(
+              "v 0.6 12/27/2022. Keeps record of all code chucks for resue and report."
+            ),            
             tags$li(
               "v 0.5 12/24/2022. Keep current code and continue."
             ),
