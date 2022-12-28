@@ -59,6 +59,15 @@ app_server <- function(input, output, session) {
   })
 
   # Switch to Main tab when Submit button is clicked
+  observeEvent(input$submit_button == 0, {
+    updateTabsetPanel(
+      session,
+      "tabs",
+      selected = "Data"
+    )
+  })
+
+  # Switch to Main tab when Submit button is clicked
   observeEvent(input$submit_button, {
     updateTabsetPanel(
       session,
@@ -666,7 +675,6 @@ app_server <- function(input, output, session) {
   output$openAI <- renderText({
     req(openAI_response()$cmd)
     res <- logs$raw
-    res <- logs$code
     # Replace multiple newlines with just one.
     #res <- gsub("\n+", "\n", res)
     # Replace emplty lines,  [ ]{0, }--> zero or more space
@@ -724,7 +732,7 @@ app_server <- function(input, output, session) {
     # update chuck choices
     updateSelectInput(
       inputId = "selected_chuck",
-      label = "Code chunks",
+      label = "All Code chunks",
       choices = 1:length(logs$code_history),
       selected = logs$id
     )
@@ -733,7 +741,7 @@ app_server <- function(input, output, session) {
     updateCheckboxInput(
       session = session,
       inputId = "continue",
-      label = "Include this chuck",
+      label = "Contine from this chuck",
       value = FALSE
     )
   })

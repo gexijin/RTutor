@@ -86,7 +86,7 @@ fluidPage(
           width = 6,
           selectInput(
             inputId = "selected_chuck",
-            label = "Code Chucks",
+            label = "All Code chunks",
             selected = NULL,
             choices = NULL
           )
@@ -96,7 +96,7 @@ fluidPage(
           style = "margin-top: 10px;",
           checkboxInput(
             inputId = "continue",
-            label = "Include this code",
+            label = "Contine from this chuck",
             value = FALSE
           ),
           tippy::tippy_this(
@@ -142,14 +142,16 @@ fluidPage(
           ),
           uiOutput("plot_ui"),
           br(),
-          uiOutput("tips_interactive"),
-          hr(),
+          uiOutput("tips_interactive")
+        ),
+        tabPanel(
+          title = "Data",
+          value = "Data",
           textOutput("data_size"),
           DT::dataTableOutput("data_table_DT"),
           verbatimTextOutput("data_structure"),
           verbatimTextOutput("data_summary")
         ),
-
         tabPanel(
           title = "Report",
           value = "Report",
@@ -177,8 +179,8 @@ fluidPage(
         ),
 
         tabPanel(
-          title = "Ask Me Anything",
-          value = "AMA",
+          title = "Ask",
+          value = "Ask",
           br(),
           #img(
           #  src = "inst/app/www/tutor.png",
