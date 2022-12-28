@@ -305,7 +305,12 @@ fluidPage(
             instruction to install RTutor as an R package."
           ),
           hr(),
-          uiOutput("list_of_packages"),
+          selectizeInput(
+            inputId = "installed_packages",
+            label = "Search for installed packages ",
+            choices = NULL,
+            selected = NULL
+          ),
           hr(),
           h4("Update log:"),
           tags$ul(

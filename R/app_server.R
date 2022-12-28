@@ -1651,19 +1651,19 @@ output$answer <- renderText({
   output$corr_map <- renderPlot({
     #GGally::ggpairs(current_data())
     df <- current_data()
-    df <- df[,sapply(df, is.numeric)]
+    df <- df[, sapply(df, is.numeric)]
     M <- cor(df)
-    testRes = corrplot::cor.mtest(df, conf.level = 0.95)
+    testRes f<- corrplot::cor.mtest(df, conf.level = 0.95)
     corrplot::corrplot(
-      M, 
-      p.mat = testRes$p, 
-      method = 'circle', 
-      type = 'lower', 
-      insig='blank',
-      addCoef.col ='black', 
-      number.cex = 0.8, 
-      order = 'AOE', 
-      diag=FALSE
+      M,
+      p.mat = testRes$p,
+      method = 'circle',
+      type = 'lower',
+      insig = 'blank',
+      addCoef.col = 'black',
+      number.cex = 0.8,
+      order = 'AOE',
+      diag = FALSE
     ) 
          
   })
@@ -1678,22 +1678,27 @@ output$answer <- renderText({
     h4(paste("RTutor Version", release))
   })
 
-  output$list_of_packages <- renderUI({
+
+  observeEvent(input$tab == "About", {
     all <- .packages(all.available = TRUE)
-    all <- sapply(all, function(x) paste(x, paste0(packageVersion(x), collapse = ".")))
+    all <- sapply(
+      all,
+      function(x) paste(x, paste0(packageVersion(x), collapse = "."))
+    )
     all <- unname(all)
     all <- c("", all)
-    selectInput(
+    updateSelectizeInput(
+      session = session,
       inputId = "installed_packages",
-      label = paste0("Search for installed packages ( ", length(all), " total)"),
+      label = paste0(
+        "Search for installed packages ( ",
+        length(all), 
+        " total)"
+      ),
       choices = all,
-      selectize = TRUE,
-      selected = NULL,
-      server = TRUE
+      selected = NULL
     )
   })
-  
-
 
   output$slava_ukraini <- renderUI({
     if (input$submit_button == 0 && input$ask_button == 0) {
