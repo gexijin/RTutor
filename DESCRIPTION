@@ -18,7 +18,10 @@ Imports:
     DT,
     shinybusy,
     shinyjs,
-    plotly
+    plotly,
+    summarytools,
+    DataExplorer,
+    corrplot
 Remotes:
     github::jcrodriguez1989/heyshiny
 Depends:
