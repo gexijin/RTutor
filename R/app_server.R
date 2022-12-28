@@ -1621,8 +1621,45 @@ output$answer <- renderText({
 
 })
 
-
 #                                      10.
+#______________________________________________________________________________
+#
+#  Exploratory Data Analysis
+#______________________________________________________________________________
+
+  output$dfSummary <- renderText({
+    req(current_data())
+    res <- capture.output(summarytools::dfSummary(current_data()))
+    res <- paste(res, collapse = "\n")
+    return(res)
+  })
+
+  output$distribution_category <- renderPlot({
+    DataExplorer::plot_bar(current_data())
+  },
+  width = 800,
+  height = 800
+  )
+
+  output$distribution_numeric <- renderPlot({
+    DataExplorer::plot_histogram(current_data())
+  })
+
+  output$qq_numeric <- renderPlot({
+    DataExplorer::plot_qq(current_data())
+  })
+  output$corr_map <- renderPlot({
+    #GGally::ggpairs(current_data())
+    df <- current_data()
+    df <- df[,sapply(df, is.numeric)]
+    M <- cor(df)
+    testRes = corrplot::cor.mtest(df, conf.level = 0.95)
+    corrplot::corrplot(M, p.mat = testRes$p, method = 'circle', type = 'lower', insig='blank',
+         addCoef.col ='black', number.cex = 0.8, order = 'AOE', diag=FALSE) 
+         
+         })
+
+#                                      11.
 #______________________________________________________________________________
 #
 #  Miscellaneous

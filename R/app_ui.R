@@ -86,7 +86,7 @@ fluidPage(
           width = 6,
           selectInput(
             inputId = "selected_chuck",
-            label = "All Code chunks",
+            label = "All code chunks",
             selected = NULL,
             choices = NULL
           )
@@ -101,7 +101,7 @@ fluidPage(
           ),
           tippy::tippy_this(
             "continue",
-            "If selected, the current R scripts will be kept in the next questions. We build upon this script.",
+            "If selected, the current R scripts will be kept in the next questions. We build upon the code chuck.",
             theme = "light-border"
           )
         )
@@ -163,7 +163,6 @@ fluidPage(
             choices = NULL,
             multiple = TRUE
           ),
-          br(),
           fluidRow(
             column(
               width = 6,
@@ -184,6 +183,34 @@ fluidPage(
           ),
           br(),
           verbatimTextOutput("rmd_chuck_output")
+        ),
+
+        tabPanel(
+          title = "EDA",
+          value = "EDA",
+          tabsetPanel(
+            tabPanel(
+              title = "Summary",
+              verbatimTextOutput("dfSummary")
+            ),
+            tabPanel(
+              title = "Categorical",
+              plotOutput("distribution_category")
+            ),
+            tabPanel(
+              title = "Numerical",
+              plotOutput("distribution_numeric"),
+              plotOutput("qq_numeric")
+            ),
+            tabPanel(
+              title = "Correlation",
+              plotOutput("corr_map")
+            )
+
+          )
+
+
+
         ),
 
         tabPanel(
@@ -283,8 +310,11 @@ fluidPage(
           h4("Update log:"),
           tags$ul(
             tags$li(
+              "v 0.7 12/27/2022. Add EDA tab."
+            ),
+            tags$li(
               "v 0.6 12/27/2022. Keeps record of all code chucks for resue and report."
-            ),            
+            ),
             tags$li(
               "v 0.5 12/24/2022. Keep current code and continue."
             ),
