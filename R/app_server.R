@@ -99,7 +99,7 @@ app_server <- function(input, output, session) {
     size = "s"
   )
 
-  shiny::showModal(welcome_modal)
+#  shiny::showModal(welcome_modal)
 
 #                                    2.
 #____________________________________________________________________________
@@ -734,7 +734,7 @@ app_server <- function(input, output, session) {
     # update chuck choices
     updateSelectInput(
       inputId = "selected_chuck",
-      label = "All code chunks",
+      label = "AI generated code (chuck no.)",
       choices = 1:length(logs$code_history),
       selected = logs$id
     )
@@ -1635,36 +1635,48 @@ output$answer <- renderText({
   })
 
   output$distribution_category <- renderPlot({
-    DataExplorer::plot_bar(current_data())
+    withProgress(message = "Running the code ...", {
+      incProgress(0.3)
+      DataExplorer::plot_bar(current_data())
+    })
   },
   width = 800,
   height = 800
   )
 
   output$distribution_numeric <- renderPlot({
-    DataExplorer::plot_histogram(current_data())
+    withProgress(message = "Running the code ...", {
+      incProgress(0.3)
+      DataExplorer::plot_histogram(current_data())
+    })
   })
 
   output$qq_numeric <- renderPlot({
-    DataExplorer::plot_qq(current_data())
+    withProgress(message = "Running the code ...", {
+      incProgress(0.3)
+      DataExplorer::plot_qq(current_data())
+    })
   })
   output$corr_map <- renderPlot({
-    #GGally::ggpairs(current_data())
-    df <- current_data()
-    df <- df[, sapply(df, is.numeric)]
-    M <- cor(df)
-    testRes <- corrplot::cor.mtest(df, conf.level = 0.95)
-    corrplot::corrplot(
-      M,
-      p.mat = testRes$p,
-      method = 'circle',
-      type = 'lower',
-      insig = 'blank',
-      addCoef.col = 'black',
-      number.cex = 0.8,
-      order = 'AOE',
-      diag = FALSE
-    ) 
+    withProgress(message = "Running the code ...", {
+      incProgress(0.3)
+      #GGally::ggpairs(current_data())
+      df <- current_data()
+      df <- df[, sapply(df, is.numeric)]
+      M <- cor(df)
+      testRes <- corrplot::cor.mtest(df, conf.level = 0.95)
+      corrplot::corrplot(
+        M,
+        p.mat = testRes$p,
+        method = 'circle',
+        type = 'lower',
+        insig = 'blank',
+        addCoef.col = 'black',
+        number.cex = 0.8,
+        order = 'AOE',
+        diag = FALSE
+      ) 
+    })
   })
 
 #                                      11.

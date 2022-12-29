@@ -20,7 +20,9 @@ fluidPage(
 
   div(
     id = "load_message",
-    h1("Loading ... ...")
+    h1("Loading ... ..."),
+    h2("NO WARRANTY. AI is not perfect!"),
+    h2("Not for commercial use.")
   ),
 
   # move notifications and progress bar to the center of screen
@@ -80,32 +82,6 @@ fluidPage(
           actionButton("api_button", "Settings")
         )
       ),
-      br(), br(),
-      fluidRow(
-        column(
-          width = 6,
-          selectInput(
-            inputId = "selected_chuck",
-            label = "All code chunks",
-            selected = NULL,
-            choices = NULL
-          )
-        ),
-        column(
-          width = 6,
-          style = "margin-top: 10px;",
-          checkboxInput(
-            inputId = "continue",
-            label = "Contine from this chuck",
-            value = FALSE
-          ),
-          tippy::tippy_this(
-            "continue",
-            "If selected, the current R scripts will be kept in the next questions. We build upon the code chuck.",
-            theme = "light-border"
-          )
-        )
-      ),
       br(),
       textOutput("usage"),
       textOutput("total_cost"),
@@ -127,8 +103,32 @@ fluidPage(
         tabPanel(
           title = "Main",
           value = "Main",
-          h4("AI generated R code:"),
-          #codeModules::codeOutput("code_out"),
+          br(),
+          fluidRow(
+            column(
+              width = 6,
+              selectInput(
+                inputId = "selected_chuck",
+                label = "AI generated code (chuck no.)",
+                selected = NULL,
+                choices = NULL
+              )
+            ),
+            column(
+              width = 6,
+              style = "margin-top: 10px;",
+              checkboxInput(
+                inputId = "continue",
+                label = "Contine from this",
+                value = FALSE
+              ),
+              tippy::tippy_this(
+                "continue",
+                "If selected, the current R scripts will be kept in the next questions. We build upon the code chuck.",
+                theme = "light-border"
+              )
+            )
+          ),
           verbatimTextOutput("openAI"),
           uiOutput("error_message"),
           h4("Results:"),
@@ -144,6 +144,7 @@ fluidPage(
           br(),
           uiOutput("tips_interactive")
         ),
+
         tabPanel(
           title = "Data",
           value = "Data",
@@ -152,6 +153,7 @@ fluidPage(
           verbatimTextOutput("data_structure"),
           verbatimTextOutput("data_summary")
         ),
+
         tabPanel(
           title = "Report",
           value = "Report",
@@ -199,8 +201,8 @@ fluidPage(
             ),
             tabPanel(
               title = "Numerical",
-              plotOutput("distribution_numeric"),
-              plotOutput("qq_numeric")
+              plotOutput("qq_numeric"),
+              plotOutput("distribution_numeric")
             ),
             tabPanel(
               title = "Correlation",
