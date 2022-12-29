@@ -207,7 +207,11 @@ fluidPage(
             tabPanel(
               title = "Correlation",
               plotOutput("corr_map")
-            )
+            ),
+#            tabPanel(
+#              title = "GGpairs",
+#              plotOutput("ggpairs")
+#            )
 
           )
 

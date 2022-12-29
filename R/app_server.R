@@ -198,6 +198,8 @@ app_server <- function(input, output, session) {
           file_type <- "read.table"
         }
       }
+      # clean column names
+      df <- df %>% janitor::clean_names()
       return(
         list(
           df = df,
@@ -1675,9 +1677,21 @@ output$answer <- renderText({
         number.cex = 0.8,
         order = 'AOE',
         diag = FALSE
-      ) 
+      )
     })
   })
+
+  output$ggpairs <- renderPlot({
+    df <- current_data()
+    
+    withProgress(message = "Running the code ...", {
+      incProgress(0.3)
+
+      GGally::ggpairs(df[, 8:11], mapping = aes(color = df$class, alpha = 0.5))
+    })
+  },
+  width = 1000,
+  height = 1000)
 
 #                                      11.
 #______________________________________________________________________________

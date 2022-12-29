@@ -21,7 +21,8 @@ Imports:
     plotly,
     summarytools,
     DataExplorer,
-    corrplot
+    corrplot,
+    janitor
 Remotes:
     github::jcrodriguez1989/heyshiny
 Depends:
