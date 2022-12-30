@@ -363,7 +363,8 @@ fluidPage(
               )
             )
           ),
-
+          hr(),
+          uiOutput("package_list"),
 
           hr(),
 
