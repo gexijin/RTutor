@@ -20,9 +20,8 @@ fluidPage(
 
   div(
     id = "load_message",
-    h1("Loading ... ..."),
-    h2("NO WARRANTY. AI is not perfect!"),
-    h2("Not for commercial use.")
+    h2("Loading ..."),
+    h3("No warranty. For academic & non-profit org. only.")
   ),
 
   # move notifications and progress bar to the center of screen
@@ -108,8 +107,8 @@ fluidPage(
             column(
               width = 6,
               selectInput(
-                inputId = "selected_chuck",
-                label = "AI generated code (chuck no.)",
+                inputId = "selected_chunk",
+                label = "AI generated code:",
                 selected = NULL,
                 choices = NULL
               )
@@ -119,12 +118,12 @@ fluidPage(
               style = "margin-top: 10px;",
               checkboxInput(
                 inputId = "continue",
-                label = "Contine from this",
+                label = "Contine from this chunk",
                 value = FALSE
               ),
               tippy::tippy_this(
                 "continue",
-                "If selected, the current R scripts will be kept in the next questions. We build upon the code chuck.",
+                "If selected, the current R scripts will be kept in the next questions. We build upon the code chunk.",
                 theme = "light-border"
               )
             )
@@ -159,8 +158,8 @@ fluidPage(
           value = "Report",
           br(),
           selectInput(
-            inputId = "selected_chuck_report",
-            label = "Code Chucks to include:",
+            inputId = "selected_chunk_report",
+            label = "Code chunks to include:",
             selected = NULL,
             choices = NULL,
             multiple = TRUE
@@ -184,7 +183,7 @@ fluidPage(
             )
           ),
           br(),
-          verbatimTextOutput("rmd_chuck_output")
+          verbatimTextOutput("rmd_chunk_output")
         ),
 
         tabPanel(
@@ -324,7 +323,7 @@ fluidPage(
               "v 0.7 12/27/2022. Add EDA tab."
             ),
             tags$li(
-              "v 0.6 12/27/2022. Keeps record of all code chucks for resue and report."
+              "v 0.6 12/27/2022. Keeps record of all code chunks for resue and report."
             ),
             tags$li(
               "v 0.5 12/24/2022. Keep current code and continue."
