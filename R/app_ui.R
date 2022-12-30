@@ -195,6 +195,11 @@ fluidPage(
               verbatimTextOutput("dfSummary")
             ),
             tabPanel(
+              title = "Table1",
+              uiOutput("table1_inputs"),
+              verbatimTextOutput("table1")
+            ),            
+            tabPanel(
               title = "Categorical",
               plotOutput("distribution_category")
             ),
@@ -207,10 +212,12 @@ fluidPage(
               title = "Correlation",
               plotOutput("corr_map")
             ),
-#            tabPanel(
-#              title = "GGpairs",
-#              plotOutput("ggpairs")
-#            )
+            tabPanel(
+              title = "GGpairs",
+              uiOutput("ggpairs_inputs"),
+              plotOutput("ggpairs"),
+              h4("Please wait for a few seconds ... ...")
+            )
 
           )
 

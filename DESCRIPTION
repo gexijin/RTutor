@@ -22,6 +22,7 @@ Imports:
     summarytools,
     DataExplorer,
     corrplot,
+    tableone,
     janitor
 Remotes:
     github::jcrodriguez1989/heyshiny
