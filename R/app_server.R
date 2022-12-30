@@ -1744,9 +1744,9 @@ output$answer <- renderText({
   output$ggpairs_inputs <- renderUI({
     req(ggpairs_data())
     df <- ggpairs_data()
-    selected = colnames(df)
-    if(length(selected) > 4) {
-      selected <- selected[1:4]
+    selected <- colnames(df)
+    if(length(selected) > 3) {
+      selected <- sample(selected, 3)
     }
     tagList(
       fluidRow(
