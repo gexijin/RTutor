@@ -687,11 +687,11 @@ app_server <- function(input, output, session) {
 
  # Defining & initializing the reactiveValues object
   logs <- reactiveValues(
-    id = 0, # 1, 2, 3, id for code chuck
+    id = 0, # 1, 2, 3, id for code chunk
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
     last_code = "", # last code for Rmarkdown
-    code_history = list() # keep all code chucks
+    code_history = list() # keep all code chunks
   )
 
   observeEvent(input$submit_button, {
@@ -728,28 +728,19 @@ app_server <- function(input, output, session) {
       raw = logs$raw, # for print
       prompt = input$input_text,
       error = code_error(),
-      rmd = Rmd_chuck()
+      rmd = Rmd_chunk()
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
-
-    # update chuck choices
+    
+    choices <- 1:length(logs$code_history)
+    names(choices) <- paste0("Chunk #", choices)
+    # update chunk choices
     updateSelectInput(
-      inputId = "selected_chuck",
-      label = "AI generated code (chuck no.)",
-      choices = 1:length(logs$code_history),
+      inputId = "selected_chunk",
+      label = "AI generated code:",
+      choices = choices,
       selected = logs$id
-    )
-
-    updateSelectInput(
-      inputId = "selected_chuck_report",
-      label = "Code chunks to include:",
-      selected = "All",
-      choices = c(
-        "All",
-        "Remove error",
-        as.character(1:length(logs$code_history))
-      )
     )
 
 
@@ -757,16 +748,16 @@ app_server <- function(input, output, session) {
     updateCheckboxInput(
       session = session,
       inputId = "continue",
-      label = "Contine from this chuck",
+      label = "Contine from this chunk",
       value = FALSE
     )
   })
 
   # change code when past code is selected.
-  observeEvent(input$selected_chuck, {
+  observeEvent(input$selected_chunk, {
     req(run_result())
 
-    id <- as.integer(input$selected_chuck)
+    id <- as.integer(input$selected_chunk)
     logs$code <- logs$code_history[[id]]$code
     logs$raw <- logs$code_history[[id]]$raw
     updateTextInput(
@@ -1081,26 +1072,28 @@ app_server <- function(input, output, session) {
 
 
   observeEvent(input$submit_button, {
+    choices <- 1:length(logs$code_history)
+    names(choices) <- paste0("Chunk #", choices)
     updateSelectInput(
-      inputId = "selected_chuck_report",
-      label = "Code chunks to include (Use backspace to delete):",
-      selected = "Chucks without errors",
+      inputId = "selected_chunk_report",
+      label = "Chunks to include (Use backspace to delete):",
+      selected = "All chunks without errors",
       choices = c(
-        "All Chucks",
-        "Chucks without errors",
-        as.character(1:length(logs$code_history))
+        "All chunks",
+        "All chunks without errors",
+        choices
       )
     )
 
   })
 
-  # collect all RMarkdown chucks
+  # collect all RMarkdown chunks
   Rmd_total <- reactive({
 
 
   Rmd_script <- ""
 
-  # if first chuck
+  # if first chunk
   Rmd_script <- paste0(
     Rmd_script,
     # Get the data from the params list-----------
@@ -1152,10 +1145,10 @@ app_server <- function(input, output, session) {
     )
   }
 
-  #------------------Add selected chucks
-  if("All Chucks" %in% input$selected_chuck_report) {
+  #------------------Add selected chunks
+  if("All chunks" %in% input$selected_chunk_report) {
       ix <- 1:length(logs$code_history)
-  } else if("Chucks without errors" %in% input$selected_chuck_report) {
+  } else if("All chunks without errors" %in% input$selected_chunk_report) {
     ix <- c()
     for (i in 1:length(logs$code_history)) {
       if(!logs$code_history[[i]]$error) {
@@ -1163,7 +1156,7 @@ app_server <- function(input, output, session) {
       }
     }
   } else {  # selected
-    ix <- as.integer(input$selected_chuck_report)
+    ix <- as.integer(input$selected_chunk_report)
   }
 
   for (i in ix) {
@@ -1174,17 +1167,17 @@ app_server <- function(input, output, session) {
 
 
 
-  # Markdown chuck for the current request
-  Rmd_chuck <- reactive({
+  # Markdown chunk for the current request
+  Rmd_chunk <- reactive({
     req(openAI_response()$cmd)
     req(openAI_prompt())
 
     Rmd_script <- ""
     Rmd_script <- paste0(
       Rmd_script,
-      # Get the data from the params list for every chuck-----------
+      # Get the data from the params list for every chunk-----------
       # Do not change this without changing the output$Rmd_source function
-      # this chuck is removed for local knitting.
+      # this chunk is removed for local knitting.
       "```{R, echo = FALSE}\n",
       "df <- params$df\n",
       "```\n"
@@ -1219,7 +1212,7 @@ app_server <- function(input, output, session) {
       "\n"
     )
 
-    # R Markdown code chuck----------------------
+    # R Markdown code chunk----------------------
     #if error when running the code, do not run
     if (code_error() == TRUE) {
       Rmd_script <- paste0(
@@ -1279,8 +1272,8 @@ app_server <- function(input, output, session) {
    )
   })
 
-  output$rmd_chuck_output <- renderText({
-    req(Rmd_chuck())
+  output$rmd_chunk_output <- renderText({
+    req(Rmd_chunk())
     Rmd_total()
   })
 
@@ -1311,7 +1304,7 @@ app_server <- function(input, output, session) {
         date(), "\"\n",
         "output: html_document\n",
         "---\n",
-        # this chuck is not needed when they download the Rmd and knit locally
+        # this chunk is not needed when they download the Rmd and knit locally
         gsub(
           "```\\{R, echo = FALSE\\}\ndf <- params\\$df\n```\n",
           "", 
@@ -1361,7 +1354,7 @@ app_server <- function(input, output, session) {
           "\n\n### "
         )
 
-        # R Markdown code chuck----------------------
+        # R Markdown code chunk----------------------
 
         # Add R code
         Rmd_script <- paste(
@@ -1683,7 +1676,7 @@ output$answer <- renderText({
 
   output$ggpairs <- renderPlot({
     df <- current_data()
-    
+
     withProgress(message = "Running the code ...", {
       incProgress(0.3)
 
@@ -1704,26 +1697,6 @@ output$answer <- renderText({
   })
 
 
-  observeEvent(input$tab == "About", {
-    all <- .packages(all.available = TRUE)
-    all <- sapply(
-      all,
-      function(x) paste(x, paste0(packageVersion(x), collapse = "."))
-    )
-    all <- unname(all)
-    all <- c("", all)
-    updateSelectizeInput(
-      session = session,
-      inputId = "installed_packages",
-      label = paste0(
-        "Search for installed packages ( ",
-        length(all), 
-        " total)"
-      ),
-      choices = all,
-      selected = NULL
-    )
-  })
 
   output$slava_ukraini <- renderUI({
     if (input$submit_button == 0 && input$ask_button == 0) {
