@@ -1696,6 +1696,26 @@ output$answer <- renderText({
     h4(paste("RTutor Version", release))
   })
 
+ output$package_list <- renderUI({
+    all <- .packages(all.available = TRUE)
+    all <- sapply(
+      all,
+      function(x) paste(x, paste0(packageVersion(x), collapse = "."))
+    )
+    all <- unname(all)
+    #all <- c("", all)
+
+    selectInput(
+      inputId = "installed_packages",
+      label = paste0(
+        "Search for installed packages ( ",
+        length(all),
+        " total)"
+      ),
+      choices = all,
+      selected = NULL
+    )
+  })
 
 
   output$slava_ukraini <- renderUI({
