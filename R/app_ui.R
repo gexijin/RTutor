@@ -44,8 +44,16 @@ app_ui <- function(request) {
         sidebarLayout(
           sidebarPanel(
             uiOutput("timer_ui"),
-            textOutput("selected_dataset"),
-            p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>")),
+            fluidRow(
+              column(
+                width = 6,
+                textOutput("selected_dataset")
+              ),
+              column(
+                width = 6,
+p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>"))
+              )
+            ),
             fluidRow(
               column(
                 width = 6,

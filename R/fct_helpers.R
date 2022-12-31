@@ -22,6 +22,7 @@ default_temperature <- 0.1
 pre_text <- "Generate R code, not R Markdown. "
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
+max_data_points <- 10000  # max number of data points for interactive plot
 
 
 
