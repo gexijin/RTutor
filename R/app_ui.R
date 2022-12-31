@@ -24,7 +24,8 @@ app_ui <- function(request) {
         div(
           id = "load_message",
           h2("Talk to your data via AI"),
-          h3("No warranty. For academic & non-profit organization only.")
+          h3("No warranty. For academic & non-profit organization only."),
+          h3("Loading ... ...")
         ),
         uiOutput("use_heyshiny"),
         # move notifications and progress bar to the center of screen
