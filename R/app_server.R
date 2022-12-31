@@ -1002,29 +1002,30 @@ app_server <- function(input, output, session) {
   current_data <- reactive({
     req(input$select_data)
 
-    # otherwise built-in data is unavailable when running from R package.
-    library(tidyverse)
-
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
       df <- NULL #as.data.frame("No data selected or uploaded.")
     } else {
+      # otherwise built-in data is unavailable when running from R package.
+      library(tidyverse)
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
     # This updates the data by running hte entire code one more time.
-    if (code_error() == FALSE && !is.null(logs$code)){
-      withProgress(message = "Updating values ...", {
-        incProgress(0.4)
-        try(
-          eval(
-            parse(
-              text =  clean_cmd(logs$code, input$select_data)
-            )
-          ),
-        )
-      })
+    if(input$submit_button != 0) {
+      if (code_error() == FALSE && !is.null(logs$code)){
+        withProgress(message = "Updating values ...", {
+          incProgress(0.4)
+          try(
+            eval(
+              parse(
+                text =  clean_cmd(logs$code, input$select_data)
+              )
+            ),
+          )
+        })
+      }
     }
     return(df)
   })

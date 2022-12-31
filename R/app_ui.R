@@ -62,7 +62,6 @@ fluidPage(
         rows = 8, ""
       ),
 
-      br(), br(),
       fluidRow(
         column(
           width = 6,
