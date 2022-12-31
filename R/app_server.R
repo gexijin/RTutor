@@ -901,7 +901,7 @@ app_server <- function(input, output, session) {
   # must run the code again.
   output$result_plot <- renderPlot({
     req(!code_error())
-      withProgress(message = "Plotting ...", {
+      withProgress(message = "Generating a plot ...", {
         incProgress(0.4)
         try(
           eval(
@@ -1735,9 +1735,6 @@ output$answer <- renderText({
         }
       }
     }
-
-
-
     return(df)
   })
 
