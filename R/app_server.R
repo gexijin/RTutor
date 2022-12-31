@@ -732,7 +732,7 @@ app_server <- function(input, output, session) {
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
-    
+
     choices <- 1:length(logs$code_history)
     names(choices) <- paste0("Chunk #", choices)
     # update chunk choices
@@ -742,7 +742,6 @@ app_server <- function(input, output, session) {
       choices = choices,
       selected = logs$id
     )
-
 
     # turn off continue button
     updateCheckboxInput(
@@ -755,7 +754,7 @@ app_server <- function(input, output, session) {
 
   # change code when past code is selected.
   observeEvent(input$selected_chunk, {
-    req(run_result())
+    #req(run_result())
 
     id <- as.integer(input$selected_chunk)
     logs$code <- logs$code_history[[id]]$code
@@ -836,7 +835,7 @@ app_server <- function(input, output, session) {
   # Sometimes returns NULL, even when code run fine. Especially when
   # a base R plot is generated.
   run_result <- reactive({
-    req(openAI_response()$cmd)
+    req(logs$code)
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
@@ -901,16 +900,17 @@ app_server <- function(input, output, session) {
   # must run the code again.
   output$result_plot <- renderPlot({
     req(!code_error())
-      withProgress(message = "Generating a plot ...", {
-        incProgress(0.4)
-        try(
-          eval(
-            parse(
-              text =  clean_cmd(logs$code, input$select_data)
-            )
-          ),
+    req(logs$code)
+    withProgress(message = "Generating a plot ...", {
+      incProgress(0.4)
+      try(
+        eval(
+          parse(
+            text =  clean_cmd(logs$code, input$select_data)
+          )
         )
-      })
+      )
+    })
   })
 
   output$result_plotly <- plotly::renderPlotly({
@@ -958,7 +958,6 @@ app_server <- function(input, output, session) {
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
     req(!code_error())
-
     # if  ggplot2, and it is not already an interactive plot, show
     if (grepl("ggplot", paste(openAI_response()$cmd, collapse = " ")) &&
       !is_interactive_plot()
@@ -1002,6 +1001,7 @@ app_server <- function(input, output, session) {
   # The current data, just for showing.
   current_data <- reactive({
     req(input$select_data)
+
     # otherwise built-in data is unavailable when running from R package.
     library(tidyverse)
 
@@ -1014,7 +1014,7 @@ app_server <- function(input, output, session) {
     }
 
     # This updates the data by running hte entire code one more time.
-    if (code_error() == FALSE){
+    if (code_error() == FALSE && !is.null(logs$code)){
       withProgress(message = "Updating values ...", {
         incProgress(0.4)
         try(
