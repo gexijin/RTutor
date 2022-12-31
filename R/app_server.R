@@ -887,6 +887,7 @@ app_server <- function(input, output, session) {
   # just capture the screen output
   output$console_output <- renderText({
     req(!code_error())
+    req(logs$code)
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
       out <- capture.output(
@@ -1002,29 +1003,30 @@ app_server <- function(input, output, session) {
   current_data <- reactive({
     req(input$select_data)
 
-    # otherwise built-in data is unavailable when running from R package.
-    library(tidyverse)
-
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
       df <- NULL #as.data.frame("No data selected or uploaded.")
     } else {
+      # otherwise built-in data is unavailable when running from R package.
+      library(tidyverse)
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
     # This updates the data by running hte entire code one more time.
-    if (code_error() == FALSE && !is.null(logs$code)){
-      withProgress(message = "Updating values ...", {
-        incProgress(0.4)
-        try(
-          eval(
-            parse(
-              text =  clean_cmd(logs$code, input$select_data)
-            )
-          ),
-        )
-      })
+    if(input$submit_button != 0) {
+      if (code_error() == FALSE && !is.null(logs$code)){
+        withProgress(message = "Updating values ...", {
+          incProgress(0.4)
+          try(
+            eval(
+              parse(
+                text =  clean_cmd(logs$code, input$select_data)
+              )
+            ),
+          )
+        })
+      }
     }
     return(df)
   })
@@ -1645,7 +1647,7 @@ output$answer <- renderText({
     df <- ggpairs_data()
     req(input$table1_strata)
     options(width = 3000)
-    withProgress(message = "Running ...", {
+    withProgress(message = "Calculating table1 ...", {
       incProgress(0.3)
       ix <- match(input$table1_strata, colnames(df))
       res <- capture.output(
@@ -1661,7 +1663,7 @@ output$answer <- renderText({
   })
 
   output$distribution_category <- renderPlot({
-    withProgress(message = "Running the code ...", {
+    withProgress(message = "Barplots of categorical variables ...", {
       incProgress(0.3)
       DataExplorer::plot_bar(current_data())
     })
@@ -1671,21 +1673,21 @@ output$answer <- renderText({
   )
 
   output$distribution_numeric <- renderPlot({
-    withProgress(message = "Running the code ...", {
+    withProgress(message = "Creating histograms ...", {
       incProgress(0.3)
       DataExplorer::plot_histogram(current_data())
     })
   })
 
   output$qq_numeric <- renderPlot({
-    withProgress(message = "Running the code ...", {
+    withProgress(message = "Generating QQ plots ...", {
       incProgress(0.3)
       DataExplorer::plot_qq(current_data())
     })
   })
 
   output$corr_map <- renderPlot({
-    withProgress(message = "Running the code ...", {
+    withProgress(message = "Generating correlation map ...", {
       incProgress(0.3)
       #GGally::ggpairs(current_data())
       df <- current_data()
@@ -1749,7 +1751,6 @@ output$answer <- renderText({
       fluidRow(
         column(
           width = 6,
-
           selectInput(
             inputId = "ggpairs_variables",
             label = "Select variables",
@@ -1779,9 +1780,9 @@ output$answer <- renderText({
     req(length(input$ggpairs_variables) > 0)
     req(ggpairs_data())
 
-    withProgress(message = "Running the code ...", {
+    withProgress(message = "Running ggpairs ...", {
       incProgress(0.3)
-      df <- ggpairs_data()
+      df <- as.data.frame(ggpairs_data())
       if(input$ggpairs_variables_color != "") {
         GGally::ggpairs(
           df[, input$ggpairs_variables],
