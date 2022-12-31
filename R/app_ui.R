@@ -568,7 +568,7 @@ golem_add_external_resources <- function() {
 
   tags$head(
     favicon(
-      ico = "favicon",
+      ico = "icon",
       rel = "shortcut icon",
       resources_path = "www",
       ext = "png"
