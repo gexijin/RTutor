@@ -58,24 +58,6 @@ app_server <- function(input, output, session) {
     }
   })
 
-  # Switch to Main tab when Submit button is clicked
-  observeEvent(input$submit_button == 0, {
-    updateTabsetPanel(
-      session,
-      "tabs",
-      selected = "Data"
-    )
-  })
-
-  # Switch to Main tab when Submit button is clicked
-  observeEvent(input$submit_button, {
-    updateTabsetPanel(
-      session,
-      "tabs",
-      selected = "Main"
-    )
-  })
-
     welcome_modal <- shiny::modalDialog(
     title = "Terms & Conditions",
     tags$p(
@@ -134,7 +116,7 @@ app_server <- function(input, output, session) {
     speech <- input$hey_cmd
     message(speech)
 
-    if (input$tabs == "Main")    {
+    if (input$tabs == "Home")    {
       if (grepl("^continue", speech)) {
 
         speech <- paste0(
@@ -149,7 +131,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = speech
       )
-    } else if (input$tabs == "AMA") {
+    } else if (input$tabs == "Ask") {
 
       speech <- paste0(
         input$input_text, # current prompt
@@ -222,7 +204,7 @@ app_server <- function(input, output, session) {
           txt <- "Dataset: uploaded."
         }
       } else {
-        txt <- paste0("Dataset: ", input$select_data, ". To switch, click Reset.")
+        txt <- paste0("Dataset: ", input$select_data)
       }
 
       return(txt)
@@ -959,9 +941,12 @@ app_server <- function(input, output, session) {
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
     req(!code_error())
-    # if  ggplot2, and it is not already an interactive plot, show
-    if (grepl("ggplot", paste(openAI_response()$cmd, collapse = " ")) &&
-      !is_interactive_plot()
+    txt <- paste(openAI_response()$cmd, collapse = " ")
+    
+    if (grepl("ggplot", txt) && # if  ggplot2, and it is 
+      !is_interactive_plot() && #not already an interactive plot, show
+       # if there are too many data points, don't do the interactive
+      !(dim(current_data()) > max_data_points && grepl("geom_point|geom_jitter", txt))
     ) {
     shinyjs::showElement(id = "make_ggplot_interactive")
     }
@@ -1092,21 +1077,19 @@ app_server <- function(input, output, session) {
   # collect all RMarkdown chunks
   Rmd_total <- reactive({
 
-
   Rmd_script <- ""
 
   # if first chunk
   Rmd_script <- paste0(
     Rmd_script,
     # Get the data from the params list-----------
-    "Developed by [Steven Ge](https://twitter.com/StevenXGe) using 
-    API access (via the 
-    [openai](https://cran.rstudio.com/web/packages/openai/index.html)
-    package ) to 
+    "\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) using API access via the 
+[openai](https://cran.rstudio.com/web/packages/openai/index.html)
+    package  to 
     [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
     language_model,
     "\" model.",
-    "\n\nRTutor Website: [http://RTutor.ai](http://RTutor.ai)",
+    "\n\nRTutor Website: [https://RTutor.ai](https://RTutor.ai)",
     "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)\n"
   )
 
