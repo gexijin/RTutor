@@ -18,20 +18,17 @@ app_ui <- function(request) {
     navbarPage(
       "RTutor",
     #  windowTitle = "RTutor",
-      id = "navbar",
-
+      id = "tabs",
       tabPanel(
-        title = "Main",
-        uiOutput("use_heyshiny"),
-
+        title = "Home",
         div(
           id = "load_message",
-          h2("Loading ..."),
-          h3("No warranty. For academic & non-profit org. only.")
+          h2("Talk to your data via AI"),
+          h3("No warranty. For academic & non-profit organization only.")
         ),
-
+        uiOutput("use_heyshiny"),
         # move notifications and progress bar to the center of screen
-        tags$head( 
+        tags$head(
           tags$style(
             HTML(".shiny-notification {
                   position:fixed;
@@ -142,20 +139,15 @@ app_ui <- function(request) {
                 ),
                 uiOutput("plot_ui"),
                 br(),
-                uiOutput("tips_interactive")
-
+                uiOutput("tips_interactive"),
+                hr(),
+                textOutput("data_size"),
+                DT::dataTableOutput("data_table_DT"),
+                verbatimTextOutput("data_structure"),
+                verbatimTextOutput("data_summary")
           )
         )
       ), #tabPanel
-
-      tabPanel(
-        title = "Data",
-        value = "Data",
-        textOutput("data_size"),
-        DT::dataTableOutput("data_table_DT"),
-        verbatimTextOutput("data_structure"),
-        verbatimTextOutput("data_summary")
-      ),
 
       tabPanel(
         title = "Report",
@@ -494,13 +486,11 @@ app_ui <- function(request) {
 
 
         uiOutput("session_info")
-      ),
-
-      tags$head(includeHTML(app_sys("app", "www", "ga.html")))
-
-      ,tags$head(includeScript(app_sys("app", "www", "ga.js")))
-      # old covid tracker called "virus"
-    )
+      )
+    ),
+    tags$head(includeHTML(app_sys("app", "www", "ga.html")))
+    ,tags$head(includeScript(app_sys("app", "www", "ga.js")))
+    # old covid tracker called "virus"
   )
 }
 

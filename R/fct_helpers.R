@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.7.3" # RTutor
+release <- "0.7.5" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 min_query_length <- 6  # minimum # of characters

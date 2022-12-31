@@ -58,24 +58,6 @@ app_server <- function(input, output, session) {
     }
   })
 
-  # Switch to Main tab when Submit button is clicked
-  observeEvent(input$submit_button == 0, {
-    updateTabsetPanel(
-      session,
-      "tabs",
-      selected = "Data"
-    )
-  })
-
-  # Switch to Main tab when Submit button is clicked
-  observeEvent(input$submit_button, {
-    updateTabsetPanel(
-      session,
-      "tabs",
-      selected = "Main"
-    )
-  })
-
     welcome_modal <- shiny::modalDialog(
     title = "Terms & Conditions",
     tags$p(
@@ -134,7 +116,7 @@ app_server <- function(input, output, session) {
     speech <- input$hey_cmd
     message(speech)
 
-    if (input$tabs == "Main")    {
+    if (input$tabs == "Home")    {
       if (grepl("^continue", speech)) {
 
         speech <- paste0(
@@ -149,7 +131,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = speech
       )
-    } else if (input$tabs == "AMA") {
+    } else if (input$tabs == "Ask") {
 
       speech <- paste0(
         input$input_text, # current prompt
