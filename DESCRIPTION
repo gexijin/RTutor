@@ -23,6 +23,7 @@ Imports:
     DataExplorer,
     corrplot,
     tableone,
+    GGally,
     janitor
 Remotes:
     github::jcrodriguez1989/heyshiny
