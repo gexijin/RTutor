@@ -214,8 +214,9 @@ fluidPage(
             tabPanel(
               title = "GGpairs",
               uiOutput("ggpairs_inputs"),
-              plotOutput("ggpairs"),
-              h4("Please wait for a few seconds ... ...")
+              h4("Please wait for 30 seconds."),
+              plotOutput("ggpairs")
+
             )
 
           )
