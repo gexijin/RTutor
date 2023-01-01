@@ -319,7 +319,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
           )
         ),
         img(
-          src = app_sys("app", "www", "tutor.png"),
+          src = "www/tutor.png", #app_sys("app", "www", "tutor.png"),
           width = "344",
           height = "309"
         )
