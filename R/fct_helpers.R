@@ -227,29 +227,11 @@ Limit ploting to -10000 to 10000."
 )
 
 demos_rna_seq <- c(
-  'Total Counts' = "Convert the first column as row names and delete it.
- Plot the column sums.",
-  'Boxplot, raw' = "Convert the first column as row names and delete it.
-   Create a bloxplot of all columns.",
-  'Boxplot, log' = "Convert the first column as row names and delete it. 
-  Add 1 to all numbers and then conduct log transformation.
-Create a bloxplot of all columns.",
-  'Heatmap of variable genes' = "Each row represents a gene. Each column is a sample.
-Make the first column as row names, then delete it.
-Remove genes with sum less than 10. 
-Add 1 to all numbers.
-Log transform using base 2.
-Rank genes by standard deviations in descending order. 
-Convert data as matrix.
-Subtract row means from all rows.
-Create a heatmap of the top 50 genes using red and green colors.",
-'DESeq2' = "Each row represents a gene. Each column is a sample.
-Make the first column as row names, then delete it.
-Remove rows with sum less than 10.
-Then use DESeq2 to identify differentially expressed genes. 
-The first three columns are control samples. The last three are mutant. 
-Show me the numbers of up and down-regulated genes based on FDR < 0.05 
-and log fold change > 1 or less than -1."
+  'Total Counts' = "Convert the first column as row names and delete it. Plot the column sums.",
+  'Boxplot, raw' = "Convert the first column as row names and delete it. Create a bloxplot of all columns.",
+  'Boxplot, log' = "Convert the first column as row names and delete it. Add 1 to all numbers and then conduct log transformation. Create a bloxplot of all columns.",
+  'Heatmap of variable genes' = "Each row represents a gene. Each column is a sample. Make the first column as row names, then delete it. Remove genes with sum less than 10. Add 1 to all numbers. Log transform using base 2. Rank genes by standard deviations in descending order. Convert data as matrix. Subtract row means from all rows. Create a heatmap of the top 50 genes using red and green colors.",
+'DESeq2' = "Each row represents a gene. Each column is a sample. Make the first column as row names, then delete it. Remove rows with sum less than 10. Then use DESeq2 to identify differentially expressed genes. The first three columns are control samples. The last three are mutant. Show me the numbers of up and down-regulated genes based on FDR < 0.05 and log fold change > 1 or less than -1."
 )
 
 

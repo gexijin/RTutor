@@ -24,8 +24,7 @@ app_server <- function(input, output, session) {
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
   # load demo data when clicked
-  observe({
-    req(input$demo_prompt)
+  observeEvent(input$demo_prompt, {
     req(input$select_data)
     if (input$demo_prompt != demos_mpg[1]) {
       updateTextInput(
@@ -39,7 +38,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use demo data. Then just ask questions or request analyses in plain English. See examples above. For different solutions, try again with the same request. Code works correctly some of the times. To use voice input, click Settings."
+"Upload a file or use demo data. Then just ask questions or request analyses in plain English. For general questions, briefly explain the data first, especially the relevant columns. See examples above. If unsuccessful, try again with the same request or ask differently. Code works correctly some of the times. To use voice input, click Settings."
       )
     }
   })
@@ -52,13 +51,12 @@ app_server <- function(input, output, session) {
     )
   }, ignoreInit = TRUE, once = TRUE)
 
-  observe({
-    if (input$submit_button > 0) {
-      updateTextInput(session, "submit_button", label = "Re-submit")
-    }
+  observeEvent(input$submit_button, {
+    updateTextInput(session, "submit_button", label = "Re-submit")
+    shinyjs::hideElement(id = "Intro")
   })
 
-    welcome_modal <- shiny::modalDialog(
+  welcome_modal <- shiny::modalDialog(
     title = "Terms & Conditions",
     tags$p(
       "No guarantee for the correctness of the generated code."
@@ -639,7 +637,7 @@ app_server <- function(input, output, session) {
 
 
   # show a warning message when reached 10c, 20c, 30c ...
-  observe({
+  observeEvent(input$submit_button, {
     req(file.exists(on_server))
     req(!openAI_response()$error)
 
@@ -879,19 +877,19 @@ app_server <- function(input, output, session) {
     req(logs$code)
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
-      #try(
-      #  out <- capture.output(eval(
-      #    parse(
-      #      text =  clean_cmd(logs$code, input$select_data)
-      #    )
-      #    )
-      # )
-      #)
+      try(
+        out <- capture.output(eval(
+          parse(
+            text = clean_cmd(logs$code, input$select_data)
+          )
+          )
+       )
+      )
 
       # this works most of the times, but not when cat is used.
-      out <- capture.output(
-          run_result()
-      )
+      #out <- capture.output(
+      #    run_result()
+      #)
       paste(out, collapse = "\n")
     })
   })
@@ -954,7 +952,7 @@ app_server <- function(input, output, session) {
     )
   })
 
-  observe({
+  observeEvent(input$submit_button, {
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
     req(!code_error())
@@ -1474,10 +1472,8 @@ app_server <- function(input, output, session) {
 #  Q and A
 #______________________________________________________________________________
   # load demo data when clicked
-  observe({
-    req(input$demo_question)
-
-    if(input$demo_question != demo_questions[1]) {
+  observeEvent(input$demo_question,{
+     if(input$demo_question != demo_questions[1]) {
       updateTextInput(
         session,
         "ask_question",
@@ -1488,7 +1484,7 @@ app_server <- function(input, output, session) {
         session,
         "ask_question",
         value = "",
-        placeholder = "Ask RTutor anything statistics. See examples. Enable voice naration in Settings."
+        placeholder = "Ask me anything statistics. See examples. Enable voice naration in Settings."
       )
     }
   })
