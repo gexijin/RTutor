@@ -125,7 +125,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                     width = 6,
                     h5(
                       "Hi I'm your statistics tutor.  
-                      As you can see from my selfie, I am not perfect. 
+                      As you can see from the selfie I drew, I am not perfect. 
                       Still in college. But I try to be helpful.  
                       I did finish my required reading:
                       millions of books, billions of web pages, 
