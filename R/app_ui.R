@@ -278,22 +278,13 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             ),
             plotOutput("ggpairs")
           )
-
         )
-
-
-
       ),
 
       tabPanel(
         title = "Ask",
         value = "Ask",
         br(),
-        #img(
-        #  src = "inst/app/www/tutor.png",
-        #  width = "688",
-        #  height = "618"
-        #),
         fluidRow(
           column(
             width = 7,
@@ -327,6 +318,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             }"
           )
         ),
+        img(
+          src = app_sys("app", "www", "tutor.png"),
+          width = "344",
+          height = "309"
+        )
       ),
 
       tabPanel(
