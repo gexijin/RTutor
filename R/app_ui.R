@@ -378,13 +378,20 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         ),
         p("NO WARRANTY! Some of the scripts run but yield incorrect result. 
         Please use the auto-generated code as a starting 
-        point for further refinement and validation."),
-
-        p("OpenAI's models are accessed via API, which is not free. 
-        Please do not abuse it. Otherwise, this service might disappear."),
+        point for further refinement and validation.
+          The RTutor.ai website and the 
+          source code (CC BY-NC 3.0 license) are freely 
+          availble for academic and 
+          non-profit organizations only. 
+          Commercial use beyond testing please contact ",
+        a(
+          "gexijin@gmail.com.",
+          href = "mailto:gexijin@gmail.com?Subject=RTutor"
+          )
+        ),
 
         hr(),
-        p(" Entirely personal project by",
+        p(" Personal project by",
           a(
             "Steven Ge.",
             href = "https://twitter.com/StevenXGe",

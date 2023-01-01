@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.7.6" # RTutor
+release <- "0.7.7" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 rna_seq <- "RNA-Seq"  # RNA-Seq read counts
