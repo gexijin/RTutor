@@ -115,7 +115,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   column(
                     width = 6,
                     img(
-                      src = "www/tutor.png",
+                      src = "www/tutor.jpg",
                       width = "240",
                       height = "216"
                     ),
@@ -316,7 +316,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         title = "Ask",
         value = "Ask",
         img(
-          src = "www/tutor.png", 
+          src = "www/tutor.jpg", 
           width = "344",
           height = "309"
         ),
