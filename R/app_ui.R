@@ -109,51 +109,82 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
 
           mainPanel(
             shinyjs::useShinyjs(),
-                br(),
+            div(
+              id = "Intro",
                 fluidRow(
                   column(
                     width = 6,
-                    selectInput(
-                      inputId = "selected_chunk",
-                      label = "AI generated code:",
-                      selected = NULL,
-                      choices = NULL
-                    )
+                    img(
+                      src = "www/tutor.png",
+                      width = "240",
+                      height = "216"
+                    ),
+                    align = 'right'
                   ),
                   column(
                     width = 6,
-                    style = "margin-top: 10px;",
-                    checkboxInput(
-                      inputId = "continue",
-                      label = "Contine from this chunk",
-                      value = FALSE
+                    h5(
+                      "Hi I'm your statistics tutor.  
+                      As you can see from my selfie, I am not perfect. 
+                      Still in college. But I try to be helpful.  
+                      I did finish my required reading:
+                      millions of books, billions of web pages, 
+                      and hundreds of millions of code repositories. 
+                      I'm not being hyperbolic. Just bragging..."
                     ),
-                    tippy::tippy_this(
-                      "continue",
-                      "If selected, the current R scripts will be kept in the next questions. We build upon the code chunk.",
-                      theme = "light-border"
-                    )
+                    align = 'left'
                   )
                 ),
-                verbatimTextOutput("openAI"),
-                uiOutput("error_message"),
-                h4("Results:"),
+                hr()
+            ),
 
-                # shows error message in local machine, but not on the server
-                verbatimTextOutput("console_output"),
-                checkboxInput(
-                  inputId = "make_ggplot_interactive",
-                  label = NULL,
-                  value = FALSE
+            div(
+              id = "Results",
+              fluidRow(
+                column(
+                  width = 6,
+                  selectInput(
+                    inputId = "selected_chunk",
+                    label = "AI generated code:",
+                    selected = NULL,
+                    choices = NULL
+                  )
                 ),
-                uiOutput("plot_ui"),
-                br(),
-                uiOutput("tips_interactive"),
-                hr(),
-                textOutput("data_size"),
-                DT::dataTableOutput("data_table_DT"),
-                verbatimTextOutput("data_structure"),
-                verbatimTextOutput("data_summary")
+                column(
+                  width = 6,
+                  style = "margin-top: 10px;",
+                  checkboxInput(
+                    inputId = "continue",
+                    label = "Contine from this chunk",
+                    value = FALSE
+                  ),
+                  tippy::tippy_this(
+                    "continue",
+                    "If selected, the current R scripts will be kept in the next questions. We build upon the code chunk.",
+                    theme = "light-border"
+                  )
+                )
+              ),
+              verbatimTextOutput("openAI"),
+              uiOutput("error_message"),
+              h4("Results:"),
+
+              # shows error message in local machine, but not on the server
+              verbatimTextOutput("console_output"),
+              checkboxInput(
+                inputId = "make_ggplot_interactive",
+                label = NULL,
+                value = FALSE
+              ),
+              uiOutput("plot_ui"),
+              br(),
+              uiOutput("tips_interactive"),
+              hr(),
+            ),
+            textOutput("data_size"),
+            DT::dataTableOutput("data_table_DT"),
+            verbatimTextOutput("data_structure"),
+            verbatimTextOutput("data_summary")
           )
         )
       ), #tabPanel
@@ -284,7 +315,12 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
       tabPanel(
         title = "Ask",
         value = "Ask",
-        br(),
+        img(
+          src = "www/tutor.png", 
+          width = "344",
+          height = "309"
+        ),
+        br(), br(),
         fluidRow(
           column(
             width = 7,
@@ -317,11 +353,6 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               font-size: 16px
             }"
           )
-        ),
-        img(
-          src = "www/tutor.png", #app_sys("app", "www", "tutor.png"),
-          width = "344",
-          height = "309"
         )
       ),
 
