@@ -11,7 +11,6 @@ License: MIT + file LICENSE
 Imports: 
     config,
     golem,
-    tidyverse,
     tippy,
     gridExtra,
     openai,

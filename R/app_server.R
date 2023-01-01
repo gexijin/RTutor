@@ -271,6 +271,12 @@ app_server <- function(input, output, session) {
         choices = demos_diamond,
         label = "Example requests:"
       )
+    } else if (input$select_data == rna_seq) {
+      selectInput(
+        inputId = "demo_prompt",
+        choices = demos_rna_seq,
+        label = "Example requests:"
+      )
     } else {
       return(NULL)
     }
@@ -840,6 +846,7 @@ app_server <- function(input, output, session) {
   # Error when run the generated code?
   code_error <- reactive({
     error_status <- FALSE
+    req(input$submit_button != 0)
 
     # if error returns true, otherwise 
     #  that slot does not exist, returning false.
@@ -872,6 +879,16 @@ app_server <- function(input, output, session) {
     req(logs$code)
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
+      #try(
+      #  out <- capture.output(eval(
+      #    parse(
+      #      text =  clean_cmd(logs$code, input$select_data)
+      #    )
+      #    )
+      # )
+      #)
+
+      # this works most of the times, but not when cat is used.
       out <- capture.output(
           run_result()
       )
@@ -981,8 +998,15 @@ app_server <- function(input, output, session) {
         )
       )
     }
-
   })
+
+  rna_seq_data <- reactive({
+    req(input$select_data == rna_seq)
+
+    df <- read.csv(app_sys("app", "www", "GSE37704.csv"))
+    return(df)
+  })
+
 
   # The current data, just for showing.
   current_data <- reactive({
@@ -992,6 +1016,8 @@ app_server <- function(input, output, session) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
       df <- NULL #as.data.frame("No data selected or uploaded.")
+    } else if(input$select_data == rna_seq){
+      df <- rna_seq_data()
     } else {
       # otherwise built-in data is unavailable when running from R package.
       library(tidyverse)
@@ -1362,6 +1388,10 @@ app_server <- function(input, output, session) {
           params <- list(
             df = user_data()$df
           )
+        } else if (input$select_data == rna_seq) {
+          params <- list(
+            df = rna_seq_data()
+          )
         } else if (input$select_data != no_data) {
           params <- list(
             df = eval(
@@ -1393,7 +1423,7 @@ app_server <- function(input, output, session) {
 #                                  8.
 #______________________________________________________________________________
 #
-#  Server rebooting every 2 hours; this gives a warning
+#  Server rebooting every 24 hours; this gives a warning
 #______________________________________________________________________________
 
   # Initialize the timer, 180 seconds

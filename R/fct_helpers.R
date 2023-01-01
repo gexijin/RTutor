@@ -11,9 +11,10 @@
 # Global variables
 ###################################################
 
-release <- "0.7.5" # RTutor
+release <- "0.7.6" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
+rna_seq <- "RNA-Seq"  # RNA-Seq read counts
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
@@ -118,6 +119,8 @@ clean_cmd <- function(cmd, selected_data){
   # if data is uploaded, add a line to get the data.
   if(selected_data == uploaded_data) {
     cmd <- c("df <- as.data.frame(user_data()$df)", cmd)
+  } else if (selected_data == rna_seq) {
+    cmd <- c("df <- as.data.frame(rna_seq_data())", cmd)
   } else if (selected_data != no_data) {
     cmd <- c(paste0("df <- as.data.frame(", selected_data, ")"), cmd)
   }
@@ -223,7 +226,31 @@ Limit ploting to -10000 to 10000."
 
 )
 
-
+demos_rna_seq <- c(
+  'Total Counts' = "Convert the first column as row names and delete it.
+ Plot the column sums.",
+  'Boxplot, raw' = "Convert the first column as row names and delete it.
+   Create a bloxplot of all columns.",
+  'Boxplot, log' = "Convert the first column as row names and delete it. 
+  Add 1 to all numbers and then conduct log transformation.
+Create a bloxplot of all columns.",
+  'Heatmap of variable genes' = "Each row represents a gene. Each column is a sample.
+Make the first column as row names, then delete it.
+Remove genes with sum less than 10. 
+Add 1 to all numbers.
+Log transform using base 2.
+Rank genes by standard deviations in descending order. 
+Convert data as matrix.
+Subtract row means from all rows.
+Create a heatmap of the top 50 genes using red and green colors.",
+'DESeq2' = "Each row represents a gene. Each column is a sample.
+Make the first column as row names, then delete it.
+Remove rows with sum less than 10.
+Then use DESeq2 to identify differentially expressed genes. 
+The first three columns are control samples. The last three are mutant. 
+Show me the numbers of up and down-regulated genes based on FDR < 0.05 
+and log fold change > 1 or less than -1."
+)
 
 
 
@@ -285,6 +312,11 @@ datasets <- c(datasets, uploaded_data)
 datasets <- move_front(datasets, uploaded_data)
 
 # append a dummy value, used when user do not use any data
+datasets <- c(datasets, rna_seq)
+# move it to 2nd place
+datasets <- move_front(datasets, rna_seq)
+
+# append a dummy value, used when user do not use any data
 datasets <- c(datasets, no_data)
 # move it to 2nd place
 datasets <- move_front(datasets, no_data)
@@ -294,12 +326,10 @@ datasets <- move_front(datasets, "diamonds")
 datasets <- move_front(datasets, "mpg")
 
 datasets <- setNames(datasets, datasets)
-names(datasets)[1] <- "mpg (examples)"
-names(datasets)[2] <- "diamonds (examples)"
 
-
-
-
+names(datasets)[match("mpg", datasets)] <- "mpg (examples)"
+names(datasets)[match("diamonds", datasets)] <- "diamonds (examples)"
+names(datasets)[match(rna_seq, datasets)] <- "RNA-Seq (examples)"
 
 
 
