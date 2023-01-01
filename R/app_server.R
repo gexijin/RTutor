@@ -879,19 +879,19 @@ app_server <- function(input, output, session) {
     req(logs$code)
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
-      #try(
-      #  out <- capture.output(eval(
-      #    parse(
-      #      text =  clean_cmd(logs$code, input$select_data)
-      #    )
-      #    )
-      # )
-      #)
+      try(
+        out <- capture.output(eval(
+          parse(
+            text = clean_cmd(logs$code, input$select_data)
+          )
+          )
+       )
+      )
 
       # this works most of the times, but not when cat is used.
-      out <- capture.output(
-          run_result()
-      )
+      #out <- capture.output(
+      #    run_result()
+      #)
       paste(out, collapse = "\n")
     })
   })

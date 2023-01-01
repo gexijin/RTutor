@@ -6,7 +6,7 @@ Authors@R:
            family = "Ge",
            role = c("aut", "cre"),
            email = "gexijin@email.com")
-Description: What the package does (one paragraph).
+Description: This package generates and tests R code from requests in English.
 License: MIT + file LICENSE
 Imports: 
     config,
