@@ -4,12 +4,14 @@
 \alias{prep_input}
 \title{Prepare User input.}
 \usage{
-prep_input(txt, selected_data)
+prep_input(txt, selected_data, df)
 }
 \arguments{
 \item{txt}{A string that stores the user input.}
 
 \item{selected_data}{Name of the dataset.}
+
+\item{df}{the data frame}
 }
 \value{
 Returns a cleaned up version, so that it could be sent to GPT.

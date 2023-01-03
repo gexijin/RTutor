@@ -492,7 +492,8 @@ app_server <- function(input, output, session) {
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
-    prep_input(input$input_text, input$select_data)
+    req(current_data())
+    prep_input(input$input_text, input$select_data, current_data())
   })
 
   openAI_response <- reactive({
@@ -801,12 +802,13 @@ app_server <- function(input, output, session) {
   # a base R plot is generated.
   run_result <- reactive({
     req(logs$code)
+    req(input$submit_button != 0)
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
         eval(
           parse(
-            text =  clean_cmd(logs$code, input$select_data)
+            text = clean_cmd(logs$code, input$select_data)
           )
         ),
         error = function(e) {
@@ -909,6 +911,7 @@ app_server <- function(input, output, session) {
 
   output$plot_ui <- renderUI({
     req(input$submit_button)
+    
     if (code_error() || input$submit_button == 0) {
       return()
     } else if (
@@ -935,12 +938,13 @@ app_server <- function(input, output, session) {
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
     req(!code_error())
+    req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
-    
+
     if (grepl("ggplot", txt) && # if  ggplot2, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
-      !(dim(current_data()) > max_data_points && grepl("geom_point|geom_jitter", txt))
+      !(dim(current_data()[1]) > max_data_points && grepl("geom_point|geom_jitter", txt))
     ) {
     shinyjs::showElement(id = "make_ggplot_interactive")
     }
@@ -949,6 +953,8 @@ app_server <- function(input, output, session) {
   is_interactive_plot <- reactive({
     # only true if the plot is interactive, natively.
     req(input$submit_button)
+    req(logs$code)
+    req(!code_error())
     if (
       grepl(
         "plotly|plot_ly|ggplotly",
@@ -988,7 +994,7 @@ app_server <- function(input, output, session) {
   # The current data, just for showing.
   current_data <- reactive({
     req(input$select_data)
-
+    
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
@@ -1003,20 +1009,27 @@ app_server <- function(input, output, session) {
 
     # This updates the data by running hte entire code one more time.
     if(input$submit_button != 0) {
-      if (code_error() == FALSE && !is.null(logs$code)){
+      if (code_error() == FALSE && !is.null(logs$code)) {
         withProgress(message = "Updating values ...", {
           incProgress(0.4)
           try(
             eval(
               parse(
-                text =  clean_cmd(logs$code, input$select_data)
+                text = clean_cmd(logs$code, input$select_data)
               )
             ),
           )
         })
       }
     }
-    return(df)
+
+    # sometimes no row is left after processing.
+    if(nrow(df) == 0) {
+      return(NULL)
+    } else {
+      return(df)
+    }
+
   })
 
   output$data_table_DT <- DT::renderDataTable({
@@ -1054,6 +1067,8 @@ app_server <- function(input, output, session) {
       collapse = "\n"
     )
   })
+
+
 
   #                                 7.
   #____________________________________________________________________________
@@ -1392,8 +1407,6 @@ app_server <- function(input, output, session) {
       })
     }
   )
-
-
 
 
 
@@ -1789,8 +1802,6 @@ output$answer <- renderText({
   },
   width = 1200,
   height = 1200)
-
-
 
 
 

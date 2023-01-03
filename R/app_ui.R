@@ -414,6 +414,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         h4("Update log:"),
         tags$ul(
           tags$li(
+            "v 0.8 1/3/2023. Add description of dataset."
+          ),
+          tags$li(
             "v 0.7.6 12/31/2022. Add RNA-seq data and example requests."
           ),
           tags$li(
