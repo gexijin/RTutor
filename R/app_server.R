@@ -1510,21 +1510,9 @@ app_server <- function(input, output, session) {
 
         # if uploaded, use that data
         req(input$select_data)
-        if (input$select_data == uploaded_data) {
+        if (input$select_data != no_data) {
           params <- list(
-            df = user_data()$df
-          )
-        } else if (input$select_data == rna_seq) {
-          params <- list(
-            df = rna_seq_data()
-          )
-        } else if (input$select_data != no_data) {
-          params <- list(
-            df = eval(
-              parse(
-                text = paste0("as.data.frame(", input$select_data, ")")
-              )
-            )
+            df = current_data()
           )
         }
 

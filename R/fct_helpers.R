@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.8" # RTutor
+release <- "0.8.1" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 rna_seq <- "RNA-Seq"  # RNA-Seq read counts
@@ -67,111 +67,108 @@ prep_input <- function(txt, selected_data, df) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
-  } else {
-    # if too short, do not send. 
-    if(nchar(txt) < min_query_length || nchar(txt) > max_query_length) {
-      return(NULL)
-    } else {
-      if (!is.null(selected_data)) {
-        if (selected_data != no_data) {
-          data_info <- " Use the df data frame. "
+  } 
+  # if too short, do not send. 
+  if(nchar(txt) < min_query_length || nchar(txt) > max_query_length) {
+    return(NULL)
+  }
 
-          numeric_index <- sapply(
-            df,
-            function(x) {
-              if (is.numeric(x)) {
-                return(TRUE)
-              } else {
-                return(FALSE)
-              }
-            }
-          )
+  if (!is.null(selected_data)) {
+    if (selected_data != no_data) {
+      data_info <- " Use the df data frame. "
 
-          numeric_var <- colnames(df)[numeric_index]
-          none_numeric_var <- colnames(df)[!numeric_index]
-
-          # variables mentioned in request
-          relevant_var <- sapply(
-            colnames(df),
-            function(x) {
-              # hwy. class
-              grepl(
-                paste0(
-                  " ", # proceeding space
-                  x,
-                  "[ |\\.|,]" # ending space, comma, or period
-                ),
-              txt
-              )
-            }
-          )
-
-          relevant_var <- colnames(df)[relevant_var]
-
-          if (length(relevant_var) > 0) {
-
-            # numeric variables-----------------------------
-            relevant_var_numeric <- intersect(relevant_var, numeric_var)
-            if (length(relevant_var_numeric) == 1) {
-              data_info <- paste0(
-                data_info,
-                "Note that ",
-                relevant_var_numeric,
-                " is a numeric variable. "
-              )
-            } else if (length(relevant_var_numeric) > 1) {
-              data_info <- paste0(
-                data_info,
-                "Note that ",
-                paste0(
-                  relevant_var_numeric[1:(length(relevant_var_numeric) - 1)],
-                  collapse = ", "
-                ),
-                " and ",
-                relevant_var_numeric[length(relevant_var_numeric)],
-                " are numeric variables. "
-              )
-            }
-
-            # Categorical variables-----------------------------
-            relevant_var_categorical <- intersect(relevant_var, none_numeric_var)
-            if (length(relevant_var_categorical) == 1) {
-              data_info <- paste0(
-                data_info,
-                "Note that ",
-                relevant_var_categorical,
-                " is a categorical variable. "
-              )
-            } else if (length(relevant_var_categorical) > 1) {
-              data_info <- paste0(
-                data_info,
-                "Note that ",
-                paste0(
-                  relevant_var_categorical[1:(length(relevant_var_categorical) - 1)],
-                  collapse = ", "
-                ),
-                " and ",
-                relevant_var_categorical[length(relevant_var_categorical)],
-                " are categorical variables. "
-              )
-            }
+      numeric_index <- sapply(
+        df,
+        function(x) {
+          if (is.numeric(x)) {
+            return(TRUE)
+          } else {
+            return(FALSE)
           }
-          txt <- paste(txt, data_info)
+        }
+      )
+
+      numeric_var <- colnames(df)[numeric_index]
+      none_numeric_var <- colnames(df)[!numeric_index]
+
+      # variables mentioned in request
+      relevant_var <- sapply(
+        colnames(df),
+        function(x) {
+          # hwy. class
+          grepl(
+            paste0(
+              " ", # proceeding space
+              x,
+              "[ |\\.|,]" # ending space, comma, or period
+            ),
+          txt
+          )
+        }
+      )
+
+      relevant_var <- colnames(df)[relevant_var]
+
+      if (length(relevant_var) > 0) {
+
+        # numeric variables-----------------------------
+        relevant_var_numeric <- intersect(relevant_var, numeric_var)
+        if (length(relevant_var_numeric) == 1) {
+          data_info <- paste0(
+            data_info,
+            "Note that ",
+            relevant_var_numeric,
+            " is a numeric variable. "
+          )
+        } else if (length(relevant_var_numeric) > 1) {
+          data_info <- paste0(
+            data_info,
+            "Note that ",
+            paste0(
+              relevant_var_numeric[1:(length(relevant_var_numeric) - 1)],
+              collapse = ", "
+            ),
+            " and ",
+            relevant_var_numeric[length(relevant_var_numeric)],
+            " are numeric variables. "
+          )
+        }
+
+        # Categorical variables-----------------------------
+        relevant_var_categorical <- intersect(relevant_var, none_numeric_var)
+        if (length(relevant_var_categorical) == 1) {
+          data_info <- paste0(
+            data_info,
+            "Note that ",
+            relevant_var_categorical,
+            " is a categorical variable. "
+          )
+        } else if (length(relevant_var_categorical) > 1) {
+          data_info <- paste0(
+            data_info,
+            "Note that ",
+            paste0(
+              relevant_var_categorical[1:(length(relevant_var_categorical) - 1)],
+              collapse = ", "
+            ),
+            " and ",
+            relevant_var_categorical[length(relevant_var_categorical)],
+            " are categorical variables. "
+          )
         }
       }
-      txt <- paste(pre_text, txt)
-      # If the last character is not a stop, add it. 
-      # Otherwise, GPT3 will add a sentence.
-      # The following 5 lines were generated by ChatGPT!!!!!
-      # Check if the last character is not a period
-      if (substr(txt, nchar(txt), nchar(txt)) != ".") {
-        # If the last character is not a period, add a period to the end of the string
-        txt <- paste(txt, ".", sep = "")
-      }
-      #cat("\n", txt, "\n")
-      return(txt)
+      txt <- paste(txt, data_info)
     }
   }
+  txt <- paste(pre_text, txt)
+
+  # remove extra space at the end.
+   txt <- gsub(" *$", "", txt)
+   if(!grepl("\\.$", txt)) {
+     txt <- paste(txt, ".", sep = "")
+   }
+
+  return(txt)
 }
 
 
