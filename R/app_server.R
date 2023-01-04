@@ -1537,9 +1537,6 @@ app_server <- function(input, output, session) {
 #  Server rebooting every 24 hours; this gives a warning
 #______________________________________________________________________________
 
-  # Initialize the timer, 180 seconds
-  timer <- reactiveVal(180)
-
   # returns hour and minutes
   time_var <- reactive({
     input$submit_button
@@ -1551,13 +1548,6 @@ app_server <- function(input, output, session) {
     ))
   })
 
-  # observer that invalidates every second.
-  observe({
-    invalidateLater(1000, session)
-    isolate({
-      timer(timer() - 1)
-    })
-  })
 
   output$timer_ui <- renderUI({
     #rebot at 7:56, 15:56, 23:56 ...
@@ -1568,9 +1558,9 @@ app_server <- function(input, output, session) {
       ) {
       h4(
         paste(
-          lubridate::seconds_to_period(timer()),
-          ": server reboots at midnight UTC. ",
-          " Download your files. Refresh at the top of the hr."
+          "Server rebooting in a few minutes. ",
+          " Download your files. Reload this site after being 
+          disconnected at the top of the hour."
         ),
         style = "color:red"
       )
