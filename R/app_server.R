@@ -1333,9 +1333,8 @@ app_server <- function(input, output, session) {
             "\n|",
             pre_text,
             "|",
-            "Use the ", 
-            input$select_data,
-            " data frame. "
+            after_text,
+            ".*"
           ),
           "",
           openAI_prompt()

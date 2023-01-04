@@ -21,6 +21,7 @@ max_query_length <- 500 # max # of characters
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
 pre_text <- "Generate R code. "
+after_text <- " Use the df data frame. "
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
@@ -75,7 +76,8 @@ prep_input <- function(txt, selected_data, df) {
 
   if (!is.null(selected_data)) {
     if (selected_data != no_data) {
-      data_info <- " Use the df data frame. "
+      
+      data_info <- after_text
 
       numeric_index <- sapply(
         df,
