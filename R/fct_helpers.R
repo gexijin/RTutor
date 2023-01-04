@@ -20,7 +20,7 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Generate R code, not R Markdown. "
+pre_text <- "Generate R code. "
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
@@ -63,79 +63,115 @@ move_front <- function(v, e){
 #' @param df the data frame
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df){
-  # if too short, do not send. 
-  if(nchar(txt) < min_query_length || nchar(txt) > max_query_length) {
+prep_input <- function(txt, selected_data, df) {
+
+  if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
-  }
+  } else {
+    # if too short, do not send. 
+    if(nchar(txt) < min_query_length || nchar(txt) > max_query_length) {
+      return(NULL)
+    } else {
+      if (!is.null(selected_data)) {
+        if (selected_data != no_data) {
+          data_info <- " Use the df data frame. "
 
-  if(!is.null(selected_data)) {
-    if(selected_data != no_data) {
+          numeric_index <- sapply(
+            df,
+            function(x) {
+              if (is.numeric(x)) {
+                return(TRUE)
+              } else {
+                return(FALSE)
+              }
+            }
+          )
 
-      numeric_index <- sapply(
-        df,
-        function(x)
-          if(
-            is.numeric(x) &&
-             # if there are few unique values compared to total values
-            !(length(unique(x)) / length(x) < unique_ratio &&
-              length(unique(x)) <= max_levels  # less than 12 unique values
-              # relcassify numeric variable as categorical
-            )
-          ) {
-            return(TRUE)
-          } else {
-            return(FALSE)
+          numeric_var <- colnames(df)[numeric_index]
+          none_numeric_var <- colnames(df)[!numeric_index]
+
+          # variables mentioned in request
+          relevant_var <- sapply(
+            colnames(df),
+            function(x) {
+              # hwy. class
+              grepl(
+                paste0(
+                  " ", # proceeding space
+                  x,
+                  "[ |\\.|,]" # ending space, comma, or period
+                ),
+              txt
+              )
+            }
+          )
+
+          relevant_var <- colnames(df)[relevant_var]
+
+          if (length(relevant_var) > 0) {
+
+            # numeric variables-----------------------------
+            relevant_var_numeric <- intersect(relevant_var, numeric_var)
+            if (length(relevant_var_numeric) == 1) {
+              data_info <- paste0(
+                data_info,
+                "Note that ",
+                relevant_var_numeric,
+                " is a numeric variable. "
+              )
+            } else if (length(relevant_var_numeric) > 1) {
+              data_info <- paste0(
+                data_info,
+                "Note that ",
+                paste0(
+                  relevant_var_numeric[1:(length(relevant_var_numeric) - 1)],
+                  collapse = ", "
+                ),
+                " and ",
+                relevant_var_numeric[length(relevant_var_numeric)],
+                " are numeric variables. "
+              )
+            }
+
+            # Categorical variables-----------------------------
+            relevant_var_categorical <- intersect(relevant_var, none_numeric_var)
+            if (length(relevant_var_categorical) == 1) {
+              data_info <- paste0(
+                data_info,
+                "Note that ",
+                relevant_var_categorical,
+                " is a categorical variable. "
+              )
+            } else if (length(relevant_var_categorical) > 1) {
+              data_info <- paste0(
+                data_info,
+                "Note that ",
+                paste0(
+                  relevant_var_categorical[1:(length(relevant_var_categorical) - 1)],
+                  collapse = ", "
+                ),
+                " and ",
+                relevant_var_categorical[length(relevant_var_categorical)],
+                " are categorical variables. "
+              )
+            }
           }
-        )
-
-      numeric_var <- colnames(df)[numeric_index]
-      none_numeric_var <- colnames(df)[!numeric_index]
-
-      data_info <- "Use the df data frame. "
-      if(1){
-      if(length(numeric_var) > 0) {
-        data_info <- paste0(
-          data_info,
-          "The following columns are numeric: ",
-          paste0(
-            numeric_var,
-            collapse = ", "
-          ),
-          ". "
-        )
+          txt <- paste(txt, data_info)
+        }
       }
-      if(length(none_numeric_var) > 0) {
-        data_info <- paste0(
-          data_info,
-          "These columns are categorical: ",
-          paste0(
-            none_numeric_var,
-            collapse = ", "
-          ),
-          ". "
-        )
+      txt <- paste(pre_text, txt)
+      # If the last character is not a stop, add it. 
+      # Otherwise, GPT3 will add a sentence.
+      # The following 5 lines were generated by ChatGPT!!!!!
+      # Check if the last character is not a period
+      if (substr(txt, nchar(txt), nchar(txt)) != ".") {
+        # If the last character is not a period, add a period to the end of the string
+        txt <- paste(txt, ".", sep = "")
       }
-      }
-
-browser()
-
-
-      txt <- paste(data_info, txt)
+      #cat("\n", txt, "\n")
+      return(txt)
     }
   }
-  txt <- paste(pre_text, txt)
-  # If the last character is not a stop, add it. 
-  # Otherwise, GPT3 will add a sentence.
-  cat("\n", txt)
-  # The following 5 lines were generated by ChatGPT!!!!!
-  # Check if the last character is not a period
-  if(substr(txt, nchar(txt), nchar(txt)) != ".") {
-    # If the last character is not a period, add a period to the end of the string
-    txt <- paste(txt, ".", sep = "")
-  }
-
-  return(txt)
 }
 
 
@@ -146,7 +182,7 @@ browser()
 #' @param cmd A string that stores the completion from GTP3.
 #' @param selected_data, name of the selected dataset. 
 #' @return Returns a cleaned up version, so that it could be executed as R command.
-clean_cmd <- function(cmd, selected_data){
+clean_cmd <- function(cmd, selected_data) {
   req(cmd)
   # simple way to check
   if(grepl("That model is currently overloaded with other requests.|Error:", cmd)) {
@@ -169,13 +205,8 @@ clean_cmd <- function(cmd, selected_data){
   # replace install.packages by "#install.packages"
   cmd <- gsub("install.packages", "#install.packages", cmd)
 
-  # if data is uploaded, add a line to get the data.
-  if(selected_data == uploaded_data) {
-    cmd <- c("df <- as.data.frame(user_data()$df)", cmd)
-  } else if (selected_data == rna_seq) {
-    cmd <- c("df <- as.data.frame(rna_seq_data())", cmd)
-  } else if (selected_data != no_data) {
-    cmd <- c(paste0("df <- as.data.frame(", selected_data, ")"), cmd)
+  if (selected_data != no_data) {
+    cmd <- c("df <- as.data.frame(current_data())", cmd)
   }
 
   return(cmd)
@@ -242,7 +273,7 @@ Change background to white.
 Increase font for labels to 15.
 Remove all grids.",
 
-"Hierarchical clustering" = "Conduct hierarchical clustering",
+"Hierarchical clustering" = "Conduct hierarchical clustering. ",
 "Density plot, panels" = "Only keep 4, 6, and 8 cylinders. 
 Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
  "Pie chart" = "Create an pie chart based on  class. "
@@ -497,4 +528,47 @@ turned_on <- function(x) {
       return(x)
     }
   }
+}
+
+
+#' Returns a data frame with some numeric columns with fewer levels 
+#' converted as factors
+#'
+#'
+#' @param df a data frame
+#' @param max_levels_factor  max levels, defaults to max_levels
+#' @param max_proportion_factor max proportion
+#'
+#' @return Returns a data frame
+numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
+  # some columns looks like numbers but have few levels
+  # convert these to factors
+  convert_index <- sapply(
+    df,
+    function(x) {
+      if (
+        is.numeric(x) &&
+        # if there are few unique values compared to total values
+        length(unique(x)) / length(x) < max_proptortion_factor &&
+        length(unique(x)) <= max_levels_factor  # less than 12 unique values
+          # relcassify numeric variable as categorical
+      ) {
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
+    }
+  )
+
+  convert_var <- colnames(df)[convert_index]
+  for (var in convert_var) {
+    eval(
+      parse(   #df$cyl <- as.factor(df$cyl)
+        text = paste0("df$", var, " <- as.factor(df$", var, ")")
+      )
+    )
+  }
+
+  return(df)
+
 }

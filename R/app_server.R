@@ -271,97 +271,158 @@ app_server <- function(input, output, session) {
       shiny::modalDialog(
         size = "l",
         footer = modalButton("Confirm"),
+        tagList(
+          fluidRow(
+            column(
+              width = 4,
+              sliderInput(
+                inputId = "temperature",
+                label = "Sampling temperature",
+                min = 0,
+                max = 1,
+                value = sample_temp(),
+                step = .1,
+                round = FALSE,
+                width = "100%"
+              )
+            ),
+            column(
+              width = 8,
+              p("This important parameter controls the AI's behavior in choosing 
+              among possible answers. A higher sampling temperature tells the AI 
+              to take more risks, producing more diverse and creative 
+              solutions when the same request is repeated. A lower  temperature
+              (such as 0) results in more
+              conservative and well-defined solutions, 
+              but less variety when repeated.
+              "),
+            )
+          ),
+          hr(),
+          h4("Use your own API key"),
+          h5("We pay a small fee to use the AI for every request.
+            If you use this regularily, 
+            please take a few minutes to create your own API key: "),
+
+          tags$ul(
+              tags$li(
+                "Create a personal account at",
+                a(
+                  "OpenAI.",
+                  href = "https://openai.com/api/",
+                  target = "_blank"
+                )
+              ),
+              tags$li("After logging in, click \"Personal\" from top right."),
+              tags$li(
+                "Click \"Manage Account\" and then \"Billing\",
+                where you can add \"Payment methods\" and set \"Usage 
+                limits\". $5 per month is more than enough."
+              ),
+              tags$li(
+                "Click \"API keys\" to create a new key, 
+                which can be copied and pasted it below."
+              ),
+          ),
+          textInput(
+            inputId = "api_key",
+            label = h5("Paste your API key from OpenAI:"),
+            value = NULL,
+            placeholder = "sk-..... (51 characters)"
+          ),
+          uiOutput("valid_key"),
+          uiOutput("save_api_ui"),
+          verbatimTextOutput("session_api_source"),
+          hr(),
+
+          fluidRow(
+            column(
+              width = 6,
+              checkboxInput(
+                inputId = "use_voice",
+                label = strong("Enable voice narration"),
+                value = use_voice()
+              )
+            ),
+            column(
+              width = 6,
+              # this causes the use_voice() to refresh twice,
+              # triggering the permission seeking in Chrome.
+              # Don't know why, but this works. I'm a stable genius.
+              actionButton("use_voice_button", strong("Seek mic permission"))
+            )
+          ),
+          h5("First select the checkbox and then seek 
+          permission to use the microphone. Your browser should have a popup 
+          window. Otherwise, check the both ends of the URL bar for a 
+          blocked icon, which
+          could be clicked to grant permission. If successful, you will see 
+          a red dot on top of the tab in Chrome.
+          Voice naration can be used in both the Main and the 
+          Ask Me Anything tabs by just saying \"Hey Cox ...\" 
+          in honor of the statistician David Cox.     
+          If not satisfied, try again to overwrite. 
+          To continue, say \"Hey Cox Continue ...\""),
+        ),
+        hr(),
         fluidRow(
           column(
             width = 4,
-            sliderInput(
-              inputId = "temperature",
-              label = "Sampling temperature",
-              min = 0,
-              max = 1,
-              value = sample_temp(),
-              step = .1,
-              round = FALSE,
-              width = "100%"
-            )
-          ),
-          column(
-            width = 8,
-            p("This important parameter controls the AI's behavior in choosing 
-            among possible answers. A higher sampling temperature tells the AI 
-            to take more risks, producing more diverse and creative 
-            solutions when the same request is repeated. A lower  temperature
-             (such as 0) results in more
-             conservative and well-defined solutions, 
-             but less variety when repeated.
-            "),
-          )
-        ),
-        hr(),
-        h4("Use your own API key"),
-        h5("We pay a small fee to use the AI for every request.
-           If you use this regularily, 
-           please take a few minutes to create your own API key: "),
-
-        tags$ul(
-            tags$li(
-              "Create a personal account at",
-              a(
-                "OpenAI.",
-                href = "https://openai.com/api/",
-                target = "_blank"
-              )
-            ),
-            tags$li("After logging in, click \"Personal\" from top right."),
-            tags$li(
-              "Click \"Manage Account\" and then \"Billing\",
-              where you can add \"Payment methods\" and set \"Usage 
-              limits\". $5 per month is more than enough."
-            ),
-            tags$li(
-              "Click \"API keys\" to create a new key, 
-              which can be copied and pasted it below."
-            ),
-        ),
-        textInput(
-          inputId = "api_key",
-          label = h5("Paste your API key from OpenAI:"),
-          value = NULL,
-          placeholder = "sk-..... (51 characters)"
-        ),
-        uiOutput("valid_key"),
-        uiOutput("save_api_ui"),
-        verbatimTextOutput("session_api_source"),
-        hr(),
-
-        fluidRow(
-          column(
-            width = 6,
             checkboxInput(
-              inputId = "use_voice",
-              label = strong("Enable voice narration"),
-              value = use_voice()
+              inputId = "numeric_as_factor",
+              label = strong("Treat as factors"),
+              value = convert_to_factor()
+            ),
+            tippy::tippy_this(
+              elementId = "numeric_as_factor",
+              tooltip = "Treat the columns that looks like a category 
+              as a category. This applies to columns that contain numbers
+              but have very few unique values. ",
+              theme = "light-border"
             )
           ),
           column(
-            width = 6,
-            # this causes the use_voice() to refresh twice,
-            # triggering the permission seeking in Chrome.
-            # Don't know why, but this works. I'm a stable genius.
-            actionButton("use_voice_button", strong("Seek mic permission"))
+            width = 4,
+            numericInput(
+              inputId = "max_levels_factor",
+              label = "Max levels",
+              value = max_levels_factor(),
+              min = 5,
+              max = 50,
+              step = 1
+            ),
+            tippy::tippy_this(
+              elementId = "max_levels_factor",
+              tooltip = "To convert a numeric column as category, 
+              the column must have no more than this number of unique values.",
+              theme = "light-border"
+            )
+          ),
+          column(
+            width = 4,
+            numericInput(
+              inputId = "max_proptortion_factor",
+              label = "Max proportion",
+              value = max_proptortion_factor(),
+              min = 0.05,
+              max = 0.5,
+              step = 0.1
+            ),
+            tippy::tippy_this(
+              elementId = "max_proptortion_factor",
+              tooltip = "To convert a numeric column as category, 
+              the number of unique values in a column must not exceed 
+              more this proportion of the total number of rows.",
+              theme = "light-border"
+            )
           )
         ),
-        h5("First select the checkbox and then seek 
-        permission to use the microphone. Your browser should have a popup 
-        window. Otherwise, check the both ends of the URL bar for a 
-        blocked icon, which
-        could be clicked to grant permission. If successful, you will see 
-        a red dot on top of the tab in Chrome.
-        Voice naration can be used in both the Main and the 
-        Ask Me Anything tabs by just saying \"Hey Cox ...\" 
-        in honor of the statistician David Cox.     
-        If not satisfied, try again to overwrite. 
-        To continue, say \"Hey Cox Continue ...\""),
+        h5("Some columns contains numbers but should be treated 
+        as categorical values or factors. For example, we sometimes 
+        use 1 to label success and 0 for failure.
+        If this is selected, using the default setting, a column 
+        is treated as categories when the number of unique values 
+        is less than or equal to 12, and less than 10% of the total rows.")
       )
     )
   })
@@ -492,7 +553,6 @@ app_server <- function(input, output, session) {
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
-    req(current_data())
     prep_input(input$input_text, input$select_data, current_data())
   })
 
@@ -808,7 +868,10 @@ app_server <- function(input, output, session) {
       tryCatch(
         eval(
           parse(
-            text = clean_cmd(logs$code, input$select_data)
+            text = clean_cmd(
+              logs$code,
+              input$select_data
+            )
           )
         ),
         error = function(e) {
@@ -944,7 +1007,7 @@ app_server <- function(input, output, session) {
     if (grepl("ggplot", txt) && # if  ggplot2, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
-      !(dim(current_data()[1]) > max_data_points && grepl("geom_point|geom_jitter", txt))
+      !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
     ) {
     shinyjs::showElement(id = "make_ggplot_interactive")
     }
@@ -991,10 +1054,49 @@ app_server <- function(input, output, session) {
   })
 
 
+  # had to use this. Otherwise, the checkbox returns to false
+  # when the popup is closed and openned again.
+  convert_to_factor <- reactive({
+      convert <- TRUE #default
+      if (!is.null(input$numeric_as_factor)) {
+        convert <- input$numeric_as_factor
+      }
+      return(convert)
+  })
+
+  max_proptortion_factor <- reactive({
+      max_proptortion <- TRUE #default
+      if(!is.null(input$max_proptortion_factor)) {
+        max_proptortion <- input$max_proptortion_factor
+      }
+      if(max_proptortion < 0.05) {
+        max_proptortion <- 0.05
+      }
+      if(max_proptortion > 0.5) {
+        max_proptortion <- 0.5
+      }
+      return(max_proptortion)
+  })
+
+
+   max_levels_factor <- reactive({
+      max_levels_1 <- max_levels #default
+      if (!is.null(input$max_levels_factor)) {
+        max_levels_1 <- input$max_levels_factor
+      }
+      if (max_levels_1 < 2) {
+        max_levels_1 <- 2
+      }
+      if (max_levels_1 > 100) {
+        max_levels_1 <- 100
+      }
+      return(max_levels_1)
+  })
+
   # The current data, just for showing.
   current_data <- reactive({
     req(input$select_data)
-    
+
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
     } else if(input$select_data == no_data){
@@ -1007,6 +1109,36 @@ app_server <- function(input, output, session) {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
+    if (convert_to_factor()) {
+      df <- numeric_to_factor(
+        df,
+        max_levels_factor(),
+        max_proptortion_factor()
+      )
+    }
+
+    # sometimes no row is left after processing.
+    if(is.null(df)) { # no_data
+      return(NULL)
+    } else if(nrow(df) == 0) {
+      return(NULL)
+    } else { # there are data in the dataframe
+
+      return(df)
+    }
+  })
+
+
+  # The data, after running the chunk
+  data_afterwards <- reactive({
+    req(input$select_data)
+    req(current_data())
+
+    if (input$submit_button == 0) {
+      return(current_data())
+    }
+
+    df <- current_data()
     # This updates the data by running hte entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
@@ -1024,16 +1156,18 @@ app_server <- function(input, output, session) {
     }
 
     # sometimes no row is left after processing.
-    if(nrow(df) == 0) {
+    if(is.null(df)) { # no_data
       return(NULL)
-    } else {
+    } else if(nrow(df) == 0) {
+      return(NULL)
+    } else { # there are data in the dataframe
       return(df)
     }
-
   })
 
+
   output$data_table_DT <- DT::renderDataTable({
-    req(current_data())
+    req(data_afterwards())
     DT::datatable(
       current_data(),
       options = list(
@@ -1047,22 +1181,22 @@ app_server <- function(input, output, session) {
   })
 
   output$data_size <- renderText({
-    req(!is.null(current_data()))
+    req(!is.null(data_afterwards()))
     paste(
-      dim(current_data())[1], "rows X ",
-      dim(current_data())[2], "columns"
+      dim(data_afterwards())[1], "rows X ",
+      dim(data_afterwards())[2], "columns"
     )
   })
   output$data_structure <- renderPrint({
-    req(!is.null(current_data()))
-    str(current_data())
+    req(!is.null(data_afterwards()))
+    str(data_afterwards())
   })
 
   output$data_summary <- renderText({
-    req(!is.null(current_data()))
+    req(!is.null(data_afterwards()))
     paste(
       capture.output(
-        summary(current_data())
+        summary(data_afterwards())
       ),
       collapse = "\n"
     )
@@ -1370,7 +1504,7 @@ app_server <- function(input, output, session) {
           file = tempReport,
           append = FALSE
         )
-        
+
         # Set up parameters to pass to Rmd document
         params <- list(df = iris) # dummy
 
