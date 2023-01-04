@@ -76,7 +76,7 @@ prep_input <- function(txt, selected_data, df) {
 
   if (!is.null(selected_data)) {
     if (selected_data != no_data) {
-      
+
       data_info <- after_text
 
       numeric_index <- sapply(
@@ -224,22 +224,20 @@ demos_mpg <- c(
   ' ... ' = 'Example requests',
 
   'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
-Color by class.
-Add jitter.",
-  'Correlation with context' = "Calculate the correlation coefficient of cty vs hwy.
-Repeat that after log transformation.
+ Color by class. 
+ Add jitter.",
+  'Correlation' = "Calculate the correlation coefficient of cty vs hwy. 
+Repeat that after log transformation. 
 Collect these results and show them.",
 
   'ANOVA, after log' = "Conduct ANOVA of log-transformed hwy by class and drv.",
 
-  "Barplot, summarized" = "Calculate average cty by year and class.
-Then use ggplot2 to create a barplot of average mpg by class,
-colored by year. The bars for different years should be side by side.",
+  "Barplot, summarized" = "Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
 
-  "Analysis, step by step" = "Only keep cars with hwy bigger than 15, but less than 40.
-Add 0.5 to cty.
-Perform log transformation on cty.
-Raise hwy to the second power.
+  "Analysis, step by step" = "Only keep cars with hwy bigger than 15, but less than 40. 
+Add 0.5 to cty. 
+Perform log transformation on cty. 
+Raise hwy to the second power. 
 Calculate correlation coefficient of transformed hwy and cty.",
 
   "Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
@@ -247,15 +245,15 @@ Calculate correlation coefficient of transformed hwy and cty.",
   'Regression, specific' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
 Give me diagnostic plots.",
 
-  "Analysis, complex" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively.
-Only keep cars more efficient than 15 MPG, but less than 40, on the highway.
-Add 0.5 to city MPG for correction.
-Perform log transformation on city MPG.
-Raise highway MPG to the second power.
+  "Analysis, complex" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. 
+Only keep cars more efficient than 15 MPG, but less than 40, on the highway. 
+Add 0.5 to city MPG for correction. 
+Perform log transformation on city MPG. 
+Raise highway MPG to the second power. 
 Calculate correlation coefficient of  the two transformed variables.",
 
-  "Neural network" = "Build a neural network model to predict 
-hwy based on displ, cyl, and class.  
+  "Neural network" = "Build a neural network model to predict  
+hwy based on displ, cyl, and class.   
 Use the nnet package. Plot the distribution of residuals.",
 
 "High level Qs, 1" = "Are hwy increasing over the years?",
@@ -267,11 +265,11 @@ Use the nnet package. Plot the distribution of residuals.",
   'Scatter plot, interactive' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
 
   "Scatter plot, refined" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
-Change shape by drv. Change size by displ.
-Change x label to 'Highway mpg'.
-Change y label to 'City mpg'.
-Change background to white.
-Increase font for labels to 15.
+Change shape by drv. Change size by displ. 
+Change x label to 'Highway mpg'. 
+Change y label to 'City mpg'. 
+Change background to white. 
+Increase font for labels to 15. 
 Remove all grids.",
 
 "Hierarchical clustering" = "Conduct hierarchical clustering. ",
@@ -287,7 +285,7 @@ demos_no_data <- c(
   'Heat map' = "Create a heatmap with hierarchical clustering tree.",
   "Ridge regression" = "Provide a demo for ridge regression.",
   'PCA' = "Create a matrix with 100 columns and 20 rows. Fill it with random numbers from the normal distribution. 
-The mean is 1 for the first 10 rows, but 3 for the rest.
+The mean is 1 for the first 10 rows, but 3 for the rest. 
 Conduct PCA. Plot using the first two principal components.",
 'Map' = "Create an world map. ",
 'Map, US' = "Create a US map.",
@@ -304,9 +302,9 @@ demos_diamond <- c(
   'Distribution, price' = "Plot the distribution of price after log transformation.",
   'Scatter, price vs. carat' = "Plot price vs. carat. Change color by clarity. ",
   'Combinations' = "Plot the combinations of cut and clarity.",
-  'Modelling' = "Remove diamonds larger than 3 carat.
-Build a model of price vs. carat.
-Create a violin plot of the residuals by clarity.
+  'Modelling' = "Remove diamonds larger than 3 carat. 
+Build a model of price vs. carat. 
+Create a violin plot of the residuals by clarity. 
 Limit ploting to -10000 to 10000."
 
 )
