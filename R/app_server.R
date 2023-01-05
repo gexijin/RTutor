@@ -773,7 +773,7 @@ app_server <- function(input, output, session) {
     updateCheckboxInput(
       session = session,
       inputId = "continue",
-      label = "Contine from this chunk",
+      label = "Continue from this chunk",
       value = FALSE
     )
   })
@@ -1117,6 +1117,15 @@ app_server <- function(input, output, session) {
       )
     }
 
+    # if the first column looks like id?
+    if(
+      length(unique(df[, 1])) == nrow(df) &&  # all unique
+      is.character(df[, 1])  # first column is character
+    ) {
+       row.names(df) <- df[, 1]
+       df <- df[, -1]
+    }
+
     # sometimes no row is left after processing.
     if(is.null(df)) { # no_data
       return(NULL)
@@ -1176,7 +1185,7 @@ app_server <- function(input, output, session) {
         dom = 'ftp',
         scrollX = "400px"
       ),
-      rownames = FALSE
+      rownames = TRUE
     )
   })
 

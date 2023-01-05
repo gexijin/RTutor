@@ -155,7 +155,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   style = "margin-top: 10px;",
                   checkboxInput(
                     inputId = "continue",
-                    label = "Contine from this chunk",
+                    label = "Continue from this chunk",
                     value = FALSE
                   ),
                   tippy::tippy_this(
@@ -316,7 +316,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         title = "Ask",
         value = "Ask",
         img(
-          src = "www/tutor.jpg", 
+          src = "www/tutor.jpg",
           width = "344",
           height = "309"
         ),
@@ -413,6 +413,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         hr(),
         h4("Update log:"),
         tags$ul(
+          tags$li(
+            "v 0.8.2  1/4/2023. Auto convert first column as row names."
+          ),          
           tags$li(
             "v 0.8.1  1/3/2023. Option to convert some numeric columns with few unique levels to factors."
           ),
