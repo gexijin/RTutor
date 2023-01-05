@@ -79,7 +79,7 @@ prep_input <- function(txt, selected_data, df) {
   if (!is.null(selected_data)) {
     if (selected_data != no_data) {
 
-      data_info <- after_text
+      data_info <- ""
 
       numeric_index <- sapply(
         df,
@@ -161,7 +161,14 @@ prep_input <- function(txt, selected_data, df) {
           )
         }
       }
-      txt <- paste(txt, data_info)
+
+      txt <- paste(txt, after_text)
+      # if user is not trying to convert data
+      if(!grepl("Convert |convert ", txt)) {
+        txt <- paste(txt, data_info)
+      }
+      cat(txt, "\n")
+
     }
   }
   txt <- paste(pre_text, txt)
