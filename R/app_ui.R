@@ -23,9 +23,8 @@ app_ui <- function(request) {
         title = "Home",
         div(
           id = "load_message",
-          h2("Talk to your data via AI"),
-          h3("No warranty. For academic & non-profit organization only."),
-          h3("Loading ... ...")
+          h2("Chat with your data via AI"),
+          h3("Still being tested and improved. Loading ... ...")
         ),
         uiOutput("use_heyshiny"),
         # move notifications and progress bar to the center of screen
@@ -109,37 +108,37 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
 
           mainPanel(
             shinyjs::useShinyjs(),
-            div(
-              id = "Intro",
-                fluidRow(
-                  column(
-                    width = 6,
-                    img(
-                      src = "www/tutor.jpg",
-                      width = "240",
-                      height = "216"
-                    ),
-                    align = 'right'
+            conditionalPanel(
+              condition = "input.submit_button == 0",
+              uiOutput("RTutor_version_main"),
+              fluidRow(
+                column(
+                  width = 3,
+                  img(
+                    src = "www/tutor.jpg",
+                    width = "120",
+                    height = "108"
                   ),
-                  column(
-                    width = 6,
-                    h5(
-                      "Hi I'm your statistics tutor.  
-                      As you can see from the selfie I drew, I am not perfect. 
-                      Still in college. But I try to be helpful.  
-                      I did finish my required reading:
-                      millions of books, billions of web pages, 
-                      and hundreds of millions of code repositories. 
-                      I'm not being hyperbolic. Just bragging..."
-                    ),
-                    align = 'left'
-                  )
+                  align = 'left'
                 ),
-                hr()
+                column(
+                  width = 9,
+                  h5(
+                    "Hi I'm your statistics tutor.  
+                    I am not perfect. 
+                    Still in college. But I try to be helpful.  
+                    I did finish my required reading:
+                    millions of books, billions of web pages, 
+                    and hundreds of millions of code repositories. 
+                    I'm not being hyperbolic. Just bragging..."
+                  ),
+                  align = 'left'
+                )
+              ),
+              hr()
             ),
-
-            div(
-              id = "Results",
+            conditionalPanel(
+              condition = "input.submit_button != 0",
               fluidRow(
                 column(
                   width = 6,
@@ -181,14 +180,21 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               uiOutput("tips_interactive"),
               hr(),
             ),
-            textOutput("data_size"),
-            DT::dataTableOutput("data_table_DT"),
             verbatimTextOutput("data_structure"),
-            verbatimTextOutput("data_summary")
+            tableOutput("data_table")
+
+
           )
         )
       ), #tabPanel
 
+      tabPanel(
+        title = "Data",
+        value = "Data",
+        textOutput("data_size"),
+        DT::dataTableOutput("data_table_DT"),
+        verbatimTextOutput("data_summary")
+      ),
       tabPanel(
         title = "Report",
         value = "Report",

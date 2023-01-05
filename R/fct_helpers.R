@@ -76,6 +76,14 @@ prep_input <- function(txt, selected_data, df) {
     return(NULL)
   }
 
+  # remove extra space at the end.
+   txt <- gsub(" *$", "", txt)
+   # if last character is not a period. Add it. Otherwise, 
+   # Davinci will try to complete a sentence.
+   if (!grepl("\\.$", txt)) { 
+     txt <- paste(txt, ".", sep = "")
+   }
+
   if (!is.null(selected_data)) {
     if (selected_data != no_data) {
 
@@ -167,19 +175,10 @@ prep_input <- function(txt, selected_data, df) {
       if(!grepl("Convert |convert ", txt)) {
         txt <- paste(txt, data_info)
       }
-      cat(txt, "\n")
 
     }
   }
   txt <- paste(pre_text, txt)
-
-  # remove extra space at the end.
-   txt <- gsub(" *$", "", txt)
-   # if last character is not a period. Add it. Otherwise, 
-   # Davinci will try to complete a sentence.
-   if (!grepl("\\.$", txt)) { 
-     txt <- paste(txt, ".", sep = "")
-   }
 
   return(txt)
 }
