@@ -23,7 +23,8 @@ Imports:
     corrplot,
     tableone,
     GGally,
-    janitor
+    janitor,
+    RSQLite
 Remotes:
     github::jcrodriguez1989/heyshiny
 Depends:

@@ -422,7 +422,27 @@ app_server <- function(input, output, session) {
         use 1 to label success and 0 for failure.
         If this is selected, using the default setting, a column 
         is treated as categories when the number of unique values 
-        is less than or equal to 12, and less than 10% of the total rows.")
+        is less than or equal to 12, and less than 10% of the total rows."
+        ),
+        hr(),
+        fluidRow(
+          column(
+            width = 4,
+            checkboxInput(
+              inputId = "contribute_data",
+              label = "Help us make RTutor better",
+              value = contribute_data()
+            )
+          ),
+          column(
+            width = 8,
+            h5("Save your requests and the structure of your data 
+            such as column names and data types, not the data itself. 
+            We can learn from users about creative ways to use AI. 
+            And we can try to improve unsuccessful attempts. ")
+          )
+        ),
+
       )
     )
   })
@@ -1973,4 +1993,31 @@ output$answer <- renderText({
     HTML(paste(i, collapse = "<br/>"))
   })
 
+
+  contribute_data <- reactive({
+      save_info <- TRUE #default
+      if(!is.null(input$contribute_data)) {
+        save_info <- input$contribute_data
+      }
+      return(save_info)
+  })
+
+  # save user data when allowed
+  observeEvent(input$submit_button, {
+    req(openAI_prompt())
+    req(logs$code)
+
+    if(contribute_data()) {
+      try(
+        save_data(
+          date = Sys.Date(),
+          time = format(Sys.time(), "%H:%M:%S"),
+          request = openAI_prompt(),
+          code = logs$code,
+          error_status = code_error(),
+          data_str = paste(capture.output(str(current_data())), collapse = "\n")
+        )
+      )
+    }
+  })
 }

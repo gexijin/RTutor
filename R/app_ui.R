@@ -171,12 +171,12 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
 
               # shows error message in local machine, but not on the server
               verbatimTextOutput("console_output"),
+              uiOutput("plot_ui"),
               checkboxInput(
                 inputId = "make_ggplot_interactive",
                 label = NULL,
                 value = FALSE
               ),
-              uiOutput("plot_ui"),
               br(),
               uiOutput("tips_interactive"),
               hr(),
@@ -414,8 +414,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         h4("Update log:"),
         tags$ul(
           tags$li(
+            "v 0.8.3  1/5/2023. Collect some user data for improvement."
+          ),
+          tags$li(
             "v 0.8.2  1/4/2023. Auto convert first column as row names."
-          ),          
+          ),
           tags$li(
             "v 0.8.1  1/3/2023. Option to convert some numeric columns with few unique levels to factors."
           ),
