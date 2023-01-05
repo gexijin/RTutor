@@ -631,7 +631,7 @@ create_usage_db <- function() {
     # if db does not exist, create one
     if (file.exists(sqlitePath)) {
       # Connect to the database
-      db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
+      db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = SQLITE_RW)
       # Construct the update query by looping over the data fields
       txt <- sprintf(
         "INSERT INTO %s (%s) VALUES ('%s')",
