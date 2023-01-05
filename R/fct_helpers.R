@@ -30,26 +30,7 @@ unique_ratio <- 0.1   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
 
-# if db does not exist, create one
-if(!file.exists(sqlitePath)) {
-  db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
-  txt <- sprintf(
-    paste0(
-     "CREATE TABLE ",
-      sqltable,
-      "(\n",
-      "date DATE NOT NULL,
-       time TIME NOT NULL,
-      request varchar(5000),
-      code varchar(5000),
-      error int ,
-      data_str varchar(5000))"
-    )
-  )
-    # Submit the update query and disconnect
-    RSQLite::dbExecute(db, txt)
-    RSQLite::dbDisconnect(db)
-}
+
 
 # if this file exists, running on the server. Otherwise local.
 # this is used to change app behavior.
@@ -604,7 +585,27 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
 #'
 #' @return nothing
   save_data <- function(date, time, request, code, error_status, data_str) {
-    browser()
+    # if db does not exist, create one
+    if(!file.exists(sqlitePath)) {
+      db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
+      txt <- sprintf(
+        paste0(
+        "CREATE TABLE ",
+          sqltable,
+          "(\n",
+          "date DATE NOT NULL,
+          time TIME NOT NULL,
+          request varchar(5000),
+          code varchar(5000),
+          error int ,
+          data_str varchar(5000))"
+        )
+      )
+        # Submit the update query and disconnect
+        RSQLite::dbExecute(db, txt)
+        RSQLite::dbDisconnect(db)
+    }
+
     # Connect to the database
     db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
     # Construct the update query by looping over the data fields
