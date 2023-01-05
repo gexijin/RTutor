@@ -583,7 +583,7 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
 create_usage_db <- function() {
   # if db does not exist, create one
   if(!file.exists(sqlitePath)) {
-    db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
+    db <- RSQLite::dbConnect(RSQLite::SQLite(), gsub(".*/", "", sqlitePath))
     txt <- sprintf(
       paste0(
       "CREATE TABLE ",
@@ -614,7 +614,6 @@ create_usage_db <- function() {
 #'
 #' @return nothing
   save_data <- function(date, time, request, code, error_status, data_str) {
-    write.csv(iris, "../../data/test.csv")
     # if db does not exist, create one
     if (!file.exists(sqlitePath)) {
       # Connect to the database
@@ -637,7 +636,7 @@ create_usage_db <- function() {
         )
       )
       # Submit the update query and disconnect
-      try( 
+      try(
         RSQLite::dbExecute(db, txt)
       )
       RSQLite::dbDisconnect(db)
