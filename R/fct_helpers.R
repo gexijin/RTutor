@@ -27,7 +27,7 @@ max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
 # if a column is numeric but only have a few unique values, treat as categorical
 unique_ratio <- 0.1   # number of unique values / total # of rows
-sqlitePath <- "usage_data.db" # folder to store the user queries, generated R code, and running results
+sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
 
 # if db does not exist, create one
