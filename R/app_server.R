@@ -2006,7 +2006,7 @@ output$answer <- renderText({
   observeEvent(input$submit_button, {
     req(openAI_prompt())
     req(logs$code)
-    req(code_error())
+
     if(contribute_data()) {
       try(
         save_data(

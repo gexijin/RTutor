@@ -567,7 +567,6 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
       )
     )
   }
-
   return(df)
 
 }
@@ -578,7 +577,7 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
 #' The data file should be stored in the ../../data folder inside 
 #' the container. From outside in the RTutor_server folder, 
 #' it is in data folder.
-#'
+#'  Only works on local machines. Not on linux.
 #' @return nothing
 create_usage_db <- function() {
   # if db does not exist, create one
@@ -603,6 +602,21 @@ create_usage_db <- function() {
   }
 }
 
+# To create a database under Ubuntu
+# sudo apt update
+# sudo apt install sqlite3
+# cd ~/Rtutor_server/data
+# sudo  sqlite3 usage_data.db
+
+# CREATE TABLE usage (
+#        date DATE NOT NULL,
+#        time TIME NOT NULL,
+#        request varchar(5000),
+#        code varchar(5000),
+#        error int,
+#        data_str varchar(5000));
+
+
 #' Saves user queries, code, and error status
 #' 
 #'
@@ -615,7 +629,7 @@ create_usage_db <- function() {
 #' @return nothing
   save_data <- function(date, time, request, code, error_status, data_str) {
     # if db does not exist, create one
-    if (!file.exists(sqlitePath)) {
+    if (file.exists(sqlitePath)) {
       # Connect to the database
       db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
       # Construct the update query by looping over the data fields
