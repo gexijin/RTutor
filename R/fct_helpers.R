@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.8.1" # RTutor
+release <- "0.8.3" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 rna_seq <- "RNA-Seq"  # RNA-Seq read counts
@@ -27,8 +27,29 @@ max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
 # if a column is numeric but only have a few unique values, treat as categorical
 unique_ratio <- 0.1   # number of unique values / total # of rows
+sqlitePath <- "usage_data.db" # folder to store the user queries, generated R code, and running results
+sqltable <- "usage"
 
-
+# if db does not exist, create one
+if(!file.exists(sqlitePath)) {
+  db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
+  txt <- sprintf(
+    paste0(
+     "CREATE TABLE ",
+      sqltable,
+      "(\n",
+      "date DATE NOT NULL,
+       time TIME NOT NULL,
+      request varchar(5000),
+      code varchar(5000),
+      error int ,
+      data_str varchar(5000))"
+    )
+  )
+    # Submit the update query and disconnect
+    RSQLite::dbExecute(db, txt)
+    RSQLite::dbDisconnect(db)
+}
 
 # if this file exists, running on the server. Otherwise local.
 # this is used to change app behavior.
@@ -369,8 +390,6 @@ datasets <- move_front(datasets, "iris")
 datasets <- move_front(datasets, "mtcars")
 
 
-
-
 # append a dummy value, used when user upload their data.
 datasets <- c(datasets, uploaded_data)
 # move it to 2nd place
@@ -571,3 +590,54 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
   return(df)
 
 }
+
+
+
+#' Saves user queries, code, and error status
+#' 
+#'
+#' @param date Date in the format of "2023-01-04"
+#' @param time Time "13:05:12"
+#' @param request, user request
+#' @param code AI generated code
+#' @param error status, TRUE, error
+#'
+#' @return nothing
+  save_data <- function(date, time, request, code, error_status, data_str) {
+    browser()
+    # Connect to the database
+    db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
+    # Construct the update query by looping over the data fields
+    txt <- sprintf(
+      "INSERT INTO %s (%s) VALUES ('%s')",
+      sqltable,
+      "date, time, request, code, error, data_str",
+      paste(
+        c(
+          as.character(date),
+          as.character(time),
+          clean_txt(request),
+          clean_txt(code),
+          as.integer(error_status),
+          clean_txt(data_str)
+        ),
+        collapse = "', '"
+      )
+    )
+    # Submit the update query and disconnect
+    try( 
+      RSQLite::dbExecute(db, txt)
+    )
+
+    RSQLite::dbDisconnect(db)
+  }
+
+#' Clean up text strings for inserting into SQL
+#' 
+#'
+#' @param x a string that can contain ' or "
+#'
+#' @return nothing
+  clean_txt <- function(x) {
+    return(gsub("\'|\"", "", x))
+  }
