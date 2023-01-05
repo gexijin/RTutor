@@ -573,6 +573,35 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
 }
 
 
+#' Creates a SQLite database file for collecting user data
+#' 
+#' The data file should be stored in the ../../data folder inside 
+#' the container. From outside in the RTutor_server folder, 
+#' it is in data folder.
+#'
+#' @return nothing
+create_usage_db <- function() {
+  # if db does not exist, create one
+  if(!file.exists(sqlitePath)) {
+    db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
+    txt <- sprintf(
+      paste0(
+      "CREATE TABLE ",
+        sqltable,
+        "(\n",
+        "date DATE NOT NULL,
+        time TIME NOT NULL,
+        request varchar(5000),
+        code varchar(5000),
+        error int ,
+        data_str varchar(5000))"
+      )
+    )
+      # Submit the update query and disconnect
+      RSQLite::dbExecute(db, txt)
+      RSQLite::dbDisconnect(db)
+  }
+}
 
 #' Saves user queries, code, and error status
 #' 
@@ -585,52 +614,34 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
 #'
 #' @return nothing
   save_data <- function(date, time, request, code, error_status, data_str) {
+    write.csv(iris, "../../data/test.csv")
     # if db does not exist, create one
-    if(!file.exists(sqlitePath)) {
+    if (!file.exists(sqlitePath)) {
+      # Connect to the database
       db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
+      # Construct the update query by looping over the data fields
       txt <- sprintf(
-        paste0(
-        "CREATE TABLE ",
-          sqltable,
-          "(\n",
-          "date DATE NOT NULL,
-          time TIME NOT NULL,
-          request varchar(5000),
-          code varchar(5000),
-          error int ,
-          data_str varchar(5000))"
+        "INSERT INTO %s (%s) VALUES ('%s')",
+        sqltable,
+        "date, time, request, code, error, data_str",
+        paste(
+          c(
+            as.character(date),
+            as.character(time),
+            clean_txt(request),
+            clean_txt(code),
+            as.integer(error_status),
+            clean_txt(data_str)
+          ),
+          collapse = "', '"
         )
       )
-        # Submit the update query and disconnect
+      # Submit the update query and disconnect
+      try( 
         RSQLite::dbExecute(db, txt)
-        RSQLite::dbDisconnect(db)
-    }
-
-    # Connect to the database
-    db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath)
-    # Construct the update query by looping over the data fields
-    txt <- sprintf(
-      "INSERT INTO %s (%s) VALUES ('%s')",
-      sqltable,
-      "date, time, request, code, error, data_str",
-      paste(
-        c(
-          as.character(date),
-          as.character(time),
-          clean_txt(request),
-          clean_txt(code),
-          as.integer(error_status),
-          clean_txt(data_str)
-        ),
-        collapse = "', '"
       )
-    )
-    # Submit the update query and disconnect
-    try( 
-      RSQLite::dbExecute(db, txt)
-    )
-
-    RSQLite::dbDisconnect(db)
+      RSQLite::dbDisconnect(db)
+    }
   }
 
 #' Clean up text strings for inserting into SQL
