@@ -51,10 +51,6 @@ app_server <- function(input, output, session) {
     )
   }, ignoreInit = TRUE, once = TRUE)
 
-  observeEvent(input$submit_button, {
-    updateTextInput(session, "submit_button", label = "Re-submit")
-    shinyjs::hideElement(id = "Intro")
-  })
 
   observe({
     shinyjs::hideElement(id = "load_message")
@@ -1198,7 +1194,7 @@ app_server <- function(input, output, session) {
   output$data_table_DT <- DT::renderDataTable({
     req(data_afterwards())
     DT::datatable(
-      current_data(),
+      data_afterwards(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
         pageLength = 10,
@@ -1207,6 +1203,14 @@ app_server <- function(input, output, session) {
       ),
       rownames = TRUE
     )
+  })
+
+  output$data_table <- renderTable({
+    req(data_afterwards())
+
+    data_afterwards()[
+      1:min(20, nrow(data_afterwards())),
+      ]
   })
 
   output$data_size <- renderText({
@@ -1953,6 +1957,12 @@ output$answer <- renderText({
 
   output$RTutor_version <- renderUI({
     h4(paste("RTutor Version", release))
+  })
+
+  output$RTutor_version_main <- renderUI({
+    tagList(
+      h3(paste("RTutor.ai ", release))      
+    )
   })
 
  output$package_list <- renderUI({
