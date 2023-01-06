@@ -87,7 +87,8 @@ app_server <- function(input, output, session) {
    # read the speech input
   observeEvent(input$hey_cmd, {
     speech <- input$hey_cmd
-    message(speech)
+    # message(speech)
+    showNotification(speech)
 
     if (input$tabs == "Home")    {
       if (grepl("^continue", speech)) {
@@ -2030,4 +2031,49 @@ output$answer <- renderText({
       )
     }
   })
+
+  observeEvent(input$save_feedbck, {
+    req(input$save_feedbck)
+    feedback_len <- nchar(input$user_feedback)
+    if (feedback_len < 5) {
+      showNotification("Feedback is too short.")
+    } else  if (feedback_len > 2000) {
+      showNotification("Feedback is too long.")
+    } else {
+      showNotification("Thank you for your feedback!")
+
+      try(
+        save_comments(
+          date = Sys.Date(),
+          time = format(Sys.time(), "%H:%M:%S"),
+          comments = input$user_feedback,
+          helpfulness = input$helpfulness,
+          experience = input$experience
+        )
+      )
+    }
+
+    # clear the comments after submitted. 
+    # This prevents users submit the same thing twice.
+    updateTextInput(
+      session,
+      "user_feedback",
+      value = "",
+      placeholder = "Any questions? Suggestions? Things you like, don't like?" 
+    )
+
+
+  })
+
+  observe({
+    shinyjs::toggle(id = "user_feedback", condition = input$Comments)
+    shinyjs::toggle(id = "save_feedbck", condition = input$Comments)
+    shinyjs::toggle(id = "helpfulness", condition = input$Comments)
+    shinyjs::toggle(id = "experience", condition = input$Comments)
+
+  })
+
+
+
+
 }
