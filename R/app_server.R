@@ -2019,14 +2019,18 @@ output$answer <- renderText({
     req(logs$code)
 
     if(contribute_data()) {
+      # remove user data, only keep column names and data type
+      txt <- capture.output(str(current_data(), vec.len = 0))
+      txt <- gsub(" levels .*$", " levels", txt)
       try(
         save_data(
           date = Sys.Date(),
           time = format(Sys.time(), "%H:%M:%S"),
           request = openAI_prompt(),
           code = logs$code,
-          error_status = code_error(),
-          data_str = paste(capture.output(str(current_data())), collapse = "\n")
+          error_status = code_error(),  # 1 --> error!  0 --> no error, success!!
+          data_str = paste(txt, collapse = "\n"),
+          dataset = input$select_data
         )
       )
     }
