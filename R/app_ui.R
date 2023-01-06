@@ -98,8 +98,34 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             textOutput("temperature"),
             uiOutput("slava_ukraini"),
             br(),
-            textOutput("retry_on_error")
-
+            textOutput("retry_on_error"),
+            checkboxInput("Comments", "Leave comments"),
+            tags$style(type = "text/css", "textarea {width:100%}"),
+            tags$textarea(
+              id = "user_feedback",
+              placeholder = "Any questions? Suggestions? Things you like, don't like?",
+              rows = 4,
+              ""
+            ),
+            radioButtons("helpfulness", "How useful is RTutor?",
+              c(
+                "Not at all",
+                "Slightly",
+                "Helpful",
+                "Extremely"
+              ),
+              selected = "Slightly"
+            ),
+            radioButtons("experience", "Your experience with R:",
+              c(
+                "None",
+                "Beginner",
+                "Intermediate",
+                "Advanced"
+               ),
+              selected = "Beginner"
+            ),
+            actionButton("save_feedbck", "Save Feedback")
           ),
 
       ###############################################################################
@@ -419,6 +445,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         hr(),
         h4("Update log:"),
         tags$ul(
+          tags$li(
+            "v 0.8.4  1/5/2023. Collect  user feedback."
+          ),
           tags$li(
             "v 0.8.3  1/5/2023. Collect some user data for improvement."
           ),

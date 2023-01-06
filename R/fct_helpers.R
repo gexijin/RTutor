@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.8.3" # RTutor
+release <- "0.8.4" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 rna_seq <- "RNA-Seq"  # RNA-Seq read counts
@@ -672,3 +672,56 @@ create_usage_db <- function() {
   clean_txt <- function(x) {
     return(gsub("\'|\"", "", x))
   }
+
+
+
+# SQLite command to create feedbck table
+
+# "CREATE TABLE feedback (
+#        date DATE NOT NULL,
+#        time TIME NOT NULL,
+#        helpfulness varchar(50),
+#        experience varchar(50),
+#        comments varchar(5000)); "
+
+
+#' Save user feedback
+#' 
+#'
+#' @param date Date in the format of "2023-01-04"
+#' @param time Time "13:05:12"
+#' @param comments, user request
+#' @param helpfulness rating
+#' @param experience  R experience
+#'
+#' @return nothing
+  save_comments <- function(date, time, comments, helpfulness, experience) {
+    # if db does not exist, create one
+    if (file.exists(sqlitePath)) {
+      # Connect to the database
+      db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RW)
+      # Construct the update query by looping over the data fields
+      txt <- sprintf(
+        "INSERT INTO %s (%s) VALUES ('%s')",
+        "feedback",
+        "date, time, comments, helpfulness, experience",
+        paste(
+          c(
+            as.character(date),
+            as.character(time),
+            clean_txt(comments),
+            helpfulness,
+            experience
+          ),
+          collapse = "', '"
+        )
+      )
+      # Submit the update query and disconnect
+      try(
+        RSQLite::dbExecute(db, txt)
+      )
+      RSQLite::dbDisconnect(db)
+    }
+  }
+
+
