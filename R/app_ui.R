@@ -151,12 +151,17 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   width = 9,
                   h5(
                     "Hi I'm your statistics tutor.  
-                    I am not perfect. 
-                    Still in college. But I try to be helpful.  
+                    I am still in college learning new things.
+                    But I try to be helpful.  
                     I did finish my required reading:
-                    millions of books, billions of web pages, 
-                    and hundreds of millions of code repositories. 
-                    I'm not being hyperbolic. Just bragging..."
+                    thousands of books, millions of code repositories, 
+                    and billions of web pages of all kinds.
+                    I'm not being hyperbolic. Just bragging. 
+                    BTW, in my foreign language classes, I learned
+                     Japanese, German, French, Chinese, Hindi, and 
+                     dozens of others languages. Maybe rusty, 
+                     but try me out. 
+                     "
                   ),
                   align = 'left'
                 )

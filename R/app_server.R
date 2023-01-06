@@ -1967,7 +1967,8 @@ output$answer <- renderText({
   output$RTutor_version_main <- renderUI({
     tagList(
       h3(paste("RTutor.ai ", release)),
-      h4("Try RTutor.ai in many foreign languages! Complex quests still needs to be in English.", style="color:red")
+      h4("New! Try me in dozens of foreign languages. 
+      English is preferred for complex analyses. ", style="color:red")
     )
   })
 
