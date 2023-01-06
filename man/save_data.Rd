@@ -4,7 +4,21 @@
 \alias{save_data}
 \title{Saves user queries, code, and error status}
 \usage{
-save_data(date, time, request, code, error_status, data_str, dataset)
+save_data(
+  date,
+  time,
+  request,
+  code,
+  error_status,
+  data_str,
+  dataset,
+  session,
+  filename,
+  filesize,
+  chunk,
+  api_time,
+  tokens
+)
 }
 \arguments{
 \item{date}{Date in the format of "2023-01-04"}
@@ -14,6 +28,16 @@ save_data(date, time, request, code, error_status, data_str, dataset)
 \item{request, }{user request}
 
 \item{code}{AI generated code}
+
+\item{filename}{name of the uploaded file}
+
+\item{filesize}{size}
+
+\item{chunk, }{id, from 1, 2, ...}
+
+\item{api_time}{time in seconds for API response}
+
+\item{tokens}{total completion tokens}
 
 \item{error}{status, TRUE, error}
 }
