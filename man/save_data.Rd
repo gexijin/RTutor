@@ -4,7 +4,7 @@
 \alias{save_data}
 \title{Saves user queries, code, and error status}
 \usage{
-save_data(date, time, request, code, error_status, data_str)
+save_data(date, time, request, code, error_status, data_str, dataset)
 }
 \arguments{
 \item{date}{Date in the format of "2023-01-04"}

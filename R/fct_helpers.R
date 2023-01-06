@@ -616,13 +616,19 @@ create_usage_db <- function() {
 # cd ~/Rtutor_server/data
 # sudo  sqlite3 usage_data.db
 
+
 # CREATE TABLE usage (
 #        date DATE NOT NULL,
 #        time TIME NOT NULL,
 #        request varchar(5000),
 #        code varchar(5000),
 #        error int,
-#        data_str varchar(5000));
+#        data_str varchar(5000),
+#       dataset varchar(100));
+
+# sudo chmod a+w usage_data.db
+
+# note that error column, 1 means error, 0 means no error, success.
 
 
 #' Saves user queries, code, and error status
@@ -635,7 +641,7 @@ create_usage_db <- function() {
 #' @param error status, TRUE, error
 #'
 #' @return nothing
-  save_data <- function(date, time, request, code, error_status, data_str) {
+  save_data <- function(date, time, request, code, error_status, data_str, dataset) {
     # if db does not exist, create one
     if (file.exists(sqlitePath)) {
       # Connect to the database
@@ -644,7 +650,7 @@ create_usage_db <- function() {
       txt <- sprintf(
         "INSERT INTO %s (%s) VALUES ('%s')",
         sqltable,
-        "date, time, request, code, error, data_str",
+        "date, time, request, code, error, data_str, dataset",
         paste(
           c(
             as.character(date),
@@ -652,7 +658,8 @@ create_usage_db <- function() {
             clean_txt(request),
             clean_txt(code),
             as.integer(error_status),
-            clean_txt(data_str)
+            clean_txt(data_str),
+            dataset
           ),
           collapse = "', '"
         )
