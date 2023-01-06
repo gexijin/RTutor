@@ -77,10 +77,12 @@ prep_input <- function(txt, selected_data, df) {
   }
 
   # remove extra space at the end.
-   txt <- gsub(" *$", "", txt)
+   txt <- gsub(" *$|\n*$", "", txt)
+   # some times it is like " \n "
+   txt <- gsub(" *$|\n*$", "", txt)
    # if last character is not a period. Add it. Otherwise, 
    # Davinci will try to complete a sentence.
-   if (!grepl("\\.$", txt)) { 
+   if (!grepl("\\.$", txt)) {
      txt <- paste(txt, ".", sep = "")
    }
 
