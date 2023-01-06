@@ -646,13 +646,16 @@ app_server <- function(input, output, session) {
         units = "secs"
       )[[1]]
 
-      # if more than 10 requests, slow down. Only on server.
-      if(counter$requests > 20 && file.exists(on_server)) {
-        Sys.sleep(counter$requests / 5 + runif(1, 0, 5))
+      if(0) {
+        # if more than 10 requests, slow down. Only on server.
+        if(counter$requests > 20 && file.exists(on_server)) {
+          Sys.sleep(counter$requests / 5 + runif(1, 0, 5))
+        }
+        if(counter$requests > 50 && file.exists(on_server)) {
+          Sys.sleep(counter$requests / 10 + runif(1, 0, 10))
+        }
       }
-      if(counter$requests > 50 && file.exists(on_server)) {
-        Sys.sleep(counter$requests / 10 + runif(1, 0, 10))
-      }
+
       if(counter$requests > 100 && file.exists(on_server)) {
         Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
       }
@@ -936,6 +939,7 @@ app_server <- function(input, output, session) {
   output$console_output <- renderText({
     req(!code_error())
     req(logs$code)
+    out <- ""
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
       try(
@@ -1962,7 +1966,8 @@ output$answer <- renderText({
 
   output$RTutor_version_main <- renderUI({
     tagList(
-      h3(paste("RTutor.ai ", release))      
+      h3(paste("RTutor.ai ", release)),
+      h4("Try RTutor.ai in many foreign languages! Complex quests still needs to be in English.", style="color:red")
     )
   })
 

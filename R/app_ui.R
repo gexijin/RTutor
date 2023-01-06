@@ -446,6 +446,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         h4("Update log:"),
         tags$ul(
           tags$li(
+            "v 0.8.5  1/6/2023. Demo in many foreign languages."
+          ),          
+          tags$li(
             "v 0.8.4  1/5/2023. Collect  user feedback."
           ),
           tags$li(

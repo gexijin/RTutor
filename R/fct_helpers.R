@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.8.4" # RTutor
+release <- "0.8.5" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 rna_seq <- "RNA-Seq"  # RNA-Seq read counts
@@ -236,6 +236,13 @@ demos_mpg <- c(
   'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
  Color by class. 
  Add jitter.",
+  'Chinese, 中文' = "按class画hwy的箱线图。按class更改颜色。添加抖动。",
+ 'Spanish, En español' = "Cree un diagrama de caja de hwy por class. Cambia de color por class. Añade nerviosismo.",
+ 'Japanese, 日本語' = "classごとに hwy の箱ひげ図を作成します。classごとに色を変えます。ジッターを追加します。",
+ 'German, deutsche Sprache' = "Verwenden Sie ggplot2, um einen Boxplot von hwy nach class zu erstellen. Farbe um class ändern. Jitter-Punkte hinzufügen",
+ 'French, Français' = "Créez une boîte à moustaches de hwy par class. Changer de couleur par class. Ajoutez des points de gigue.",
+ 'Italian, Italiano' = "Crea un boxplot di hwy di class. Varia colore di class. Aggiungi punti di jitter.",
+ 'Hindi, हिन्दी भाषा' = "class द्वारा hwy का बॉक्सप्लॉट बनाने के लिए ggplot2 का उपयोग करें। class द्वारा भिन्न रंग। जिटर पॉइंट जोड़ें।",
   'Correlation' = "Calculate the correlation coefficient of cty vs hwy. 
 Repeat that after log transformation. 
 Collect these results and show them.",
