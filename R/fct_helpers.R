@@ -639,9 +639,28 @@ create_usage_db <- function() {
 #' @param request, user request
 #' @param code AI generated code
 #' @param error status, TRUE, error
-#'
+#' @param chunk, id, from 1, 2, ...
+#' @param api_time  time in seconds for API response
+#' @param tokens  total completion tokens
+#' @param filename name of the uploaded file
+#' @param filesize size
+#' 
 #' @return nothing
-  save_data <- function(date, time, request, code, error_status, data_str, dataset) {
+  save_data <- function(
+    date,
+    time,
+    request,
+    code,
+    error_status,
+    data_str,
+    dataset,
+    session,
+    filename,
+    filesize,
+    chunk,
+    api_time,
+    tokens
+  ) {
     # if db does not exist, create one
     if (file.exists(sqlitePath)) {
       # Connect to the database
@@ -650,7 +669,7 @@ create_usage_db <- function() {
       txt <- sprintf(
         "INSERT INTO %s (%s) VALUES ('%s')",
         sqltable,
-        "date, time, request, code, error, data_str, dataset",
+        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens",
         paste(
           c(
             as.character(date),
@@ -659,7 +678,13 @@ create_usage_db <- function() {
             clean_txt(code),
             as.integer(error_status),
             clean_txt(data_str),
-            dataset
+            dataset,
+            session,
+            filename,
+            filesize,
+            chunk,
+            api_time,
+            tokens
           ),
           collapse = "', '"
         )

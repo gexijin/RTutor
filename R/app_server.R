@@ -2030,7 +2030,13 @@ output$answer <- renderText({
           code = logs$code,
           error_status = code_error(),  # 1 --> error!  0 --> no error, success!!
           data_str = paste(txt, collapse = "\n"),
-          dataset = input$select_data
+          dataset = input$select_data,
+          session = session$token,
+          filename = ifelse(is.null(input$user_file[1, 1]), " ", input$user_file[1, 1]),
+          filesize = ifelse(is.null(input$user_file[1, 2]), " ", input$user_file[1, 2]),
+          chunk = counter$requests,
+          api_time = counter$time,
+          tokens = counter$tokens_current
         )
       )
     }
@@ -2046,15 +2052,15 @@ output$answer <- renderText({
     } else {
       showNotification("Thank you for your feedback!")
 
-      try(
-        save_comments(
-          date = Sys.Date(),
-          time = format(Sys.time(), "%H:%M:%S"),
-          comments = input$user_feedback,
-          helpfulness = input$helpfulness,
-          experience = input$experience
-        )
+    try(
+      save_comments(
+        date = Sys.Date(),
+        time = format(Sys.time(), "%H:%M:%S"),
+        comments = input$user_feedback,
+        helpfulness = input$helpfulness,
+        experience = input$experience
       )
+    )
     }
 
     # clear the comments after submitted. 
