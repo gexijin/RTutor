@@ -237,35 +237,41 @@ demos_mpg <- c(
   'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
  Color by class. 
  Add jitter.",
-  'Distribution, numbers' = 'Show me the distribution of hwy.',
-  "Distribution, normality" = "Is cty normally distributed?",
-  'Distribution, categories' = 'Show me the distribution of class as a barchart.',
-  "Distribution, categories, pie" = "Create an pie chart based on  class.",
-  'Relationship, numbers-numbers' = "Show me the relationship between hwy and cty.",
-  "Relationship, refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
+
+  'Distribution: Numers' = 'Show me the distribution of hwy.',
+  "Dist: normality" = "Is cty normally distributed?",
+  'Dist: Categories' = 'Show me the distribution of class as a barchart.',
+  "Dist: Categories, pie" = "Create an pie chart based on  class.",
+
+  'Relationships: Numbers-numbers' = "Show me the relationship between hwy and cty.",
+  "Rel: Refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
 Change shape by drv. Change size by displ. 
 Change x label to 'Highway mpg'. 
 Change y label to 'City mpg'. 
 Change background to white. 
 Increase font for labels to 15. 
 Remove all grids.",
-  'Relationship, correlation coefficient' = "Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.",
-  'Relationship, numbers-categories' = "Show me the relationship between hwy and class.",
-  "Relationship, density plot in panels" = "Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
- "Relationship, category-category" = "Are drv and cyl independent?",
- "Relationship, category-category, plot" = "Plot the combinations of drv and cyl.",
-  "Relationship, category-category" = "Plot the combinations of drv and cyl as a mosaic plot.",
-  "Multivariate, correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
-"Multivariate, hierarchical clustering" = "Conduct hierarchical clustering. ",
-  'Multivariate, ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
-  'Multivariate, regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
+  'Rel: Correlation coefficient' = "Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.",
+  'Rel: Numbers-categories' = "Show me the relationship between hwy and class.",
+  "Rel: Numbers-categories, density" = "Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
+  'Rel: Numbers-categories, violin' = "Create a violin plot of cty vs. class. Color by class. Add jitter.",
+
+ "Rel: Category-category" = "Are drv and cyl independent?",
+ "Rel: Category-category, plot" = "Plot the combinations of drv and cyl.",
+  "Rel: Category-category, mosaic" = "Plot the combinations of drv and cyl as a mosaic plot.",
+
+  "Multivariate: Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
+"Mul: Hierarchical clustering" = "Conduct hierarchical clustering. ",
+  'Mul: ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
+  'Mul: Regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
 Give me diagnostic plots.",
-  "Multivariate, neural network" = "Build a neural network model to predict  
+  "Mul: Neural network" = "Build a neural network model to predict  
 hwy based on displ, cyl, and class.   
 Use the nnet package. Plot the distribution of residuals.",
-
-  "Barplot, summarized" = "Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
-  "Data processing, describe data first" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. 
+  
+  "Data analysis" = "Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
+   "Convert data types" = "Convert cyl as numeric and calculate its correlation coefficient with hwy.",
+  "Data processing" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. 
 Only keep cars more efficient than 15 MPG, but less than 40, on the highway. 
 Add 0.5 to city MPG for correction. 
 Perform log transformation on city MPG. 
