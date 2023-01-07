@@ -684,9 +684,9 @@ app_server <- function(input, output, session) {
   api_error_modal <- shiny::modalDialog(
     title = "API connection error!",
     tags$h4("Is the API key is correct?", style = "color:red"),
-    tags$h4("How about the WiFi?", style = "color:red"),
-    tags$h5("If you are on RTutor.ai, maybe Dr G's API usage 
-    is more than he can affort this month.", style = "color:red"),
+      tags$h4("How about the WiFi?", style = "color:red"),
+      tags$h4("Maybe the openAI.com website is taking forever to respond.", style = "color:red"),    
+    tags$h5("If you keep having trouble, send us an email.", style = "color:red"),
     tags$h4(
       "Auto-reset ...", 
       style = "color:blue; text-align:right"
@@ -1967,8 +1967,7 @@ output$answer <- renderText({
   output$RTutor_version_main <- renderUI({
     tagList(
       h3(paste("RTutor.ai ", release)),
-      h4("New! Try me in dozens of foreign languages. 
-      English is preferred for complex analyses. ", style="color:red")
+      h4("English is preferred but try asking in other languages.")
     )
   })
 

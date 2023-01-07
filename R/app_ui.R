@@ -99,11 +99,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             uiOutput("slava_ukraini"),
             br(),
             textOutput("retry_on_error"),
-            checkboxInput("Comments", "Leave comments"),
+            checkboxInput("Comments", "Help improve RTutor"),
             tags$style(type = "text/css", "textarea {width:100%}"),
             tags$textarea(
               id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like?",
+              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
               rows = 4,
               ""
             ),
@@ -157,13 +157,61 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                     thousands of books, millions of code repositories, 
                     and billions of web pages of all kinds.
                     I'm not being hyperbolic. Just bragging. 
-                    BTW, in my foreign language classes, I learned
-                     Japanese, German, French, Chinese, Hindi, and 
-                     dozens of others languages. Maybe rusty, 
-                     but try me out. 
+                    BTW, I also learned a few dozen foregin languages.
                      "
                   ),
                   align = 'left'
+                )
+              ),
+              hr(),
+              h3("Tips:"),
+              tags$ul(
+                tags$li(
+                  "Start small. Gradually add complexity.  First try simple requests 
+                  such as distributions, plain plots, or simple models. Then customize it
+                  or add variables. Step by Step.
+                  ", style = "color:red"
+                ),
+                tags$li(
+                  "Launched as a prototype, RTutor is only 
+                  20 days old. Keep your expectations low and 
+                  send us your valuable feedback. See lower left."
+                ),
+                tags$li(
+                  "It can takes a few tries to get it correct. If it still does not
+                  work, try to word it differently. As a last resort, increase 
+                  the \"Temperature\" setting to 0.9 and try a few times."
+                ),
+                tags$li(
+                  "Clean your data in Excel first!"
+                ),
+                tags$li(
+                  "After uploading your file, your data is automatically loaded into
+                  RTutor as a data frame called df. "
+                ),
+                tags$li(
+                  "Before sending your request to OpenAI, we add \"Generate R code\" before it,
+                  and append something like \"Use the df data frame. 
+                  Note that hwy is numeric\" afterwards."
+                ),
+
+                tags$li(
+                  "Your data is not sent to the AI. To ask generic questions without
+                  mentioning column names, first tell RTutor some information about 
+                  the relevant columns, like describing your data to an statistician 
+                  who knows nothing about your data."
+                ),
+                tags$li(
+                  "Each chunk starts anew from your uploaded data. If you want to build 
+                  upon the current chunk, select the \"Continue from this chunk\" checkbox.
+                    The R code will be inserted before your next chunk when executed. "
+                ),
+                tags$li(
+                  "Check if the data types are correct: numeric
+                  columns vs. categories (factors or characters). See below.
+                    You can tell RTutor to convert by using saying
+                    \"Convert cyl as numeric\", or \"Convert year as factor\". 
+                    Big difference in analysis and plots! We try to auto detect. See settings."
                 )
               ),
               hr()
@@ -172,7 +220,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               condition = "input.submit_button != 0",
               fluidRow(
                 column(
-                  width = 6,
+                  width = 4,
                   selectInput(
                     inputId = "selected_chunk",
                     label = "AI generated code:",
@@ -181,7 +229,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   )
                 ),
                 column(
-                  width = 6,
+                  width = 4,
                   style = "margin-top: 10px;",
                   checkboxInput(
                     inputId = "continue",
