@@ -181,7 +181,8 @@ prep_input <- function(txt, selected_data, df) {
     }
   }
   txt <- paste(pre_text, txt)
-
+  # replace newline with space.
+  txt <- gsub("\n", " ", txt)
   return(txt)
 }
 
@@ -236,68 +237,55 @@ demos_mpg <- c(
   'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
  Color by class. 
  Add jitter.",
-  'Chinese, 中文' = "按class画hwy的箱线图。按class更改颜色。添加抖动。",
- 'Spanish, En español' = "Cree un diagrama de caja de hwy por class. Cambia de color por class. Añade nerviosismo.",
- 'Japanese, 日本語' = "classごとに hwy の箱ひげ図を作成します。classごとに色を変えます。ジッターを追加します。",
- 'German, deutsche Sprache' = "Verwenden Sie ggplot2, um einen Boxplot von hwy nach class zu erstellen. Farbe um class ändern. Jitter-Punkte hinzufügen",
- 'French, Français' = "Créez une boîte à moustaches de hwy par class. Changer de couleur par class. Ajoutez des points de gigue.",
- 'Italian, Italiano' = "Crea un boxplot di hwy di class. Varia colore di class. Aggiungi punti di jitter.",
- 'Hindi, हिन्दी भाषा' = "class द्वारा hwy का बॉक्सप्लॉट बनाने के लिए ggplot2 का उपयोग करें। class द्वारा भिन्न रंग। जिटर पॉइंट जोड़ें।",
-  'Correlation' = "Calculate the correlation coefficient of cty vs hwy. 
-Repeat that after log transformation. 
-Collect these results and show them.",
-
-  'ANOVA, after log' = "Conduct ANOVA of log-transformed hwy by class and drv.",
-
-  "Barplot, summarized" = "Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
-
-  "Analysis, step by step" = "Only keep cars with hwy bigger than 15, but less than 40. 
-Add 0.5 to cty. 
-Perform log transformation on cty. 
-Raise hwy to the second power. 
-Calculate correlation coefficient of transformed hwy and cty.",
-
-  "Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
-
-  'Regression, specific' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
-Give me diagnostic plots.",
-
-  "Analysis, complex" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. 
-Only keep cars more efficient than 15 MPG, but less than 40, on the highway. 
-Add 0.5 to city MPG for correction. 
-Perform log transformation on city MPG. 
-Raise highway MPG to the second power. 
-Calculate correlation coefficient of  the two transformed variables.",
-
-  "Neural network" = "Build a neural network model to predict  
-hwy based on displ, cyl, and class.   
-Use the nnet package. Plot the distribution of residuals.",
-
-"High level Qs, 1" = "Are hwy increasing over the years?",
-"High level Qs, 2" = "Are drv and cyl independent?",
-"High level Qs, 3" = "Is hwy normally distributed?",
-
-#"Ask for info, demo" = "Show me how to do model-based clustering.",
-
-  'Scatter plot, interactive' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
-
-  "Scatter plot, refined" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
+  'Distribution, numbers' = 'Show me the distribution of hwy.',
+  "Distribution, normality" = "Is cty normally distributed?",
+  'Distribution, categories' = 'Show me the distribution of class as a barchart.',
+  "Distribution, categories, pie" = "Create an pie chart based on  class.",
+  'Relationship, numbers-numbers' = "Show me the relationship between hwy and cty.",
+  "Relationship, refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
 Change shape by drv. Change size by displ. 
 Change x label to 'Highway mpg'. 
 Change y label to 'City mpg'. 
 Change background to white. 
 Increase font for labels to 15. 
 Remove all grids.",
+  'Relationship, correlation coefficient' = "Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.",
+  'Relationship, numbers-categories' = "Show me the relationship between hwy and class.",
+  "Relationship, density plot in panels" = "Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
+ "Relationship, category-category" = "Are drv and cyl independent?",
+ "Relationship, category-category, plot" = "Plot the combinations of drv and cyl.",
+  "Relationship, category-category" = "Plot the combinations of drv and cyl as a mosaic plot.",
+  "Multivariate, correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
+"Multivariate, hierarchical clustering" = "Conduct hierarchical clustering. ",
+  'Multivariate, ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
+  'Multivariate, regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
+Give me diagnostic plots.",
+  "Multivariate, neural network" = "Build a neural network model to predict  
+hwy based on displ, cyl, and class.   
+Use the nnet package. Plot the distribution of residuals.",
 
-"Hierarchical clustering" = "Conduct hierarchical clustering. ",
-"Density plot, panels" = "Only keep 4, 6, and 8 cylinders. 
-Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
- "Pie chart" = "Create an pie chart based on  class. "
+  "Barplot, summarized" = "Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
+  "Data processing, describe data first" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. 
+Only keep cars more efficient than 15 MPG, but less than 40, on the highway. 
+Add 0.5 to city MPG for correction. 
+Perform log transformation on city MPG. 
+Raise highway MPG to the second power. 
+Calculate correlation coefficient of  the two transformed variables.",
+
+  'Interactive plots' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
+
+ 'Chinese, 中文' = "按class画hwy的箱线图。按class更改颜色。添加抖动。",
+ 'Spanish, En español' = "Cree un diagrama de caja de hwy por class. Cambia de color por class. Añade nerviosismo.",
+ 'Japanese, 日本語' = "classごとに hwy の箱ひげ図を作成します。classごとに色を変えます。ジッターを追加します。",
+ 'German, deutsche Sprache' = "Verwenden Sie ggplot2, um einen Boxplot von hwy nach class zu erstellen. Farbe um class ändern. Jitter-Punkte hinzufügen",
+ 'French, Français' = "Créez une boîte à moustaches de hwy par class. Changer de couleur par class. Ajoutez des points de gigue.",
+ 'Italian, Italiano' = "Crea un boxplot di hwy di class. Varia colore di class. Aggiungi punti di jitter.",
+ 'Hindi, हिन्दी भाषा' = "class द्वारा hwy का बॉक्सप्लॉट बनाने के लिए ggplot2 का उपयोग करें। class द्वारा भिन्न रंग। जिटर पॉइंट जोड़ें।"
 )
 
 # demo requests when no dataset is selected.
 demos_no_data <- c(
-  'Random number' = "Generate 100 random numbers. Plot their distribution.",
+  'Random numbers' = "Generate 100 random numbers. Plot their distribution.",
   'Hierarchical tree' = "Provide a demo for hierarchical clustering tree.",
   'Heat map' = "Create a heatmap with hierarchical clustering tree.",
   "Ridge regression" = "Provide a demo for ridge regression.",
@@ -306,7 +294,6 @@ The mean is 1 for the first 10 rows, but 3 for the rest.
 Conduct PCA. Plot using the first two principal components.",
 'Map' = "Create an world map. ",
 'Map, US' = "Create a US map.",
-'Map, state' = "Crate a county level map of South Dakota.",
 'Bioinformatics, genes' = "Use the biomaRt package to retrieve all human genes on Chr.Y.",
 'Bioinformatics, position' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y.",
 'Bioinformatics, length' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y. Calculate the length as the absolute difference between the start and end positions. Create a density plot of the length after log10 transformation.",

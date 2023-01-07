@@ -99,11 +99,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             uiOutput("slava_ukraini"),
             br(),
             textOutput("retry_on_error"),
-            checkboxInput("Comments", "Leave comments"),
+            checkboxInput("Comments", "Send us feedback"),
             tags$style(type = "text/css", "textarea {width:100%}"),
             tags$textarea(
               id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like?",
+              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
               rows = 4,
               ""
             ),
@@ -157,10 +157,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                     thousands of books, millions of code repositories, 
                     and billions of web pages of all kinds.
                     I'm not being hyperbolic. Just bragging. 
-                    BTW, in my foreign language classes, I learned
-                     Japanese, German, French, Chinese, Hindi, and 
-                     dozens of others languages. Maybe rusty, 
-                     but try me out. 
+                    BTW, I also learned a few dozen foregin languages.
                      "
                   ),
                   align = 'left'
@@ -172,7 +169,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               condition = "input.submit_button != 0",
               fluidRow(
                 column(
-                  width = 6,
+                  width = 4,
                   selectInput(
                     inputId = "selected_chunk",
                     label = "AI generated code:",
@@ -181,7 +178,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   )
                 ),
                 column(
-                  width = 6,
+                  width = 4,
                   style = "margin-top: 10px;",
                   checkboxInput(
                     inputId = "continue",
