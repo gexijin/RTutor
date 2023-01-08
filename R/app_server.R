@@ -1202,7 +1202,7 @@ app_server <- function(input, output, session) {
       data_afterwards(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
-        pageLength = 10,
+        pageLength = 500,
         dom = 'ftp',
         scrollX = "400px"
       ),

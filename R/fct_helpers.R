@@ -277,7 +277,8 @@ Add 0.5 to city MPG for correction.
 Perform log transformation on city MPG. 
 Raise highway MPG to the second power. 
 Calculate correlation coefficient of  the two transformed variables.",
-
+  "Data wrangling, base R" = "The dataset contains various statistics about cars. Remove everything after \"(\" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Use ggplot2 to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
+  "Data wrangling, dplyr" = "The dataset contains various about cars. First, use dplyr to prepare the data. Remove everything after \"(\" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Sort the cars by ratio, highest first. Second, use ggplot2 to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
   'Interactive plots' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
 
  'Chinese, 中文' = "按class画hwy的箱线图。按class更改颜色。添加抖动。",
