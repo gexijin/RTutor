@@ -243,7 +243,7 @@ demos_mpg <- c(
   'Dist: Categories' = 'Show me the distribution of class as a barchart.',
   "Dist: Categories, pie" = "Create an pie chart based on  class.",
 
-  'Relationships: Numbers-numbers' = "Show me the relationship between hwy and cty.",
+  'Relationship: Numbers-numbers' = "Show me the relationship between hwy and cty.",
   "Rel: Refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
 Change shape by drv. Change size by displ. 
 Change x label to 'Highway mpg'. 
@@ -261,11 +261,11 @@ Remove all grids.",
   "Rel: Category-category, mosaic" = "Plot the combinations of drv and cyl as a mosaic plot.",
 
   "Multivariate: Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
-"Mul: Hierarchical clustering" = "Conduct hierarchical clustering. ",
-  'Mul: ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
-  'Mul: Regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
+"Multi: Hierarchical clustering" = "Conduct hierarchical clustering. ",
+  'Multi: ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
+  'Multi: Regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
 Give me diagnostic plots.",
-  "Mul: Neural network" = "Build a neural network model to predict  
+  "Multi: Neural network" = "Build a neural network model to predict  
 hwy based on displ, cyl, and class.   
 Use the nnet package. Plot the distribution of residuals.",
   
