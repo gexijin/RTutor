@@ -178,7 +178,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   send us your valuable feedback. See lower left."
                 ),
                 tags$li(
-                  "It can takes a few tries to get it correct. If it still does not
+                  "It can take a few tries to get it correct. If it still does not
                   work, try to word it differently. As a last resort, increase 
                   the \"Temperature\" setting to 0.9 and try a few times."
                 ),
@@ -211,7 +211,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   columns vs. categories (factors or characters). See below.
                     You can tell RTutor to convert by using saying
                     \"Convert cyl as numeric\", or \"Convert year as factor\". 
-                    Big difference in analysis and plots! We try to auto detect. See settings."
+                    Big difference in analysis and plots! We try to auto detect. See Settings."
                 )
               ),
               hr()
