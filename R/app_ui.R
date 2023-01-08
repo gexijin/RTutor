@@ -282,8 +282,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         title = "Data",
         value = "Data",
         textOutput("data_size"),
-        DT::dataTableOutput("data_table_DT"),
-        verbatimTextOutput("data_summary")
+        DT::dataTableOutput("data_table_DT")
       ),
       tabPanel(
         title = "Report",
@@ -322,6 +321,10 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         title = "EDA",
         value = "EDA",
         tabsetPanel(
+          tabPanel(
+            title = "Basic",
+            verbatimTextOutput("data_summary")
+          ),
           tabPanel(
             title = "Summary",
             verbatimTextOutput("dfSummary"),
