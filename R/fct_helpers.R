@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.8.5" # RTutor
+release <- "0.8.6" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "No data (examples)" # no data is uploaded or selected
 rna_seq <- "RNA-Seq"  # RNA-Seq read counts
@@ -149,40 +149,65 @@ prep_input <- function(txt, selected_data, df) {
         }
 
         # Categorical variables-----------------------------
-        relevant_var_categorical <- intersect(relevant_var, none_numeric_var)
-        if (length(relevant_var_categorical) == 1) {
-          data_info <- paste0(
-            data_info,
-            "Note that ",
-            relevant_var_categorical,
-            " is a categorical variable. "
+        all_relevant_var_categorical <- intersect(
+          relevant_var,
+          none_numeric_var
+        )
+
+        for (relevant_var_categorical in all_relevant_var_categorical) {
+          ix <- match(relevant_var_categorical, colnames(df))
+          factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
+          factor_levels <- names(factor_levels)
+
+          # have more than 6 levels?
+          many_levels <- FALSE
+
+          if (length(factor_levels) > 6) {
+            many_levels <- TRUE
+            factor_levels <- factor_levels[1:6]
+          }
+
+          last_level <- factor_levels[length(factor_levels)]
+          factor_levels <- factor_levels[-1 * length(factor_levels)]
+          tem <- paste0(
+            factor_levels,
+            collapse = "', '"
           )
-        } else if (length(relevant_var_categorical) > 1) {
+          if (!many_levels) { # less than 6 levels
+            factor_levels <- paste0("'", tem, "', and '", last_level, "'")
+          } else { # more than 6 levels
+            factor_levels <- paste0(
+              "'",
+              tem,
+              "', '",
+              last_level,
+              "', etc"
+            )
+          }
+
           data_info <- paste0(
             data_info,
-            "Note that ",
-            paste0(
-              relevant_var_categorical[1:(length(relevant_var_categorical) - 1)],
-              collapse = ", "
-            ),
-            " and ",
-            relevant_var_categorical[length(relevant_var_categorical)],
-            " are categorical variables. "
+            "The column ",
+            relevant_var_categorical,
+            " contains a categorical variable with these levels: ",
+            factor_levels,
+            ". "
           )
         }
       }
 
       txt <- paste(txt, after_text)
       # if user is not trying to convert data
-      if(!grepl("Convert |convert ", txt)) {
+      if (!grepl("Convert |convert ", txt)) {
         txt <- paste(txt, data_info)
       }
-
     }
   }
+
   txt <- paste(pre_text, txt)
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
+
   return(txt)
 }
 
@@ -238,37 +263,37 @@ demos_mpg <- c(
  Color by class. 
  Add jitter.",
 
-  'Distribution: Numers' = 'Show me the distribution of hwy.',
-  "Dist: normality" = "Is cty normally distributed?",
-  'Dist: Categories' = 'Show me the distribution of class as a barchart.',
-  "Dist: Categories, pie" = "Create an pie chart based on  class.",
+  'Distribution (D): Numers' = 'Show me the distribution of hwy.',
+  "D: normality" = "Is cty normally distributed?",
+  'D: Categories' = 'Show me the distribution of class as a barchart.',
+  "D: Categories, pie" = "Create an pie chart based on  class.",
 
-  'Relationship: Numbers-numbers' = "Show me the relationship between hwy and cty.",
-  "Rel: Refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
+  'Relationship (R): Numbers-numbers' = "Show me the relationship between hwy and cty.",
+  "R: Refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
 Change shape by drv. Change size by displ. 
 Change x label to 'Highway mpg'. 
 Change y label to 'City mpg'. 
 Change background to white. 
 Increase font for labels to 15. 
 Remove all grids.",
-  'Rel: Correlation coefficient' = "Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.",
-  'Rel: Numbers-categories' = "Show me the relationship between hwy and class.",
-  "Rel: Numbers-categories, density" = "Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
-  'Rel: Numbers-categories, violin' = "Create a violin plot of cty vs. class. Color by class. Add jitter.",
+  'R: Correlation coefficient' = "Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.",
+  'R: Numbers-categories' = "Show me the relationship between hwy and class.",
+  "R: Numbers-categories, density" = "Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
+  'R: Numbers-categories, violin' = "Create a violin plot of cty vs. class. Color by class. Add data points with jitter.",
 
- "Rel: Category-category" = "Are drv and cyl independent?",
- "Rel: Category-category, plot" = "Plot the combinations of drv and cyl.",
-  "Rel: Category-category, mosaic" = "Plot the combinations of drv and cyl as a mosaic plot.",
+ "R: Category-category" = "Are drv and cyl independent?",
+ "R: Category-category, plot" = "Plot the combinations of drv and cyl.",
+  "R: Category-category, mosaic" = "Plot the combinations of drv and cyl as a mosaic plot.",
 
-  "Multivariate: Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
-"Multi: Hierarchical clustering" = "Conduct hierarchical clustering. ",
-  'Multi: ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
-  'Multi: Regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
+  "Multivariate (M): Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
+"M: Hierarchical clustering" = "Conduct hierarchical clustering. ",
+  'M: ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
+  'M: Regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
 Give me diagnostic plots.",
-  "Multi: Neural network" = "Build a neural network model to predict  
+  "M: Neural network" = "Build a neural network model to predict  
 hwy based on displ, cyl, and class.   
 Use the nnet package. Plot the distribution of residuals.",
-  
+
   "Data analysis" = "Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
    "Convert data types" = "Convert cyl as numeric and calculate its correlation coefficient with hwy.",
   "Data processing" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. 
@@ -278,7 +303,7 @@ Perform log transformation on city MPG.
 Raise highway MPG to the second power. 
 Calculate correlation coefficient of  the two transformed variables.",
   "Data wrangling, base R" = "The dataset contains information about cars. Remove everything after \"(\" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Use ggplot2 to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
-  "Data wrangling, dplyr" = "The dataset contains various about cars. First, use dplyr to prepare the data. Remove everything after \"(\" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Sort the cars by ratio, highest first. Second, use ggplot2 to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
+  "Data wrangling, dplyr" = "The dataset contains various about cars. First, use dplyr to prepare the data. Remove everything after "(" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Sort the cars by ratio, highest first. Second, use ggplot2 and the new data to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
   'Interactive plots' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
 
  'Chinese, 中文' = "按class画hwy的箱线图。按class更改颜色。添加抖动。",
