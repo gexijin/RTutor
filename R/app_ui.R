@@ -173,8 +173,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   ", style = "color:red"
                 ),
                 tags$li(
-                  "Released as a prototype for testing, RTutor is only 
-                  25 days old. Keep your expectations low and 
+                  "Released as a prototype for testing, RTutor was just an idea 
+                  25 days ago. Keep your expectations low and 
                   send us your valuable feedback (lower left)."
                 ),
                 tags$li(
