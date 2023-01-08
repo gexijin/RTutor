@@ -179,8 +179,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 ),
                 tags$li(
                   "It can take a few tries to get it correct. If it still does not
-                  work, try to word it differently. As a last resort, increase 
-                  the \"Temperature\" setting to 0.9 and try a few times."
+                  work, rephrase your request. Also, increase 
+                  the \"Temperature\" setting will make the AI more aggressive in
+                  seeking alternative solutions."
                 ),
                 tags$li(
                   "Prepare and clean your data in Excel first! 
