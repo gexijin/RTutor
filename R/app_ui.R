@@ -43,7 +43,7 @@ app_ui <- function(request) {
         # Sidebar with a slider input for number of bins
         sidebarLayout(
           sidebarPanel(
-            uiOutput("timer_ui"),
+#            uiOutput("timer_ui"),
             fluidRow(
               column(
                 width = 6,
