@@ -274,9 +274,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             verbatimTextOutput("data_structure"),
             tableOutput("data_table")
 
-
-          )
-        )
+            ,uiOutput("python_markdown")
+          ) #mainPanel
+        ) #sideBarpanel
       ), #tabPanel
 
       tabPanel(

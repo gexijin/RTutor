@@ -2090,5 +2090,17 @@ output$answer <- renderText({
 
 
 
+  # Python
+
+  output$python_markdown <- renderUI({
+    withProgress(message = "Running Python code...", {
+      incProgress(0.3)
+      HTML(
+        markdown::markdownToHTML(knitr::knit("C:/work/RTutor/test.Rmd", quiet = TRUE))
+      )
+    })
+  })
+
+
 
 }
