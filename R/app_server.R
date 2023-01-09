@@ -2121,6 +2121,7 @@ printcode:
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 library(reticulate)
+use_condaenv(\"r-ticulate\")
 df <- params$df
 ```
 
