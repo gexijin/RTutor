@@ -160,11 +160,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                     BTW, I also learned a few dozen foregin languages.
                      "
                   ),
-                  align = 'left'
+                  align = "left"
                 )
               ),
               hr(),
-              h3("Tips:"),
+              h3("Instructions:"),
               tags$ul(
                 tags$li(
                   "Start small. Gradually add complexity. First, try simple requests 
@@ -274,7 +274,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             verbatimTextOutput("data_structure"),
             tableOutput("data_table")
 
-            ,uiOutput("python_markdown")
+
           ) #mainPanel
         ) #sideBarpanel
       ), #tabPanel
@@ -284,6 +284,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         value = "Data",
         textOutput("data_size"),
         DT::dataTableOutput("data_table_DT")
+      ),
+      tabPanel(
+        title = "Python",
+        value = "Python",
+        uiOutput("python_markdown")
       ),
       tabPanel(
         title = "Report",

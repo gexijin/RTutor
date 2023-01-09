@@ -2093,12 +2093,88 @@ output$answer <- renderText({
   # Python
 
   output$python_markdown <- renderUI({
-    withProgress(message = "Running Python code...", {
-      incProgress(0.3)
-      HTML(
-        markdown::markdownToHTML(knitr::knit("C:/work/RTutor/test.Rmd", quiet = TRUE))
-      )
-    })
+      
+      withProgress(message = "Generating Report ...", {
+        incProgress(0.2)
+        input$submit_button
+
+        #temporary html file
+        html_file <- paste0(tempfile(), "_temp.html")
+        tempReport <- paste0(tempfile(), "_temp.Rmd")
+
+
+        req(openAI_response()$cmd)
+        req(openAI_prompt())
+
+        #RMarkdown file's Header
+        Rmd_script <- 
+"---
+output: html_document
+params:
+  df:
+printcode:
+  label: \"Display Code\"
+  value: TRUE
+  input: checkbox
+---
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+library(reticulate)
+df <- params$df
+```
+
+```{python, echo = FALSE, message=FALSE}
+df = r.df
+```
+
+### AI generated Python code:"
+
+        Rmd_script <- paste0(
+          Rmd_script,
+"\n```{python}
+import matplotlib.pyplot as plt
+plt.scatter(df['hwy'], df['cty'])
+plt.show()
+```\n"
+        )
+
+        write(
+          Rmd_script,
+          file = tempReport,
+          append = FALSE
+        )
+
+        # Set up parameters to pass to Rmd document
+        params <- list(df = iris) # dummy
+
+        # if uploaded, use that data
+        req(input$select_data)
+        if (input$select_data != no_data) {
+          params <- list(
+            df = current_data()
+          )
+        }
+
+        req(params)
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
+
+
+        rmarkdown::render(
+          input = tempReport, # markdown_location,
+          output_file = html_file,
+          params = params,
+          envir = new.env(parent = globalenv())
+        )
+      })  # progress bar
+
+
+       tagList(
+       includeHTML(html_file)
+       )
+
   })
 
 
