@@ -588,7 +588,7 @@ app_server <- function(input, output, session) {
 
       shinybusy::show_modal_spinner(
         spin = "orbit",
-        text = paste(
+        text = paste("1:",
           sample(jokes, 1)
         ),
         color = "#000000"
@@ -2089,7 +2089,6 @@ output$answer <- renderText({
   })
 
 
-
   # Python
 
   output$python_markdown <- renderUI({
@@ -2109,7 +2108,6 @@ output$answer <- renderText({
         #RMarkdown file's Header
         Rmd_script <- 
 "---
-output: html_document
 params:
   df:
 printcode:
@@ -2121,7 +2119,7 @@ printcode:
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 library(reticulate)
-use_condaenv(\"r-reticulate\")
+#use_condaenv(\"r-reticulate\")
 df <- params$df
 ```
 
@@ -2138,6 +2136,8 @@ import matplotlib.pyplot as plt
 plt.scatter(df['hwy'], df['cty'])
 plt.show()
 ```\n"
+
+
         )
 
         write(
@@ -2162,19 +2162,23 @@ plt.show()
         # child of the global environment (this isolates the code in the document
         # from the code in this app).
 
-
         rmarkdown::render(
           input = tempReport, # markdown_location,
           output_file = html_file,
           params = params,
           envir = new.env(parent = globalenv())
         )
+
+
       })  # progress bar
 
 
-       tagList(
-       includeHTML(html_file)
-       )
+
+
+        htmltools::tags$iframe(
+          src =  app_sys("app", "www", "pathway.html"), #"C:\\work\\RTutor\\pathway.html", 
+        width = '100%', height = '100vh')
+ 
 
   })
 
