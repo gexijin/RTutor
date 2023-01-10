@@ -2108,6 +2108,7 @@ output$answer <- renderText({
         #RMarkdown file's Header
         Rmd_script <- 
 "---
+output: html_fragment
 params:
   df:
 printcode:
@@ -2136,7 +2137,6 @@ import matplotlib.pyplot as plt
 plt.scatter(df['hwy'], df['cty'])
 plt.show()
 ```\n"
-
 
         )
 
@@ -2172,16 +2172,13 @@ plt.show()
 
       })  # progress bar
 
-
-
-
-        htmltools::tags$iframe(
-          src =  app_sys("app", "www", "pathway.html"), #"C:\\work\\RTutor\\pathway.html", 
-        width = '100%', height = '100vh')
- 
+      includeHTML(
+        html_file
+      )
+#      htmltools::tags$iframe(
+#        src =  "C:\\work\\RTutor\\pathway.html", 
+#      width = '100%', height = '100vh')
 
   })
-
-
 
 }
