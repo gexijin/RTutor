@@ -76,7 +76,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
 
             fluidRow(
               column(
-                width = 6,
+                width = 4,
                 actionButton("submit_button", strong("Submit")),
                 tags$head(tags$style(
                   "#submit_button{font-size: 16px;color: red}"
@@ -88,8 +88,12 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 )
               ),
               column(
-                width = 6,
+                width = 4,
                 actionButton("api_button", "Settings")
+              ),
+              column(
+                width = 4,
+                checkboxInput("use_python", "Python", value = FALSE)
               )
             ),
             br(),
@@ -256,19 +260,29 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 )
               ),
               verbatimTextOutput("openAI"),
-              uiOutput("error_message"),
-              h4("Results:"),
+              conditionalPanel(
+                condition = "input.use_python == 0",
 
-              # shows error message in local machine, but not on the server
-              verbatimTextOutput("console_output"),
-              uiOutput("plot_ui"),
-              checkboxInput(
-                inputId = "make_ggplot_interactive",
-                label = NULL,
-                value = FALSE
+                uiOutput("error_message"),
+                h4("Results:"),
+
+                # shows error message in local machine, but not on the server
+                verbatimTextOutput("console_output"),
+                uiOutput("plot_ui"),
+                checkboxInput(
+                  inputId = "make_ggplot_interactive",
+                  label = NULL,
+                  value = FALSE
+                ),
+                br(),
+                uiOutput("tips_interactive"), 
               ),
-              br(),
-              uiOutput("tips_interactive"),
+              conditionalPanel(
+                condition = "input.use_python == 1",
+                uiOutput("python_markdown")
+              ),
+
+
               hr(),
             ),
             verbatimTextOutput("data_structure"),
@@ -284,11 +298,6 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         value = "Data",
         textOutput("data_size"),
         DT::dataTableOutput("data_table_DT")
-      ),
-      tabPanel(
-        title = "Python",
-        value = "Python",
-        uiOutput("python_markdown")
       ),
       tabPanel(
         title = "Report",

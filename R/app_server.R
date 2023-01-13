@@ -570,7 +570,7 @@ app_server <- function(input, output, session) {
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
-    prep_input(input$input_text, input$select_data, current_data())
+    prep_input(input$input_text, input$select_data, current_data(), input$use_python)
   })
 
   openAI_response <- reactive({
@@ -588,9 +588,7 @@ app_server <- function(input, output, session) {
 
       shinybusy::show_modal_spinner(
         spin = "orbit",
-        text = paste("1:",
-          sample(jokes, 1)
-        ),
+        text = sample(jokes, 1),
         color = "#000000"
       )
 
@@ -737,7 +735,9 @@ app_server <- function(input, output, session) {
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
     last_code = "", # last code for Rmarkdown
-    code_history = list() # keep all code chunks
+    language = "", # Python or R
+    code_history = list(), # keep all code chunks
+
   )
 
   observeEvent(input$submit_button, {
@@ -752,6 +752,8 @@ app_server <- function(input, output, session) {
 
       logs$last_code <- ""
 
+      logs$language = ifelse(input$use_python, "Python", "R")
+
     } else { # if continue
       logs$last_code <- logs$code  # last code
       logs$code <- paste(
@@ -765,6 +767,8 @@ app_server <- function(input, output, session) {
         "\n\n#-------------------------\n",
         gsub("^\n+", "", openAI_response()$response$choices[1, 1])
       )
+
+      logs$language = ifelse(input$use_python, "Python", "R")
     }
 
     # A list holds current request
@@ -774,7 +778,8 @@ app_server <- function(input, output, session) {
       raw = logs$raw, # for print
       prompt = input$input_text,
       error = code_error(),
-      rmd = Rmd_chunk()
+      rmd = Rmd_chunk(),
+      language = ifelse(input$use_python, "Python", "R")
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -2092,7 +2097,11 @@ output$answer <- renderText({
   # Python
 
   output$python_markdown <- renderUI({
-      
+    req(input$submit_button)
+    req(input$use_python)
+    req(logs$code)
+
+    isolate({ 
       withProgress(message = "Generating Report ...", {
         incProgress(0.2)
         input$submit_button
@@ -2118,7 +2127,7 @@ printcode:
 ---
 
 
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(reticulate)
 #use_condaenv(\"r-reticulate\")
 df <- params$df
@@ -2128,18 +2137,14 @@ df <- params$df
 df = r.df
 ```
 
-### AI generated Python code:"
+#### Results:"
 
         Rmd_script <- paste0(
           Rmd_script,
-"\n```{python}
-import matplotlib.pyplot as plt
-plt.scatter(df['hwy'], df['cty'])
-plt.show()
-```\n"
-
+          "\n```{python, echo=FALSE}\n",
+          logs$code,
+          "\n```\n"
         )
-
         write(
           Rmd_script,
           file = tempReport,
@@ -2161,24 +2166,28 @@ plt.show()
         # Knit the document, passing in the `params` list, and eval it in a
         # child of the global environment (this isolates the code in the document
         # from the code in this app).
-
-        rmarkdown::render(
-          input = tempReport, # markdown_location,
-          output_file = html_file,
-          params = params,
-          envir = new.env(parent = globalenv())
+        try(
+          rmarkdown::render(
+            input = tempReport, # markdown_location,
+            output_file = html_file,
+            params = params,
+            envir = new.env(parent = globalenv())
+          )
         )
 
-
       })  # progress bar
+      
 
-      includeHTML(
-        html_file
-      )
-#      htmltools::tags$iframe(
-#        src =  "C:\\work\\RTutor\\pathway.html", 
-#      width = '100%', height = '100vh')
+      if(file.exists(html_file)) {
+        includeHTML(html_file)       
+      } else {
+        p("Error!")
+      }
 
+
+    })
   })
+
+  
 
 }

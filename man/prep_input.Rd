@@ -4,7 +4,7 @@
 \alias{prep_input}
 \title{Prepare User input.}
 \usage{
-prep_input(txt, selected_data, df)
+prep_input(txt, selected_data, df, use_python)
 }
 \arguments{
 \item{txt}{A string that stores the user input.}
@@ -12,6 +12,8 @@ prep_input(txt, selected_data, df)
 \item{selected_data}{Name of the dataset.}
 
 \item{df}{the data frame}
+
+\item{use_python}{whether or not using python instead of R}
 }
 \value{
 Returns a cleaned up version, so that it could be sent to GPT.

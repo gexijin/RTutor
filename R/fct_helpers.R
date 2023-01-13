@@ -21,7 +21,8 @@ max_query_length <- 500 # max # of characters
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
 pre_text <- "Generate R code. "
-after_text <- " Use the df data frame. "
+pre_text_python <- "Generate Python code. "
+after_text <- " Use the df data frame, which is already read from a file. "
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
@@ -64,9 +65,10 @@ move_front <- function(v, e){
 #' @param txt A string that stores the user input.
 #' @param selected_data Name of the dataset.
 #' @param df the data frame
+#' @param use_python  whether or not using python instead of R
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df) {
+prep_input <- function(txt, selected_data, df, use_python) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -204,7 +206,16 @@ prep_input <- function(txt, selected_data, df) {
     }
   }
 
-  txt <- paste(pre_text, txt)
+
+
+  txt <- paste(
+    ifelse(
+      use_python,
+      pre_text_python,
+      pre_text
+    ),
+    txt
+  )
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
 
