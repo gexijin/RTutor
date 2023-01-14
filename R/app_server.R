@@ -816,6 +816,14 @@ app_server <- function(input, output, session) {
       value = logs$code_history[[id]]$prompt
     )
 
+    # change language 
+    if(input$submit_button != 0) {
+      updateCheckboxInput(
+        session = session,
+        inputId = "use_python",
+        value = (logs$code_history[[id]]$language == "Python")
+      )
+    }
 
   })
 
@@ -887,7 +895,9 @@ app_server <- function(input, output, session) {
   # a base R plot is generated.
   run_result <- reactive({
     req(logs$code)
-    req(input$submit_button != 0)
+    req(input$submit_button != 0)   
+    req(!input$use_python)
+
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
@@ -944,6 +954,7 @@ app_server <- function(input, output, session) {
   output$console_output <- renderText({
     req(!code_error())
     req(logs$code)
+    req(!input$use_python)
     out <- ""
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
@@ -969,6 +980,7 @@ app_server <- function(input, output, session) {
   output$result_plot <- renderPlot({
     req(!code_error())
     req(logs$code)
+    req(!input$use_python)
     withProgress(message = "Generating a plot ...", {
       incProgress(0.4)
       try(
@@ -983,6 +995,7 @@ app_server <- function(input, output, session) {
 
   output$result_plotly <- plotly::renderPlotly({
     req(!code_error())
+    req(!input$use_python)
     req(
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive)
@@ -1000,6 +1013,7 @@ app_server <- function(input, output, session) {
 
   output$plot_ui <- renderUI({
     req(input$submit_button)
+    req(!input$use_python)
     
     if (code_error() || input$submit_button == 0) {
       return()
@@ -1177,16 +1191,18 @@ app_server <- function(input, output, session) {
     # This updates the data by running hte entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
-        withProgress(message = "Updating values ...", {
-          incProgress(0.4)
-          try(
-            eval(
-              parse(
-                text = clean_cmd(logs$code, input$select_data)
-              )
-            ),
-          )
-        })
+        if(!input$use_python && logs$language == "R") { # not python
+          withProgress(message = "Updating values ...", {
+            incProgress(0.4)
+            try(
+              eval(
+                parse(
+                  text = clean_cmd(logs$code, input$select_data)
+                )
+              ),
+            )
+          })
+        }
       }
     }
 
@@ -2098,8 +2114,9 @@ output$answer <- renderText({
 
   output$python_markdown <- renderUI({
     req(input$submit_button)
-    req(input$use_python)
-    req(logs$code)
+    req((logs$language == "Python") == input$use_python )
+    # responsive when switching between two python chunks
+    input$selected_chunk 
 
     isolate({ 
       withProgress(message = "Generating Report ...", {
