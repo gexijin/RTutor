@@ -925,18 +925,23 @@ app_server <- function(input, output, session) {
     error_status <- FALSE
     req(input$submit_button != 0)
 
-    # if error returns true, otherwise 
-    #  that slot does not exist, returning false.
-    # or be NULL
-    try(  # if you do not 'try', the entire app quits! :-)
-      if (is.list(run_result())) {
-      req(!is.null(names(run_result())[1]))
-        if (names(run_result())[1] == "error_value") {
-          error_status <- TRUE
+    if(!input$use_python) { # R
+      # if error returns true, otherwise 
+      #  that slot does not exist, returning false.
+      # or be NULL
+      try(  # if you do not 'try', the entire app quits! :-)
+        if (is.list(run_result())) {
+        req(!is.null(names(run_result())[1]))
+          if (names(run_result())[1] == "error_value") {
+            error_status <- TRUE
+          }
         }
-      }
-    )
-    return(error_status)
+      )
+      return(error_status)
+    } else { # Python
+      return( python_to_html() == -1)
+    }
+
   })
 
 
@@ -1379,6 +1384,18 @@ app_server <- function(input, output, session) {
       "```\n"
     )
 
+    if(input$use_python) {
+      Rmd_script <- paste0(
+        Rmd_script,
+        "```{R}\n",
+        "library(reticulate)\n",
+        "```\n",
+        "```{python, message=FALSE}\n",
+        "df = r.df\n",
+        "```\n"
+      )
+    }
+
     # User request----------------------
     Rmd_script  <- paste0(
       Rmd_script,
@@ -1408,19 +1425,33 @@ app_server <- function(input, output, session) {
     )
 
     # R Markdown code chunk----------------------
-    #if error when running the code, do not run
-    if (code_error() == TRUE) {
-      Rmd_script <- paste0(
-        Rmd_script,
-        "```{R, eval = FALSE}"
-      )
-    } else {
-      Rmd_script <- paste0(
-        Rmd_script,
-        "```{R}"
-      )
+    if(!input$use_python) {  # R code chunk
+      #if error when running the code, do not run
+      if (code_error() == TRUE) {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{R, eval = FALSE}"
+        )
+      } else {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{R}"
+        )
+      }
+    } else {  # Python code chunk
+      #if error when running the code, do not run
+      if (python_to_html() == -1) {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{python, eval = FALSE}"
+        )
+      } else {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{python}"
+        )
+      }
     }
-
     cmd <- openAI_response()$cmd
     # remove empty line
     if(nchar(cmd[1]) == 0) {
