@@ -1,116 +1,117 @@
-﻿data,R,Python,Name, Example requests
-mpg,1,0,"Boxplot, ggplot2 ", Use ggplot2 to create a boxplot of hwy vs. class. Color by class. Add jitter.
-mpg,1,0,Distribution (D): Numers , Show me the distribution of hwy.
-mpg,1,1,D: normality , Is cty normally distributed?
-mpg,1,1,D: Categories , Show me the distribution of class as a barchart.
-mpg,1,1,"D: Categories, pie ", Create an pie chart based on  class.
-mpg,1,1,Relationship (R): Numbers-numbers , Plot the relationship between hwy and cty
-mpg,1,0,R: Refined scatter plot ," Use ggplot2. Plot hwy vs. cty, colored by class. Change shape by drv. Change size by displ. Change x label to 'Highway mpg'.  Change y label to 'City mpg'. Change background to white.  Increase font for labels to 15. Remove all grids."
-mpg,1,0,R: Correlation coefficient , Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.
-mpg,1,1,R: Numbers-categories , Show me the relationship between hwy and class.
-mpg,1,0,"R: Numbers-categories, density "," Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl."
-mpg,1,0,"R: Numbers-categories, violin ", Create a violin plot of cty vs. class. Color by class. Add data points with jitter.
-mpg,1,0,R: Category-category , Are drv and cyl independent?
-mpg,1,0,"R: Category-category, plot ", Plot the combinations of drv and cyl.
-mpg,1,0,"R: Category-category, mosaic ", Plot the combinations of drv and cyl as a mosaic plot.
-mpg,1,0,Multivariate (M): Correlation heatmap , Create a correlation map of all the columns that contain numbers
-mpg,1,0,M: Hierarchical clustering , Conduct hierarchical clustering.
-mpg,1,0,M: ANOVA , Conduct ANOVA of log-transformed hwy by class and drv.
-mpg,1,0,M: Regression ," Build a regression model of hwy based on cyl, displ, drv, and class. Give me diagnostic plots."
-mpg,1,0,M: Neural network ," Build a neural network model to predict hwy based on displ, cyl, and class. Use the nnet package. Plot the distribution of residuals."
-mpg,1,0,Data analysis ," Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side."
-mpg,1,0,Convert data types , Convert cyl as numeric and calculate its correlation coefficient with hwy.
-mpg,1,0,Data processing ," hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. Only keep cars more efficient than 15 MPG, but less than 40, on the highway. Add 0.5 to city MPG for correction. Perform log transformation on city MPG. Raise highway MPG to the second power. Calculate correlation coefficient of  the two transformed variables."
-mpg,1,0,"Data wrangling, base R "," The dataset contains information about cars. Remove everything after \""(\"" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Use ggplot2 to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl."
-mpg,1,0,"Data wrangling, dplyr "," The dataset contains various about cars. First, use dplyr to prepare the data. Remove everything after \""(\"" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Sort the cars by ratio, highest first. Second, use ggplot2 and the new data to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl."
-mpg,1,0,Interactive plots , Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.
-mpg,1,0,"Chinese, 中文 ", 按class画hwy的箱线图。按class更改颜色。添加抖动。
-mpg,1,0,"Spanish, En español ", Cree un diagrama de caja de hwy por class. Cambia de color por class. Añade nerviosismo.
-mpg,1,0,"Japanese, 日本語 ", classごとに hwy の箱ひげ図を作成します。classごとに色を変えます。ジッターを追加します。
-mpg,1,0,"German, deutsche Sprache "," Verwenden Sie ggplot2, um einen Boxplot von hwy nach class zu erstellen. Farbe um class ändern. Jitter-Punkte hinzufügen"
-mpg,1,0,"French, Français ", Créez une boîte à moustaches de hwy par class. Changer de couleur par class. Ajoutez des points de gigue.
-mpg,1,0,"Italian, Italiano ", Crea un boxplot di hwy di class. Varia colore di class. Aggiungi punti di jitter.
-mpg,1,0,"Hindi, हिन्दी भाषा ", class द्वारा hwy का बॉक्सप्लॉट बनाने के लिए ggplot2 का उपयोग करें। class द्वारा भिन्न रंग। जिटर पॉइंट जोड़ें।
-no_data,1,0,Random numbers , Generate 100 random numbers. Plot their distribution.
-no_data,1,0,Hierarchical tree , Provide a demo for hierarchical clustering tree.
-no_data,1,0,Heat map , Create a heatmap with hierarchical clustering tree.
-no_data,1,0,Ridge regression,Provide a demo for ridge regression.
-no_data,1,0,PCA ," Create a matrix with 100 columns and 20 rows. Fill it with random numbers from the normal distribution. The mean is 1 for the first 10 rows, but 3 for the rest. Conduct PCA. Plot using the first two principal components."
-no_data,1,0,Map , Create an world map.
-no_data,1,0,"Map, US ", Create a US map.
-no_data,1,0,"Bioinformatics, genes ", Use the biomaRt package to retrieve all human genes on Chr.Y.
-no_data,1,0,"Bioinformatics, position "," Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y."
-no_data,1,0,"Bioinformatics, length "," Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y. Calculate the length as the absolute difference between the start and end positions. Create a density plot of the length after log10 transformation."
-no_data,1,0,"Financial, stocks ", Retrieve and plot the stock price of Apple in 2022. Add 20 day moving average.
-diamonds,1,0,"Distribution, cut ", Plot the distribution of cut using a pie chart.
-diamonds,1,0,"Distribution, price ", Plot the distribution of price after log transformation.
-diamonds,1,0,"Scatter, price vs. carat ", Plot price vs. carat. Change color by clarity.
-diamonds,1,0,Combinations , Plot the combinations of cut and clarity.
-diamonds,1,0,Modelling , Remove diamonds larger than 3 carat. Build a model of price vs. carat. Create a violin plot of the residuals by clarity. Limit ploting to -10000 to 10000.
-rna_seq,1,0,Total Counts , Plot the column sums.
-rna_seq,1,0,"Boxplot, raw ", Create a bloxplot of all columns.
-rna_seq,1,0,"Boxplot, log ", Add 1 to all numbers and then conduct log transformation. Create a bloxplot of all columns.
-rna_seq,1,0,Heatmap of variable genes , Each row represents a gene. Each column is a sample. Remove genes with sum less than 10. Add 1 to all numbers. Log transform using base 2. Rank genes by standard deviations in descending order. Convert data as matrix. Subtract row means from all rows. Create a heatmap of the top 50 genes using red and green colors.
-rna_seq,1,0,DESeq2 , Each row represents a gene. Each column is a sample. Remove rows with sum less than 10. Then use DESeq2 to identify differentially expressed genes. The first three columns are control samples. The last three are mutant. Show me the numbers of up and down-regulated genes based on FDR < 0.05 and log fold change > 1 or less than -1.
-questions,0,0,Example questions:,Example questions:
-questions,0,0,Lookup R package,List popular R packages for time-series forecast.
-questions,0,0,Explain concepts,What is Moran's I in sptatial statistics?
-questions,0,0,Find statistic method,What statistics test should I use to examine the correlation of two categorical variable?
-questions,0,0,"How to, situation",How do you do regression when there are predictor variables that are highly correlated?
-questions,0,0,"How to, methods",How do you choose k in k-means clustering?
-questions,0,0,"How to, evaluation",How do you assess linear regression models?
-questions,0,0,"How to, outliers",How to deal with outliers?
-questions,0,0,"How to, interpretation",What does P value 
-questions,0,0,"Vague question, rejected",How does k-means clustering work?
-questions,0,0,"Vague question, w/ context",How does k-means clustering work in statistics?
-jokes,0,0,,Why did the tomato turn red? Because it saw the salad dressing. - ChatGPT
-jokes,0,0,,Why was the belt arrested? Because it held up a pair of pants. - ChatGPT
-jokes,0,0,,Why was the math book sad? Because it had too many problems. - ChatGPT
-jokes,0,0,,Why was the statistician's favorite method of transportation a bus? Because it had a lot of data. - ChatGPT
-jokes,0,0,,Why did the tomato turn red? Because it saw the salad dressing. - ChatGPT
-jokes,0,0,,Why was the math book upset? Because it was having a negative number of pages. - ChatGPT
-jokes,0,0,,Why was the math book happy? Because it had lots of solutions. - ChatGPT
-jokes,0,0,,Why couldn't the bicycle stand up by itself? Because it was two-tired. - ChatGPT
-jokes,0,0,,Why do statisticians enjoy spending time with their data? Because they're data-driven individuals. - ChatGPT
-jokes,0,0,,Why do statisticians like playing with their data? Because they have mean jokes. - ChatGPT
-jokes,0,0,,Why do statisticians have a tough time at parties? Because they're always trying to fit in. - ChatGPT
-jokes,0,0,,Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle. -ChatGPT
-jokes,0,0,,Don't let yesterday take up too much of today. -ChatGPT
-jokes,0,0,,"If you want to live a happy life, tie it to a goal, not to people or things. -ChatGPT"
-jokes,0,0,,"If you can dream it, you can do it."
-jokes,0,0,,"Success is not final, failure is not fatal: it is the courage to continue that counts. -ChatGPT"
-jokes,0,0,,The only way to do great work is to love what you do. -ChatGPT
-jokes,0,0,,The only limit to our realization of tomorrow will be our doubts of today. -ChatGPT
-jokes,0,0,,You miss 100% of the shots you don't take. -ChatGPT
-jokes,0,0,,"Your time is limited, don't waste it living someone else's life. -ChatGPT"
-jokes,0,0,,Hardships often prepare ordinary people for an extraordinary destiny. -ChatGPT
-jokes,0,0,,"Success is not how high you have climbed, but how you make a positive difference to the world. -ChatGPT"
-jokes,0,0,,Happiness is not something ready-made. It comes from your own actions. -ChatGPT
-jokes,0,0,,The only way to do great work is to be passionate about what you do. -ChatGPT
-jokes,0,0,,Believe you can and you're halfway there. -ChatGPT
-jokes,0,0,,The only way to achieve the impossible is to believe it is possible. -ChatGPT
-jokes,0,0,,"Do what you can, with what you have, where you are. -ChatGPT"
-jokes,0,0,,"The greatest glory in living lies not in never falling, but in rising every time we fall. -ChatGPT"
-jokes,0,0,,"Life is not about waiting for the storm to pass, but learning to dance in the rain. -ChatGPT"
-jokes,0,0,,The biggest adventure you can take is to live the life of your dreams. -ChatGPT
-jokes,0,0,,"If opportunity doesn't knock, build a door. -ChatGPT"
-jokes,0,0,,The only limit to our realization of tomorrow will be our doubts of today. -ChatGPT
-jokes,0,0,,The only true limit to our realization of tomorrow is in today's doubts and fears. -ChatGPT
-jokes,0,0,,Don't watch the clock; do what it does. Keep going. -ChatGPT
-jokes,0,0,,Successful people do what unsuccessful people are not willing to do. Don't wish it were easier; wish you were better. -ChatGPT
-jokes,0,0,,"You may be the only person left who believes in you, but it's enough. It takes just one star to pierce a universe of darkness. Never give up. -ChatGPT"
-jokes,0,0,,Be the change you wish to see in the world. -ChatGPT
-jokes,0,0,,The only way to discover the limits of the possible is to go beyond them into the impossible. -ChatGPT
-jokes,0,0,,"Success is not in what you have, but who you are. -ChatGPT"
-jokes,0,0,,"Success is not how much money you make, but the difference you make in people's lives. -ChatGPT"
-jokes,0,0,,The only limit to our realization of tomorrow will be the doubts of today. -ChatGPT
-jokes,0,0,,"Statistics are like a bikini. What they reveal is suggestive, but what they conceal is vital. - Aaron Levenstein"
-jokes,0,0,,"There are three kinds of lies: lies, damned lies, and statistics. - Benjamin Disraeli"
-jokes,0,0,,"In God we trust, all others must bring data. - W. Edwards Deming"
-jokes,0,0,,Statistics is the grammar of science. - Karl Pearson
-jokes,0,0,,A single death is a tragedy; a million deaths is a statistic. - Joseph Stalin
-jokes,0,0,,Chance is the pseudonym of God when he does not want to sign his work. - Anatole France
-jokes,0,0,,"Statistics are like a lamp that illuminates the past and the present, but only reveals the future. - George E. P. Box"
-jokes,0,0,,Statistics are human beings with the tears wiped off. - Paul Brodeur
-jokes,0,0,,The only thing more dangerous than ignorance is arrogance. - Albert Einstein
-jokes,0,0,,The best thing about being a statistician is that you get to play in everyone's backyard. - John Tukey
+﻿data,R,Python,name,requests,memo
+mpg,1,1, ... , Example requests,
+mpg,1,0,"Boxplot, ggplot2 ", Use ggplot2 to create a boxplot of hwy vs. class. Color by class. Add jitter.,
+mpg,1,0,Distribution (D): Numers , Show me the distribution of hwy.,
+mpg,1,1,D: normality , Is cty normally distributed?,
+mpg,1,1,D: Categories , Show me the distribution of class as a barchart.,
+mpg,1,1,"D: Categories, pie ", Create an pie chart based on  class.,
+mpg,1,1,Relationship (R): Numbers-numbers , Plot the relationship between hwy and cty,
+mpg,1,0,R: Refined scatter plot ," Use ggplot2. Plot hwy vs. cty, colored by class. Change shape by drv. Change size by displ. Change x label to 'Highway mpg'.  Change y label to 'City mpg'. Change background to white.  Increase font for labels to 15. Remove all grids.",
+mpg,1,0,R: Correlation coefficient , Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.,
+mpg,1,1,R: Numbers-categories , Show me the relationship between hwy and class.,
+mpg,1,0,"R: Numbers-categories, density "," Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
+mpg,1,0,"R: Numbers-categories, violin ", Create a violin plot of cty vs. class. Color by class. Add data points with jitter.,
+mpg,1,0,R: Category-category , Are drv and cyl independent?,
+mpg,1,0,"R: Category-category, plot ", Plot the combinations of drv and cyl.,
+mpg,1,0,"R: Category-category, mosaic ", Plot the combinations of drv and cyl as a mosaic plot.,
+mpg,1,0,Multivariate (M): Correlation heatmap , Create a correlation map of all the columns that contain numbers,
+mpg,1,0,M: Hierarchical clustering , Conduct hierarchical clustering.,
+mpg,1,0,M: ANOVA , Conduct ANOVA of log-transformed hwy by class and drv.,
+mpg,1,0,M: Regression ," Build a regression model of hwy based on cyl, displ, drv, and class. Give me diagnostic plots.",
+mpg,1,0,M: Neural network ," Build a neural network model to predict hwy based on displ, cyl, and class. Use the nnet package. Plot the distribution of residuals.",
+mpg,1,0,Data analysis ," Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
+mpg,1,0,Convert data types , Convert cyl as numeric and calculate its correlation coefficient with hwy.,
+mpg,1,0,Data processing ," hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. Only keep cars more efficient than 15 MPG, but less than 40, on the highway. Add 0.5 to city MPG for correction. Perform log transformation on city MPG. Raise highway MPG to the second power. Calculate correlation coefficient of  the two transformed variables.",
+mpg,1,0,"Data wrangling, base R "," The dataset contains information about cars. Remove everything after \""(\"" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Use ggplot2 to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
+mpg,1,0,"Data wrangling, dplyr "," The dataset contains various about cars. First, use dplyr to prepare the data. Remove everything after \""(\"" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Sort the cars by ratio, highest first. Second, use ggplot2 and the new data to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
+mpg,1,0,Interactive plots , Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.,
+mpg,1,0,"Chinese, 中文 ", 按class画hwy的箱线图。按class更改颜色。添加抖动。,
+mpg,1,0,"Spanish, En español ", Cree un diagrama de caja de hwy por class. Cambia de color por class. Añade nerviosismo.,
+mpg,1,0,"Japanese, 日本語 ", classごとに hwy の箱ひげ図を作成します。classごとに色を変えます。ジッターを追加します。,
+mpg,1,0,"German, deutsche Sprache "," Verwenden Sie ggplot2, um einen Boxplot von hwy nach class zu erstellen. Farbe um class ändern. Jitter-Punkte hinzufügen",
+mpg,1,0,"French, Français ", Créez une boîte à moustaches de hwy par class. Changer de couleur par class. Ajoutez des points de gigue.,
+mpg,1,0,"Italian, Italiano ", Crea un boxplot di hwy di class. Varia colore di class. Aggiungi punti di jitter.,
+mpg,1,0,"Hindi, हिन्दी भाषा ", class द्वारा hwy का बॉक्सप्लॉट बनाने के लिए ggplot2 का उपयोग करें। class द्वारा भिन्न रंग। जिटर पॉइंट जोड़ें।,
+no_data,1,0,Random numbers , Generate 100 random numbers. Plot their distribution.,
+no_data,1,0,Hierarchical tree , Provide a demo for hierarchical clustering tree.,
+no_data,1,0,Heat map , Create a heatmap with hierarchical clustering tree.,
+no_data,1,0,Ridge regression,Provide a demo for ridge regression.,
+no_data,1,0,PCA ," Create a matrix with 100 columns and 20 rows. Fill it with random numbers from the normal distribution. The mean is 1 for the first 10 rows, but 3 for the rest. Conduct PCA. Plot using the first two principal components.",
+no_data,1,0,Map , Create an world map.,
+no_data,1,0,"Map, US ", Create a US map.,
+no_data,1,0,"Bioinformatics, genes ", Use the biomaRt package to retrieve all human genes on Chr.Y.,
+no_data,1,0,"Bioinformatics, position "," Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y.",
+no_data,1,0,"Bioinformatics, length "," Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y. Calculate the length as the absolute difference between the start and end positions. Create a density plot of the length after log10 transformation.",
+no_data,1,0,"Financial, stocks ", Retrieve and plot the stock price of Apple in 2022. Add 20 day moving average.,
+diamonds,1,0,"Distribution, cut ", Plot the distribution of cut using a pie chart.,
+diamonds,1,0,"Distribution, price ", Plot the distribution of price after log transformation.,
+diamonds,1,0,"Scatter, price vs. carat ", Plot price vs. carat. Change color by clarity.,
+diamonds,1,0,Combinations , Plot the combinations of cut and clarity.,
+diamonds,1,0,Modelling , Remove diamonds larger than 3 carat. Build a model of price vs. carat. Create a violin plot of the residuals by clarity. Limit ploting to -10000 to 10000.,
+rna_seq,1,0,Total Counts , Plot the column sums.,
+rna_seq,1,0,"Boxplot, raw ", Create a bloxplot of all columns.,
+rna_seq,1,0,"Boxplot, log ", Add 1 to all numbers and then conduct log transformation. Create a bloxplot of all columns.,
+rna_seq,1,0,Heatmap of variable genes , Each row represents a gene. Each column is a sample. Remove genes with sum less than 10. Add 1 to all numbers. Log transform using base 2. Rank genes by standard deviations in descending order. Convert data as matrix. Subtract row means from all rows. Create a heatmap of the top 50 genes using red and green colors.,
+rna_seq,1,0,DESeq2 , Each row represents a gene. Each column is a sample. Remove rows with sum less than 10. Then use DESeq2 to identify differentially expressed genes. The first three columns are control samples. The last three are mutant. Show me the numbers of up and down-regulated genes based on FDR < 0.05 and log fold change > 1 or less than -1.,
+questions,0,0,Example questions:,Example questions:,
+questions,0,0,Lookup R package,List popular R packages for time-series forecast.,
+questions,0,0,Explain concepts,What is Moran's I in sptatial statistics?,
+questions,0,0,Find statistic method,What statistics test should I use to examine the correlation of two categorical variable?,
+questions,0,0,"How to, situation",How do you do regression when there are predictor variables that are highly correlated?,
+questions,0,0,"How to, methods",How do you choose k in k-means clustering?,
+questions,0,0,"How to, evaluation",How do you assess linear regression models?,
+questions,0,0,"How to, outliers",How to deal with outliers?,
+questions,0,0,"How to, interpretation",What does P value ,
+questions,0,0,"Vague question, rejected",How does k-means clustering work?,
+questions,0,0,"Vague question, w/ context",How does k-means clustering work in statistics?,
+jokes,0,0,,Why did the tomato turn red? Because it saw the salad dressing. - ChatGPT,
+jokes,0,0,,Why was the belt arrested? Because it held up a pair of pants. - ChatGPT,
+jokes,0,0,,Why was the math book sad? Because it had too many problems. - ChatGPT,
+jokes,0,0,,Why was the statistician's favorite method of transportation a bus? Because it had a lot of data. - ChatGPT,
+jokes,0,0,,Why did the tomato turn red? Because it saw the salad dressing. - ChatGPT,
+jokes,0,0,,Why was the math book upset? Because it was having a negative number of pages. - ChatGPT,
+jokes,0,0,,Why was the math book happy? Because it had lots of solutions. - ChatGPT,
+jokes,0,0,,Why couldn't the bicycle stand up by itself? Because it was two-tired. - ChatGPT,
+jokes,0,0,,Why do statisticians enjoy spending time with their data? Because they're data-driven individuals. - ChatGPT,
+jokes,0,0,,Why do statisticians like playing with their data? Because they have mean jokes. - ChatGPT,
+jokes,0,0,,Why do statisticians have a tough time at parties? Because they're always trying to fit in. - ChatGPT,
+jokes,0,0,,Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle. -ChatGPT,
+jokes,0,0,,Don't let yesterday take up too much of today. -ChatGPT,
+jokes,0,0,,"If you want to live a happy life, tie it to a goal, not to people or things. -ChatGPT",
+jokes,0,0,,"If you can dream it, you can do it.",
+jokes,0,0,,"Success is not final, failure is not fatal: it is the courage to continue that counts. -ChatGPT",
+jokes,0,0,,The only way to do great work is to love what you do. -ChatGPT,
+jokes,0,0,,The only limit to our realization of tomorrow will be our doubts of today. -ChatGPT,
+jokes,0,0,,You miss 100% of the shots you don't take. -ChatGPT,
+jokes,0,0,,"Your time is limited, don't waste it living someone else's life. -ChatGPT",
+jokes,0,0,,Hardships often prepare ordinary people for an extraordinary destiny. -ChatGPT,
+jokes,0,0,,"Success is not how high you have climbed, but how you make a positive difference to the world. -ChatGPT",
+jokes,0,0,,Happiness is not something ready-made. It comes from your own actions. -ChatGPT,
+jokes,0,0,,The only way to do great work is to be passionate about what you do. -ChatGPT,
+jokes,0,0,,Believe you can and you're halfway there. -ChatGPT,
+jokes,0,0,,The only way to achieve the impossible is to believe it is possible. -ChatGPT,
+jokes,0,0,,"Do what you can, with what you have, where you are. -ChatGPT",
+jokes,0,0,,"The greatest glory in living lies not in never falling, but in rising every time we fall. -ChatGPT",
+jokes,0,0,,"Life is not about waiting for the storm to pass, but learning to dance in the rain. -ChatGPT",
+jokes,0,0,,The biggest adventure you can take is to live the life of your dreams. -ChatGPT,
+jokes,0,0,,"If opportunity doesn't knock, build a door. -ChatGPT",
+jokes,0,0,,The only limit to our realization of tomorrow will be our doubts of today. -ChatGPT,
+jokes,0,0,,The only true limit to our realization of tomorrow is in today's doubts and fears. -ChatGPT,
+jokes,0,0,,Don't watch the clock; do what it does. Keep going. -ChatGPT,
+jokes,0,0,,Successful people do what unsuccessful people are not willing to do. Don't wish it were easier; wish you were better. -ChatGPT,
+jokes,0,0,,"You may be the only person left who believes in you, but it's enough. It takes just one star to pierce a universe of darkness. Never give up. -ChatGPT",
+jokes,0,0,,Be the change you wish to see in the world. -ChatGPT,
+jokes,0,0,,The only way to discover the limits of the possible is to go beyond them into the impossible. -ChatGPT,
+jokes,0,0,,"Success is not in what you have, but who you are. -ChatGPT",
+jokes,0,0,,"Success is not how much money you make, but the difference you make in people's lives. -ChatGPT",
+jokes,0,0,,The only limit to our realization of tomorrow will be the doubts of today. -ChatGPT,
+jokes,0,0,,"Statistics are like a bikini. What they reveal is suggestive, but what they conceal is vital. - Aaron Levenstein",
+jokes,0,0,,"There are three kinds of lies: lies, damned lies, and statistics. - Benjamin Disraeli",
+jokes,0,0,,"In God we trust, all others must bring data. - W. Edwards Deming",
+jokes,0,0,,Statistics is the grammar of science. - Karl Pearson,
+jokes,0,0,,A single death is a tragedy; a million deaths is a statistic. - Joseph Stalin,
+jokes,0,0,,Chance is the pseudonym of God when he does not want to sign his work. - Anatole France,
+jokes,0,0,,"Statistics are like a lamp that illuminates the past and the present, but only reveals the future. - George E. P. Box",
+jokes,0,0,,Statistics are human beings with the tears wiped off. - Paul Brodeur,
+jokes,0,0,,The only thing more dangerous than ignorance is arrogance. - Albert Einstein,
+jokes,0,0,,The best thing about being a statistician is that you get to play in everyone's backyard. - John Tukey,

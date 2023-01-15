@@ -26,7 +26,7 @@ app_server <- function(input, output, session) {
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
-    if (input$demo_prompt != demos_mpg[1]) {
+    if (input$demo_prompt != demo$requests[1]) {
       updateTextInput(
         session,
         "input_text",
@@ -227,32 +227,36 @@ app_server <- function(input, output, session) {
     # hide after data is uploaded
     req(is.null(input$user_file))
 
-    if (input$select_data == "mpg") {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_mpg,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == no_data) {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_no_data,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == "diamonds") {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_diamond,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == rna_seq) {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_rna_seq,
-        label = "Example requests:"
+    # subset based on dataset
+    demo_related <- subset(
+      demo,
+      data == input$select_data
+    )
+
+    #subset based on R or Python
+    if(input$use_python) {
+      demo_related <- subset(
+        demo_related,
+        Python == 1
       )
     } else {
-      return(NULL)
+      demo_related <- subset(
+        demo_related,
+        R == 1
+      )
+    }
+
+    choices <- demo_related$requests
+    names(choices) <- demo_related$name
+
+    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq)) {
+      return(
+        selectInput(
+          inputId = "demo_prompt",
+          choices = choices,
+          label = "Example requests:"
+        )
+      )
     }
   })
 
