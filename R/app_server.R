@@ -939,7 +939,7 @@ app_server <- function(input, output, session) {
       )
       return(error_status)
     } else { # Python
-      return( python_to_html() == -1)
+      return(python_to_html() == -1)
     }
 
   })
