@@ -779,8 +779,7 @@ app_server <- function(input, output, session) {
       prompt = input$input_text,
       error = code_error(),
       rmd = Rmd_chunk(),
-      language = ifelse(input$use_python, "Python", "R"),
-      html = python_to_html()
+      language = ifelse(input$use_python, "Python", "R")
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -2118,16 +2117,9 @@ output$answer <- renderText({
 
     req(openAI_response()$cmd)
     req(input$use_python)
-    input$selected_chunk
 
-    if(0) { #input$selected_chunk != "") { 
-      id <- as.integer(input$selected_chunk)
-      if(id < logs$id) {
-        rendered <- logs$code_history[[id]]$html
-      } 
-    } else {
-      rendered <- python_to_html()
-    }
+
+    rendered <- python_to_html()
 
     if (rendered == -1) {
       p("Error!")
