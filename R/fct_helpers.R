@@ -31,7 +31,29 @@ unique_ratio <- 0.1   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
 
+#RMarkdown file's Header for knit python chunks
+Rmd_script_python <- 
+"---
+output: html_fragment
+params:
+  df:
+printcode:
+  label: \"Display Code\"
+  value: TRUE
+  input: checkbox
+---
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(reticulate)
+#use_condaenv(\"r-reticulate\")
+df <- params$df
+```
+
+```{python, echo = FALSE, message=FALSE}
+df = r.df
+```
+
+#### Results:"
 
 # if this file exists, running on the server. Otherwise local.
 # this is used to change app behavior.
@@ -279,7 +301,7 @@ demos_mpg <- c(
   'D: Categories' = 'Show me the distribution of class as a barchart.',
   "D: Categories, pie" = "Create an pie chart based on  class.",
 
-  'Relationship (R): Numbers-numbers' = "Show me the relationship between hwy and cty.",
+  'Relationship (R): Numbers-numbers' = "Plot the relationship between hwy and cty.",
   "R: Refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
 Change shape by drv. Change size by displ. 
 Change x label to 'Highway mpg'. 
@@ -794,5 +816,70 @@ create_usage_db <- function() {
       RSQLite::dbDisconnect(db)
     }
   }
+
+
+
+#' Generate html file from Python code
+#' 
+#'
+#' @param python_code, a chunk of code 
+#' @param html_file file name for output
+#' @param select_data input$select data
+#' @param current_data   current_data()
+#'
+#' @return -1 if failed. If success, the the designated html file is written
+#' 
+python_html <- function(python_code, select_data, current_data) {
+  withProgress(message = "Generating Report from Python...", {
+    incProgress(0.2)
+    temp_rmd <- paste0(tempfile(), "_temp.Rmd")
+
+    # html file is generated using the same file name except the extension
+    html_file <- gsub("Rmd$", "html", temp_rmd)
+
+    Rmd_script <- paste0(
+      Rmd_script_python,
+      "\n```{python, echo=FALSE}\n",
+      python_code,
+      "\n```\n"
+    )
+    write(
+      Rmd_script,
+      file = temp_rmd,
+      append = FALSE
+    )
+
+    # Set up parameters to pass to Rmd document
+    params <- list(df = iris) # dummy
+
+    # if uploaded, use that data
+    req(select_data)
+    if (select_data != no_data) {
+      params <- list(
+        df = current_data
+      )
+    }
+
+    req(params)
+    # Knit the document, passing in the `params` list, and eval it in a
+    # child of the global environment (this isolates the code in the document
+    # from the code in this app).
+    try(
+      rmarkdown::render(
+        input = temp_rmd, # markdown_location,
+        params = params,
+        envir = new.env(parent = globalenv())
+      )
+    )
+
+  })  # progress bar
+    
+
+    if(file.exists(html_file)) {
+      return(html_file)       
+    } else {
+      return(-1)
+    }
+}
 
 

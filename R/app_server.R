@@ -779,7 +779,8 @@ app_server <- function(input, output, session) {
       prompt = input$input_text,
       error = code_error(),
       rmd = Rmd_chunk(),
-      language = ifelse(input$use_python, "Python", "R")
+      language = ifelse(input$use_python, "Python", "R"),
+      html = python_to_html()
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -2110,101 +2111,47 @@ output$answer <- renderText({
   })
 
 
-  # Python
-
+#
+#  Python
   output$python_markdown <- renderUI({
-    req(input$submit_button)
-    req((logs$language == "Python") == input$use_python )
-    # responsive when switching between two python chunks
-    input$selected_chunk 
+    #browser()
 
-    isolate({ 
-      withProgress(message = "Generating Report ...", {
-        incProgress(0.2)
-        input$submit_button
+    req(openAI_response()$cmd)
+    req(input$use_python)
+    input$selected_chunk
 
-        #temporary html file
-        html_file <- paste0(tempfile(), "_temp.html")
-        tempReport <- paste0(tempfile(), "_temp.Rmd")
+    if(0) { #input$selected_chunk != "") { 
+      id <- as.integer(input$selected_chunk)
+      if(id < logs$id) {
+        rendered <- logs$code_history[[id]]$html
+      } 
+    } else {
+      rendered <- python_to_html()
+    }
 
-
-        req(openAI_response()$cmd)
-        req(openAI_prompt())
-
-        #RMarkdown file's Header
-        Rmd_script <- 
-"---
-output: html_fragment
-params:
-  df:
-printcode:
-  label: \"Display Code\"
-  value: TRUE
-  input: checkbox
----
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(reticulate)
-#use_condaenv(\"r-reticulate\")
-df <- params$df
-```
-
-```{python, echo = FALSE, message=FALSE}
-df = r.df
-```
-
-#### Results:"
-
-        Rmd_script <- paste0(
-          Rmd_script,
-          "\n```{python, echo=FALSE}\n",
-          logs$code,
-          "\n```\n"
-        )
-        write(
-          Rmd_script,
-          file = tempReport,
-          append = FALSE
-        )
-
-        # Set up parameters to pass to Rmd document
-        params <- list(df = iris) # dummy
-
-        # if uploaded, use that data
-        req(input$select_data)
-        if (input$select_data != no_data) {
-          params <- list(
-            df = current_data()
-          )
-        }
-
-        req(params)
-        # Knit the document, passing in the `params` list, and eval it in a
-        # child of the global environment (this isolates the code in the document
-        # from the code in this app).
-        try(
-          rmarkdown::render(
-            input = tempReport, # markdown_location,
-            output_file = html_file,
-            params = params,
-            envir = new.env(parent = globalenv())
-          )
-        )
-
-      })  # progress bar
-      
-
-      if(file.exists(html_file)) {
-        includeHTML(html_file)       
-      } else {
-        p("Error!")
-      }
-
-
-    })
+    if (rendered == -1) {
+      p("Error!")
+    } else {
+      includeHTML(rendered)
+    }
   })
 
-  
+  python_to_html <- reactive({
+    req(input$submit_button)
+    req((logs$language == "Python") == input$use_python )
+    req(input$use_python)
+    # This makes it responsive when switching between two python chunks
+    # causes shiny to render it twice initially
+    input$selected_chunk 
+
+    isolate({
+      python_html(
+        python_code = logs$code,
+        select_data = input$select_data,
+        current_data = current_data()
+      )      
+    })
+
+  })
 
 }
