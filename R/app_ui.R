@@ -528,6 +528,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         h4("Update log:"),
         tags$ul(
           tags$li(
+            "v 0.90  1/15/2023. Generates and runs Pyton code in addition to R!"
+          ),
+          tags$li(
             "v 0.8.6  1/8/2023. Add description of the levels in factors."
           ),
           tags$li(
