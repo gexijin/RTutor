@@ -26,7 +26,7 @@ app_server <- function(input, output, session) {
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
-    if (input$demo_prompt != demos_mpg[1]) {
+    if (input$demo_prompt != demo$requests[1]) {
       updateTextInput(
         session,
         "input_text",
@@ -227,32 +227,36 @@ app_server <- function(input, output, session) {
     # hide after data is uploaded
     req(is.null(input$user_file))
 
-    if (input$select_data == "mpg") {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_mpg,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == no_data) {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_no_data,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == "diamonds") {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_diamond,
-        label = "Example requests:"
-      )
-    } else if (input$select_data == rna_seq) {
-      selectInput(
-        inputId = "demo_prompt",
-        choices = demos_rna_seq,
-        label = "Example requests:"
+    # subset based on dataset
+    demo_related <- subset(
+      demo,
+      data == input$select_data
+    )
+
+    #subset based on R or Python
+    if(input$use_python) {
+      demo_related <- subset(
+        demo_related,
+        Python == 1
       )
     } else {
-      return(NULL)
+      demo_related <- subset(
+        demo_related,
+        R == 1
+      )
+    }
+
+    choices <- demo_related$requests
+    names(choices) <- demo_related$name
+
+    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq)) {
+      return(
+        selectInput(
+          inputId = "demo_prompt",
+          choices = choices,
+          label = "Example requests:"
+        )
+      )
     }
   })
 
@@ -570,7 +574,7 @@ app_server <- function(input, output, session) {
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
-    prep_input(input$input_text, input$select_data, current_data())
+    prep_input(input$input_text, input$select_data, current_data(), input$use_python)
   })
 
   openAI_response <- reactive({
@@ -588,9 +592,7 @@ app_server <- function(input, output, session) {
 
       shinybusy::show_modal_spinner(
         spin = "orbit",
-        text = paste(
-          sample(jokes, 1)
-        ),
+        text = sample(jokes, 1),
         color = "#000000"
       )
 
@@ -737,7 +739,9 @@ app_server <- function(input, output, session) {
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
     last_code = "", # last code for Rmarkdown
-    code_history = list() # keep all code chunks
+    language = "", # Python or R
+    code_history = list(), # keep all code chunks
+
   )
 
   observeEvent(input$submit_button, {
@@ -752,6 +756,8 @@ app_server <- function(input, output, session) {
 
       logs$last_code <- ""
 
+      logs$language = ifelse(input$use_python, "Python", "R")
+
     } else { # if continue
       logs$last_code <- logs$code  # last code
       logs$code <- paste(
@@ -765,6 +771,8 @@ app_server <- function(input, output, session) {
         "\n\n#-------------------------\n",
         gsub("^\n+", "", openAI_response()$response$choices[1, 1])
       )
+
+      logs$language = ifelse(input$use_python, "Python", "R")
     }
 
     # A list holds current request
@@ -774,7 +782,8 @@ app_server <- function(input, output, session) {
       raw = logs$raw, # for print
       prompt = input$input_text,
       error = code_error(),
-      rmd = Rmd_chunk()
+      rmd = Rmd_chunk(),
+      language = ifelse(input$use_python, "Python", "R")
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -811,6 +820,14 @@ app_server <- function(input, output, session) {
       value = logs$code_history[[id]]$prompt
     )
 
+    # change language 
+    if(input$submit_button != 0) {
+      updateCheckboxInput(
+        session = session,
+        inputId = "use_python",
+        value = (logs$code_history[[id]]$language == "Python")
+      )
+    }
 
   })
 
@@ -882,7 +899,9 @@ app_server <- function(input, output, session) {
   # a base R plot is generated.
   run_result <- reactive({
     req(logs$code)
-    req(input$submit_button != 0)
+    req(input$submit_button != 0)   
+    req(!input$use_python)
+
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
       tryCatch(
@@ -910,18 +929,23 @@ app_server <- function(input, output, session) {
     error_status <- FALSE
     req(input$submit_button != 0)
 
-    # if error returns true, otherwise 
-    #  that slot does not exist, returning false.
-    # or be NULL
-    try(  # if you do not 'try', the entire app quits! :-)
-      if (is.list(run_result())) {
-      req(!is.null(names(run_result())[1]))
-        if (names(run_result())[1] == "error_value") {
-          error_status <- TRUE
+    if(!input$use_python) { # R
+      # if error returns true, otherwise 
+      #  that slot does not exist, returning false.
+      # or be NULL
+      try(  # if you do not 'try', the entire app quits! :-)
+        if (is.list(run_result())) {
+        req(!is.null(names(run_result())[1]))
+          if (names(run_result())[1] == "error_value") {
+            error_status <- TRUE
+          }
         }
-      }
-    )
-    return(error_status)
+      )
+      return(error_status)
+    } else { # Python
+      return(python_to_html() == -1)
+    }
+
   })
 
 
@@ -939,6 +963,7 @@ app_server <- function(input, output, session) {
   output$console_output <- renderText({
     req(!code_error())
     req(logs$code)
+    req(!input$use_python)
     out <- ""
     withProgress(message = "Running the code for console...", {
       incProgress(0.4)
@@ -964,6 +989,7 @@ app_server <- function(input, output, session) {
   output$result_plot <- renderPlot({
     req(!code_error())
     req(logs$code)
+    req(!input$use_python)
     withProgress(message = "Generating a plot ...", {
       incProgress(0.4)
       try(
@@ -978,6 +1004,7 @@ app_server <- function(input, output, session) {
 
   output$result_plotly <- plotly::renderPlotly({
     req(!code_error())
+    req(!input$use_python)
     req(
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive)
@@ -995,6 +1022,7 @@ app_server <- function(input, output, session) {
 
   output$plot_ui <- renderUI({
     req(input$submit_button)
+    req(!input$use_python)
     
     if (code_error() || input$submit_button == 0) {
       return()
@@ -1172,16 +1200,18 @@ app_server <- function(input, output, session) {
     # This updates the data by running hte entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
-        withProgress(message = "Updating values ...", {
-          incProgress(0.4)
-          try(
-            eval(
-              parse(
-                text = clean_cmd(logs$code, input$select_data)
-              )
-            ),
-          )
-        })
+        if(!input$use_python && logs$language == "R") { # not python
+          withProgress(message = "Updating values ...", {
+            incProgress(0.4)
+            try(
+              eval(
+                parse(
+                  text = clean_cmd(logs$code, input$select_data)
+                )
+              ),
+            )
+          })
+        }
       }
     }
 
@@ -1358,6 +1388,18 @@ app_server <- function(input, output, session) {
       "```\n"
     )
 
+    if(input$use_python) {
+      Rmd_script <- paste0(
+        Rmd_script,
+        "```{R}\n",
+        "library(reticulate)\n",
+        "```\n",
+        "```{python, message=FALSE}\n",
+        "df = r.df\n",
+        "```\n"
+      )
+    }
+
     # User request----------------------
     Rmd_script  <- paste0(
       Rmd_script,
@@ -1387,19 +1429,33 @@ app_server <- function(input, output, session) {
     )
 
     # R Markdown code chunk----------------------
-    #if error when running the code, do not run
-    if (code_error() == TRUE) {
-      Rmd_script <- paste0(
-        Rmd_script,
-        "```{R, eval = FALSE}"
-      )
-    } else {
-      Rmd_script <- paste0(
-        Rmd_script,
-        "```{R}"
-      )
+    if(!input$use_python) {  # R code chunk
+      #if error when running the code, do not run
+      if (code_error() == TRUE) {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{R, eval = FALSE}"
+        )
+      } else {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{R}"
+        )
+      }
+    } else {  # Python code chunk
+      #if error when running the code, do not run
+      if (python_to_html() == -1) {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{python, eval = FALSE}"
+        )
+      } else {
+        Rmd_script <- paste0(
+          Rmd_script,
+          "```{python}"
+        )
+      }
     }
-
     cmd <- openAI_response()$cmd
     # remove empty line
     if(nchar(cmd[1]) == 0) {
@@ -2041,7 +2097,8 @@ output$answer <- renderText({
           filesize = ifelse(is.null(input$user_file[1, 2]), " ", input$user_file[1, 2]),
           chunk = counter$requests,
           api_time = counter$time,
-          tokens = counter$tokens_current
+          tokens = counter$tokens_current,
+          language = logs$language
         )
       )
     }
@@ -2089,6 +2146,40 @@ output$answer <- renderText({
   })
 
 
+#
+#  Python
+  output$python_markdown <- renderUI({
+    #browser()
 
+    req(openAI_response()$cmd)
+    req(input$use_python)
+
+
+    rendered <- python_to_html()
+
+    if (rendered == -1) {
+      p("Error!")
+    } else {
+      includeHTML(rendered)
+    }
+  })
+
+  python_to_html <- reactive({
+    req(input$submit_button)
+    req((logs$language == "Python") == input$use_python )
+    req(input$use_python)
+    # This makes it responsive when switching between two python chunks
+    # causes shiny to render it twice initially
+    input$selected_chunk 
+
+    isolate({
+      python_html(
+        python_code = logs$code,
+        select_data = input$select_data,
+        current_data = current_data()
+      )      
+    })
+
+  })
 
 }

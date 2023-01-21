@@ -11,17 +11,20 @@
 # Global variables
 ###################################################
 
-release <- "0.8.6" # RTutor
+release <- "0.90" # RTutor
 uploaded_data <- "User Upload" # used for drop down
-no_data <- "No data (examples)" # no data is uploaded or selected
-rna_seq <- "RNA-Seq"  # RNA-Seq read counts
+no_data <- "no_data" # no data is uploaded or selected
+names(no_data) <- "No data (examples)"
+rna_seq <- "rna_seq"  # RNA-Seq read counts
+names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
 pre_text <- "Generate R code. "
-after_text <- " Use the df data frame. "
+pre_text_python <- "Generate Python code. "
+after_text <- " Use the df data frame, which is already read from a file. "
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
@@ -30,7 +33,28 @@ unique_ratio <- 0.1   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
 
+#RMarkdown file's Header for knit python chunks
+Rmd_script_python <- 
+"---
+output: html_fragment
+params:
+  df:
+printcode:
+  label: \"Display Code\"
+  value: TRUE
+  input: checkbox
+---
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(reticulate)
+df <- params$df
+```
+
+```{python, echo = FALSE, message=FALSE}
+df = r.df
+```
+
+#### Results:"
 
 # if this file exists, running on the server. Otherwise local.
 # this is used to change app behavior.
@@ -64,9 +88,10 @@ move_front <- function(v, e){
 #' @param txt A string that stores the user input.
 #' @param selected_data Name of the dataset.
 #' @param df the data frame
+#' @param use_python  whether or not using python instead of R
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df) {
+prep_input <- function(txt, selected_data, df, use_python) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -204,7 +229,16 @@ prep_input <- function(txt, selected_data, df) {
     }
   }
 
-  txt <- paste(pre_text, txt)
+
+
+  txt <- paste(
+    ifelse(
+      use_python,
+      pre_text_python,
+      pre_text
+    ),
+    txt
+  )
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
 
@@ -255,127 +289,19 @@ clean_cmd <- function(cmd, selected_data) {
 # Prepare data
 ###################################################################
 
-# demo requests for mpg dataset
-demos_mpg <- c(
-  ' ... ' = 'Example requests',
+# A file, demo requests for different datasets, demo questions,
+demo <- read.csv(app_sys("app", "www", "demo_questions.csv"))
 
-  'Boxplot, ggplot2' = "Use ggplot2 to create a boxplot of hwy vs. class. 
- Color by class. 
- Add jitter.",
+ix <- which(demo$data == "questions")
+demo_questions <- demo$requests[ix]
+names(demo_questions) <- demo$name[ix]
 
-  'Distribution (D): Numers' = 'Show me the distribution of hwy.',
-  "D: normality" = "Is cty normally distributed?",
-  'D: Categories' = 'Show me the distribution of class as a barchart.',
-  "D: Categories, pie" = "Create an pie chart based on  class.",
+jokes <- demo[
+  which(demo$data == "jokes"), 
+  "requests"
+]
 
-  'Relationship (R): Numbers-numbers' = "Show me the relationship between hwy and cty.",
-  "R: Refined scatter plot" = "Use ggplot2. Plot hwy vs. cty, colored by class. 
-Change shape by drv. Change size by displ. 
-Change x label to 'Highway mpg'. 
-Change y label to 'City mpg'. 
-Change background to white. 
-Increase font for labels to 15. 
-Remove all grids.",
-  'R: Correlation coefficient' = "Calculate the correlation coefficient of cty vs hwy. Repeat that after log transformation. Collect these results and show them.",
-  'R: Numbers-categories' = "Show me the relationship between hwy and class.",
-  "R: Numbers-categories, density" = "Only keep 4, 6, and 8 cylinders. Create a density plot of cty, colored by year. Split into panels with one column  by cyl.",
-  'R: Numbers-categories, violin' = "Create a violin plot of cty vs. class. Color by class. Add data points with jitter.",
-
- "R: Category-category" = "Are drv and cyl independent?",
- "R: Category-category, plot" = "Plot the combinations of drv and cyl.",
-  "R: Category-category, mosaic" = "Plot the combinations of drv and cyl as a mosaic plot.",
-
-  "Multivariate (M): Correlation heatmap" = "Create a correlation map of all the columns that contain numbers.",
-"M: Hierarchical clustering" = "Conduct hierarchical clustering. ",
-  'M: ANOVA' = "Conduct ANOVA of log-transformed hwy by class and drv.",
-  'M: Regression' = "Build a regression model of hwy based on cyl, displ, drv, and class. 
-Give me diagnostic plots.",
-  "M: Neural network" = "Build a neural network model to predict  
-hwy based on displ, cyl, and class.   
-Use the nnet package. Plot the distribution of residuals.",
-
-  "Data analysis" = "Calculate average cty by year and class. Then use ggplot2 to create a barplot of average mpg by class, colored by year. The bars for different years should be side by side.",
-   "Convert data types" = "Convert cyl as numeric and calculate its correlation coefficient with hwy.",
-  "Data processing" = "hwy and cty represent miles per gallon (MPG) on the highway and in the city, respectively. 
-Only keep cars more efficient than 15 MPG, but less than 40, on the highway. 
-Add 0.5 to city MPG for correction. 
-Perform log transformation on city MPG. 
-Raise highway MPG to the second power. 
-Calculate correlation coefficient of  the two transformed variables.",
-  "Data wrangling, base R" = "The dataset contains information about cars. Remove everything after \"(\" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Use ggplot2 to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
-  "Data wrangling, dplyr" = "The dataset contains various about cars. First, use dplyr to prepare the data. Remove everything after \"(\" in trans column. Remove cars labeled as 2seater in class. Define a new column called ratio by dividing hwy by cty. Sort the cars by ratio, highest first. Second, use ggplot2 and the new data to plot ratio vs. hwy. Color by class. Change marker type by trans. Change marker size by cyl.",
-  'Interactive plots' = "Plot hwy vs. displ group by cyl. Make it interactive with ggplotly.",
-
- 'Chinese, 中文' = "按class画hwy的箱线图。按class更改颜色。添加抖动。",
- 'Spanish, En español' = "Cree un diagrama de caja de hwy por class. Cambia de color por class. Añade nerviosismo.",
- 'Japanese, 日本語' = "classごとに hwy の箱ひげ図を作成します。classごとに色を変えます。ジッターを追加します。",
- 'German, deutsche Sprache' = "Verwenden Sie ggplot2, um einen Boxplot von hwy nach class zu erstellen. Farbe um class ändern. Jitter-Punkte hinzufügen",
- 'French, Français' = "Créez une boîte à moustaches de hwy par class. Changer de couleur par class. Ajoutez des points de gigue.",
- 'Italian, Italiano' = "Crea un boxplot di hwy di class. Varia colore di class. Aggiungi punti di jitter.",
- 'Hindi, हिन्दी भाषा' = "class द्वारा hwy का बॉक्सप्लॉट बनाने के लिए ggplot2 का उपयोग करें। class द्वारा भिन्न रंग। जिटर पॉइंट जोड़ें।"
-)
-
-# demo requests when no dataset is selected.
-demos_no_data <- c(
-  'Random numbers' = "Generate 100 random numbers. Plot their distribution.",
-  'Hierarchical tree' = "Provide a demo for hierarchical clustering tree.",
-  'Heat map' = "Create a heatmap with hierarchical clustering tree.",
-  "Ridge regression" = "Provide a demo for ridge regression.",
-  'PCA' = "Create a matrix with 100 columns and 20 rows. Fill it with random numbers from the normal distribution. 
-The mean is 1 for the first 10 rows, but 3 for the rest. 
-Conduct PCA. Plot using the first two principal components.",
-'Map' = "Create an world map. ",
-'Map, US' = "Create a US map.",
-'Bioinformatics, genes' = "Use the biomaRt package to retrieve all human genes on Chr.Y.",
-'Bioinformatics, position' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y.",
-'Bioinformatics, length' = "Use the biomaRt package to retrieve the gene symbol, the start and end position of all human genes on Chr.Y. Calculate the length as the absolute difference between the start and end positions. Create a density plot of the length after log10 transformation.",
-'Financial, stocks' = "Retrieve and plot the stock price of Apple in 2022. Add 20 day moving average."
-)
-
-
-demos_diamond <- c(
-  'Distribution, cut' = "Plot the distribution of cut using a pie chart.",
-  'Distribution, price' = "Plot the distribution of price after log transformation.",
-  'Scatter, price vs. carat' = "Plot price vs. carat. Change color by clarity. ",
-  'Combinations' = "Plot the combinations of cut and clarity.",
-  'Modelling' = "Remove diamonds larger than 3 carat. 
-Build a model of price vs. carat. 
-Create a violin plot of the residuals by clarity. 
-Limit ploting to -10000 to 10000."
-
-)
-
-demos_rna_seq <- c(
-  'Total Counts' = "Plot the column sums.",
-  'Boxplot, raw' = "Create a bloxplot of all columns.",
-  'Boxplot, log' = "Add 1 to all numbers and then conduct log transformation. Create a bloxplot of all columns.",
-  'Heatmap of variable genes' = "Each row represents a gene. Each column is a sample. Remove genes with sum less than 10. Add 1 to all numbers. Log transform using base 2. Rank genes by standard deviations in descending order. Convert data as matrix. Subtract row means from all rows. Create a heatmap of the top 50 genes using red and green colors.",
-'DESeq2' = "Each row represents a gene. Each column is a sample. Remove rows with sum less than 10. Then use DESeq2 to identify differentially expressed genes. The first three columns are control samples. The last three are mutant. Show me the numbers of up and down-regulated genes based on FDR < 0.05 and log fold change > 1 or less than -1."
-)
-
-
-
-
-demo_questions <- c(
-  'Example questions:' = "Example questions:",
-  'Lookup R package' = "List popular R packages for time-series forecast.",
-  'Explain concepts' = "What is Moran's I in sptatial statistics?",
-  'Find statistic method' = "What statistics test should I use to examine the 
-  correlation of two categorical variable?",
-  'How to, situation' = "How do you do regression when there are
-predictor variables that are highly correlated?",
-  'How to, methods' = "How do you choose k in k-means clustering?",
-  'How to, evaluation' = "How do you assess linear regression models?",
-  'How to, outliers' = "How to deal with outliers?",
-  'How to, interpretation' = "What does P value = 0.02 mean in ANOVA?",
-  'Vague question, rejected' = "How does k-means clustering work?",
-  'Vague question, w/ context' = "How does k-means clustering work in statistics?"
-  )
-
-
-
-
-# prepare a list of available data sets.
+# prepare a list of available data sets that are built-in
 datasets <- data()$results[, 3] # name of datasets
 datasets <- gsub(" .*", "", datasets)
 
@@ -429,64 +355,6 @@ datasets <- setNames(datasets, datasets)
 names(datasets)[match("mpg", datasets)] <- "mpg (examples)"
 names(datasets)[match("diamonds", datasets)] <- "diamonds (examples)"
 names(datasets)[match(rna_seq, datasets)] <- "RNA-Seq (examples)"
-
-
-
-# Generated by ChatGPT
-jokes <- c(
-  "Why did the tomato turn red? Because it saw the salad dressing. - ChatGPT",
-  "Why was the belt arrested? Because it held up a pair of pants. - ChatGPT",
-  "Why was the math book sad? Because it had too many problems. - ChatGPT",
-  "Why was the statistician's favorite method of transportation a bus? Because it had a lot of data. - ChatGPT",
-  "Why did the tomato turn red? Because it saw the salad dressing. - ChatGPT",
-  "Why was the math book upset? Because it was having a negative number of pages. - ChatGPT",
-  "Why was the math book happy? Because it had lots of solutions. - ChatGPT",
-  "Why couldn't the bicycle stand up by itself? Because it was two-tired. - ChatGPT",
-  "Why do statisticians enjoy spending time with their data? Because they're data-driven individuals. - ChatGPT",
-  "Why do statisticians like playing with their data? Because they have mean jokes. - ChatGPT",
-  "Why do statisticians have a tough time at parties? Because they're always trying to fit in. - ChatGPT",
-  "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle. -ChatGPT",
-  "Don't let yesterday take up too much of today. -ChatGPT",
-  "If you want to live a happy life, tie it to a goal, not to people or things. -ChatGPT",
-  "If you can dream it, you can do it.",
-  "Success is not final, failure is not fatal: it is the courage to continue that counts. -ChatGPT",
-  "The only way to do great work is to love what you do. -ChatGPT",
-  "The only limit to our realization of tomorrow will be our doubts of today. -ChatGPT",
-  "You miss 100% of the shots you don't take. -ChatGPT",
-  "Your time is limited, don't waste it living someone else's life. -ChatGPT",
-  "Hardships often prepare ordinary people for an extraordinary destiny. -ChatGPT",
-  "Success is not how high you have climbed, but how you make a positive difference to the world. -ChatGPT",
-  "Happiness is not something ready-made. It comes from your own actions. -ChatGPT",
-  "The only way to do great work is to be passionate about what you do. -ChatGPT",
-  "Believe you can and you're halfway there. -ChatGPT",
-  "The only way to achieve the impossible is to believe it is possible. -ChatGPT",
-  "Do what you can, with what you have, where you are. -ChatGPT",
-  "The greatest glory in living lies not in never falling, but in rising every time we fall. -ChatGPT",
-  "Life is not about waiting for the storm to pass, but learning to dance in the rain. -ChatGPT",
-  "The biggest adventure you can take is to live the life of your dreams. -ChatGPT",
-  "If opportunity doesn't knock, build a door. -ChatGPT",
-  "The only limit to our realization of tomorrow will be our doubts of today. -ChatGPT",
-  "The only true limit to our realization of tomorrow is in today's doubts and fears. -ChatGPT",
-  "Don't watch the clock; do what it does. Keep going. -ChatGPT",
-  "Successful people do what unsuccessful people are not willing to do. Don't wish it were easier; wish you were better. -ChatGPT",
-  "You may be the only person left who believes in you, but it's enough. It takes just one star to pierce a universe of darkness. Never give up. -ChatGPT",
-  "Be the change you wish to see in the world. -ChatGPT",
-  "The only way to discover the limits of the possible is to go beyond them into the impossible. -ChatGPT",
-  "Success is not in what you have, but who you are. -ChatGPT",
-  "Success is not how much money you make, but the difference you make in people's lives. -ChatGPT",
-  "The only limit to our realization of tomorrow will be the doubts of today. -ChatGPT",
-  "Statistics are like a bikini. What they reveal is suggestive, but what they conceal is vital. - Aaron Levenstein",
-  "There are three kinds of lies: lies, damned lies, and statistics. - Benjamin Disraeli",
-  "In God we trust, all others must bring data. - W. Edwards Deming",
-  "Statistics is the grammar of science. - Karl Pearson",
-  "A single death is a tragedy; a million deaths is a statistic. - Joseph Stalin",
-  "Chance is the pseudonym of God when he does not want to sign his work. - Anatole France",
-  "Statistics are like a lamp that illuminates the past and the present, but only reveals the future. - George E. P. Box",
-  "Statistics are human beings with the tears wiped off. - Paul Brodeur",
-  "The only thing more dangerous than ignorance is arrogance. - Albert Einstein",
-  "The best thing about being a statistician is that you get to play in everyone's backyard. - John Tukey"
-)
-
 
 
 #' Clean up API key character
@@ -685,7 +553,8 @@ create_usage_db <- function() {
     filesize,
     chunk,
     api_time,
-    tokens
+    tokens,
+    language
   ) {
     # if db does not exist, create one
     if (file.exists(sqlitePath)) {
@@ -695,7 +564,7 @@ create_usage_db <- function() {
       txt <- sprintf(
         "INSERT INTO %s (%s) VALUES ('%s')",
         sqltable,
-        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens",
+        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language",
         paste(
           c(
             as.character(date),
@@ -710,7 +579,8 @@ create_usage_db <- function() {
             filesize,
             chunk,
             api_time,
-            tokens
+            tokens,
+            language
           ),
           collapse = "', '"
         )
@@ -783,5 +653,70 @@ create_usage_db <- function() {
       RSQLite::dbDisconnect(db)
     }
   }
+
+
+
+#' Generate html file from Python code
+#' 
+#'
+#' @param python_code, a chunk of code 
+#' @param html_file file name for output
+#' @param select_data input$select data
+#' @param current_data   current_data()
+#'
+#' @return -1 if failed. If success, the the designated html file is written
+#' 
+python_html <- function(python_code, select_data, current_data) {
+  withProgress(message = "Running Python...", {
+    incProgress(0.2)
+    temp_rmd <- paste0(tempfile(), "_temp.Rmd")
+
+    # html file is generated using the same file name except the extension
+    html_file <- gsub("Rmd$", "html", temp_rmd)
+
+    Rmd_script <- paste0(
+      Rmd_script_python,
+      "\n```{python, echo=FALSE}\n",
+      python_code,
+      "\n```\n"
+    )
+    write(
+      Rmd_script,
+      file = temp_rmd,
+      append = FALSE
+    )
+
+    # Set up parameters to pass to Rmd document
+    params <- list(df = iris) # dummy
+
+    # if uploaded, use that data
+    req(select_data)
+    if (select_data != no_data) {
+      params <- list(
+        df = current_data
+      )
+    }
+
+    req(params)
+    # Knit the document, passing in the `params` list, and eval it in a
+    # child of the global environment (this isolates the code in the document
+    # from the code in this app).
+    try(
+      rmarkdown::render(
+        input = temp_rmd, # markdown_location,
+        params = params,
+        envir = new.env(parent = globalenv())
+      )
+    )
+
+  })  # progress bar
+    
+
+    if(file.exists(html_file)) {
+      return(html_file)       
+    } else {
+      return(-1)
+    }
+}
 
 
