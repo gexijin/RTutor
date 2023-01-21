@@ -31,9 +31,10 @@ app_ui <- function(request) {
         tags$head(
           tags$style(
             HTML(".shiny-notification {
+                  width: 200px;
                   position:fixed;
-                  top: calc(20%);
-                  left: calc(50%);
+                  top: calc(10%);
+                  left: calc(10%);
                   }
                   "
                 )
