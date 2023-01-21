@@ -553,7 +553,8 @@ create_usage_db <- function() {
     filesize,
     chunk,
     api_time,
-    tokens
+    tokens,
+    language
   ) {
     # if db does not exist, create one
     if (file.exists(sqlitePath)) {
@@ -563,7 +564,7 @@ create_usage_db <- function() {
       txt <- sprintf(
         "INSERT INTO %s (%s) VALUES ('%s')",
         sqltable,
-        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens",
+        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language",
         paste(
           c(
             as.character(date),
@@ -578,7 +579,8 @@ create_usage_db <- function() {
             filesize,
             chunk,
             api_time,
-            tokens
+            tokens,
+            language
           ),
           collapse = "', '"
         )

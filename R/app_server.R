@@ -2097,7 +2097,8 @@ output$answer <- renderText({
           filesize = ifelse(is.null(input$user_file[1, 2]), " ", input$user_file[1, 2]),
           chunk = counter$requests,
           api_time = counter$time,
-          tokens = counter$tokens_current
+          tokens = counter$tokens_current,
+          language = logs$language
         )
       )
     }
