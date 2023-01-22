@@ -104,7 +104,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             uiOutput("slava_ukraini"),
             br(),
             textOutput("retry_on_error"),
-            checkboxInput("Comments", "Help improve RTutor"),
+            checkboxInput("Comments", "Comments & questions"),
             tags$style(type = "text/css", "textarea {width:100%}"),
             tags$textarea(
               id = "user_feedback",
@@ -162,7 +162,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                     thousands of books, millions of code repositories, 
                     and billions of web pages of all kinds.
                     I'm not being hyperbolic. Just bragging. 
-                    BTW, I also learned a few dozen foregin languages.
+                    BTW, I can understand instructions in  
+                    dozens of human languages, and produces both R and Python 
+                    code for testing.
                      "
                   ),
                   align = "left"
@@ -179,7 +181,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 ),
                 tags$li(
                   "Released as a prototype for testing, RTutor was just an idea 
-                  25 days ago. Keep your expectations low and 
+                  a few weeks ago. Keep your expectations low and 
                   send us your valuable feedback (lower left)."
                 ),
                 tags$li(

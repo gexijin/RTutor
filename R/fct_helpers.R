@@ -28,6 +28,7 @@ after_text <- " Use the df data frame, which is already read from a file. "
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
+max_levels_factor_conversion <- 4 # Numeric columns will be converted to factor if less than or equal to this many levels
 # if a column is numeric but only have a few unique values, treat as categorical
 unique_ratio <- 0.1   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results

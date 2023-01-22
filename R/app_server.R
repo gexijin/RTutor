@@ -38,7 +38,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use demo data. Then just ask questions or request analyses in plain English. For general questions, briefly explain the data first, especially the relevant columns. See examples above. If unsuccessful, try again with the same request or ask differently. Code works correctly some of the times. To use voice input, click Settings."
+"Upload a file or use demo data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first, especially the relevant columns. See examples above. If unsuccessful, try again with the same request or ask differently. Code works correctly some of the times. To use voice input, click Settings."
       )
     }
   })
@@ -388,7 +388,7 @@ app_server <- function(input, output, session) {
               inputId = "max_levels_factor",
               label = "Max levels",
               value = max_levels_factor(),
-              min = 5,
+              min = 3,
               max = 50,
               step = 1
             ),
@@ -756,7 +756,7 @@ app_server <- function(input, output, session) {
 
       logs$last_code <- ""
 
-      logs$language = ifelse(input$use_python, "Python", "R")
+      logs$language <- ifelse(input$use_python, "Python", "R")
 
     } else { # if continue
       logs$last_code <- logs$code  # last code
@@ -772,7 +772,7 @@ app_server <- function(input, output, session) {
         gsub("^\n+", "", openAI_response()$response$choices[1, 1])
       )
 
-      logs$language = ifelse(input$use_python, "Python", "R")
+      logs$language <- ifelse(input$use_python, "Python", "R")
     }
 
     # A list holds current request
@@ -783,7 +783,9 @@ app_server <- function(input, output, session) {
       prompt = input$input_text,
       error = code_error(),
       rmd = Rmd_chunk(),
-      language = ifelse(input$use_python, "Python", "R")
+      language = ifelse(input$use_python, "Python", "R"),
+      # saves the rendered file in the logs object.
+      html_file = ifelse(input$use_python, python_to_html(), -1)
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -1129,7 +1131,7 @@ app_server <- function(input, output, session) {
 
 
    max_levels_factor <- reactive({
-      max_levels_1 <- max_levels #default
+      max_levels_1 <- max_levels_factor_conversion #default
       if (!is.null(input$max_levels_factor)) {
         max_levels_1 <- input$max_levels_factor
       }
@@ -1851,6 +1853,11 @@ output$answer <- renderText({
   output$table1 <- renderText({
     req(ggpairs_data())
     df <- ggpairs_data()
+
+    # if more than 5000 rows, sample
+    if (nrow(df) > 5000) {
+      df <- df[sample(1:nrow(df), 5000), ]
+    }
     req(input$table1_strata)
     options(width = 3000)
     withProgress(message = "Calculating table1 ...", {
@@ -2022,8 +2029,9 @@ output$answer <- renderText({
 
   output$RTutor_version_main <- renderUI({
     tagList(
-      h3(paste("RTutor.ai ", release)),
-      h4("English is preferred but try asking in other languages.")
+      h3(paste("RTutor.ai ", release, "R & Python!")),
+      h4("English is preferred but try me using other 
+      languages: Spanish, German, French, Chinese, Japanese, etc.")
     )
   })
 
@@ -2149,13 +2157,12 @@ output$answer <- renderText({
 #
 #  Python
   output$python_markdown <- renderUI({
-    #browser()
-
     req(openAI_response()$cmd)
     req(input$use_python)
 
-
-    rendered <- python_to_html()
+    id <- as.integer(input$selected_chunk)
+    rendered <- logs$code_history[[id]]$html_file
+    req(rendered)
 
     if (rendered == -1) {
       p("Error!")
@@ -2164,13 +2171,11 @@ output$answer <- renderText({
     }
   })
 
+  # file is renderred and stored in the html_file variable in logs$code_history
   python_to_html <- reactive({
     req(input$submit_button)
-    req((logs$language == "Python") == input$use_python )
+    req(logs$language == "Python")
     req(input$use_python)
-    # This makes it responsive when switching between two python chunks
-    # causes shiny to render it twice initially
-    input$selected_chunk 
 
     isolate({
       python_html(
