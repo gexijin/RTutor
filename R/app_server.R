@@ -2029,9 +2029,7 @@ output$answer <- renderText({
 
   output$RTutor_version_main <- renderUI({
     tagList(
-      h3(paste("RTutor.ai ", release, "R & Python!")),
-      h4("English is preferred but try me using other 
-      languages: Spanish, German, French, Chinese, Japanese, etc.")
+      h3(paste("RTutor.ai ", release, "Multilingual in human and computer languages!"))
     )
   })
 

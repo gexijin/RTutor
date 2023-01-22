@@ -160,11 +160,10 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                     But I try to be helpful.  
                     I did finish my required reading:
                     thousands of books, millions of code repositories, 
-                    and billions of web pages of all kinds.
+                    and billions of web pages.
                     I'm not being hyperbolic. Just bragging. 
-                    BTW, I can understand instructions in  
-                    dozens of human languages, and produces both R and Python 
-                    code for testing.
+                    BTW, I can generate and evaluate both R and Python scripts
+                     from instructions in dozens of human languages.
                      "
                   ),
                   align = "left"
