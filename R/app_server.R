@@ -1717,8 +1717,9 @@ output$answer <- renderText({
     }
 
     prepared_request <- paste(
-      "If the next question is not related to statistics or data science 
-       say 'Statistics only!' ",
+      "If the next question is not broadly related to statistics, algorithms, or computer science
+       say 'Statistics only!' If the question is in languages other than English, 
+       respond in that language.",
       txt
     )
 
