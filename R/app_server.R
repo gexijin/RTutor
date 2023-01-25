@@ -135,33 +135,45 @@ app_server <- function(input, output, session) {
     req(!is.null(in_file))
 
     isolate({
+      df <- data.frame()
       file_type <- "read_excel"
       # Excel file ---------------
-      if(grepl("xls$|xlsx$", in_file, ignore.case = TRUE)) {
-        df <- readxl::read_excel(in_file)
+      if (grepl("xls$|xlsx$", in_file, ignore.case = TRUE)) {
+        try(
+          df <- readxl::read_excel(in_file)
+        )
         df <- as.data.frame(df)
       } else {
         #CSV --------------------
-        df <- read.csv(in_file)
+        try(
+          df <- read.csv(in_file)
+        )
         file_type <- "read.csv"
         # Tab-delimented file ----------
-        if (ncol(df) <= 2) {
-          df <- read.table(
-            in_file,
-            sep = "\t",
-            header = TRUE
+        if (ncol(df) <= 1) { # unable to parse with comma
+          try(
+            df <- read.table(
+              in_file,
+              sep = "\t",
+              header = TRUE
+            )
           )
           file_type <- "read.table"
         }
       }
-      # clean column names
-      df <- df %>% janitor::clean_names()
-      return(
-        list(
-          df = df,
-          file_type = file_type
+
+      if (ncol(df) == 0) { # no data read in. Empty
+        return(NULL)
+      } else {
+        # clean column names
+        df <- df %>% janitor::clean_names()
+        return(
+          list(
+            df = df,
+            file_type = file_type
+          )
         )
-      )
+      }
     })
   })
 
@@ -1116,7 +1128,7 @@ app_server <- function(input, output, session) {
   })
 
   max_proptortion_factor <- reactive({
-      max_proptortion <- TRUE #default
+      max_proptortion <- 0.5 #default
       if(!is.null(input$max_proptortion_factor)) {
         max_proptortion <- input$max_proptortion_factor
       }
