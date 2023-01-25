@@ -145,7 +145,7 @@ app_server <- function(input, output, session) {
         df <- read.csv(in_file)
         file_type <- "read.csv"
         # Tab-delimented file ----------
-        if (ncol(df) == 2) {
+        if (ncol(df) <= 2) {
           df <- read.table(
             in_file,
             sep = "\t",
