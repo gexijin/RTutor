@@ -79,7 +79,7 @@ app_server <- function(input, output, session) {
         heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
         heyshiny::speechInput(
           inputId = "hey_cmd",
-          command = "hey cox *msg"  # hey cox is more sensitive than 'hi tutor'
+          command = paste(wake_word, "*msg")  # hey cox is more sensitive than 'hi tutor'
         ), # set the input
       )
   })
@@ -88,11 +88,10 @@ app_server <- function(input, output, session) {
   observeEvent(input$hey_cmd, {
     speech <- input$hey_cmd
     # message(speech)
-    showNotification(speech)
+    #showNotification(speech)
 
     if (input$tabs == "Home")    {
       if (grepl("^continue", speech)) {
-
         speech <- paste0(
           input$input_text, # current prompt
           ". ",  # add . and space.
@@ -105,18 +104,24 @@ app_server <- function(input, output, session) {
         "input_text",
         value = speech
       )
+
+      # submit the request when user said  action verb
+      if (tolower(speech) %in% action_verbs) {
+        shinyjs::click("submit_button")
+      }
     } else if (input$tabs == "Ask") {
 
-      speech <- paste0(
-        input$input_text, # current prompt
-        ". ",  # add . and space.
-        gsub("^continue", "", speech) # remove the continue
-      )
       updateTextInput(
         session,
         "ask_question",
         value = speech
       )
+
+
+      # submit the request when user said  action verb
+      if (tolower(speech) %in% action_verbs) {
+        shinyjs::click("ask_button")
+      }
 
     }
 
@@ -372,10 +377,10 @@ app_server <- function(input, output, session) {
           could be clicked to grant permission. If successful, you will see 
           a red dot on top of the tab in Chrome.
           Voice naration can be used in both the Main and the 
-          Ask Me Anything tabs by just saying \"Hey Cox ...\" 
-          in honor of the statistician David Cox.     
+          Ask Me Anything tabs by just saying \"Tutor ...\".
+          To submit the request, say \"Tutor submit\", or \"Tutor go ahead.\"     
           If not satisfied, try again to overwrite. 
-          To continue, say \"Hey Cox Continue ...\""),
+          To continue, say \"Tutor Continue ...\""),
         ),
         hr(),
         fluidRow(
@@ -1918,6 +1923,7 @@ output$answer <- renderText({
       #GGally::ggpairs(current_data())
       df <- current_data()
       df <- df[, sapply(df, is.numeric)]
+      df <- na.omit(df) # remove missing values
       M <- cor(df)
       testRes <- corrplot::cor.mtest(df, conf.level = 0.95)
       corrplot::corrplot(
@@ -1936,6 +1942,7 @@ output$answer <- renderText({
 
   ggpairs_data <- reactive({
     df <- current_data()
+    df <- na.omit(df) # remove missing values
     cat_variables <- colnames(df)[!sapply(df, is.numeric)]
     # ggpairs does not tolerate variables with too many levels
     for (v in cat_variables) {

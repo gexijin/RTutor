@@ -530,6 +530,10 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         h4("Update log:"),
         tags$ul(
           tags$li(
+            "v 0.91  2/6/2023. Voice input is improved. 
+            Just enable micphone and say Tutor..."
+          ),
+          tags$li(
             "v 0.90  1/15/2023. Generates and runs Pyton code in addition to R!"
           ),
           tags$li(
@@ -707,8 +711,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         p("Start a new browser window, not another tab. You will be assigned
         to a new worker process. You can also try our mirror site ",
         a(
-          "https://bcloud.org.",
-          href = "https://bcloud.org"
+          "http://149.165.170.244/",
+          href = "http://149.165.170.244/"
         )
         ),
 

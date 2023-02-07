@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.90" # RTutor
+release <- "0.91" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -33,6 +33,18 @@ max_levels_factor_conversion <- 4 # Numeric columns will be converted to factor 
 unique_ratio <- 0.1   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
+
+# voice input parameters
+wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
+# this triggers the submit button
+action_verbs <- c(
+  "now", 
+  "do it", 
+  "do it now", 
+  "go ahead", 
+  "submit", 
+  "what are you waiting for"
+)
 
 #RMarkdown file's Header for knit python chunks
 Rmd_script_python <- 
