@@ -99,13 +99,13 @@ demography <- readr::read_delim(
   paste0(data_path, "Demography.txt"), 
   delim = "\t", 
   escape_double = FALSE, 
-  col_types = cols(
-    patient = col_character(),
-    enrolled_date = col_date(format = "%d/%m/%Y"), 
-    site = col_character(), 
-    investigator = col_character(), 
-    Date_of_birth = col_date(format = "%d/%m/%Y"), 
-    age = col_integer()
+  col_types = readr::cols(
+    patient = readr::col_character(),
+    enrolled_date = readr::col_date(format = "%d/%m/%Y"), 
+    site = readr::col_character(), 
+    investigator = readr::col_character(), 
+    Date_of_birth = readr::col_date(format = "%d/%m/%Y"), 
+    age = readr::col_integer()
   ), 
   trim_ws = TRUE
 )
@@ -118,9 +118,9 @@ lab <- readr::read_delim(
   paste0(data_path, "Lab Results.txt"), 
   delim = "\t", 
   escape_double = FALSE, 
-  col_types = cols(
-    patient = col_character(), 
-    result = col_number()
+  col_types = readr::cols(
+    patient = readr::col_character(), 
+    result = readr::col_number()
   ), 
   trim_ws = TRUE
 )
@@ -136,10 +136,10 @@ events <- readr::read_delim(
   paste0(data_path, "Adverse Events.txt"), 
   delim = "\t", 
   escape_double = FALSE, 
-  col_types = cols(
-    patient = col_character(), 
-    Start = col_date(format = "%d/%m/%Y"), 
-    End = col_date(format = "%d/%m/%Y")
+  col_types = readr::cols(
+    patient = readr::col_character(), 
+    Start = readr::col_date(format = "%d/%m/%Y"), 
+    End = readr::col_date(format = "%d/%m/%Y")
   ), 
   trim_ws = TRUE
 )
@@ -150,10 +150,10 @@ medications <- readr::read_delim(
   paste0(data_path, "Medications.txt"), 
      delim = "\t", 
      escape_double = FALSE, 
-     col_types = cols(
-      patient = col_character(), 
-      Start = col_date(format = "%d/%m/%Y"), 
-      End = col_date(format = "%d/%m/%Y")
+     col_types = readr::cols(
+      patient = readr::col_character(), 
+      Start = readr::col_date(format = "%d/%m/%Y"), 
+      End = readr::col_date(format = "%d/%m/%Y")
     ), 
   trim_ws = TRUE
 )
