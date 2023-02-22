@@ -11,4 +11,4 @@ golem::detach_all_attached()
 golem::document_and_reload()
 
 # Run the application
-golem::run_app()
+run_app()

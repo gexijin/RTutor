@@ -95,7 +95,7 @@ move_front <- function(v, e){
 
 #data_path <- "G:/My Drive/personal/UK/clean/"
 data_path <- "../../data/"
-demography <- read_delim(
+demography <- readr::read_delim(
   paste0(data_path, "Demography.txt"), 
   delim = "\t", 
   escape_double = FALSE, 
@@ -114,7 +114,7 @@ demography$race <- as.factor(demography$race)
 demography$ethnicity <- as.factor(demography$ethnicity)
 demography$country <- as.factor(demography$country)
 
-lab <- read_delim(
+lab <- readr::read_delim(
   paste0(data_path, "Lab Results.txt"), 
   delim = "\t", 
   escape_double = FALSE, 
@@ -132,7 +132,7 @@ lab$category <- as.factor(lab$category)
 lab$indicator <- as.factor(lab$indicator)
 
 
-events <- read_delim(
+events <- readr::read_delim(
   paste0(data_path, "Adverse Events.txt"), 
   delim = "\t", 
   escape_double = FALSE, 
@@ -146,7 +146,7 @@ events <- read_delim(
 events$Serious <- as.factor(events$Serious)
 events$Status <- as.factor(events$Status)
 
-medications <- read_delim(
+medications <- readr::read_delim(
   paste0(data_path, "Medications.txt"), 
      delim = "\t", 
      escape_double = FALSE, 
