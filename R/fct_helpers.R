@@ -93,6 +93,73 @@ move_front <- function(v, e){
   return(v)
 }
 
+data_path <- "G:/My Drive/personal/UK/clean/"
+demography <- read_delim(
+  paste0(data_path, "Demography.txt"), 
+  delim = "\t", 
+  escape_double = FALSE, 
+  col_types = cols(
+    patient = col_character(),
+    enrolled_date = col_date(format = "%d/%m/%Y"), 
+    site = col_character(), 
+    investigator = col_character(), 
+    Date_of_birth = col_date(format = "%d/%m/%Y"), 
+    age = col_integer()
+  ), 
+  trim_ws = TRUE
+)
+demography$sex <- as.factor(demography$sex)
+demography$race <- as.factor(demography$race)
+demography$ethnicity <- as.factor(demography$ethnicity)
+demography$country <- as.factor(demography$country)
+
+lab <- read_delim(
+  paste0(data_path, "Lab Results.txt"), 
+  delim = "\t", 
+  escape_double = FALSE, 
+  col_types = cols(
+    patient = col_character(), 
+    result = col_number()
+  ), 
+  trim_ws = TRUE
+)
+
+lab <- na.omit(lab)
+
+lab$test <- as.factor(lab$test)
+lab$category <- as.factor(lab$category)
+lab$indicator <- as.factor(lab$indicator)
+
+
+events <- read_delim(
+  paste0(data_path, "Adverse Events.txt"), 
+  delim = "\t", 
+  escape_double = FALSE, 
+  col_types = cols(
+    patient = col_character(), 
+    Start = col_date(format = "%d/%m/%Y"), 
+    End = col_date(format = "%d/%m/%Y")
+  ), 
+  trim_ws = TRUE
+)
+events$Serious <- as.factor(events$Serious)
+events$Status <- as.factor(events$Status)
+
+
+medications <- read_delim(
+  paste0(data_path, "Medications.txt"), 
+     delim = "\t", 
+     escape_double = FALSE, 
+     col_types = cols(
+      patient = col_character(), 
+      Start = col_date(format = "%d/%m/%Y"), 
+      End = col_date(format = "%d/%m/%Y")
+    ), 
+  trim_ws = TRUE
+)
+
+
+
 
 #' Prepare User input.
 #'
@@ -356,12 +423,18 @@ datasets <- move_front(datasets, rna_seq)
 
 # append a dummy value, used when user do not use any data
 datasets <- c(datasets, no_data)
+
+#datasets <- c(datasets, "demography", "lab")
+datasets <- c("mpg", "demography", "lab", "events", "medications")
 # move it to 2nd place
 datasets <- move_front(datasets, no_data)
 
 datasets <- move_front(datasets, "diamonds")
 # default
 datasets <- move_front(datasets, "mpg")
+
+datasets <- move_front(datasets, "lab")
+datasets <- move_front(datasets, "demography")
 
 datasets <- setNames(datasets, datasets)
 
