@@ -93,7 +93,6 @@ move_front <- function(v, e){
   return(v)
 }
 
-read_data1 <- function() {
 #data_path <- "G:/My Drive/personal/UK/clean/"
 data_path <- "../../data/"
 demography <- read_delim(
@@ -159,7 +158,7 @@ medications <- read_delim(
   trim_ws = TRUE
 )
 
-}
+
 
 
 #' Prepare User input.
