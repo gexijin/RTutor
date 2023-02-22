@@ -94,7 +94,7 @@ move_front <- function(v, e){
 }
 
 #data_path <- "G:/My Drive/personal/UK/clean/"
-data_path <- "~/"
+data_path <- "../../data/"
 demography <- read_delim(
   paste0(data_path, "Demography.txt"), 
   delim = "\t", 
