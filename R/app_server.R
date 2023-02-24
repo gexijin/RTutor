@@ -13,6 +13,8 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
+  # read data
+  read_additional_data()
 #                            1.
 #____________________________________________________________________________
 #  General UI, observers, etc.
