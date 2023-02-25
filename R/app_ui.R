@@ -154,17 +154,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 ),
                 column(
                   width = 9,
-                  h5(
-                    "Hi I'm your statistics tutor.  
-                    I am still in college learning new things.
-                    But I try to be helpful.  
-                    I did finish my required reading:
-                    thousands of books, millions of code repositories, 
-                    and billions of web pages.
-                    I'm not being hyperbolic. Just bragging. 
-                    BTW, I can generate and evaluate both R and Python scripts
-                     from instructions in dozens of human languages.
-                     "
+                  h3(
+                    "Only ask questions regarding the demography data and adverse events data.  These are built-in."
                   ),
                   align = "left"
                 )
