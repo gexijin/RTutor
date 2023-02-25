@@ -24,8 +24,7 @@ Imports:
     tableone,
     GGally,
     janitor,
-    RSQLite,
-    dplyr
+    RSQLite
 Remotes:
     github::jcrodriguez1989/heyshiny
 Depends:

@@ -99,7 +99,7 @@ move_front <- function(v, e){
 #' Read user data files
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
 read_additional_data <- function() {
-
+  library(dplyr)
   # Running on laptop, specify absolute path to the folder
   data_path <- "G:/My Drive/personal/UK/clean/"
 
