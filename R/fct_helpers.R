@@ -22,7 +22,13 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Generate R code. "
+pre_text <- "Generate R code. The demography data frame contains information 
+about patient demographics information. It a numeric column called age. Other columns
+include patient, site, investigator, Date_of_birth, sex, race, ethnicity and country. 
+In the sex column, male is denoted as M. 
+The events data frame contains information 
+about adverse events in a clinical trial. 
+All datasets have been read in and contain a common column called patient. "
 pre_text_python <- "Generate Python code. "
 after_text <- " Use the df data frame, which is already read from a file. "
 max_char_question <- 280 # max n. of characters in the Q&A
@@ -93,71 +99,89 @@ move_front <- function(v, e){
   return(v)
 }
 
+
+#' Read built-in datasets
+#'
+#' Read user data files
+#' @return Returns a cleaned up version, so that it could be sent to GPT.
 read_additional_data <- function() {
-#data_path <- "G:/My Drive/personal/UK/clean/"
-data_path <- "../../data/"
-demography <<- readr::read_delim(
-  paste0(data_path, "Demography.txt"), 
-  delim = "\t", 
-  escape_double = FALSE, 
-  col_types = readr::cols(
-    patient = readr::col_character(),
-    enrolled_date = readr::col_date(format = "%d/%m/%Y"), 
-    site = readr::col_character(), 
-    investigator = readr::col_character(), 
-    Date_of_birth = readr::col_date(format = "%d/%m/%Y"), 
-    age = readr::col_integer()
-  ), 
-  trim_ws = TRUE
-)
-demography$sex <- as.factor(demography$sex)
-demography$race <- as.factor(demography$race)
-demography$ethnicity <- as.factor(demography$ethnicity)
-demography$country <- as.factor(demography$country)
 
-lab <<- readr::read_delim(
-  paste0(data_path, "Lab Results.txt"), 
-  delim = "\t", 
-  escape_double = FALSE, 
-  col_types = readr::cols(
-    patient = readr::col_character(), 
-    result = readr::col_number()
-  ), 
-  trim_ws = TRUE
-)
+  # Running on laptop, specify absolute path to the folder
+  data_path <- "G:/My Drive/personal/UK/clean/"
 
-lab <- na.omit(lab)
+  # data file should be stored in 
+  if(file.exists(on_server)) {
+    data_path <- "../../data/"
+  }
 
-lab$test <- as.factor(lab$test)
-lab$category <- as.factor(lab$category)
-lab$indicator <- as.factor(lab$indicator)
+  demography <<- readr::read_delim(
+    paste0(data_path, "Demography.txt"), 
+    delim = "\t", 
+    escape_double = FALSE, 
+    col_types = readr::cols(
+      patient = readr::col_character(),
+      enrolled_date = readr::col_date(format = "%d/%m/%Y"), 
+      site = readr::col_character(), 
+      investigator = readr::col_character(), 
+      Date_of_birth = readr::col_date(format = "%d/%m/%Y"), 
+      age = readr::col_integer()
+    ), 
+    trim_ws = TRUE
+  )
+  demography$sex <<- as.factor(demography$sex)
+  demography$race <<- as.factor(demography$race)
+  demography$ethnicity <<- as.factor(demography$ethnicity)
+  demography$country <<- as.factor(demography$country)
+  demography <<- as.data.frame(demography)
 
+  if(0) { # disable temporarily
+  lab <<- readr::read_delim(
+    paste0(data_path, "Lab Results.txt"), 
+    delim = "\t", 
+    escape_double = FALSE, 
+    col_types = readr::cols(
+      patient = readr::col_character(), 
+      result = readr::col_number()
+    ), 
+    trim_ws = TRUE
+  )
 
-events <<- readr::read_delim(
-  paste0(data_path, "Adverse Events.txt"), 
-  delim = "\t", 
-  escape_double = FALSE, 
-  col_types = readr::cols(
-    patient = readr::col_character(), 
-    Start = readr::col_date(format = "%d/%m/%Y"), 
-    End = readr::col_date(format = "%d/%m/%Y")
-  ), 
-  trim_ws = TRUE
-)
-events$Serious <- as.factor(events$Serious)
-events$Status <- as.factor(events$Status)
+  lab <<- na.omit(lab)
 
-medications <<- readr::read_delim(
-  paste0(data_path, "Medications.txt"), 
-     delim = "\t", 
-     escape_double = FALSE, 
-     col_types = readr::cols(
+  lab$test <<- as.factor(lab$test)
+  lab$category <<- as.factor(lab$category)
+  lab$indicator <<- as.factor(lab$indicator)
+  lab <<- as.data.frame(lab)
+  }
+
+  events <<- readr::read_delim(
+    paste0(data_path, "Adverse Events.txt"), 
+    delim = "\t", 
+    escape_double = FALSE, 
+    col_types = readr::cols(
       patient = readr::col_character(), 
       Start = readr::col_date(format = "%d/%m/%Y"), 
       End = readr::col_date(format = "%d/%m/%Y")
     ), 
-  trim_ws = TRUE
-)
+    trim_ws = TRUE
+  )
+  events$Serious <<- as.factor(events$Serious)
+  events$Status <<- as.factor(events$Status)
+  events <<- as.data.frame(events)
+
+  medications <<- readr::read_delim(
+    paste0(data_path, "Medications.txt"), 
+      delim = "\t", 
+      escape_double = FALSE, 
+      col_types = readr::cols(
+        patient = readr::col_character(), 
+        Start = readr::col_date(format = "%d/%m/%Y"), 
+        End = readr::col_date(format = "%d/%m/%Y")
+      ), 
+    trim_ws = TRUE
+  )
+  medications$medications <<- as.factor(medications$medications)
+  medications <<- as.data.frame(medications)
 
 }
 
@@ -302,11 +326,13 @@ prep_input <- function(txt, selected_data, df, use_python) {
         }
       }
 
-      txt <- paste(txt, after_text)
+      #txt <- paste(txt, after_text)
+
       # if user is not trying to convert data
-      if (!grepl("Convert |convert ", txt)) {
-        txt <- paste(txt, data_info)
-      }
+      #if (!grepl("Convert |convert ", txt)) {
+      #  txt <- paste(txt, data_info)
+      #}
+
     }
   }
 
@@ -326,6 +352,108 @@ prep_input <- function(txt, selected_data, df, use_python) {
   return(txt)
 }
 
+
+#' Describe data frame
+#'
+#' Returns information on data frame describing columns.
+#'
+#' @param df a data frame
+#' @return Returns a cleaned up version, so that it could be executed as R command.
+
+ describe_df <- function(df) {
+
+      data_info <- ""
+
+      numeric_index <- sapply(
+        df,
+        function(x) {
+          if (is.numeric(x)) {
+            return(TRUE)
+          } else {
+            return(FALSE)
+          }
+        }
+      )
+
+      numeric_var <- colnames(df)[numeric_index]
+      none_numeric_var <- colnames(df)[!numeric_index]
+
+      relevant_var <- colnames(df)
+
+
+
+      # numeric variables-----------------------------
+      relevant_var_numeric <- intersect(relevant_var, numeric_var)
+      if (length(relevant_var_numeric) == 1) {
+        data_info <- paste0(
+          data_info,
+          "Note that ",
+          relevant_var_numeric,
+          " is a numeric variable. "
+        )
+      } else if (length(relevant_var_numeric) > 1) {
+        data_info <- paste0(
+          data_info,
+          "Note that ",
+          paste0(
+            relevant_var_numeric[1:(length(relevant_var_numeric) - 1)],
+            collapse = ", "
+          ),
+          " and ",
+          relevant_var_numeric[length(relevant_var_numeric)],
+          " are numeric variables. "
+        )
+      }
+
+      # Categorical variables-----------------------------
+      all_relevant_var_categorical <- intersect(
+        relevant_var,
+        none_numeric_var
+      )
+
+      for (relevant_var_categorical in all_relevant_var_categorical) {
+        ix <- match(relevant_var_categorical, colnames(df))
+        factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
+        factor_levels <- names(factor_levels)
+
+        # have more than 6 levels?
+        many_levels <- FALSE
+
+        if (length(factor_levels) > 6) {
+          many_levels <- TRUE
+          factor_levels <- factor_levels[1:6]
+        }
+
+        last_level <- factor_levels[length(factor_levels)]
+        factor_levels <- factor_levels[-1 * length(factor_levels)]
+        tem <- paste0(
+          factor_levels,
+          collapse = "', '"
+        )
+        if (!many_levels) { # less than 6 levels
+          factor_levels <- paste0("'", tem, "', and '", last_level, "'")
+        } else { # more than 6 levels
+          factor_levels <- paste0(
+            "'",
+            tem,
+            "', '",
+            last_level,
+            "', etc"
+          )
+        }
+
+        data_info <- paste0(
+          data_info,
+          "The column ",
+          relevant_var_categorical,
+          " contains a categorical variable with these levels: ",
+          factor_levels,
+          ". "
+        )
+      }
+
+      return(data_info)
+    }
 
 #' Clean up R commands generated by GTP
 #'
