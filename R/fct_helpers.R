@@ -22,7 +22,7 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Generate R code. Load the required library. "
+pre_text <- "Generate R code. Load all required libraries. "
 pre_text_python <- "Generate Python code. "
 after_text <- " Use the df data frame, which is already read from a file. "
 max_char_question <- 280 # max n. of characters in the Q&A
