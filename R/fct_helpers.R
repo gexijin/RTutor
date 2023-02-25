@@ -433,7 +433,7 @@ describe_df <- function(df) {
       all_relevant_var_categorical <- intersect(
         relevant_var,
         none_numeric_var
-      )
+      ) 
 
       for (relevant_var_categorical in all_relevant_var_categorical) {
         ix <- match(relevant_var_categorical, colnames(df))
