@@ -153,11 +153,7 @@ jokes,0,0,,"Statistics are like a lamp that illuminates the past and the present
 jokes,0,0,,Statistics are human beings with the tears wiped off. - Paul Brodeur,
 jokes,0,0,,The only thing more dangerous than ignorance is arrogance. - Albert Einstein,
 jokes,0,0,,The best thing about being a statistician is that you get to play in everyone's backyard. - John Tukey,
-<<<<<<< Updated upstream
-demography,1,1,Events per site,Plot the number of events per site. Make it interactive use ggplotly,
-=======
 demography,1,1,Events per site,Plot the number of events per site. Make it interactive with  ggplotly.,
->>>>>>> Stashed changes
 demography,1,1,Top patients,Show the patients who had the most adverse events.,
 demography,1,1,"White male, 50+",Show me the top events in white male who are 50 years or older.,
 demography,1,1,winter,Most frequently happened adverse events in the winter.,
@@ -170,11 +166,7 @@ demography,1,1,Fatal,Show me the patient information of fatal events.,
 demography,1,1,Asian,List all frequently happened adverse events in Asian patients.,
 demography,1,1,2018,List the frequency of events happened in September 2018.,
 demography,1,1,Diarrhea,List the frequency of events happened in 2018 that related to DIARRHEA.,
-<<<<<<< Updated upstream
-demography,1,1,Flu,Plot the monthly frequency of FLU events.,
-=======
 demography,1,1,Flu,Show me all the patients with a FLU event.,
->>>>>>> Stashed changes
 demography,1,1,Hispanics,Most frequently happened adverse events in the winter in Hispanics.,
 demography,1,1,Age distribution,Show me the distribution of age.,
 demography,1,1,Age x race,Show me the distribution of age by race.,
