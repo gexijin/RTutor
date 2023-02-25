@@ -352,6 +352,10 @@ prep_input <- function(txt, selected_data, df, use_python) {
         "The events data frame contains information about adverse events in a clinical trial.",
         describe_df(events)       
      )
+     txt <- paste(txt, 
+        "The medications data frame includes the medications patients are taking.",
+        describe_df(medications)       
+     )
       txt <- paste(txt, 
         "All datasets have been read in and contain a common column called patient."      
      )
@@ -367,7 +371,7 @@ prep_input <- function(txt, selected_data, df, use_python) {
       pre_text_python,
       pre_text
     ),
-    "Merge the demography data frame with the events data frame using the patient column. ",
+    #"Merge  data frames required to answer the question. ",
     txt
   )
   # replace newline with space.
@@ -433,7 +437,7 @@ describe_df <- function(df) {
       all_relevant_var_categorical <- intersect(
         relevant_var,
         none_numeric_var
-      ) 
+      )
 
       for (relevant_var_categorical in all_relevant_var_categorical) {
         ix <- match(relevant_var_categorical, colnames(df))
