@@ -2051,7 +2051,7 @@ output$answer <- renderText({
 
   output$RTutor_version_main <- renderUI({
     tagList(
-      h3(paste("RTutor.ai ", release, "  Multilingual"))
+      h3(paste("RTutor.ai ", release, "  customized for clinical trials data"))
     )
   })
 

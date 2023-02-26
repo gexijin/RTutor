@@ -155,7 +155,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 column(
                   width = 9,
                   h3(
-                    "Only ask questions regarding the demography, events and medications data.  These are built-in."
+                    "Ask questions regarding the demography, events and medications data."
                   ),
                   align = "left"
                 )
