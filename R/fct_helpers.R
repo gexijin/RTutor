@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.91" # RTutor
+release <- "0.92" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -22,9 +22,9 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Generate R code. "
-pre_text_python <- "Generate Python code. "
-after_text <- " Use the df data frame. "
+pre_text <- "Generate R code."
+pre_text_python <- "Generate Python code."
+after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
@@ -221,6 +221,53 @@ describe_df <- function(df) {
           cat_var[length(cat_var)],
           ". "
         )
+
+        # describe the levels in categorical variable
+        for (relevant_var in cat_var) {
+          max_lelvels_description <- 10
+          ix <- match(relevant_var, colnames(df))
+          factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
+          factor_levels <- names(factor_levels)
+
+          # have more than 6 levels?
+          many_levels <- FALSE
+
+          if (length(factor_levels) > max_lelvels_description) {
+            many_levels <- TRUE
+            factor_levels <- factor_levels[1:max_lelvels_description]
+          }
+
+          last_level <- factor_levels[length(factor_levels)]
+          factor_levels <- factor_levels[-1 * length(factor_levels)]
+          tem <- paste0(
+            factor_levels,
+            collapse = "', '"
+          )
+          if (!many_levels) { # less than 6 levels
+            factor_levels <- paste0("'", tem, "', and '", last_level, "'")
+          } else { # more than 6 levels
+            factor_levels <- paste0(
+              "'",
+              tem,
+              "', '",
+              last_level,
+              "', etc"
+            )
+          }
+
+          data_info <- paste0(
+            data_info,
+            "The categorical variable ",
+            relevant_var,
+            " has these levels: ",
+            factor_levels,
+            ". "
+          )
+        }
+
+
+
+
       }
 
       return(data_info)

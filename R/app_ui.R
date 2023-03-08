@@ -140,7 +140,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
           mainPanel(
             shinyjs::useShinyjs(),
             conditionalPanel(
-              condition = "input.submit_button == 0",
+              condition = "output.file_uploaded == 0 && input.submit_button == 0",
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(

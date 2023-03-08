@@ -56,6 +56,15 @@ app_server <- function(input, output, session) {
     shinyjs::hideElement(id = "load_message")
   })
 
+  # after file is uploaded, hide some UI elements. 
+  # https://stackoverflow.com/questions/19686581/make-conditionalpanel-depend-on-files-uploaded-with-fileinput
+  # On the UI, changed to output.file_uploaded == 0
+  output$file_uploaded <- reactive({
+    return(!is.null(input$user_file))
+  })
+  outputOptions(output, 'file_uploaded', suspendWhenHidden = FALSE)
+
+
 #                                    2.
 #____________________________________________________________________________
 #  Voice naration
