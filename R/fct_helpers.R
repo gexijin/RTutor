@@ -181,14 +181,14 @@ describe_df <- function(df) {
       if (length(numeric_var) == 1) {
         data_info <- paste0(
           data_info,
-          "The ",
+          "The df data frame has a column ",
           numeric_var,
-          " column contain a numeric variable. "
+          " that contains a numeric variable. "
         )
       } else if (length(numeric_var) > 1) {
         data_info <- paste0(
           data_info,
-          "These columns are numeric variables: ",
+          "The df data frame contains these numeric variables: ",
           paste0(
             numeric_var[1:(length(numeric_var) - 1)],
             collapse = ", "
@@ -205,14 +205,14 @@ describe_df <- function(df) {
       if (length(cat_var) == 1) {
         data_info <- paste0(
           data_info,
-          "The ",
+          "The df data frame has a column ",
           cat_var,
-          " column contains a categorical variable. "
+          " that contains a categorical variable. "
         )
       } else if (length(cat_var) > 1) {
         data_info <- paste0(
           data_info,
-          "These columns are categorical variables: ",
+          "The df data frame contains these categorical variables: ",
           paste0(
             cat_var[1:(length(cat_var) - 1)],
             collapse = ", "
