@@ -141,6 +141,23 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             shinyjs::useShinyjs(),
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
+
+              h3(
+                "Urgent! Send us a brief email to help us seek funding ",
+                 style = "color:red"
+              ),
+              p("We are currently applying for government
+              funding to fully develop RTutor and cover our running costs. 
+              To showcase its utility, we require emails from as many users as possible. 
+              We would appreciate a brief account of how RTutor has facilitated your study,
+               research, or business. As the proposal submission deadline is April 4th, 
+               kindly take a few minutes to send us an email today.
+               Without your support, RTutor might disappear.",
+                a(
+                  "gexijin@gmail.com",
+                  href = "mailto:gelabinfo@gmail.com?Subject=RTutor support letter"
+                )
+              ),
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
