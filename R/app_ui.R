@@ -143,7 +143,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
               h3(
-                "Urgent! Send us a brief email to help us seek funding ",
+                "We need your help! Send a brief email to support us in seeking funding",
                  style = "color:red"
               ),
               p("We are currently applying for government

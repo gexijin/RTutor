@@ -168,7 +168,7 @@ prep_input <- function(txt, selected_data, df, use_python) {
   )
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  cat(txt)
+  #cat(txt)
   return(txt)
 }
 
