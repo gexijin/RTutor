@@ -22,8 +22,8 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Generate R code."
-pre_text_python <- "Generate Python code."
+pre_text <- "Following instructions below, write correct, efficient R code that can be directly executed."
+pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
@@ -127,7 +127,28 @@ prep_input <- function(txt, selected_data, df, use_python) {
   if (!is.null(selected_data)) {
     if (selected_data != no_data) {
 
-      data_info <- describe_df(df)
+      # variables mentioned in request
+      relevant_var <- sapply(
+        colnames(df),
+        function(x) {
+          # hwy. class
+          grepl(
+            paste0(
+              " ", # proceeding space
+              x,
+              "[ |\\.|,|?]" # ending space, comma, period, or question mark
+            ),
+          txt
+          )
+        }
+      )
+      relevant_var <- names(relevant_var)[relevant_var]
+
+      data_info <- describe_df(
+        df, 
+        list_levels = TRUE, 
+        relevant_var = relevant_var
+      )
 
       txt <- paste(txt, after_text)
       # if user is not trying to convert data
@@ -147,7 +168,7 @@ prep_input <- function(txt, selected_data, df, use_python) {
   )
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  #cat(txt)
+  cat(txt)
   return(txt)
 }
 
@@ -158,9 +179,11 @@ prep_input <- function(txt, selected_data, df, use_python) {
 #' Returns information on data frame describing columns.
 #'
 #' @param df a data frame
+#' @param list_levels whether to list levels for factors
+#' @param relevant_var  a list of variables mentioned by the user
 #' @return Returns a cleaned up version, so that it could be executed as R command.
 
-describe_df <- function(df) {
+describe_df <- function(df, list_levels = FALSE, relevant_var) {
 
       data_info <- ""
       numeric_index <- sapply(
@@ -222,49 +245,53 @@ describe_df <- function(df) {
           ". "
         )
 
+        if(list_levels & length(relevant_var) > 0) {
+
+          # only list for categorical variables specified in user prompt
+          relevant_cat_var <- intersect(relevant_var, cat_var)
         # describe the levels in categorical variable
-        for (relevant_var in cat_var) {
-          max_lelvels_description <- 10
-          ix <- match(relevant_var, colnames(df))
-          factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
-          factor_levels <- names(factor_levels)
+          for (var in relevant_cat_var) {
+            max_lelvels_description <- 10
+            ix <- match(var, colnames(df))
+            factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
+            factor_levels <- names(factor_levels)
 
-          # have more than 6 levels?
-          many_levels <- FALSE
+            # have more than 6 levels?
+            many_levels <- FALSE
 
-          if (length(factor_levels) > max_lelvels_description) {
-            many_levels <- TRUE
-            factor_levels <- factor_levels[1:max_lelvels_description]
-          }
+            if (length(factor_levels) > max_lelvels_description) {
+              many_levels <- TRUE
+              factor_levels <- factor_levels[1:max_lelvels_description]
+            }
 
-          last_level <- factor_levels[length(factor_levels)]
-          factor_levels <- factor_levels[-1 * length(factor_levels)]
-          tem <- paste0(
-            factor_levels,
-            collapse = "', '"
-          )
-          if (!many_levels) { # less than 6 levels
-            factor_levels <- paste0("'", tem, "', and '", last_level, "'")
-          } else { # more than 6 levels
-            factor_levels <- paste0(
-              "'",
-              tem,
-              "', '",
-              last_level,
-              "', etc"
+            last_level <- factor_levels[length(factor_levels)]
+            factor_levels <- factor_levels[-1 * length(factor_levels)]
+            tem <- paste0(
+              factor_levels,
+              collapse = "', '"
+            )
+            if (!many_levels) { # less than 6 levels
+              factor_levels <- paste0("'", tem, "', and '", last_level, "'")
+            } else { # more than 6 levels
+              factor_levels <- paste0(
+                "'",
+                tem,
+                "', '",
+                last_level,
+                "', etc"
+              )
+            }
+
+            data_info <- paste0(
+              data_info,
+              "The categorical variable ",
+              var,
+              " has these levels: ",
+              factor_levels,
+              ". "
             )
           }
-
-          data_info <- paste0(
-            data_info,
-            "The categorical variable ",
-            relevant_var,
-            " has these levels: ",
-            factor_levels,
-            ". "
-          )
         }
-
 
 
 

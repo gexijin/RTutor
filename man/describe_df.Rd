@@ -4,10 +4,14 @@
 \alias{describe_df}
 \title{Describe data frame}
 \usage{
-describe_df(df)
+describe_df(df, list_levels = FALSE, relevant_var)
 }
 \arguments{
 \item{df}{a data frame}
+
+\item{list_levels}{whether to list levels for factors}
+
+\item{relevant_var}{a list of variables mentioned by the user}
 }
 \value{
 Returns a cleaned up version, so that it could be executed as R command.
