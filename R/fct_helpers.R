@@ -22,7 +22,7 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Following instructions below, write correct, efficient R code that can be directly executed."
+pre_text <- "Following instructions below, write correct, efficient R code."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
@@ -39,6 +39,7 @@ wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
 action_verbs <- c(
   "now", 
+  "over",
   "do it", 
   "do it now", 
   "go ahead", 
@@ -168,7 +169,7 @@ prep_input <- function(txt, selected_data, df, use_python) {
   )
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  #cat(txt)
+  #cat("\n", txt)
   return(txt)
 }
 
