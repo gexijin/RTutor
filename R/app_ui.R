@@ -143,16 +143,13 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
               h3(
-                "We need your help! Send a brief email to support us in seeking funding",
+                "Send an email to show your support!",
                  style = "color:red"
               ),
               p("We are currently applying for government
-              funding to fully develop RTutor and cover our running costs. 
-              To showcase its utility, we require emails from as many users as possible. 
-              We would appreciate a brief account of how RTutor has facilitated your study,
-               research, or business. As the proposal submission deadline is April 4th, 
-               kindly take a few minutes to send us an email today.
-               Without your support, RTutor might disappear.",
+              funding to cover our costs and fully develop RTutor.   
+              Please send a brief email describing how RTutor has facilitated your learning,
+               research, or business, before April 4th.",
                 a(
                   "gexijin@gmail.com",
                   href = "mailto:gelabinfo@gmail.com?Subject=RTutor support letter"
