@@ -1048,10 +1048,29 @@ app_server <- function(input, output, session) {
 
   })
 
+  output$result_CanvasXpress <- canvasXpress::renderCanvasXpress({
+    req(!code_error())
+    req(!input$use_python)
+    req(run_result())
+
+    g <- run_result()
+    if (
+      turned_on(input$make_interactive_cx) &&
+      !is.character(g) &&
+      !is.data.frame(g) &&
+      !is.numeric(g)
+    ) {
+      g <- canvasXpress::canvasXpress(g)
+    } else {
+      g <- canvasXpress::canvasXpress(destroy = TRUE)
+    }
+    return(g)
+  })
+
   output$plot_ui <- renderUI({
     req(input$submit_button)
     req(!input$use_python)
-    
+
     if (code_error() || input$submit_button == 0) {
       return()
     } else if (
@@ -1059,22 +1078,25 @@ app_server <- function(input, output, session) {
       turned_on(input$make_ggplot_interactive) # converted
     ){
       plotly::plotlyOutput("result_plotly")
+    } else if (
+      turned_on(input$make_interactive_cx) # converted
+    ) {
+      canvasXpress::canvasXpressOutput("result_CanvasXpress")
     } else {
       plotOutput("result_plot")
     }
   })
 
-  # reset to FALSE after each submission
+
   observeEvent(input$submit_button, {
+
     updateCheckboxInput(
       session = session,
       inputId = "make_ggplot_interactive",
-      label = "Make it interactive!",
+      label = "Make it interactive with plotly",
       value = FALSE
     )
-  })
 
-  observeEvent(input$submit_button, {
     # hide it by default
     shinyjs::hideElement(id = "make_ggplot_interactive")
     req(!code_error())
@@ -1089,6 +1111,30 @@ app_server <- function(input, output, session) {
     shinyjs::showElement(id = "make_ggplot_interactive")
     }
   })
+
+
+  observeEvent(input$submit_button, {
+    # hide it by default
+    shinyjs::hideElement(id = "make_interactive_cx")
+    req(!code_error())
+    req(logs$code)
+    txt <- paste(openAI_response()$cmd, collapse = " ")
+
+    updateCheckboxInput(
+      session = session,
+      inputId = "make_interactive_cx",
+      label = "Make it interactive with canvasXpress",
+      value = FALSE
+    )
+    if (grepl("ggplot", txt) && # if  ggplot2, and it is 
+      !is_interactive_plot() && #not already an interactive plot, show
+       # if there are too many data points, don't do the interactive
+      !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
+    ) {
+    shinyjs::showElement(id = "make_interactive_cx")
+    }
+  })
+
 
   is_interactive_plot <- reactive({
     # only true if the plot is interactive, natively.
@@ -1114,10 +1160,21 @@ app_server <- function(input, output, session) {
       turned_on (input$make_ggplot_interactive)
      ) {
       tagList(
-        p("Interactive plot. Mouse over to see values. Select a region to zoom. 
+        p("Mouse over to see values. Select a region to zoom. 
         Click on the legends to deselect a group. 
         Double click a category to hide all others. 
         Use the menu on the top right for other functions."
+        )
+      )
+    } else if (turned_on (input$make_interactive_cx)) {
+      tagList(
+        p("To reset, press ESC. Or mouse over the top, 
+        then click the reset button on the top left. 
+        Mouse over to see values. Select a region to zoom. 
+        Click on the legends to deselect a group. 
+        Double click a category to hide all others. 
+        Use the menu on the top right for other functions.
+        Right click for more options."
         )
       )
     }
