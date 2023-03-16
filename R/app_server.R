@@ -1066,6 +1066,26 @@ app_server <- function(input, output, session) {
     return(g)
   })
 
+      # Show messages when on the Network tab or button is clicked ----
+    observe({
+      req(input$make_interactive_cx && input$tabs == "Home")
+      showNotification(
+        ui = paste("Please uncheck the 'Make it interactive with CanvasXpress\' 
+        box before clicking Submit for next Chunk of code."),
+        id = "uncheck_canvasXpress",
+        duration = NULL,
+        type = "message"
+      )
+    })
+
+    # Remove messages if the tab changes --------
+    observe({
+      req(!input$make_interactive_cx || input$tabs != "Home")
+      removeNotification("uncheck_canvasXpress")
+    })
+
+
+
   output$plot_ui <- renderUI({
     req(input$submit_button)
     req(!input$use_python)
