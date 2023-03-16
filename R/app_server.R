@@ -1051,7 +1051,6 @@ app_server <- function(input, output, session) {
   output$result_CanvasXpress <- canvasXpress::renderCanvasXpress({
     req(!code_error())
     req(!input$use_python)
-    req(run_result())
 
     g <- run_result()
     if (
