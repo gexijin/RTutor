@@ -296,20 +296,20 @@ datasets <- move_front(datasets, rna_seq)
 datasets <- c(datasets, no_data)
 
 #datasets <- c(datasets, "demography", "lab")
-datasets <- c("mpg", "demography",  "events", "medications")
+datasets <- c("demography",  "events", "medications")
 # move it to 2nd place
 datasets <- move_front(datasets, no_data)
 
 datasets <- move_front(datasets, "diamonds")
 # default
-datasets <- move_front(datasets, "mpg")
+#datasets <- move_front(datasets, "mpg")
 
 #datasets <- move_front(datasets, "lab")
 datasets <- move_front(datasets, "demography")
 
 datasets <- setNames(datasets, datasets)
 
-names(datasets)[match("mpg", datasets)] <- "mpg (examples)"
+#names(datasets)[match("mpg", datasets)] <- "mpg (examples)"
 names(datasets)[match("diamonds", datasets)] <- "diamonds (examples)"
 names(datasets)[match(rna_seq, datasets)] <- "RNA-Seq (examples)"
 
