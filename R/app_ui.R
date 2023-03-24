@@ -32,7 +32,7 @@ app_ui <- function(request) {
             HTML(".shiny-notification {
                   width: 200px;
                   position:fixed;
-                  top: calc(10%);
+                  top: calc(80%);
                   left: calc(10%);
                   }
                   "
@@ -103,33 +103,29 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             #uiOutput("slava_ukraini"),
             br(),
             textOutput("retry_on_error"),
-            checkboxInput("Comments", "Comments & questions"),
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-              rows = 4,
-              ""
-            ),
-            radioButtons("helpfulness", "How useful is RTutor?",
-              c(
-                "Not at all",
-                "Slightly",
-                "Helpful",
-                "Extremely"
+            fluidRow(
+              column(
+                width = 4,
+                actionButton("save_feedbck", "Save code"),
               ),
-              selected = "Slightly"
+              column(
+                width = 8,
+                tags$style(type = "text/css", "textarea {width:100%}"),
+                tags$textarea(
+                  id = "user_feedback",
+                  placeholder = "Short description",
+                  rows = 1,
+                  ""
+                )
+              )
             ),
-            radioButtons("experience", "Your experience with R:",
-              c(
-                "None",
-                "Beginner",
-                "Intermediate",
-                "Advanced"
-               ),
-              selected = "Beginner"
+            br(),
+            selectInput(
+              inputId = "selected_chunk_saved",
+              label = "Retrieve Saved Code:",
+              selected = NULL,
+              choices = NULL
             ),
-            actionButton("save_feedbck", "Save Feedback")
           ),
 
       ###############################################################################
@@ -141,23 +137,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             conditionalPanel(
               condition = "input.submit_button == 0",
               uiOutput("RTutor_version_main"),
-              fluidRow(
-                column(
-                  width = 3,
-                  img(
-                    src = "www/tutor.jpg",
-                    width = "120",
-                    height = "108"
-                  ),
-                  align = 'left'
-                ),
-                column(
-                  width = 9,
-                  h3(
-                    "Ask questions regarding the demography, events and medications data."
-                  ),
-                  align = "left"
-                )
+              h3(
+                "Ask questions regarding the demography, events and medications data."
               )
             ),
             conditionalPanel(
@@ -220,15 +201,14 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
           verbatimTextOutput("openAI")
         )
 
-      )
+      ),
+      tabPanel(
+        title = "Data",
+        value = "Data",
+        textOutput("data_size"),
+        DT::dataTableOutput("data_table_DT")
+      ),
 
-#      tabPanel(
-#        title = "Disqus",
-#        value = "Disqus",
-#        div(
-#        tags$head(includeHTML(app_sys("app", "www", "disqus.html")))
-#        )
-#      )
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))

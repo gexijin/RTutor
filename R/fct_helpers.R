@@ -727,7 +727,8 @@ create_usage_db <- function() {
     chunk,
     api_time,
     tokens,
-    language
+    language,
+    description
   ) {
     # if db does not exist, create one
     if (file.exists(sqlitePath)) {
@@ -737,13 +738,13 @@ create_usage_db <- function() {
       txt <- sprintf(
         "INSERT INTO %s (%s) VALUES ('%s')",
         sqltable,
-        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language",
+        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language, description",
         paste(
           c(
             as.character(date),
             as.character(time),
             clean_txt(request),
-            clean_txt(code),
+            clean_code(code),
             as.integer(error_status),
             clean_txt(data_str),
             dataset,
@@ -753,7 +754,8 @@ create_usage_db <- function() {
             chunk,
             api_time,
             tokens,
-            language
+            language,
+            description
           ),
           collapse = "', '"
         )
@@ -766,6 +768,34 @@ create_usage_db <- function() {
     }
   }
 
+
+#' Saves user queries, code, and error status
+#' 
+#'
+#' 
+#' @return data frame
+  retrieve_data <- function ( ) {
+    res <- NULL
+    # if db does not exist, create one
+    if (file.exists(sqlitePath)) {
+      # Connect to the database
+      db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RO)
+      # Submit the update query and disconnect
+      try(
+        res <- RSQLite::dbGetQuery(db, "select * from usage;")
+      )
+      RSQLite::dbDisconnect(db)
+      # remove records without description
+      res <- res[!is.na(res$description), ]
+    }
+    return(res)
+  }
+
+
+
+
+
+
 #' Clean up text strings for inserting into SQL
 #' 
 #'
@@ -773,10 +803,32 @@ create_usage_db <- function() {
 #'
 #' @return nothing
   clean_txt <- function(x) {
-    return(gsub("\'|\"", "", x))
+    return(gsub("\"|\'", "====", x))
   }
 
+#' Clean up text strings for inserting into SQL
+#' 
+#'
+#' @param x a string that can contain ' or "
+#'
+#' @return nothing
+  clean_code <- function(x) {
 
+    x1 <- gsub("\'", "===", x)
+    x2 <- gsub("\"", "====", x1)
+    return(x2)
+  }
+#' Clean up text strings for inserting into SQL
+#' 
+#'
+#' @param x a string that can contain ' or "
+#'
+#' @return nothing
+  clean_code_reverse <- function(x) {
+    x1 <- gsub("====", "\"", x)
+    x2 <- gsub("===","\'", x1)
+    return(x2)
+  }
 
 # SQLite command to create feedbck table
 

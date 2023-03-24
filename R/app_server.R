@@ -2103,11 +2103,17 @@ output$answer <- renderText({
   })
 
   # save user data when allowed
-  observeEvent(input$submit_button, {
+  observeEvent(input$save_feedbck, {
     req(openAI_prompt())
     req(logs$code)
 
-    if(contribute_data()) {
+    feedback_len <- nchar(input$user_feedback)
+    if (feedback_len < 5) {
+      showNotification("Description is too short.")
+    } else  if (feedback_len > 2000) {
+      showNotification("Description is too long.")
+    } else {
+      showNotification("Prompt and code saved!")
       # remove user data, only keep column names and data type
       txt <- capture.output(str(current_data(), vec.len = 0))
       txt <- gsub(" levels .*$", " levels", txt)
@@ -2115,7 +2121,7 @@ output$answer <- renderText({
         save_data(
           date = Sys.Date(),
           time = format(Sys.time(), "%H:%M:%S"),
-          request = openAI_prompt(),
+          request = input$input_text,
           code = logs$code,
           error_status = code_error(),  # 1 --> error!  0 --> no error, success!!
           data_str = paste(txt, collapse = "\n"),
@@ -2126,52 +2132,21 @@ output$answer <- renderText({
           chunk = counter$requests,
           api_time = counter$time,
           tokens = counter$tokens_current,
-          language = logs$language
+          language = logs$language,
+          description = input$user_feedback
         )
       )
-    }
-  })
-
-  observeEvent(input$save_feedbck, {
-    req(input$save_feedbck)
-    feedback_len <- nchar(input$user_feedback)
-    if (feedback_len < 5) {
-      showNotification("Feedback is too short.")
-    } else  if (feedback_len > 2000) {
-      showNotification("Feedback is too long.")
-    } else {
-      showNotification("Thank you for your feedback!")
-
-    try(
-      save_comments(
-        date = Sys.Date(),
-        time = format(Sys.time(), "%H:%M:%S"),
-        comments = input$user_feedback,
-        helpfulness = input$helpfulness,
-        experience = input$experience
-      )
-    )
-    }
-
-    # clear the comments after submitted. 
+          # clear the comments after submitted. 
     # This prevents users submit the same thing twice.
     updateTextInput(
       session,
       "user_feedback",
       value = "",
-      placeholder = "Any questions? Suggestions? Things you like, don't like?" 
+      placeholder = "Short description"
     )
-
-
+    }
   })
 
-  observe({
-    shinyjs::toggle(id = "user_feedback", condition = input$Comments)
-    shinyjs::toggle(id = "save_feedbck", condition = input$Comments)
-    shinyjs::toggle(id = "helpfulness", condition = input$Comments)
-    shinyjs::toggle(id = "experience", condition = input$Comments)
-
-  })
 
 
 #
@@ -2206,5 +2181,47 @@ output$answer <- renderText({
     })
 
   })
+
+#                                      12.
+#______________________________________________________________________________
+#
+#  Saved code
+#______________________________________________________________________________
+
+  saved_code <- reactive({
+    retrieve_data()
+  })
+
+  observe({
+    updateSelectInput(
+      inputId = "selected_chunk_saved",
+      label = "Retrieve saved code",
+      choices = c("...", unique(saved_code()$description))
+    )
+  })
+
+  chunk_id <- reactive({
+    req(input$selected_chunk_saved)    
+    ix <- match(input$selected_chunk_saved, saved_code()$description)
+    ix <- ix[1]
+    ix
+  })
+
+
+    # change code when past code is selected.
+  observeEvent(input$selected_chunk_saved, {
+    #req(run_result())
+    req(chunk_id())
+    ix <- chunk_id()
+    id <- saved_code()$chunk[ix]
+    logs$code <- clean_code_reverse(saved_code()$code[ix])
+    logs$raw <- clean_code_reverse(saved_code()$code[ix])
+    updateTextInput(
+      session,
+      "input_text",
+      value = saved_code()$request[ix]
+    )
+  })
+
 
 }
