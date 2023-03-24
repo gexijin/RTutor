@@ -2224,4 +2224,94 @@ output$answer <- renderText({
   })
 
 
+  top_10_sites <- reactive({
+    df <- current_data()
+    # Merge data frames
+    df_merged <- merge(df, events, by = "patient")
+
+    # Calculate the number of events per site
+    df_events_per_site <- df_merged %>%
+      group_by(site) %>%
+      summarise(events_per_site = n())
+
+    # Keep top 10 sites
+    df_top_10_sites <- df_events_per_site %>%
+      top_n(10, events_per_site) %>%
+      arrange(desc(events_per_site))
+
+    df_top_10_sites
+
+  })
+
+   output$barplot_site <- renderPlot({
+    req(top_10_sites())
+    # Plot the number of events per site in descending order
+    ggplot(top_10_sites(), aes(x = reorder(site, events_per_site), y = events_per_site)) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      labs(x = "Site", y = "Number of Events", title = "Click on each bar to select.")
+   })
+
+   output$age_dist <- renderPlot({
+
+    df <- current_data()
+    if(!is.null(input$plot_click)) {
+      ix <- 11 - round(input$plot_click$y)
+      clicked_site <- top_10_sites()$site[ix]
+      df <- df[df$site == clicked_site, ]
+    }
+    # Create density plot of age, grouped by sex
+    ggplot(data = df, aes(x = age, fill = sex)) +
+      geom_density(alpha = 0.5) +
+      labs(title = "Density Plot of Age Grouped by Sex",
+          x = "Age",
+          y = "Density")
+
+   })
+
+   output$top_events <- renderPlot({
+    df <- current_data()
+    if(!is.null(input$plot_click)) {
+      ix <- 11 - round(input$plot_click$y)
+      clicked_site <- top_10_sites()$site[ix]
+      df <- df[df$site == clicked_site, ]
+    }
+    # Merge with the events data by patient ID
+    df_merged <- merge(df, events, by = "patient")
+
+    # Top 5 frequently happened adverse events in the winter
+    df_winter <- df_merged %>%
+      filter(Start >= "2018-12-01" & Start <= "2019-02-28") %>%
+      group_by(Event) %>%
+      summarise(count = n()) %>%
+      arrange(desc(count)) %>%
+      top_n(5)
+
+    # Create a barplot
+    ggplot(df_winter, aes(x = reorder(Event, count), y = count)) +
+      geom_bar(stat = "identity") +
+      xlab("Adverse Events") +
+      ylab("Frequency") +
+      ggtitle("Top 5 Frequently Happened Adverse Events in the Winter")
+   })
+
+
+
+  output$top_patient <- renderTable({
+    df <- current_data()
+    if(!is.null(input$plot_click)) {
+      ix <- 11 - round(input$plot_click$y)
+      clicked_site <- top_10_sites()$site[ix]
+      df <- df[df$site == clicked_site, ]
+    }
+    df_merged <- left_join(df, events, by = "patient")
+
+    # Show the patients who had the most adverse events
+    df_merged %>%
+      group_by(patient) %>%
+      summarise(count = n()) %>%
+      arrange(desc(count))
+  })
+
+
 }

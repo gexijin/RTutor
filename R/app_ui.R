@@ -99,7 +99,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             br(),
             #textOutput("usage"),
             #textOutput("total_cost"),
-            textOutput("temperature"),
+            #textOutput("temperature"),
             #uiOutput("slava_ukraini"),
             br(),
             textOutput("retry_on_error"),
@@ -207,6 +207,40 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         value = "Data",
         textOutput("data_size"),
         DT::dataTableOutput("data_table_DT")
+      ),
+      tabPanel(
+        title = "Explore",
+        value = "Explore",
+        fluidRow(
+          column(
+            width = 6,
+            plotOutput(
+              outputId = "barplot_site",
+              click = "plot_click",
+              brush = brushOpts(
+                id = "plot2_brush",
+                resetOnNew = TRUE
+            )
+
+            )
+          ),
+          column(
+            width = 6,
+            plotOutput("age_dist")
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            plotOutput("top_events")
+          ),
+          column(
+            width = 6,
+            tableOutput("top_patient")
+          )
+        ),
+
+
       ),
 
     ),
