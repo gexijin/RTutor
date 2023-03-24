@@ -136,10 +136,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             shinyjs::useShinyjs(),
             conditionalPanel(
               condition = "input.submit_button == 0",
-              uiOutput("RTutor_version_main"),
+              #uiOutput("RTutor_version_main"),
               h3(
-                "Ask questions regarding the demography, events and medications data."
-              )
+                "Customized RTutor: Clinical Trials"
+              ),
+              br()
             ),
             conditionalPanel(
               condition = "input.submit_button != 0",
