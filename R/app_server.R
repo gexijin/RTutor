@@ -107,31 +107,28 @@ app_server <- function(input, output, session) {
           gsub("^continue", "", speech) # remove the continue
         )
       }
-
-      updateTextInput(
-        session,
-        "input_text",
-        value = speech
-      )
-
       # submit the request when user said  action verb
       if (tolower(speech) %in% action_verbs) {
         shinyjs::click("submit_button")
+      } else {
+        updateTextInput(
+          session,
+          "input_text",
+          value = speech
+        )
       }
+
     } else if (input$tabs == "Ask") {
-
-      updateTextInput(
-        session,
-        "ask_question",
-        value = speech
-      )
-
-
       # submit the request when user said  action verb
       if (tolower(speech) %in% action_verbs) {
         shinyjs::click("ask_button")
+      } else {
+        updateTextInput(
+          session,
+          "ask_question",
+          value = speech
+        )
       }
-
     }
 
   })
