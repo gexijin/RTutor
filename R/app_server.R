@@ -2271,8 +2271,8 @@ output$answer <- renderText({
         column(
           width = 9,          
           align = "left",
-          style = "margin-top: -10px;",
-          h4(examples[i])
+          style = "margin-top: -5px;",
+          h5(examples[i])
         )
       )
 
