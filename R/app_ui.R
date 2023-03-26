@@ -296,7 +296,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               hr(),
             ),
               # Add an action button and a file input
-            actionButton("data_edit_modal", "Change Data Type"),
+            actionButton("data_edit_modal", "Data Types"),
+            br(),br(),
             verbatimTextOutput("data_structure")
             #,tableOutput("data_table")
 
