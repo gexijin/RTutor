@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.91" # RTutor
+release <- "0.93" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -22,15 +22,15 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Generate R code. "
-pre_text_python <- "Generate Python code. "
-after_text <- " Use the df data frame, which is already read from a file. "
+pre_text <- "Following instructions below, write correct, efficient R code."
+pre_text_python <- "Write correct, efficient Python code."
+after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
-max_levels_factor_conversion <- 4 # Numeric columns will be converted to factor if less than or equal to this many levels
+max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor if less than or equal to this many levels
 # if a column is numeric but only have a few unique values, treat as categorical
-unique_ratio <- 0.1   # number of unique values / total # of rows
+unique_ratio <- 0.2   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
 
@@ -39,6 +39,7 @@ wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
 action_verbs <- c(
   "now", 
+  "over",
   "do it", 
   "do it now", 
   "go ahead", 
@@ -120,15 +121,72 @@ prep_input <- function(txt, selected_data, df, use_python) {
    txt <- gsub(" *$|\n*$", "", txt)
    # if last character is not a period. Add it. Otherwise, 
    # Davinci will try to complete a sentence.
-   if (!grepl("\\.$", txt)) {
+   if (!grepl("\\.$|?", txt)) {
      txt <- paste(txt, ".", sep = "")
    }
 
   if (!is.null(selected_data)) {
     if (selected_data != no_data) {
 
-      data_info <- ""
+      # variables mentioned in request
+      relevant_var <- sapply(
+        colnames(df),
+        function(x) {
+          # hwy. class
+          grepl(
+            paste0(
+              " ", # proceeding space
+              x,
+              "[ |\\.|,|?]" # ending space, comma, period, or question mark
+            ),
+          txt
+          )
+        }
+      )
+      relevant_var <- names(relevant_var)[relevant_var]
 
+      data_info <- describe_df(
+        df, 
+        list_levels = TRUE, 
+        relevant_var = relevant_var
+      )
+
+      txt <- paste(txt, after_text)
+      # if user is not trying to convert data
+      if (!grepl("Convert |convert ", txt)) {
+        txt <- paste(txt, data_info)
+      }
+    }
+  }
+
+  txt <- paste(
+    ifelse(
+      use_python,
+      pre_text_python,
+      pre_text
+    ),
+    txt
+  )
+  # replace newline with space.
+  txt <- gsub("\n", " ", txt)
+  #cat("\n", txt)
+  return(txt)
+}
+
+
+
+#' Describe data frame
+#'
+#' Returns information on data frame describing columns.
+#'
+#' @param df a data frame
+#' @param list_levels whether to list levels for factors
+#' @param relevant_var  a list of variables mentioned by the user
+#' @return Returns a cleaned up version, so that it could be executed as R command.
+
+describe_df <- function(df, list_levels = FALSE, relevant_var) {
+
+      data_info <- ""
       numeric_index <- sapply(
         df,
         function(x) {
@@ -141,121 +199,106 @@ prep_input <- function(txt, selected_data, df, use_python) {
       )
 
       numeric_var <- colnames(df)[numeric_index]
-      none_numeric_var <- colnames(df)[!numeric_index]
+      cat_var <- colnames(df)[!numeric_index]
 
-      # variables mentioned in request
-      relevant_var <- sapply(
-        colnames(df),
-        function(x) {
-          # hwy. class
-          grepl(
-            paste0(
-              " ", # proceeding space
-              x,
-              "[ |\\.|,]" # ending space, comma, or period
-            ),
-          txt
-          )
-        }
-      )
+     # numeric variables
+      if (length(numeric_var) == 1) {
+        data_info <- paste0(
+          data_info,
+          "The df data frame has a column ",
+          numeric_var,
+          " that contains a numeric variable. "
+        )
+      } else if (length(numeric_var) > 1) {
+        data_info <- paste0(
+          data_info,
+          "The df data frame contains these numeric variables: ",
+          paste0(
+            numeric_var[1:(length(numeric_var) - 1)],
+            collapse = ", "
+          ),
+          ", and ",
+          numeric_var[length(numeric_var)],
+          ". "
+        )
+      }
 
-      relevant_var <- colnames(df)[relevant_var]
 
-      if (length(relevant_var) > 0) {
-
-        # numeric variables-----------------------------
-        relevant_var_numeric <- intersect(relevant_var, numeric_var)
-        if (length(relevant_var_numeric) == 1) {
-          data_info <- paste0(
-            data_info,
-            "Note that ",
-            relevant_var_numeric,
-            " is a numeric variable. "
-          )
-        } else if (length(relevant_var_numeric) > 1) {
-          data_info <- paste0(
-            data_info,
-            "Note that ",
-            paste0(
-              relevant_var_numeric[1:(length(relevant_var_numeric) - 1)],
-              collapse = ", "
-            ),
-            " and ",
-            relevant_var_numeric[length(relevant_var_numeric)],
-            " are numeric variables. "
-          )
-        }
-
-        # Categorical variables-----------------------------
-        all_relevant_var_categorical <- intersect(
-          relevant_var,
-          none_numeric_var
+      # Categorical variables-----------------------------
+     # numeric variables
+      if (length(cat_var) == 1) {
+        data_info <- paste0(
+          data_info,
+          "The df data frame has a column ",
+          cat_var,
+          " that contains a categorical variable. "
+        )
+      } else if (length(cat_var) > 1) {
+        data_info <- paste0(
+          data_info,
+          "The df data frame contains these categorical variables: ",
+          paste0(
+            cat_var[1:(length(cat_var) - 1)],
+            collapse = ", "
+          ),
+          ", and ",
+          cat_var[length(cat_var)],
+          ". "
         )
 
-        for (relevant_var_categorical in all_relevant_var_categorical) {
-          ix <- match(relevant_var_categorical, colnames(df))
-          factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
-          factor_levels <- names(factor_levels)
+        if(list_levels & length(relevant_var) > 0) {
 
-          # have more than 6 levels?
-          many_levels <- FALSE
+          # only list for categorical variables specified in user prompt
+          relevant_cat_var <- intersect(relevant_var, cat_var)
+        # describe the levels in categorical variable
+          for (var in relevant_cat_var) {
+            max_lelvels_description <- 10
+            ix <- match(var, colnames(df))
+            factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
+            factor_levels <- names(factor_levels)
 
-          if (length(factor_levels) > 6) {
-            many_levels <- TRUE
-            factor_levels <- factor_levels[1:6]
-          }
+            # have more than 6 levels?
+            many_levels <- FALSE
 
-          last_level <- factor_levels[length(factor_levels)]
-          factor_levels <- factor_levels[-1 * length(factor_levels)]
-          tem <- paste0(
-            factor_levels,
-            collapse = "', '"
-          )
-          if (!many_levels) { # less than 6 levels
-            factor_levels <- paste0("'", tem, "', and '", last_level, "'")
-          } else { # more than 6 levels
-            factor_levels <- paste0(
-              "'",
-              tem,
-              "', '",
-              last_level,
-              "', etc"
+            if (length(factor_levels) > max_lelvels_description) {
+              many_levels <- TRUE
+              factor_levels <- factor_levels[1:max_lelvels_description]
+            }
+
+            last_level <- factor_levels[length(factor_levels)]
+            factor_levels <- factor_levels[-1 * length(factor_levels)]
+            tem <- paste0(
+              factor_levels,
+              collapse = "', '"
+            )
+            if (!many_levels) { # less than 6 levels
+              factor_levels <- paste0("'", tem, "', and '", last_level, "'")
+            } else { # more than 6 levels
+              factor_levels <- paste0(
+                "'",
+                tem,
+                "', '",
+                last_level,
+                "', etc"
+              )
+            }
+
+            data_info <- paste0(
+              data_info,
+              "The categorical variable ",
+              var,
+              " has these levels: ",
+              factor_levels,
+              ". "
             )
           }
-
-          data_info <- paste0(
-            data_info,
-            "The column ",
-            relevant_var_categorical,
-            " contains a categorical variable with these levels: ",
-            factor_levels,
-            ". "
-          )
         }
+
+
+
       }
 
-      txt <- paste(txt, after_text)
-      # if user is not trying to convert data
-      if (!grepl("Convert |convert ", txt)) {
-        txt <- paste(txt, data_info)
-      }
-    }
-  }
-
-
-
-  txt <- paste(
-    ifelse(
-      use_python,
-      pre_text_python,
-      pre_text
-    ),
-    txt
-  )
-  # replace newline with space.
-  txt <- gsub("\n", " ", txt)
-
-  return(txt)
+      return(data_info)
 }
 
 
@@ -369,6 +412,8 @@ names(datasets)[match("mpg", datasets)] <- "mpg (examples)"
 names(datasets)[match("diamonds", datasets)] <- "diamonds (examples)"
 names(datasets)[match(rna_seq, datasets)] <- "RNA-Seq (examples)"
 
+colnames(mpg) <- c("maker", "model", "dis", "year", "cylinder", 
+  "transmission", "drive", "city", "highway", "fuel", "type")
 
 #' Clean up API key character
 #'
@@ -457,11 +502,12 @@ turned_on <- function(x) {
 numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
   # some columns looks like numbers but have few levels
   # convert these to factors
+
   convert_index <- sapply(
     df,
     function(x) {
       if (
-        is.numeric(x) &&
+        (is.numeric(x) || is.character(x)) &&
         # if there are few unique values compared to total values
         length(unique(x)) / length(x) < max_proptortion_factor &&
         length(unique(x)) <= max_levels_factor  # less than 12 unique values
