@@ -298,7 +298,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               # Add an action button and a file input
             actionButton("data_edit_modal", "Data Types"),
             br(),br(),
-            verbatimTextOutput("data_structure")
+            verbatimTextOutput("data_structure"),
+            textOutput("data_description"),
+            tags$style(type="text/css", "#data_description {white-space: pre-wrap;}")
             #,tableOutput("data_table")
 
 

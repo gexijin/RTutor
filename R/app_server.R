@@ -2304,4 +2304,10 @@ output$answer <- renderText({
   })
 
 
+  output$data_description <- renderText({
+    req(current_data())
+    describe_data(current_data())
+  })
+
+
 }

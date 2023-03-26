@@ -778,4 +778,122 @@ python_html <- function(python_code, select_data, current_data) {
     }
 }
 
+#' Describes the distribution of a column in a data frame, or a vector.
+#' 
+#'
+#' @param x a vector
+#'
+#' @return a text string
+#' 
+distribution_description <- function(x) {
 
+  if (is.numeric(x)) {
+    desc <- paste0(" has a ",
+                   " mean of ", round(mean(x, na.rm = TRUE), 2),
+                   " and standard Deviation of ", round(sd(x, na.rm = TRUE), 2), ". ")
+    
+    skewness <- moments::skewness(x, na.rm = TRUE)
+    if (abs(skewness) < 0.5) {
+      desc <- paste0(desc, "The distribution is approximately symmetric.")
+    } else {
+      if (skewness > 0) {
+        if (skewness > 1) {
+          desc <- paste0(desc, "The distribution is highly right-skewed.")
+        } else {
+          desc <- paste0(desc, "The distribution is moderately right-skewed.")
+        }
+      } else {
+        if (skewness < -1) {
+          desc <- paste0(desc, "The distribution is highly left-skewed.")
+        } else {
+          desc <- paste0(desc, "The distribution is moderately left-skewed.")
+        }
+      }
+    }
+  } else if (is.factor(x)) {
+    desc <- paste0(" has ")
+    freq_table <- as.data.frame(table(x))
+    top_levels <- freq_table %>% arrange(desc(Freq))
+    if(nrow(top_levels) > 3) {
+      top_levels <- top_levels[1:2,]
+    }
+    desc <- paste0(desc, " top levels:")
+    for (j in 1:nrow(top_levels)) {
+      desc <- paste0(desc, " '", top_levels$x[j], "' (", round(100 * top_levels$Freq[j] / sum(freq_table$Freq), 0), "%), ")
+    }
+  } else if (is.character(x)) {
+    desc <- ""
+  } else {
+    desc <- ""
+  }
+    
+  desc <- gsub(",\\s*$", ".", desc)
+  return(desc)
+}
+
+
+
+#' Generate a plain text about the distribution and correlations.
+#' 
+#'
+#' @param df a data frame.
+#'
+#' @return a text string
+#' 
+describe_data <- function(df) {
+  p_val_cutoff <- 1e-3
+  R_cutoff <- 0.5
+  numeric_vars <- sapply(df, is.numeric)
+  character_vars <- sapply(df, is.character)
+
+  # Convert character columns to factors if number of unique values is much less than total rows
+  df[character_vars] <- lapply(df[character_vars], function(x) {
+    if (length(unique(x)) / nrow(df) < 0.1) {
+      factor(x)
+    } else {
+      x
+    }
+  })
+
+  factor_vars <- sapply(df, is.factor)
+
+  a <- ""
+
+  for (i in 1:(ncol(df))) {
+    b <- ""
+    for (j in 1:ncol(df)) {
+      if (i == j) {
+        next
+      }
+      if (numeric_vars[i] && numeric_vars[j]) {
+        cor_test <- cor.test(df[[i]], df[[j]])
+        if (cor_test$p.value < p_val_cutoff & abs(cor_test$estimate) > R_cutoff) {
+          b <- paste0(b, ", ", colnames(df)[j], " (R=", round(cor_test$estimate, 2), ")")
+        }
+      } else if (factor_vars[i] && factor_vars[j] && nlevels(df[[i]]) > 1 && nlevels(df[[j]]) > 1) {
+        chi_test <- chisq.test(table(df[[i]], df[[j]]))
+        if (!is.na(chi_test$p.value) && chi_test$p.value < p_val_cutoff) {
+          b <- paste0(b, ", ", colnames(df)[j], " (P=", formatC(chi_test$p.value, format = "e", digits = 1), ")")
+        }
+      } else if (numeric_vars[i] && factor_vars[j] && nlevels(df[[j]]) > 1) {
+        anova_test <- aov(df[[i]] ~ df[[j]])
+        anova_p_value <- summary(anova_test)[[1]][["Pr(>F)"]][1]
+        if (anova_p_value < p_val_cutoff) {
+          b <- paste0(b, ", ", colnames(df)[j], " (P=", formatC(anova_p_value, format = "e", digits = 1), ")")
+        }
+      } else if (factor_vars[i] && numeric_vars[j] && nlevels(df[[i]]) > 1) {
+        anova_test <- aov(df[[j]] ~ df[[i]])
+        anova_p_value <- summary(anova_test)[[1]][["Pr(>F)"]][1]
+        if (anova_p_value < p_val_cutoff) {
+          b <- paste0(b, ", ", colnames(df)[j], " (P=", formatC(anova_p_value, format = "e", digits = 1), ")")
+        }
+      }
+    }
+
+    if (nchar(b) > 0) {
+      a <- paste0(a, "The column \'", colnames(df)[i], "\'", distribution_description(df[[i]]), " It has significant correlation with:", b, ".\n\n")
+    }
+  }
+  a <- gsub(":,", ": ", a)
+  return(a)
+}
