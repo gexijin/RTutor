@@ -817,7 +817,7 @@ distribution_description <- function(x) {
     if(nrow(top_levels) > 3) {
       top_levels <- top_levels[1:2,]
     }
-    desc <- paste0(desc, " top levels:")
+    desc <- paste0(desc, " levels:")
     for (j in 1:nrow(top_levels)) {
       desc <- paste0(desc, " '", top_levels$x[j], "' (", round(100 * top_levels$Freq[j] / sum(freq_table$Freq), 0), "%), ")
     }
