@@ -2056,7 +2056,7 @@ output$answer <- renderText({
 
   output$RTutor_version_main <- renderUI({
     tagList(
-      h3(paste("RTutor.ai ", release, "  Multilingual"))
+      h3(paste("RTutor.ai ", release))
     )
   })
 
@@ -2226,7 +2226,7 @@ output$answer <- renderText({
         h4("If a column represents categories, choose 'Factor', even if 
         it is coded as numbers. Some columns are 
         automatically converted. See Settings.", 
-        style = "color: red"),
+        style = "color: blue"),
         br(),
         footer = tagList(
           modalButton("Close")

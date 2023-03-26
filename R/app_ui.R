@@ -171,15 +171,13 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 column(
                   width = 9,
                   h5(
-                    "Hi I'm your statistics tutor.  
+                    "'Chat' with your data
+                    in dozens of human languages.
                     I am still in college learning new things.
                     But I try to be helpful.  
                     I did finish my required reading:
                     thousands of books, millions of code repositories, 
-                    and billions of web pages.
-                    I'm not being hyperbolic. Just bragging. 
-                    BTW, I can generate and evaluate both R and Python scripts
-                     from instructions in dozens of human languages.
+                    and billions of web pages.                    
                      "
                   ),
                   align = "left"
@@ -195,9 +193,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   ", style = "color:red"
                 ),
                 tags$li(
-                  "Released as a prototype for testing, RTutor was just an idea 
-                  a few weeks ago. Keep your expectations low and 
-                  send us your valuable feedback (lower left)."
+                  "Releases as a prototype, it is still being developed.
+                   Please send us your valuable feedback (lower left)."
                 ),
                 tags$li(
                   "It can take a few tries to get it correct. If it still does not
@@ -213,14 +210,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 ),
                 tags$li(
                   "Once uploaded, your data is automatically loaded into
-                  RTutor as a data frame called df. "
-                ),
-                tags$li(
-                  "Check if the data types are correct: numeric
-                  columns vs. categories (factors or characters). See below.
-                    You can tell RTutor to convert by saying
-                    \"Convert cyl as numeric\", or \"Convert year as factor\". 
-                   We try to auto-detect (Settings).
+                  RTutor as a data frame called df. 
+                  Check if the data types of the columns are correct.
+                  Change if needed, especially when numbers are used to code for categories.
                    Data types make a big difference in analysis and plots!"
                 ),
 
@@ -305,8 +297,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             ),
               # Add an action button and a file input
             actionButton("data_edit_modal", "Change Data Type"),
-            verbatimTextOutput("data_structure"),
-            tableOutput("data_table")
+            verbatimTextOutput("data_structure")
+            #,tableOutput("data_table")
 
 
           ) #mainPanel
@@ -547,6 +539,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         hr(),
         h4("Update log:"),
         tags$ul(
+          tags$li(
+            "v 0.93  3/26/2023. Change data types."
+          ),
           tags$li(
             "v 0.92  3/8/2023. Includes description of data structure in prompt."
           ),
