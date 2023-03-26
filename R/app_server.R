@@ -2218,13 +2218,15 @@ output$answer <- renderText({
 #  Data Editing
 #______________________________________________________________________________
 
-  observeEvent(input$user_file, {
+  show_pop_up <- function() {
     showModal(
       modalDialog(
-        title = "Verify data types",
+        title = "Verify data types (important!)",
         uiOutput("column_type_ui"),
         h4("If a column represents categories, choose 'Factor', even if 
-        it is coded as numbers."),
+        it is coded as numbers. Some columns are 
+        automatically converted. See Settings.", 
+        style = "color: red"),
         br(),
         footer = tagList(
           modalButton("Close")
@@ -2233,8 +2235,15 @@ output$answer <- renderText({
         easyClose = TRUE
       )
     )
+  }
+
+  observeEvent(input$user_file, {
+    show_pop_up()
   })
-  
+  # Trigger the pop-up when a file is uploaded
+  observeEvent(input$data_edit_modal, {
+    show_pop_up()
+  })  
   output$column_type_ui <- renderUI({
     req(current_data())
     req(input$select_data)
