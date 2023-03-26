@@ -2306,8 +2306,22 @@ output$answer <- renderText({
 
   output$data_description <- renderText({
     req(current_data())
-    describe_data(current_data())
+    try(describe_data(current_data()))
   })
 
+  observeEvent(input$data_desc_modal, {
+    showModal(
+      modalDialog(
+        title = "Data description",
+        textOutput("data_description"),
+        tags$style(type="text/css", "#data_description {white-space: pre-wrap;}"),
+        footer = tagList(
+          modalButton("Close")
+        ),
+        size = "m",
+        easyClose = TRUE
+      )
+    )
+  })
 
 }
