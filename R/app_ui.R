@@ -44,7 +44,8 @@ app_ui <- function(request) {
         # Sidebar with a slider input for number of bins
         sidebarLayout(
           sidebarPanel(
-#            uiOutput("timer_ui"),
+            #uiOutput("timer_ui"),
+
             fluidRow(
               column(
                 width = 6,
@@ -52,6 +53,7 @@ app_ui <- function(request) {
               ),
               column(
                 width = 6,
+                style = "margin-top: -10px;",
 p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>"))
               )
             ),

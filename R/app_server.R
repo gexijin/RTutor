@@ -211,7 +211,7 @@ app_server <- function(input, output, session) {
 
     # Hide this input box after the first run.
     req(input$submit_button == 0)
-
+    req(is.null(input$user_file))
     fileInput(
       inputId = "user_file",
       label = "File Upload",
@@ -1139,7 +1139,7 @@ app_server <- function(input, output, session) {
   })
 
   max_proptortion_factor <- reactive({
-      max_proptortion <- 0.5 #default
+      max_proptortion <- unique_ratio #default
       if(!is.null(input$max_proptortion_factor)) {
         max_proptortion <- input$max_proptortion_factor
       }
@@ -1167,8 +1167,10 @@ app_server <- function(input, output, session) {
       return(max_levels_1)
   })
 
-  # The current data, just for showing.
-  current_data <- reactive({
+  # The current data
+  current_data <- reactiveVal(NULL)
+
+  observeEvent(input$select_data, {
     req(input$select_data)
 
     if(input$select_data == uploaded_data) {
@@ -1202,12 +1204,12 @@ app_server <- function(input, output, session) {
 
     # sometimes no row is left after processing.
     if(is.null(df)) { # no_data
-      return(NULL)
+      current_data(NULL)
     } else if(nrow(df) == 0) {
-      return(NULL)
+      current_data(NULL)
     } else { # there are data in the dataframe
 
-      return(df)
+      current_data(df)
     }
   })
 
@@ -1840,8 +1842,7 @@ output$answer <- renderText({
     if (grepl("Statistics only!", ans)) {
       ans <- paste(
         sample(humor, 1),
-        "     If you are not
-       trying to be funny, ask again with more context. It might
+        "     Ask again with more context. It might
         be helpful to add \"in statistics\" to the question."
       )
     }
@@ -2210,5 +2211,88 @@ output$answer <- renderText({
     })
 
   })
+
+#                                      12.
+#______________________________________________________________________________
+#
+#  Data Editing
+#______________________________________________________________________________
+
+  observeEvent(input$user_file, {
+    showModal(
+      modalDialog(
+        title = "Verify data types",
+        uiOutput("column_type_ui"),
+        h4("If a column represents categories, choose 'Factor', even if 
+        it is coded as numbers."),
+        br(),
+        footer = tagList(
+          modalButton("Close")
+        ),
+        size = "l",
+        easyClose = TRUE
+      )
+    )
+  })
+  
+  output$column_type_ui <- renderUI({
+    req(current_data())
+    req(input$select_data)
+    column_names <- names(current_data())
+    examples <- capture.output(str(current_data()))
+    examples <- examples[-1]
+    examples <- gsub(" \\$ ", "", examples)
+
+    lapply(seq_along(column_names), function(i) {
+      column_name <- column_names[i]
+      fluidRow(
+        column(
+          width = 3,
+          selectInput(
+            inputId = paste0("column_type_", i),
+            label = NULL,
+            choices = c("Character" = "character",
+                        "Numeric" = "numeric",
+                        "Integer" = "integer",
+                        "Date" = "Date",
+                        "Factor" = "factor"),
+            selected = class(current_data()[[i]])
+          )
+        ),
+        column(
+          width = 9,          
+          align = "left",
+          style = "margin-top: -10px;",
+          h4(examples[i])
+        )
+      )
+
+    })
+  })
+  
+  observe({
+    req(current_data())
+    for (i in seq_along(current_data())) {
+      col_type <- input[[paste0("column_type_", i)]]
+      if (!is.null(col_type)) {
+        updated_data <- isolate(current_data())
+
+        # when converting to factor the as function gives an error
+        if(col_type == "factor") {
+          updated_data[[i]] <- as.factor(updated_data[[i]])
+        } else if (col_type == "Date") {
+          updated_data[[i]] <- lubridate::parse_date_time(
+            updated_data[[i]],
+            orders = c("mdy", "dmy", "ymd")            
+          )
+          updated_data[[i]] <- as.Date(updated_data[[i]])
+        } else {
+          updated_data[[i]] <- as(updated_data[[i]], col_type)
+        }
+        current_data(updated_data)
+      }
+    }
+  })
+
 
 }
