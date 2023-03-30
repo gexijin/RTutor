@@ -2240,10 +2240,12 @@ output$answer <- renderText({
   observeEvent(input$user_file, {
     show_pop_up()
   })
+
   # Trigger the pop-up when a file is uploaded
   observeEvent(input$data_edit_modal, {
     show_pop_up()
-  })  
+  }) 
+   
   output$column_type_ui <- renderUI({
     req(current_data())
     req(input$select_data)

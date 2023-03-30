@@ -22,7 +22,7 @@ max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_model <- "text-davinci-003"
 default_temperature <- 0.1
-pre_text <- "Following instructions below, write correct, efficient R code."
+pre_text <- "Following the instructions below, write correct, efficient R code."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
@@ -222,8 +222,6 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
           ". "
         )
       }
-
-
       # Categorical variables-----------------------------
      # numeric variables
       if (length(cat_var) == 1) {
@@ -282,7 +280,6 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
                 "', etc"
               )
             }
-
             data_info <- paste0(
               data_info,
               "The categorical variable ",
@@ -293,11 +290,7 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
             )
           }
         }
-
-
-
       }
-
       return(data_info)
 }
 

@@ -145,7 +145,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
               h3(
-                "Send an email to show your support!",
+                "Send an email to show your support before April 4th!",
                  style = "color:red"
               ),
               p("We are currently applying for government
@@ -154,7 +154,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                research, or business, before April 4th.",
                 a(
                   "gexijin@gmail.com",
-                  href = "mailto:gelabinfo@gmail.com?Subject=RTutor support letter"
+                  href = "mailto:gexijin@gmail.com?Subject=RTutor support letter"
                 )
               ),
               uiOutput("RTutor_version_main"),
@@ -171,7 +171,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 column(
                   width = 9,
                   h5(
-                    "'Chat' with your data
+                    "Chat with your data
                     in dozens of human languages.
                     I am still in college learning new things.
                     But I try to be helpful.  
