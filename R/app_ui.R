@@ -23,8 +23,7 @@ app_ui <- function(request) {
         title = "Home",
         div(
           id = "load_message",
-          h2("Chat with your data via AI"),
-          h3("Still being tested and improved. Loading ... ...")
+          h2("Chat with your data via AI ..."),
         ),
         uiOutput("use_heyshiny"),
         # move notifications and progress bar to the center of screen
@@ -145,13 +144,13 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
               h3(
-                "Send an email to show your support before April 4th!",
+                "Last day to send emails!",
                  style = "color:red"
               ),
               p("We are currently applying for government
               funding to cover our costs and fully develop RTutor.   
               Please send a brief email describing how RTutor has facilitated your learning,
-               research, or business, before April 4th.",
+               research, or business, before 2pm CDT April 4th.",
                 a(
                   "gexijin@gmail.com",
                   href = "mailto:gexijin@gmail.com?Subject=RTutor support letter"
