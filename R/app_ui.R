@@ -143,19 +143,6 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
-              h3(
-                "Last day to send emails!",
-                 style = "color:red"
-              ),
-              p("We are currently applying for government
-              funding to cover our costs and fully develop RTutor.   
-              Please send a brief email describing how RTutor has facilitated your learning,
-               research, or business, before 2pm CDT April 4th.",
-                a(
-                  "gexijin@gmail.com",
-                  href = "mailto:gexijin@gmail.com?Subject=RTutor support letter"
-                )
-              ),
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
