@@ -536,6 +536,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         h4("Update log:"),
         tags$ul(
           tags$li(
+            "v 0.94  4/21/2023. Interactive plots using CanvasXpress."
+          ),
+          tags$li(
             "v 0.93  3/26/2023. Change data types. Add data description. Improve voice input."
           ),
           tags$li(

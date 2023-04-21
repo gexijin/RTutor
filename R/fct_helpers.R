@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.93" # RTutor
+release <- "0.94" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
