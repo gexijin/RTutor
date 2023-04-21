@@ -294,7 +294,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   value = FALSE
                 ),
                 checkboxInput(
-                  inputId = "make_interactive_cx",
+                  inputId = "make_cx_interactive",
                   label = NULL,
                   value = FALSE
                 ),
