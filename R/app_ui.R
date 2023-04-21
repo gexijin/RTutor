@@ -23,8 +23,7 @@ app_ui <- function(request) {
         title = "Home",
         div(
           id = "load_message",
-          h2("Chat with your data via AI"),
-          h3("Still being tested and improved. Loading ... ...")
+          h2("Chat with your data via AI ..."),
         ),
         uiOutput("use_heyshiny"),
         # move notifications and progress bar to the center of screen
@@ -144,19 +143,6 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
-              h3(
-                "Send an email to show your support!",
-                 style = "color:red"
-              ),
-              p("We are currently applying for government
-              funding to cover our costs and fully develop RTutor.   
-              Please send a brief email describing how RTutor has facilitated your learning,
-               research, or business, before April 4th.",
-                a(
-                  "gexijin@gmail.com",
-                  href = "mailto:gelabinfo@gmail.com?Subject=RTutor support letter"
-                )
-              ),
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
@@ -171,7 +157,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 column(
                   width = 9,
                   h5(
-                    "'Chat' with your data
+                    "Chat with your data
                     in dozens of human languages.
                     I am still in college learning new things.
                     But I try to be helpful.  
@@ -284,6 +270,12 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   label = NULL,
                   value = FALSE
                 ),
+                checkboxInput(
+                  inputId = "make_cx_interactive",
+                  label = NULL,
+                  value = FALSE
+                ),
+
                 br(),
                 uiOutput("tips_interactive"),
               ),
@@ -549,6 +541,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         hr(),
         h4("Update log:"),
         tags$ul(
+          tags$li(
+            "v 0.94  4/21/2023. Interactive plots using CanvasXpress."
+          ),
           tags$li(
             "v 0.93  3/26/2023. Change data types. Add data description. Improve voice input."
           ),
