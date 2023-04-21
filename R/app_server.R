@@ -1104,8 +1104,9 @@ app_server <- function(input, output, session) {
     }
   })
 
-  observeEvent(input$submit_button, {
-
+  observe({
+    # hide it by default
+    shinyjs::hideElement(id = "make_ggplot_interactive")
     updateCheckboxInput(
       session = session,
       inputId = "make_ggplot_interactive",
@@ -1113,8 +1114,6 @@ app_server <- function(input, output, session) {
       value = FALSE
     )
 
-    # hide it by default
-    shinyjs::hideElement(id = "make_ggplot_interactive")
     req(!code_error())
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
@@ -1124,31 +1123,30 @@ app_server <- function(input, output, session) {
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
     ) {
-    shinyjs::showElement(id = "make_ggplot_interactive")
+      shinyjs::showElement(id = "make_ggplot_interactive")
     }
   })
 
-
-  observeEvent(input$submit_button, {
+  observe({
     # hide it by default
     shinyjs::hideElement(id = "make_cx_interactive")
+    updateCheckboxInput(
+      session = session,
+      inputId = "make_cx_interactive",
+      label = "Interactive via CanvasXpress",
+      value = FALSE
+    )
+
     req(!code_error())
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-     updateCheckboxInput(
-      session = session,
-      inputId = "make_cx_interactive",
-      label = "Interactive via canvasXpress",
-      value = FALSE
-    )
-
-    if (grepl("ggplot", txt) && # if  ggplot2, and it is 
+    if (grepl("ggplot", txt) && # if  canvasXpress, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
     ) {
-    shinyjs::showElement(id = "make_cx_interactive")
+      shinyjs::showElement(id = "make_cx_interactive")
     }
   })
 
@@ -1174,7 +1172,7 @@ app_server <- function(input, output, session) {
     req(input$submit_button)
     req(openAI_response()$cmd)
     if(is_interactive_plot() ||   # natively interactive
-      turned_on (input$make_ggplot_interactive)
+      turned_on(input$make_ggplot_interactive)
      ) {
       tagList(
         p("Mouse over to see values. Select a region to zoom. 
@@ -1183,7 +1181,7 @@ app_server <- function(input, output, session) {
         Use the menu on the top right for other functions."
         )
       )
-    } else if (turned_on (input$make_cx_interactive)) {
+    } else if (turned_on(input$make_cx_interactive)) {
       tagList(
         p("To reset, press ESC. Or mouse over the top, 
         then click the reset button on the top left. 
