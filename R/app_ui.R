@@ -270,6 +270,12 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   label = NULL,
                   value = FALSE
                 ),
+                checkboxInput(
+                  inputId = "make_cx_interactive",
+                  label = NULL,
+                  value = FALSE
+                ),
+
                 br(),
                 uiOutput("tips_interactive"),
               ),
