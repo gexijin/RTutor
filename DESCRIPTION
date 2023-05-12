@@ -25,7 +25,8 @@ Imports:
     GGally,
     janitor,
     RSQLite,
-    canvasXpress
+    canvasXpress,
+    moments
 Remotes:
     github::jcrodriguez1989/heyshiny
 Depends:
