@@ -24,7 +24,9 @@ Imports:
     tableone,
     GGally,
     janitor,
-    RSQLite
+    RSQLite,
+    canvasXpress,
+    moments
 Remotes:
     github::jcrodriguez1989/heyshiny
 Depends:
