@@ -314,16 +314,32 @@ clean_cmd <- function(cmd, selected_data) {
     cat(cmd)
   )
 
-  #cmd is a vector. Each element is a line.
+  # A typical returned text from OpenAI
+  # ```{r}
+  #data <- read.csv("data1.csv")
+  #```
+  #Note: This code assumes that ...
+  #            XX```{R}       ```{r}   ```R ```r     ```
+  cmd <- gsub(".*(```\\{R\\}|```\\{r\\}|```R|```r|^```)", "", cmd)
 
-  # sometimes it returns RMarkdown code.
-  cmd <- gsub("```", "", cmd)
-
-  # remove empty lines
-  cmd <- cmd[cmd != ""]
+  # remove anything followed ```
+  cmd <- gsub("```.*", "", cmd)
+  #cmd <- gsub("```\\{R\\}|```\\{r\\}|```R|```r|```|\r", "", cmd)
 
   # replace install.packages by "#install.packages"
   cmd <- gsub("install.packages", "#install.packages", cmd)
+
+  # prevent running system commands, malicious
+  # system("...")  --> #system("...")
+  cmd <- gsub("system *\\(", "#system\\()", cmd)
+  cmd <- gsub("unlink *\\(", "#unlink\\()", cmd)
+  cmd <- gsub(
+    "(link|dir|link)_(create|delete|chmod|chown|move) *\\(",
+    "#MASKED_FILE_OPERATION\\(", cmd
+  )
+  
+  # use pacman, load if installed; otherwise install it first then load.
+  cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
 
   if (selected_data != no_data) {
     cmd <- c("df <- as.data.frame(current_data())", cmd)
