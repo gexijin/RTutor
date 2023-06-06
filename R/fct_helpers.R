@@ -318,13 +318,12 @@ clean_cmd <- function(cmd, selected_data) {
   # ```{r}
   #data <- read.csv("data1.csv")
   #```
-  #Note: This code assumes that ...
-  #            XX```{R}       ```{r}   ```R ```r     ```
-  cmd <- gsub(".*(```\\{R\\}|```\\{r\\}|```R|```r|^```)", "", cmd)
+   cmd <- gsub("``` *", "```", cmd)
+  #                    ```{python} ```{r}               ```python                    ^```
+  cmd <- gsub(".*(```\\{(PYTHON|Python|python|R|r|bash|sql|js|rcpp|css)\\}|```(PYTHON|Python|python|R|r|bash|sql|js|rcpp|css)|^```)", "", cmd)
 
-  # remove anything followed ```
+  # remove anything after ```
   cmd <- gsub("```.*", "", cmd)
-  #cmd <- gsub("```\\{R\\}|```\\{r\\}|```R|```r|```|\r", "", cmd)
 
   # replace install.packages by "#install.packages"
   cmd <- gsub("install.packages", "#install.packages", cmd)
@@ -332,15 +331,15 @@ clean_cmd <- function(cmd, selected_data) {
   # prevent running system commands, malicious
   # system("...")  --> #system("...")
   cmd <- gsub("system *\\(", "#system\\()", cmd)
+    cmd <- gsub("source *\\(", "#source\\()", cmd)
   cmd <- gsub("unlink *\\(", "#unlink\\()", cmd)
   cmd <- gsub(
     "(link|dir|link)_(create|delete|chmod|chown|move) *\\(",
     "#MASKED_FILE_OPERATION\\(", cmd
   )
-  
+
   # use pacman, load if installed; otherwise install it first then load.
   cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
-
   if (selected_data != no_data) {
     cmd <- c("df <- as.data.frame(current_data())", cmd)
   }
