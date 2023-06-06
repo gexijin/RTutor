@@ -2161,7 +2161,17 @@ output$answer <- renderText({
     if (input$submit_button == 0 && input$ask_button == 0) {
       tagList(
         br(),
+
+        p("Also try ",
+          a(
+            "Chatlize.ai,",
+            href="https://chatlize.ai",
+            target = "_blank"
+          ),
+          " a general data science platform."
+        ),
         h4("Slava Ukraini!")
+
       )
 
     }
