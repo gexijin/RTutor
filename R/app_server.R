@@ -283,8 +283,6 @@ app_server <- function(input, output, session) {
     }
   })
 
-
-
   #                             4.
   #____________________________________________________________________________
   # API key management
@@ -297,6 +295,21 @@ app_server <- function(input, output, session) {
         footer = modalButton("Confirm"),
         tagList(
           fluidRow(
+            column(
+              width = 2,
+              "Model:",
+              align = "center"
+            ),
+            column(
+              width = 10,
+              align = "left",
+              selectInput(
+                inputId = "language_model",
+                choices = language_models,
+                label = NULL,
+                selected = selected_model()
+              )
+            ),
             column(
               width = 4,
               sliderInput(
@@ -466,7 +479,7 @@ app_server <- function(input, output, session) {
             And we can try to improve unsuccessful attempts. ")
           )
         ),
-
+        easyClose = TRUE
       )
     )
   })
@@ -594,6 +607,14 @@ app_server <- function(input, output, session) {
       return(temperature)
   })
 
+  selected_model <- reactive({
+      model <- language_models[1]
+      if (!is.null(input$language_model)) {
+         model <- input$language_model
+      }
+      return(model)
+  })
+
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
@@ -620,11 +641,11 @@ app_server <- function(input, output, session) {
       )
 
       start_time <- Sys.time()
-
+browser()
       # Send to openAI
       tryCatch(
         response <- openai::create_completion(
-          engine_id = language_model,
+          engine_id = selected_model(),
           prompt = prepared_request,
           openai_api_key = api_key_session()$api_key,
           max_tokens = 500,
@@ -1409,7 +1430,7 @@ app_server <- function(input, output, session) {
 [openai](https://cran.rstudio.com/web/packages/openai/index.html)
     package  to 
     [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
-    language_model,
+    selected_model(),
     "\" model.",
     "\n\nRTutor Website: [https://RTutor.ai](https://RTutor.ai)",
     "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)\n"
@@ -1837,10 +1858,10 @@ output$answer <- renderText({
     # Send to openAI
     tryCatch(
       response <- openai::create_completion(
-        engine_id = language_model,
+        engine_id = selected_model(),
         prompt = prepared_request,
         openai_api_key = api_key_session()$api_key,
-        max_tokens = 200,
+        max_tokens = 500,
         temperature = sample_temp()
       ),
       error = function(e) {

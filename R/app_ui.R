@@ -494,8 +494,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             href = "https://openai.com/",
             target = "_blank"
           ),
-          " powerful ",
-          language_model,
+          " powerful large ",
           "language model",
           " to translate natural language into R code, which is then excuted.",
           "You can request your analysis,
