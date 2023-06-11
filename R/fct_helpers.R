@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.94" # RTutor
+release <- "0.95" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -23,8 +23,8 @@ max_query_length <- 500 # max # of characters
 language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4")
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
 default_temperature <- 0.1
-pre_text <- "Following the instructions, write correct, efficient R code."
-pre_text_python <- "Write correct, efficient Python code."
+pre_text <- "Act as a experienced statistician and data scientist. Write correct, efficient R code."
+pre_text_python <- "Act as a experienced statistician and data scientist. Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
@@ -107,7 +107,7 @@ move_front <- function(v, e){
 #' @param chunk_id  first or not? First chunk add data description
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df, use_python, chunk_id) {
+prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -153,22 +153,30 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id) {
         relevant_var = relevant_var
       )
 
-      txt <- paste(txt, after_text)
-      # if user is not trying to convert data
-      if (!grepl("Convert |convert ", txt) && chunk_id == 0) {
+      #if it is the first chunk;  always do this when Davinci model
+      more_info <- chunk_id == 0 || selected_model == language_models[1]
+      if (more_info) {
+        txt <- paste(txt, after_text)
+      }
+      
+      # add data descrdiption
+      # if user is not trying to convert data; 
+      if (!grepl("Convert |convert ", txt) && more_info) {
         txt <- paste(txt, data_info)
       }
     }
   }
 
-  txt <- paste(
-    ifelse(
-      use_python,
-      pre_text_python,
-      pre_text
-    ),
-    txt
-  )
+  if(selected_model == language_models[1]) {
+    txt <- paste(
+      ifelse(
+        use_python,
+        pre_text_python,
+        pre_text
+      ),
+      txt
+    )
+  }
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
   #cat("\n", txt)

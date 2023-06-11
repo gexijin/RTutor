@@ -618,7 +618,7 @@ app_server <- function(input, output, session) {
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
-    prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id)
+    prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model())
   })
 
   openAI_response <- reactive({
@@ -661,7 +661,14 @@ app_server <- function(input, output, session) {
             if (nchar(system_role) > 10) {
               prompt_total <- append(
                 prompt_total,
-                list(list(role = "system", content = system_role))
+                list(list(
+                  role = "system",
+                  content = ifelse(
+                    input$use_python,
+                    pre_text_python,
+                    pre_text
+                  )
+                ))
               )
             }
           }
@@ -696,6 +703,8 @@ app_server <- function(input, output, session) {
             temperature = sample_temp(),
               messages = prompt_total
           )
+
+          # to make the returned code at the same spot, as davinci model.
           response$choices[1, 1] <- response$choices$message.content
         },
         error = function(e) {
