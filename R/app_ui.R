@@ -269,6 +269,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 condition = "input.use_python == 0",
 
                 uiOutput("error_message"),
+                uiOutput("send_error_message"),
                 h4("Results:"),
 
                 # shows error message in local machine, but not on the server

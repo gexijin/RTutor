@@ -133,6 +133,34 @@ app_server <- function(input, output, session) {
 
   })
 
+  # copy error message
+  observeEvent(code_error(), {
+    # not Davinci
+    req(selected_model() != language_models[1])
+
+    output$send_error_message <- renderUI({
+      tagList(
+        actionButton(
+          inputId = "send_error",
+          label = strong("Copy error message")
+        ),
+        tags$head(tags$style(
+          "#send_error{font-size: 16px;color: purple}"
+        ))
+      )
+    })
+  })
+
+  observeEvent(input$send_error, {
+
+    updateTextInput(
+      session,
+      "input_text",
+      value = paste0("Error! ", run_result()$message)
+    )
+  })
+
+
   #                             3.
   #____________________________________________________________________________
   #  Loading data
@@ -649,7 +677,7 @@ app_server <- function(input, output, session) {
             engine_id = selected_model(),
             prompt = prepared_request,
             openai_api_key = api_key_session()$api_key,
-            max_tokens = 500,
+            max_tokens = 1000,
             temperature = sample_temp()
           )
         } else {
@@ -699,7 +727,7 @@ app_server <- function(input, output, session) {
           response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
             model = selected_model(),
             openai_api_key = api_key_session()$api_key,
-            max_tokens = 500,
+            #max_tokens = 500,
             temperature = sample_temp(),
               messages = prompt_total
           )
