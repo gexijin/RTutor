@@ -636,7 +636,7 @@ app_server <- function(input, output, session) {
   })
 
   selected_model <- reactive({
-      model <- language_models[2] #chatgpt
+      model <- language_models[1] #chatgpt
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
