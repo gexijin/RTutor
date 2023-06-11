@@ -137,8 +137,9 @@ app_server <- function(input, output, session) {
   observeEvent(code_error(), {
     # not Davinci
     req(selected_model() != language_models[1])
-
+    req(code_error())
     output$send_error_message <- renderUI({
+      req(code_error())
       tagList(
         actionButton(
           inputId = "send_error",
@@ -636,7 +637,7 @@ app_server <- function(input, output, session) {
   })
 
   selected_model <- reactive({
-      model <- language_models[1] #chatgpt
+      model <- language_models[2] #chatgpt
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
@@ -691,11 +692,7 @@ app_server <- function(input, output, session) {
                 prompt_total,
                 list(list(
                   role = "system",
-                  content = ifelse(
-                    input$use_python,
-                    pre_text_python,
-                    pre_text
-                  )
+                  content = system_role
                 ))
               )
             }

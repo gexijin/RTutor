@@ -23,8 +23,8 @@ max_query_length <- 500 # max # of characters
 language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4")
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
 default_temperature <- 0.1
-pre_text <- "Act as a experienced statistician and data scientist. Write correct, efficient R code."
-pre_text_python <- "Act as a experienced statistician and data scientist. Write correct, efficient Python code."
+pre_text <- "Write correct, efficient R code."
+pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
@@ -34,7 +34,7 @@ max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor
 unique_ratio <- 0.2   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
-system_role <- "Act as a experienced data scientist and statistician. You will write code, without explanation, following instructions."
+system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation."
 # voice input parameters
 wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
@@ -167,16 +167,15 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
     }
   }
 
-  if(selected_model == language_models[1]) {
-    txt <- paste(
-      ifelse(
-        use_python,
-        pre_text_python,
-        pre_text
-      ),
-      txt
-    )
-  }
+  txt <- paste(
+    ifelse(
+      use_python,
+      pre_text_python,
+      pre_text
+    ),
+    txt
+  )
+
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
   #cat("\n", txt)
