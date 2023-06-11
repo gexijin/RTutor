@@ -133,6 +133,34 @@ app_server <- function(input, output, session) {
 
   })
 
+  # copy error message
+  observeEvent(code_error(), {
+    # not Davinci
+    req(selected_model() != language_models[1])
+
+    output$send_error_message <- renderUI({
+      tagList(
+        actionButton(
+          inputId = "send_error",
+          label = strong("Copy error message")
+        ),
+        tags$head(tags$style(
+          "#send_error{font-size: 16px;color: purple}"
+        ))
+      )
+    })
+  })
+
+  observeEvent(input$send_error, {
+
+    updateTextInput(
+      session,
+      "input_text",
+      value = paste0("Error! ", run_result()$message)
+    )
+  })
+
+
   #                             3.
   #____________________________________________________________________________
   #  Loading data
@@ -283,8 +311,6 @@ app_server <- function(input, output, session) {
     }
   })
 
-
-
   #                             4.
   #____________________________________________________________________________
   # API key management
@@ -297,6 +323,21 @@ app_server <- function(input, output, session) {
         footer = modalButton("Confirm"),
         tagList(
           fluidRow(
+            column(
+              width = 2,
+              "Model:",
+              align = "center"
+            ),
+            column(
+              width = 10,
+              align = "left",
+              selectInput(
+                inputId = "language_model",
+                choices = language_models,
+                label = NULL,
+                selected = selected_model()
+              )
+            ),
             column(
               width = 4,
               sliderInput(
@@ -466,7 +507,7 @@ app_server <- function(input, output, session) {
             And we can try to improve unsuccessful attempts. ")
           )
         ),
-
+        easyClose = TRUE
       )
     )
   })
@@ -594,10 +635,18 @@ app_server <- function(input, output, session) {
       return(temperature)
   })
 
+  selected_model <- reactive({
+      model <- language_models[2] #chatgpt
+      if (!is.null(input$language_model)) {
+         model <- input$language_model
+      }
+      return(model)
+  })
+
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
-    prep_input(input$input_text, input$select_data, current_data(), input$use_python)
+    prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model())
   })
 
   openAI_response <- reactive({
@@ -623,13 +672,69 @@ app_server <- function(input, output, session) {
 
       # Send to openAI
       tryCatch(
-        response <- openai::create_completion(
-          engine_id = language_model,
-          prompt = prepared_request,
-          openai_api_key = api_key_session()$api_key,
-          max_tokens = 500,
-          temperature = sample_temp()
-        ),
+        if(selected_model() == language_models[1]) { # completion model: davinci-text-003
+          response <- openai::create_completion(
+            engine_id = selected_model(),
+            prompt = prepared_request,
+            openai_api_key = api_key_session()$api_key,
+            max_tokens = 1000,
+            temperature = sample_temp()
+          )
+        } else {
+
+          prompt_total <- list()
+
+          # System role: You are an experience programmar, etc
+          if (!is.null(system_role)) {
+            if (nchar(system_role) > 10) {
+              prompt_total <- append(
+                prompt_total,
+                list(list(
+                  role = "system",
+                  content = ifelse(
+                    input$use_python,
+                    pre_text_python,
+                    pre_text
+                  )
+                ))
+              )
+            }
+          }
+
+          # add history, first, if any
+          if (length(logs$code_history) > 0) {
+            # add each chunk
+            history <- list()
+            for(i in 1:length(logs$code_history)) {
+              history <- append(
+                history,
+                list(list(role = "user", content = logs$code_history[[i]]$prompt_all))
+              )
+              history <- append(
+                history,
+                list(list(role = "assistant", content = logs$code_history[[i]]$raw))
+              )
+            }
+            prompt_total <- append(prompt_total, history)
+          }
+
+          # add new user prompt
+          prompt_total <- append(
+            prompt_total,
+            list(list(role = "user", content = prepared_request))
+          )
+
+          response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
+            model = selected_model(),
+            openai_api_key = api_key_session()$api_key,
+            #max_tokens = 500,
+            temperature = sample_temp(),
+              messages = prompt_total
+          )
+
+          # to make the returned code at the same spot, as davinci model.
+          response$choices[1, 1] <- response$choices$message.content
+        },
         error = function(e) {
           # remove spinner, show message for 5s, & reload
           shinybusy::remove_modal_spinner()
@@ -695,7 +800,7 @@ app_server <- function(input, output, session) {
 
       return(
         list(
-          cmd = cmd,
+          cmd = polish_cmd(cmd),
           response = response,
           time = round(api_time, 0),
           error = error_api,
@@ -771,9 +876,9 @@ app_server <- function(input, output, session) {
     logs$id <- logs$id + 1
     # if not continue
     if(!input$continue) {
-      logs$code <- openAI_response()$cmd
+      logs$code <-  openAI_response()$cmd
 
-      logs$raw <- openAI_response()$response$choices[1, 1]
+      logs$raw <- openAI_response()$cmd #openAI_response()$response$choices[1, 1]
       # remove one or more blank lines in the beginning.
       logs$raw <- gsub("^\n+", "", logs$raw)
 
@@ -804,6 +909,7 @@ app_server <- function(input, output, session) {
       code = logs$code,
       raw = logs$raw, # for print
       prompt = input$input_text,
+      prompt_all = openAI_prompt(), # entire prompt, as sent to openAI
       error = code_error(),
       rmd = Rmd_chunk(),
       language = ifelse(input$use_python, "Python", "R"),
@@ -1409,7 +1515,7 @@ app_server <- function(input, output, session) {
 [openai](https://cran.rstudio.com/web/packages/openai/index.html)
     package  to 
     [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
-    language_model,
+    selected_model(),
     "\" model.",
     "\n\nRTutor Website: [https://RTutor.ai](https://RTutor.ai)",
     "\nSource code: [GitHub.](https://github.com/gexijin/RTutor)\n"
@@ -1837,10 +1943,10 @@ output$answer <- renderText({
     # Send to openAI
     tryCatch(
       response <- openai::create_completion(
-        engine_id = language_model,
+        engine_id = selected_model(),
         prompt = prepared_request,
         openai_api_key = api_key_session()$api_key,
-        max_tokens = 200,
+        max_tokens = 500,
         temperature = sample_temp()
       ),
       error = function(e) {

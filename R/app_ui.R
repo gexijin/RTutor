@@ -156,22 +156,23 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 ),
                 column(
                   width = 9,
-                  h5(
-                    "Chat with your data
-                    in dozens of human languages.
-                    I am still in college learning new things.
-                    But I try to be helpful.  
-                    I did finish my required reading:
-                    thousands of books, millions of code repositories, 
-                    and billions of web pages.                    
-                     "
+                  h4(
+                    "Chat with your data in dozens of human languages."
                   ),
+              h4("June 11, 2023: With v0.95, gpt-3.5-turbo becomes the default language model. You can now ask 
+              questions based on previous results, like 'Remove grid lines' or 'change color to red'. 
+              You can also use GPT-4 with your own API key. Although slow and costly, GPT-4 is much better in coding.
+              To switch back to Davinci, see Settings."),
                   align = "left"
                 )
               ),
               hr(),
+
               h3("Instructions:"),
               tags$ul(
+                tags$li(
+                  "Powered by ChatGPT, RTutor enables you to chat with your data. "
+                ),
                 tags$li(
                   "Start small. Gradually add complexity. First, try simple requests 
                   such as distributions, basic plots, or simple models. 
@@ -187,6 +188,14 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   work, rephrase your request. Also, increase 
                   the \"Temperature\" setting will make the AI more aggressive in
                   seeking alternative solutions."
+                ),
+                tags$li(
+                  "The gpt-3.5-turbo (ChatGPT) is now the default language model. 
+                  You can ask questions based on previous questions and code. 
+                  You can gradually refine a plot, step by step. 'Change color based on cut.' 
+                  'Repeat that after log transformation.'
+                  You can also copy and paste the error message into the box 
+                  so that ChatGPT can fix the error."
                 ),
                 tags$li(
                   "Prepare and clean your data in Excel first! 
@@ -260,6 +269,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 condition = "input.use_python == 0",
 
                 uiOutput("error_message"),
+                uiOutput("send_error_message"),
                 h4("Results:"),
 
                 # shows error message in local machine, but not on the server
@@ -494,8 +504,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
             href = "https://openai.com/",
             target = "_blank"
           ),
-          " powerful ",
-          language_model,
+          " powerful large ",
           "language model",
           " to translate natural language into R code, which is then excuted.",
           "You can request your analysis,
@@ -541,6 +550,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         hr(),
         h4("Update log:"),
         tags$ul(
+          tags$li(
+            "v 0.95  6/11/2023. ChatGPT(gpt-3.5-turbo) becomes default model."
+          ),
           tags$li(
             "v 0.94  4/21/2023. Interactive plots using CanvasXpress."
           ),

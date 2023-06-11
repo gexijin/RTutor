@@ -4,7 +4,7 @@
 \alias{prep_input}
 \title{Prepare User input.}
 \usage{
-prep_input(txt, selected_data, df, use_python)
+prep_input(txt, selected_data, df, use_python, chunk_id, selected_model)
 }
 \arguments{
 \item{txt}{A string that stores the user input.}
@@ -14,6 +14,8 @@ prep_input(txt, selected_data, df, use_python)
 \item{df}{the data frame}
 
 \item{use_python}{whether or not using python instead of R}
+
+\item{chunk_id}{first or not? First chunk add data description}
 }
 \value{
 Returns a cleaned up version, so that it could be sent to GPT.

@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.94" # RTutor
+release <- "0.95" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -20,10 +20,11 @@ names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
-language_model <- "text-davinci-003"
+language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4")
+names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
 default_temperature <- 0.1
-pre_text <- "Following the instructions below, write correct, efficient R code."
-pre_text_python <- "Write correct, efficient Python code."
+pre_text <- "Act as a experienced statistician and data scientist. Write correct, efficient R code."
+pre_text_python <- "Act as a experienced statistician and data scientist. Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
@@ -33,7 +34,7 @@ max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor
 unique_ratio <- 0.2   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
-
+system_role <- "Act as a experienced data scientist and statistician. You will write code, without explanation, following instructions."
 # voice input parameters
 wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
@@ -103,9 +104,10 @@ move_front <- function(v, e){
 #' @param selected_data Name of the dataset.
 #' @param df the data frame
 #' @param use_python  whether or not using python instead of R
+#' @param chunk_id  first or not? First chunk add data description
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df, use_python) {
+prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -151,22 +153,30 @@ prep_input <- function(txt, selected_data, df, use_python) {
         relevant_var = relevant_var
       )
 
-      txt <- paste(txt, after_text)
-      # if user is not trying to convert data
-      if (!grepl("Convert |convert ", txt)) {
+      #if it is the first chunk;  always do this when Davinci model
+      more_info <- chunk_id == 0 || selected_model == language_models[1]
+      if (more_info) {
+        txt <- paste(txt, after_text)
+      }
+      
+      # add data descrdiption
+      # if user is not trying to convert data; 
+      if (!grepl("Convert |convert ", txt) && more_info) {
         txt <- paste(txt, data_info)
       }
     }
   }
 
-  txt <- paste(
-    ifelse(
-      use_python,
-      pre_text_python,
-      pre_text
-    ),
-    txt
-  )
+  if(selected_model == language_models[1]) {
+    txt <- paste(
+      ifelse(
+        use_python,
+        pre_text_python,
+        pre_text
+      ),
+      txt
+    )
+  }
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
   #cat("\n", txt)
@@ -314,16 +324,7 @@ clean_cmd <- function(cmd, selected_data) {
     cat(cmd)
   )
 
-  # A typical returned text from OpenAI
-  # ```{r}
-  #data <- read.csv("data1.csv")
-  #```
-   cmd <- gsub("``` *", "```", cmd)
-  #                    ```{python} ```{r}               ```python                    ^```
-  cmd <- gsub(".*(```\\{(PYTHON|Python|python|R|r|bash|sql|js|rcpp|css)\\}|```(PYTHON|Python|python|R|r|bash|sql|js|rcpp|css)|^```)", "", cmd)
-
-  # remove anything after ```
-  cmd <- gsub("```.*", "", cmd)
+  cmd <- polish_cmd(cmd)
 
   # replace install.packages by "#install.packages"
   cmd <- gsub("install.packages", "#install.packages", cmd)
@@ -347,6 +348,26 @@ clean_cmd <- function(cmd, selected_data) {
   return(cmd)
 
 }
+
+
+#' Remove Markdown and explanation
+#'
+#' The response from GTP3 sometimes contains strings that are not R commands.
+#'
+#' @param cmd A string that stores the completion from GTP3.
+#' @return Returns a cleaned up version, so that it could be executed as R command.
+polish_cmd <- function(cmd) {
+
+  cmd <- gsub("``` *", "```", cmd)
+  #                    ```{python} ```{r}               ```python                    ^```
+  cmd <- gsub(".*(```\\{(PYTHON|Python|python|R|r|bash|sql|js|rcpp|css)\\}|```(PYTHON|Python|python|R|r|bash|sql|js|rcpp|css)|^```)", "", cmd)
+
+  # remove anything after ```
+  cmd <- gsub("```.*", "", cmd)
+  
+  return(paste0("\n", cmd))
+}
+
 
 
 ###################################################################
