@@ -608,7 +608,7 @@ app_server <- function(input, output, session) {
   })
 
   selected_model <- reactive({
-      model <- language_models[1]
+      model <- language_models[2] #chatgpt
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
@@ -618,7 +618,7 @@ app_server <- function(input, output, session) {
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
-    prep_input(input$input_text, input$select_data, current_data(), input$use_python)
+    prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id)
   })
 
   openAI_response <- reactive({
@@ -641,16 +641,63 @@ app_server <- function(input, output, session) {
       )
 
       start_time <- Sys.time()
-browser()
+
       # Send to openAI
       tryCatch(
-        response <- openai::create_completion(
-          engine_id = selected_model(),
-          prompt = prepared_request,
-          openai_api_key = api_key_session()$api_key,
-          max_tokens = 500,
-          temperature = sample_temp()
-        ),
+        if(selected_model() == language_models[1]) { # completion model: davinci-text-003
+          response <- openai::create_completion(
+            engine_id = selected_model(),
+            prompt = prepared_request,
+            openai_api_key = api_key_session()$api_key,
+            max_tokens = 500,
+            temperature = sample_temp()
+          )
+        } else {
+
+          prompt_total <- list()
+
+          # System role: You are an experience programmar, etc
+          if (!is.null(system_role)) {
+            if (nchar(system_role) > 10) {
+              prompt_total <- append(
+                prompt_total,
+                list(list(role = "system", content = system_role))
+              )
+            }
+          }
+
+          # add history, first, if any
+          if (length(logs$code_history) > 0) {
+            # add each chunk
+            history <- list()
+            for(i in 1:length(logs$code_history)) {
+              history <- append(
+                history,
+                list(list(role = "user", content = logs$code_history[[i]]$prompt_all))
+              )
+              history <- append(
+                history,
+                list(list(role = "assistant", content = logs$code_history[[i]]$raw))
+              )
+            }
+            prompt_total <- append(prompt_total, history)
+          }
+
+          # add new user prompt
+          prompt_total <- append(
+            prompt_total,
+            list(list(role = "user", content = prepared_request))
+          )
+
+          response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
+            model = selected_model(),
+            openai_api_key = api_key_session()$api_key,
+            max_tokens = 500,
+            temperature = sample_temp(),
+              messages = prompt_total
+          )
+          response$choices[1, 1] <- response$choices$message.content
+        },
         error = function(e) {
           # remove spinner, show message for 5s, & reload
           shinybusy::remove_modal_spinner()
@@ -716,7 +763,7 @@ browser()
 
       return(
         list(
-          cmd = cmd,
+          cmd = polish_cmd(cmd),
           response = response,
           time = round(api_time, 0),
           error = error_api,
@@ -792,9 +839,9 @@ browser()
     logs$id <- logs$id + 1
     # if not continue
     if(!input$continue) {
-      logs$code <- openAI_response()$cmd
+      logs$code <-  openAI_response()$cmd
 
-      logs$raw <- openAI_response()$response$choices[1, 1]
+      logs$raw <- openAI_response()$cmd #openAI_response()$response$choices[1, 1]
       # remove one or more blank lines in the beginning.
       logs$raw <- gsub("^\n+", "", logs$raw)
 
@@ -825,6 +872,7 @@ browser()
       code = logs$code,
       raw = logs$raw, # for print
       prompt = input$input_text,
+      prompt_all = openAI_prompt(), # entire prompt, as sent to openAI
       error = code_error(),
       rmd = Rmd_chunk(),
       language = ifelse(input$use_python, "Python", "R"),
