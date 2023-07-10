@@ -527,6 +527,7 @@ app_server <- function(input, output, session) {
         session_key_source <- "pasted!"
       }
     }
+    cat("\nReactive:", api_key)
     return(
       list(
         api_key = api_key,
@@ -541,6 +542,8 @@ app_server <- function(input, output, session) {
     # The following is essential for correctly getting the 
     # environment variable on Linux!!! Don't ask.
     tem <- Sys.getenv("OPEN_API_KEY")
+    cat("\ntem:", tem)
+    cat("\n Key:", txt)
     paste0(
       "Current API key: ",
       substr(txt, 1, 4),
