@@ -210,6 +210,11 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
       numeric_var <- colnames(df)[numeric_index]
       cat_var <- colnames(df)[!numeric_index]
 
+      # calculate total number of unique levels
+      total_levels <- sapply(cat_var, function(x) {length(unique(df[, x]))})
+      # remove columns that are names, strings, etc
+      cat_var <- cat_var[total_levels < nrow(df) * 0.8]
+
      # numeric variables
       if (length(numeric_var) == 1) {
         data_info <- paste0(
@@ -252,54 +257,55 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
           cat_var[length(cat_var)],
           ". "
         )
+      }
+      
+      if(list_levels & length(relevant_var) > 0) {
 
-        if(list_levels & length(relevant_var) > 0) {
+        # only list for categorical variables specified in user prompt
+        relevant_cat_var <- intersect(relevant_var, cat_var)
+      # describe the levels in categorical variable
+        for (var in relevant_cat_var) {
+          max_lelvels_description <- 10
+          ix <- match(var, colnames(df))
+          factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
+          factor_levels <- names(factor_levels)
 
-          # only list for categorical variables specified in user prompt
-          relevant_cat_var <- intersect(relevant_var, cat_var)
-        # describe the levels in categorical variable
-          for (var in relevant_cat_var) {
-            max_lelvels_description <- 10
-            ix <- match(var, colnames(df))
-            factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
-            factor_levels <- names(factor_levels)
+          # have more than 6 levels?
+          many_levels <- FALSE
 
-            # have more than 6 levels?
-            many_levels <- FALSE
+          if (length(factor_levels) > max_lelvels_description) {
+            many_levels <- TRUE
+            factor_levels <- factor_levels[1:max_lelvels_description]
+          }
 
-            if (length(factor_levels) > max_lelvels_description) {
-              many_levels <- TRUE
-              factor_levels <- factor_levels[1:max_lelvels_description]
-            }
-
-            last_level <- factor_levels[length(factor_levels)]
-            factor_levels <- factor_levels[-1 * length(factor_levels)]
-            tem <- paste0(
-              factor_levels,
-              collapse = "', '"
-            )
-            if (!many_levels) { # less than 6 levels
-              factor_levels <- paste0("'", tem, "', and '", last_level, "'")
-            } else { # more than 6 levels
-              factor_levels <- paste0(
-                "'",
-                tem,
-                "', '",
-                last_level,
-                "', etc"
-              )
-            }
-            data_info <- paste0(
-              data_info,
-              "The categorical variable ",
-              var,
-              " has these levels: ",
-              factor_levels,
-              ". "
+          last_level <- factor_levels[length(factor_levels)]
+          factor_levels <- factor_levels[-1 * length(factor_levels)]
+          tem <- paste0(
+            factor_levels,
+            collapse = "', '"
+          )
+          if (!many_levels) { # less than 6 levels
+            factor_levels <- paste0("'", tem, "', and '", last_level, "'")
+          } else { # more than 6 levels
+            factor_levels <- paste0(
+              "'",
+              tem,
+              "', '",
+              last_level,
+              "', etc"
             )
           }
+          data_info <- paste0(
+            data_info,
+            "The categorical variable ",
+            var,
+            " has these levels: ",
+            factor_levels,
+            ". "
+          )
         }
       }
+      
       return(data_info)
 }
 
