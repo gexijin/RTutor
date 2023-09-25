@@ -95,6 +95,30 @@ move_front <- function(v, e){
   return(v)
 }
 
+  # Running on laptop, specify absolute path to the folder
+  data_path <- "G:/My Drive/personal/UK/clean/"
+
+  # data file should be stored in 
+  if(file.exists(on_server)) {
+    data_path <- "../../data/"
+  }
+
+  home_loan <<- readr::read_csv(
+    paste0(data_path, "Home_loan.csv"),
+    col_types = cols(
+      id = col_integer(),
+      FIPS = col_integer(), STNUM = col_integer(),
+      ZIPCODE = col_integer(), PLUS4 = col_integer(),
+      BOOK = col_integer(), PAGE = col_integer(),
+      DOCNUM = col_integer(), DATE = col_character(),
+      BUYERZIP = col_integer(), BUYERPLUS4 = col_integer()
+    )
+  )
+
+  # home_loan <<- na.omit(home_loan)
+  home_loan$DATE <<- as.Date(as.character(home_loan$DATE), format="%Y%m%d")
+  home_loan <<- as.data.frame(home_loan)
+  
 
 #' Prepare User input.
 #'
