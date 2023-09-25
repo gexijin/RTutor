@@ -160,5 +160,7 @@ home_loan,1,1,Mortgage by state,Calculate and print out the average mortgage in 
 home_loan,1,1,Mortgage by state distribution,Compare the distribution of mortgages by state. Plot in log10 scale.,
 home_loan,1,1,Large loans by state,How many mortgages are more than 1 million? Give me numbers by state.,
 home_loan,1,1,Loans by Zip,Show me the number of mortgages by zip code in the state of MA. Rank from the most to the least.,
-home_loan,1,1,Top 5 zip code in MA,Find the top 5 zip codes in the state of MA that have the most mortgages. Calculate average mortgage. Plot as a bar plot.,
+home_loan,1,1,Top 5 zip code in MA,Find the top 5 zip codes in the state of MA that have the most mortgages. Calculate average mortgage by zip code and plot as a bar plot.,
 home_loan,1,1,Top 5 zip code in NJ,Do that for the state of NJ.,
+home_loan,1,1,Lender,Show me the number of loans by lender and average amount.,
+home_loan,1,1,Lender zip,Remove rows that has no lender. Show me the most frequent combinations of lender and zip code. Also include average mortgage for that combination.,

@@ -20,10 +20,10 @@ names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
-language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4") #"gpt-4-0314"
+language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314") #"gpt-4-0314"
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
 default_temperature <- 0.1
-pre_text <- "Write correct, efficient R code."
+pre_text <- "Write correct, efficient R code to analyze data. Each row represents a home loan."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
@@ -108,7 +108,7 @@ move_front <- function(v, e){
     col_types = cols(
       id = col_integer(),
       FIPS = col_integer(), STNUM = col_integer(),
-      ZIPCODE = col_integer(), PLUS4 = col_integer(),
+      ZIPCODE = col_character(), PLUS4 = col_integer(),
       BOOK = col_integer(), PAGE = col_integer(),
       DOCNUM = col_integer(), DATE = col_character(),
       BUYERZIP = col_integer(), BUYERPLUS4 = col_integer()
@@ -175,12 +175,13 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
       data_info <- describe_df(
         df, 
-        list_levels = TRUE, 
+        list_levels = FALSE, 
         relevant_var = relevant_var
       )
 
       #if it is the first chunk;  always do this when Davinci model
       more_info <- chunk_id == 0 || selected_model == language_models[1]
+      more_info <- TRUE # force append data description
       if (more_info) {
         txt <- paste(txt, after_text)
       }
