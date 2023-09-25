@@ -20,7 +20,7 @@ names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 500 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
-language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4")
+language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4") #"gpt-4-0314"
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
 default_temperature <- 0.1
 pre_text <- "Write correct, efficient R code."
@@ -117,6 +117,8 @@ move_front <- function(v, e){
 
   # home_loan <<- na.omit(home_loan)
   home_loan$DATE <<- as.Date(as.character(home_loan$DATE), format="%Y%m%d")
+
+  home_loan <<- home_loan[which(!is.na(home_loan$MORTGAGE)),]
   home_loan <<- as.data.frame(home_loan)
   
 
@@ -447,6 +449,7 @@ datasets <- move_front(datasets, "mtcars")
 
 # append a dummy value, used when user upload their data.
 datasets <- c(datasets, uploaded_data)
+
 # move it to 2nd place
 datasets <- move_front(datasets, uploaded_data)
 
@@ -464,6 +467,8 @@ datasets <- move_front(datasets, "diamonds")
 # default
 datasets <- move_front(datasets, "mpg")
 
+datasets <- c(datasets, "home_loan")
+datasets <- move_front(datasets, "home_loan")
 datasets <- setNames(datasets, datasets)
 
 names(datasets)[match("mpg", datasets)] <- "mpg (examples)"

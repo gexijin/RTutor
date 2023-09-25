@@ -267,7 +267,7 @@ app_server <- function(input, output, session) {
       inputId = "select_data",
       label = "Data",
       choices = datasets,
-      selected = "mpg",
+      selected = "home_loan",
       multiple = FALSE,
       selectize = FALSE
     )
@@ -301,7 +301,7 @@ app_server <- function(input, output, session) {
     choices <- demo_related$requests
     names(choices) <- demo_related$name
 
-    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq)) {
+    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq, "home_loan")) {
       return(
         selectInput(
           inputId = "demo_prompt",
@@ -637,7 +637,7 @@ app_server <- function(input, output, session) {
   })
 
   selected_model <- reactive({
-      model <- language_models[2] #chatgpt
+      model <- language_models[3] #chatgpt
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
