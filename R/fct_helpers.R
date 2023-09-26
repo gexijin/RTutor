@@ -102,31 +102,38 @@ move_front <- function(v, e){
 read_additional_data <- function() {
 
   # Running on laptop, specify absolute path to the folder
-  data_path <- "G:/My Drive/personal/UK/clean/"
+  data_path <- "G:/My Drive/other/Exchange Robotics/"
 
   # data file should be stored in 
   if(file.exists(on_server)) {
     data_path <- "../../data/"
   }
 
-  home_loan <<- readr::read_csv(
-    paste0(data_path, "Home_loan.csv"),
-    col_types = readr::cols(
-      id = readr::col_integer(),
-      FIPS = readr::col_integer(), STNUM = readr::col_integer(),
-      ZIPCODE = readr::col_character(), PLUS4 = readr::col_integer(),
-      BOOK = readr::col_integer(), PAGE = readr::col_integer(),
-      DOCNUM = readr::col_integer(), DATE = readr::col_character(),
-      BUYERZIP = readr::col_integer(), BUYERPLUS4 = readr::col_integer()
+  if(0) {
+    home_loan <<- readr::read_csv(
+      paste0(data_path, "Home_loan.csv"),
+      col_types = readr::cols(
+        id = readr::col_integer(),
+        FIPS = readr::col_integer(), STNUM = readr::col_integer(),
+        ZIPCODE = readr::col_character(), PLUS4 = readr::col_integer(),
+        BOOK = readr::col_integer(), PAGE = readr::col_integer(),
+        DOCNUM = readr::col_integer(), DATE = readr::col_character(),
+        BUYERZIP = readr::col_integer(), BUYERPLUS4 = readr::col_integer()
+      )
     )
-  )
 
-  # home_loan <<- na.omit(home_loan)
-  home_loan$DATE <<- as.Date(as.character(home_loan$DATE), format="%Y%m%d")
+    # home_loan <<- na.omit(home_loan)
+    home_loan$DATE <<- as.Date(as.character(home_loan$DATE), format="%Y%m%d")
 
-  home_loan <<- home_loan[which(!is.na(home_loan$MORTGAGE)),]
-  home_loan <<- as.data.frame(home_loan)
-  
+    home_loan <<- home_loan[which(!is.na(home_loan$MORTGAGE)),]
+    home_loan <<- as.data.frame(home_loan)
+  }
+
+  home_loan <<- readRDS(paste0(data_path, "home_loan.RDS"))
+
+
+
+
 } 
 
 #' Prepare User input.
