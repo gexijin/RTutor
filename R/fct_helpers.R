@@ -95,13 +95,19 @@ move_front <- function(v, e){
   return(v)
 }
 
+#' Read built-in datasets
+#'
+#' Read user data files
+#' @return Returns a cleaned up version, so that it could be sent to GPT.
+read_additional_data <- function() {
+
   # Running on laptop, specify absolute path to the folder
-  #data_path <- "G:/My Drive/personal/UK/clean/"
+  data_path <- "G:/My Drive/personal/UK/clean/"
 
   # data file should be stored in 
-  #if(file.exists(on_server)) {
+  if(file.exists(on_server)) {
     data_path <- "../../data/"
-  #}
+  }
 
   home_loan <<- readr::read_csv(
     paste0(data_path, "Home_loan.csv"),
@@ -121,6 +127,7 @@ move_front <- function(v, e){
   home_loan <<- home_loan[which(!is.na(home_loan$MORTGAGE)),]
   home_loan <<- as.data.frame(home_loan)
   
+} 
 
 #' Prepare User input.
 #'
