@@ -99,9 +99,9 @@ move_front <- function(v, e){
   #data_path <- "G:/My Drive/personal/UK/clean/"
 
   # data file should be stored in 
-  if(file.exists(on_server)) {
+  #if(file.exists(on_server)) {
     data_path <- "../../data/"
-  }
+  #}
 
   home_loan <<- readr::read_csv(
     paste0(data_path, "Home_loan.csv"),
