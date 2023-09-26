@@ -125,82 +125,11 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   h4(
                     "Chat with your data in dozens of human languages."
                   ),
-              h4("June 11, 2023: With v0.95, gpt-3.5-turbo becomes the default language model. You can now ask 
-              questions based on previous results, like 'Remove grid lines' or 'change color to red'. 
-              You can also use GPT-4 with your own API key. Although slow and costly, GPT-4 is much better in coding.
-              To switch back to Davinci, see Settings."),
+              h4(" "),
                   align = "left"
                 )
               ),
-              hr(),
 
-              h3("Instructions:"),
-              tags$ul(
-                tags$li(
-                  "Powered by ChatGPT, RTutor enables you to chat with your data. "
-                ),
-                tags$li(
-                  "Start small. Gradually add complexity. First, try simple requests 
-                  such as distributions, basic plots, or simple models. 
-                  Then customize it or add variables. 
-                  ", style = "color:red"
-                ),
-                tags$li(
-                  "Releases as a prototype, it is still being developed.
-                   Please send us your valuable feedback (lower left)."
-                ),
-                tags$li(
-                  "It can take a few tries to get it correct. If it still does not
-                  work, rephrase your request. Also, increase 
-                  the \"Temperature\" setting will make the AI more aggressive in
-                  seeking alternative solutions."
-                ),
-                tags$li(
-                  "The gpt-3.5-turbo (ChatGPT) is now the default language model. 
-                  You can ask questions based on previous questions and code. 
-                  You can gradually refine a plot, step by step. 'Change color based on cut.' 
-                  'Repeat that after log transformation.'
-                  You can also copy and paste the error message into the box 
-                  so that ChatGPT can fix the error."
-                ),
-                tags$li(
-                  "Prepare and clean your data in Excel first! 
-                  RTutor can only analyze traditional 
-                  statistics data, where rows are 
-                  observations and columns are variables."
-                ),
-                tags$li(
-                  "Once uploaded, your data is automatically loaded into
-                  RTutor as a data frame called df. 
-                  Check if the data types of the columns are correct.
-                  Change if needed, especially when numbers are used to code for categories.
-                   Data types make a big difference in analysis and plots!"
-                ),
-
-                tags$li(
-                  "Before sending your request to OpenAI, we add \"Generate R code\" before it, and 
-                  append something like \"Use the df data frame. 
-                  Note that hwy is numeric\" afterward. 
-                  If you are not using any data (plot a function or simulations),
-                  choose \"No data\" from the Data dropdown."
-                ),
-                tags$li(
-                  "Your data is not sent to the AI. To ask generic questions without
-                  mentioning column names, briefly describe your data, especially 
-                  the relevant columns, just like emailing a statistician 
-                  who knows nothing about your data."
-                ),
-                tags$li(
-                  "Each chunk of code is run independently using your uploaded data. 
-                  If you want to build upon the current code, 
-                  select the \"Continue from this chunk\" checkbox.
-                  Your current R code will be inserted before your next chunk 
-                  and get executed. This is especially important for 
-                  data wrangling when you remove rows,
-                  add columns, or log-transform. You can go back to any previous 
-                  chunks and continue from there."
-                )
-              ),
               hr()
             ),
             conditionalPanel(

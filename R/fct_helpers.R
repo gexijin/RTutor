@@ -114,7 +114,7 @@ read_additional_data <- function() {
     col_types = readr::cols(
       id = readr::col_integer(),
       FIPS = readr::col_integer(), STNUM = readr::col_integer(),
-      ZIPCODE = readr::col_character(), PLUS4 = col_integer(),
+      ZIPCODE = readr::col_character(), PLUS4 = readr::col_integer(),
       BOOK = readr::col_integer(), PAGE = readr::col_integer(),
       DOCNUM = readr::col_integer(), DATE = readr::col_character(),
       BUYERZIP = readr::col_integer(), BUYERPLUS4 = readr::col_integer()
