@@ -111,13 +111,13 @@ read_additional_data <- function() {
 
   home_loan <<- readr::read_csv(
     paste0(data_path, "Home_loan.csv"),
-    col_types = cols(
-      id = col_integer(),
-      FIPS = col_integer(), STNUM = col_integer(),
-      ZIPCODE = col_character(), PLUS4 = col_integer(),
-      BOOK = col_integer(), PAGE = col_integer(),
-      DOCNUM = col_integer(), DATE = col_character(),
-      BUYERZIP = col_integer(), BUYERPLUS4 = col_integer()
+    col_types = readr::cols(
+      id = readr::col_integer(),
+      FIPS = readr::col_integer(), STNUM = readr::col_integer(),
+      ZIPCODE = readr::col_character(), PLUS4 = col_integer(),
+      BOOK = readr::col_integer(), PAGE = readr::col_integer(),
+      DOCNUM = readr::col_integer(), DATE = readr::col_character(),
+      BUYERZIP = readr::col_integer(), BUYERPLUS4 = readr::col_integer()
     )
   )
 
