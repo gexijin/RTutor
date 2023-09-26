@@ -16,7 +16,7 @@ app_ui <- function(request) {
   tagList(
     golem_add_external_resources(),
     navbarPage(
-      "RTutor",
+      "Exchange Robotics",
     #  windowTitle = "RTutor",
       id = "tabs",
       tabPanel(
@@ -97,41 +97,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 width = 4,
                 checkboxInput("use_python", "Python", value = FALSE)
               )
-            ),
-            br(),
-            textOutput("usage"),
-            textOutput("total_cost"),
-            textOutput("temperature"),
-            uiOutput("slava_ukraini"),
-            br(),
-            textOutput("retry_on_error"),
-            checkboxInput("Comments", "Comments & questions"),
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-              rows = 4,
-              ""
-            ),
-            radioButtons("helpfulness", "How useful is RTutor?",
-              c(
-                "Not at all",
-                "Slightly",
-                "Helpful",
-                "Extremely"
-              ),
-              selected = "Slightly"
-            ),
-            radioButtons("experience", "Your experience with R:",
-              c(
-                "None",
-                "Beginner",
-                "Intermediate",
-                "Advanced"
-               ),
-              selected = "Beginner"
-            ),
-            actionButton("save_feedbck", "Save Feedback")
+            )
           ),
 
       ###############################################################################

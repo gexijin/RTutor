@@ -96,7 +96,7 @@ move_front <- function(v, e){
 }
 
   # Running on laptop, specify absolute path to the folder
-  data_path <- "G:/My Drive/personal/UK/clean/"
+  #data_path <- "G:/My Drive/personal/UK/clean/"
 
   # data file should be stored in 
   if(file.exists(on_server)) {

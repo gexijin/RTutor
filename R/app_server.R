@@ -670,7 +670,7 @@ app_server <- function(input, output, session) {
       )
 
       start_time <- Sys.time()
-      cat("\n", prepared_request, "\n")
+      #cat("\n", prepared_request, "\n")
       # Send to openAI
       tryCatch(
         if(selected_model() == language_models[1]) { # completion model: davinci-text-003
