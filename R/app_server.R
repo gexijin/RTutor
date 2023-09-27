@@ -637,7 +637,7 @@ app_server <- function(input, output, session) {
   })
 
   selected_model <- reactive({
-      model <- language_models[3] #gpt-4
+      model <- language_models[2] #gpt-4
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
@@ -828,7 +828,7 @@ app_server <- function(input, output, session) {
     req(file.exists(on_server))
     req(!openAI_response()$error)
 
-    cost_session <-  round(counter$tokens * 2e-3, 0)
+    cost_session <-  round(counter$tokens * 3e-3, 0)
     if (cost_session %% 20  == 0 & cost_session != 0) {
       shiny::showModal(
         shiny::modalDialog(
@@ -974,9 +974,8 @@ app_server <- function(input, output, session) {
 
   output$total_cost <- renderText({
     if(input$submit_button == 0 & input$ask_button == 0) {
-      return("OpenAI charges 2¢ per 1000 tokens/words 
-      from our account. Heavy users 
-      please use your own account. See Settings."
+      return("OpenAI charges us $1 for about 30 requests via GPT-4. Heavy users please
+      use your API key. See Settings."
       )
     } else {
     #req(openAI_response()$cmd)
@@ -2265,14 +2264,6 @@ output$answer <- renderText({
       tagList(
         br(),
 
-        h4("Also try ",
-          a(
-            "Chatlize.ai,",
-            href="https://chatlize.ai",
-            target = "_blank"
-          ),
-          " a general data science platform."
-        ),
         h4("Slava Ukraini!")
 
       )

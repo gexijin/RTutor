@@ -159,11 +159,18 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   h4(
                     "Chat with your data in dozens of human languages."
                   ),
-              h4("Sept 26, 2023: With v0.96, GPT-4 becomes the default model.
-               It is slower and more expensive than GPT-3.5, but has much better performance.
-              We cover the cost of API calls. Please do not abuse it. 
-              Also fixed an issue of forgetting column names in longer sessions. 
-              All feedbacks are welcome!"),
+                  br(),
+                  h4("Sept 26, 2023: With v0.96, fixed an issue of forgetting column names in longer sessions. 
+                  GPT-4 is available (Settings). All feedbacks are welcome!"),
+                  br(),
+                  h4("Also try ",
+                    a(
+                      "Chatlize.ai,",
+                      href="https://chatlize.ai",
+                      target = "_blank"
+                    ),
+                    " a more general, powerful platform with the tree-of-thoughts prompting."
+                  ),
                   align = "left"
                 )
               ),
@@ -191,7 +198,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                   seeking alternative solutions."
                 ),
                 tags$li(
-                  "The GPT-4 is now the default language model. 
+                  "The ChatGPT (gpt-3.5-turbo) is now the default language model. To change it, go to Settings.
                   You can ask questions based on previous questions and code. 
                   You can gradually refine a plot, step by step. 'Change color based on cut.' 
                   'Repeat that after log transformation.'
@@ -552,7 +559,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         h4("Update log:"),
         tags$ul(
           tags$li(
-            "v 0.96  9/26/2023. GPT-4 becomes default model. Include column names in all requests."
+            "v 0.96  9/26/2023. Include column names in all requests. GPT-4 is available."
           ),
           tags$li(
             "v 0.95  6/11/2023. ChatGPT(gpt-3.5-turbo) becomes default model."
