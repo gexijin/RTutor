@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.95" # RTutor
+release <- "0.96" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -155,6 +155,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
       #if it is the first chunk;  always do this when Davinci model
       more_info <- chunk_id == 0 || selected_model == language_models[1]
+      more_info <- TRUE # override
       if (more_info) {
         txt <- paste(txt, after_text)
       }
