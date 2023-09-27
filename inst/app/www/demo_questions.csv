@@ -163,4 +163,7 @@ home_loan,1,1,Loans by Zip,Show me the number of mortgages by zip code in the st
 home_loan,1,1,Top 5 zip code in MA,Find the top 5 zip codes in the state of MA that have the most mortgages. Calculate average mortgage by zip code and plot as a bar plot.,
 home_loan,1,1,Top 5 zip code in NJ,Do that for the state of NJ.,
 home_loan,1,1,Lender,Show me the number of loans by lender and average amount.,
-home_loan,1,1,Lender zip,Remove rows that has no lender. Show me the most frequent combinations of lender and zip code. Also include average mortgage for that combination.,
+home_loan,1,1,Count by year,Count the number of mortgages by year. Create a bar plot.,
+home_loan,1,1,Mortgage by year,Create a boxplot of mortgages by year in log10 scale.,
+home_loan,1,1,Count by year and state,Count the number of mortgages by year and state. Create a side-by-side bar plot.,
+home_loan,1,1,Top lenders,Identify top 5 lenders by total mortgages. Ignore the rest rows. Count the number of mortgages by year and lender. Create a stacked bar plot. Color by lender.,
