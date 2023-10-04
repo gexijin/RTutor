@@ -107,32 +107,6 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
           mainPanel(
             shinyjs::useShinyjs(),
             conditionalPanel(
-              condition = "output.file_uploaded == 0 && input.submit_button == 0",
-
-              uiOutput("RTutor_version_main"),
-              fluidRow(
-                column(
-                  width = 3,
-                  img(
-                    src = "www/tutor.jpg",
-                    width = "120",
-                    height = "108"
-                  ),
-                  align = 'left'
-                ),
-                column(
-                  width = 9,
-                  h4(
-                    "Chat with your data in dozens of human languages."
-                  ),
-              h4(" "),
-                  align = "left"
-                )
-              ),
-
-              hr()
-            ),
-            conditionalPanel(
               condition = "input.submit_button != 0",
               fluidRow(
                 column(
@@ -203,10 +177,6 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 actionButton("data_desc_modal", "Description")
               )
             ),
-            br(),br(),
-            verbatimTextOutput("data_structure"),
-            #,tableOutput("data_table")
-
 
           ) #mainPanel
         ) #sideBarpanel

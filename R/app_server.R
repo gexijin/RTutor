@@ -24,6 +24,8 @@ app_server <- function(input, output, session) {
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
+  shinyjs::hide(id = "use_python")
+  shinyjs::hide(id = "api_button")
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
