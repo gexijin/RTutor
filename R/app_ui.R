@@ -52,7 +52,7 @@ app_ui <- function(request) {
               column(
                 width = 6,
                 style = "margin-top: -10px;",
-p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>"))
+                p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>"))
               )
             ),
             fluidRow(
@@ -104,7 +104,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
       ###############################################################################
 
           mainPanel(
-            h4("Exchange Robotics", style = "color: red;"),
+            h4("Exchange Robotics", style = "color: purple;"),
             shinyjs::useShinyjs(),
             conditionalPanel(
               condition = "input.submit_button != 0",
