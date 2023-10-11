@@ -177,6 +177,8 @@ app_ui <- function(request) {
                 actionButton("data_desc_modal", "Description")
               )
             ),
+            br(),br(),
+            verbatimTextOutput("data_structure"),
 
           ) #mainPanel
         ) #sideBarpanel

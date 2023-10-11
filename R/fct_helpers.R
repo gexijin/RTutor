@@ -23,7 +23,7 @@ max_query_length <- 500 # max # of characters
 language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314") #"gpt-4-0314"
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
 default_temperature <- 0.1
-pre_text <- "Write correct, efficient R code to analyze data. Each row represents a home loan."
+pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
@@ -130,8 +130,8 @@ read_additional_data <- function() {
   }
 
   home_loan <<- readRDS(paste0(data_path, "home_loan.RDS"))
-
-
+  default_stats <<- readRDS(paste0(data_path, "default_stats.RDS"))
+  #default_stats_full <<- readRDS(paste0(data_path, "default_stats_full.RDS"))
 
 
 } 
@@ -213,6 +213,19 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       use_python,
       pre_text_python,
       pre_text
+    ),
+    ifelse(
+      selected_data == "home_loan",
+      " Each row is a home loan.",  # home_loan data
+      ifelse(
+        selected_data == "default_stats",
+        "Each row contain information about loan default statistics by STATE, CITY, LENDER and YEAR. ",  # loan default data, reduced
+        ifelse(
+          selected_data == "default_stats_full",
+          "Each row contain information about loan default statistics by STATE, CITY, LENDER and YEAR. ",  # loan default data
+          ""
+      )
+      )
     ),
     txt
   )
@@ -481,7 +494,10 @@ datasets <- move_front(datasets, no_data)
 datasets <- move_front(datasets, "diamonds")
 # default
 datasets <- move_front(datasets, "mpg")
-
+#datasets <- c(datasets, "default_stats_full")
+#datasets <- move_front(datasets, "default_stats_full")
+datasets <- c(datasets, "default_stats")
+datasets <- move_front(datasets, "default_stats")
 datasets <- c(datasets, "home_loan")
 datasets <- move_front(datasets, "home_loan")
 datasets <- setNames(datasets, datasets)
