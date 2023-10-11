@@ -167,6 +167,7 @@ home_loan,1,1,Count by year,Count the number of mortgages by year. Create a bar 
 home_loan,1,1,Mortgage by year,Create a boxplot of mortgages by year in log10 scale.,
 home_loan,1,1,Count by year and state,Count the number of mortgages by year and state. Create a side-by-side bar plot.,
 home_loan,1,1,Top lenders,Remove loans without lender info. Identify top 5 lenders by the number of mortgages. Ignore the rest rows. Count the number of mortgages by year and lender. Create a stacked bar plot by year. Color by lender. ,
+default_stats,1,1,Default by year,"For each year, calculate the total mortgages, number of defaults, and the percentage of defaults.",
 default_stats,1,1,Default % by year,Plot the percentage of default by year.,
 default_stats,1,1,Default % by lender,Plot the default percentage by lender.,
 default_stats,1,1,By state,Plot the total number of loans by state.,

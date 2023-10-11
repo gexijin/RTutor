@@ -270,7 +270,7 @@ app_server <- function(input, output, session) {
       inputId = "select_data",
       label = "Data",
       choices = datasets,
-      selected = "home_loan",
+      selected = "default_stats",
       multiple = FALSE,
       selectize = FALSE
     )
@@ -304,7 +304,7 @@ app_server <- function(input, output, session) {
     choices <- demo_related$requests
     names(choices) <- demo_related$name
 
-    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq, "home_loan")) {
+    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq, "home_loan", "default_stats")) {
       return(
         selectInput(
           inputId = "demo_prompt",
