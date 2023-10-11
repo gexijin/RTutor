@@ -496,10 +496,11 @@ datasets <- move_front(datasets, "diamonds")
 datasets <- move_front(datasets, "mpg")
 #datasets <- c(datasets, "default_stats_full")
 #datasets <- move_front(datasets, "default_stats_full")
-datasets <- c(datasets, "default_stats")
-datasets <- move_front(datasets, "default_stats")
 datasets <- c(datasets, "home_loan")
 datasets <- move_front(datasets, "home_loan")
+datasets <- c(datasets, "default_stats")
+datasets <- move_front(datasets, "default_stats")
+
 datasets <- setNames(datasets, datasets)
 
 names(datasets)[match("mpg", datasets)] <- "mpg (examples)"
