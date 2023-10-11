@@ -1366,13 +1366,13 @@ app_server <- function(input, output, session) {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
-    if (convert_to_factor()) {
-      df <- numeric_to_factor(
-        df,
-        max_levels_factor(),
-        max_proptortion_factor()
-      )
-    }
+#    if (convert_to_factor()) {
+#      df <- numeric_to_factor(
+#        df,
+#        max_levels_factor(),
+#        max_proptortion_factor()
+#      )
+#    }
 
     # if the first column looks like id?
     if(

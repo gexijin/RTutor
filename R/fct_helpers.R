@@ -27,9 +27,9 @@ pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 280 # max n. of characters in the Q&A
-max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
+max_levels <- 50 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
-max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor if less than or equal to this many levels
+max_levels_factor_conversion <- 50 # Numeric columns will be converted to factor if less than or equal to this many levels
 # if a column is numeric but only have a few unique values, treat as categorical
 unique_ratio <- 0.2   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
@@ -597,7 +597,7 @@ turned_on <- function(x) {
 numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
   # some columns looks like numbers but have few levels
   # convert these to factors
-
+browser()
   convert_index <- sapply(
     df,
     function(x) {
