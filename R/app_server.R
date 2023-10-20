@@ -20,7 +20,7 @@ app_server <- function(input, output, session) {
 #____________________________________________________________________________
 
   # increase max input file size
-  options(shiny.maxRequestSize = 10 * 1024^2) # 10MB
+  options(shiny.maxRequestSize = 1024 * 1024^2) # 10MB
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
