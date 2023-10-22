@@ -1019,7 +1019,7 @@ app_server <- function(input, output, session) {
 
   # define a reactive variable that holds an R environment to be used for running the code.
   # This is needed for the Rmd chunk.
-  current_env <- reactiveVal(rlang::env())
+  run_env <- reactiveVal(new.env())
 
 
   # stores the results after running the generated code.
@@ -1040,7 +1040,10 @@ app_server <- function(input, output, session) {
       console_output <- NULL
       error_message <- NULL
       result <- tryCatch({
-        eval_result <- eval(parse(text = clean_cmd(logs$code, input$select_data)))
+        eval_result <- eval(
+          parse(text = clean_cmd(logs$code, input$select_data)), 
+          envir = run_env()
+        )
         console_output <- capture.output(print(eval_result))
         eval_result
       }, error = function(e) {
@@ -1063,7 +1066,7 @@ app_server <- function(input, output, session) {
     req(input$submit_button != 0)
 
     if(!input$use_python) { # R
--     return(!is.null(run_result()$error_message))
+      return(!is.null(run_result()$error_message))
     } else { # Python
       return(python_to_html() == -1)
     }
@@ -1091,8 +1094,8 @@ app_server <- function(input, output, session) {
     if (inherits(run_result()$result, "ggplot") || is.null(run_result()$console_output)) {
       return(run_result()$result)
     } else {
-      # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string
-      eval(parse(text = clean_cmd(logs$code, input$select_data)))
+      # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string, under the parent environment of the run_env()
+      eval(parse(text = clean_cmd(logs$code, input$select_data)), envir = parent.env(run_env()))
     }
   })
 
@@ -1156,10 +1159,9 @@ app_server <- function(input, output, session) {
   output$plot_ui <- renderUI({
     req(input$submit_button)
     req(!input$use_python)
+    req(!code_error())
 
-    if (code_error() || input$submit_button == 0) {
-      return()
-    } else if (
+    if (
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive) # converted
     ){
@@ -1187,7 +1189,7 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if inherits(run_result()$result, "ggplot") && # if  ggplot2, and it is 
+    if (inherits(run_result()$result, "ggplot") && # if  ggplot2, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
@@ -1351,7 +1353,7 @@ app_server <- function(input, output, session) {
       current_data(df)
     }
     # add the data to the current environment
-    current_env(rlang::env(current_env(), df = current_data()))
+    run_env(rlang::env(run_env(), df = current_data()))
   })
 
 

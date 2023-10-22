@@ -18,7 +18,7 @@ names(no_data) <- "No data (examples)"
 rna_seq <- "rna_seq"  # RNA-Seq read counts
 names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
-max_query_length <- 500 # max # of characters
+max_query_length <- 2000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314")
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4 (slow & costly)")
@@ -26,7 +26,7 @@ default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
-max_char_question <- 280 # max n. of characters in the Q&A
+max_char_question <- 1000 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
 max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor if less than or equal to this many levels
