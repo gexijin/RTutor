@@ -1017,6 +1017,11 @@ app_server <- function(input, output, session) {
   # Run the code, shows plots, code, and errors
   #____________________________________________________________________________
 
+  # define a reactive variable that holds an R environment to be used for running the code.
+  # This is needed for the Rmd chunk.
+  current_env <- reactiveVal(rlang::env())
+
+
   # stores the results after running the generated code.
   # return error indicator and message
 
@@ -1024,32 +1029,33 @@ app_server <- function(input, output, session) {
 
   # Sometimes returns NULL, even when code run fine. Especially when
   # a base R plot is generated.
+
   run_result <- reactive({
     req(logs$code)
-    req(input$submit_button != 0)   
+    req(input$submit_button != 0)
     req(!input$use_python)
 
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
-      tryCatch(
-        eval(
-          parse(
-            text = clean_cmd(
-              logs$code,
-              input$select_data
-            )
-          )
-        ),
-        error = function(e) {
-          list(
-            error_value = -1,
-            message = capture.output(print(e$message)),
-            error_status = TRUE
-          )
-        }
+      console_output <- NULL
+      error_message <- NULL
+      result <- tryCatch({
+        eval_result <- eval(parse(text = clean_cmd(logs$code, input$select_data)))
+        console_output <- capture.output(print(eval_result))
+        eval_result
+      }, error = function(e) {
+        error_message <- capture.output(print(e$message))
+        return(list(error_value = -1, message = error_message, error_status = TRUE))
+      })
+      
+      list(
+        result = result,
+        console_output = console_output,
+        error_message = error_message
       )
     })
   })
+
 
   # Error when run the generated code?
   code_error <- reactive({
@@ -1057,76 +1063,37 @@ app_server <- function(input, output, session) {
     req(input$submit_button != 0)
 
     if(!input$use_python) { # R
-      # if error returns true, otherwise 
-      #  that slot does not exist, returning false.
-      # or be NULL
-      try(  # if you do not 'try', the entire app quits! :-)
-        if (is.list(run_result())) {
-        req(!is.null(names(run_result())[1]))
-          if (names(run_result())[1] == "error_value") {
-            error_status <- TRUE
-          }
-        }
-      )
-      return(error_status)
+-     return(!is.null(run_result()$error_message))
     } else { # Python
       return(python_to_html() == -1)
     }
 
   })
 
-
   output$error_message <- renderUI({
     req(!is.null(code_error()))
     if(code_error()) {
-      h4(paste("Error!", run_result()$message), style = "color:red")
+      h4(paste("Error!", run_result()$error_message), style = "color:red")
     } else {
       return(NULL)
     }
-
   })
 
-  # just capture the screen output
   output$console_output <- renderText({
     req(!code_error())
-    req(logs$code)
-    req(!input$use_python)
-    out <- ""
-    withProgress(message = "Running the code for console...", {
-      incProgress(0.4)
-      try(
-        out <- capture.output(eval(
-          parse(
-            text = clean_cmd(logs$code, input$select_data)
-          )
-          )
-       )
-      )
-
-      # this works most of the times, but not when cat is used.
-      #out <- capture.output(
-      #    run_result()
-      #)
-      paste(out, collapse = "\n")
-    })
+    paste(run_result()$console_output, collapse = "\n")
   })
 
-  # base R plots can not be auto generated from the run_results() object
-  # must run the code again.
   output$result_plot <- renderPlot({
     req(!code_error())
-    req(logs$code)
-    req(!input$use_python)
-    withProgress(message = "Generating a plot ...", {
-      incProgress(0.4)
-      try(
-        eval(
-          parse(
-            text =  clean_cmd(logs$code, input$select_data)
-          )
-        )
-      )
-    })
+    
+    # Check if the result is not a ggplot or a known plot type
+    if (inherits(run_result()$result, "ggplot") || is.null(run_result()$console_output)) {
+      return(run_result()$result)
+    } else {
+      # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string
+      eval(parse(text = clean_cmd(logs$code, input$select_data)))
+    }
   })
 
   output$result_plotly <- plotly::renderPlotly({
@@ -1137,7 +1104,7 @@ app_server <- function(input, output, session) {
       turned_on(input$make_ggplot_interactive)
     )
 
-    g <- run_result()
+    g <- run_result()$result
     # still errors some times, when the returned list is not a plot
     if(is.character(g) || is.data.frame(g) || is.numeric(g)) {
       return(NULL)
@@ -1151,7 +1118,7 @@ app_server <- function(input, output, session) {
     req(!code_error())
     req(!input$use_python)
 
-    g <- run_result()
+    g <- run_result()$result
     if (
       turned_on(input$make_cx_interactive) &&
       !is.character(g) &&
@@ -1220,7 +1187,7 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (grepl("ggplot", txt) && # if  ggplot2, and it is 
+    if inherits(run_result()$result, "ggplot") && # if  ggplot2, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
@@ -1243,7 +1210,7 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (grepl("ggplot", txt) && # if  canvasXpress, and it is 
+    if (inherits(run_result()$result, "ggplot") && # if  canvasXpress, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
@@ -1258,12 +1225,7 @@ app_server <- function(input, output, session) {
     req(input$submit_button)
     req(logs$code)
     req(!code_error())
-    if (
-      grepl(
-        "plotly|plot_ly|ggplotly",
-        paste(logs$code, collapse = " ")
-      )
-    ) {
+    if (inherits(run_result()$result, "plotly")) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -1388,6 +1350,8 @@ app_server <- function(input, output, session) {
 
       current_data(df)
     }
+    # add the data to the current environment
+    current_env(rlang::env(current_env(), df = current_data()))
   })
 
 
