@@ -19,7 +19,7 @@ app_server <- function(input, output, session) {
 #____________________________________________________________________________
 
   # increase max input file size
-  options(shiny.maxRequestSize = 10 * 1024^2) # 10MB
+  options(shiny.maxRequestSize = 1000 * 1024^2) # 10MB
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
@@ -637,7 +637,7 @@ app_server <- function(input, output, session) {
   })
 
   selected_model <- reactive({
-      model <- language_models[3] #gpt-4
+      model <- language_models[default_model] #gpt-4
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
@@ -915,7 +915,7 @@ app_server <- function(input, output, session) {
       # save a copy of the data in the environment as a list.
       # if save environment, only reference is saved. 
       # This needs more memory, but works.
-      env = as.list(run_env_start())
+      env = run_env_start() # it is a list
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -951,7 +951,7 @@ app_server <- function(input, output, session) {
     if(id < length(logs$code_history)) {
       # convert list to environment; use it as a parent environment; 
       # update the run_env reactive value.
-      run_env(new.env(parent = list2env(logs$code_history[[id]]$env)))
+      run_env(list2env(logs$code_history[[id]]$env))
     }
 
     updateTextInput(
@@ -1029,10 +1029,11 @@ app_server <- function(input, output, session) {
   # Run the code, shows plots, code, and errors
   #____________________________________________________________________________
 
-  # define a reactive variable that holds an R environment to be used for running the code.
+  # define a reactive variable that holds an R environment
   # This is needed for the Rmd chunk.
   run_env <- reactiveVal(new.env())
-  run_env_start <- reactiveVal(new.env())
+  # a list stores all data objects before running the code.
+  run_env_start <- reactiveVal(list()) 
 
   # stores the results after running the generated code.
   # return error indicator and message
@@ -1053,7 +1054,8 @@ app_server <- function(input, output, session) {
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
 
-      run_env_start(run_env()) # keep a copy of the current environment
+      run_env_start(as.list(run_env())) # keep a copy of the crime scene
+
       result <- tryCatch({
         eval_result <- eval(
           parse(text = clean_cmd(logs$code, input$select_data)), 
@@ -1069,6 +1071,11 @@ app_server <- function(input, output, session) {
         if(names(result)[1] == "error_message") {
           error_message <- result$error_message
         }
+      }
+
+      # Run with error
+      if(!is.null(error_message)) {
+        run_env(list2env(run_env_start())) # revert the environment
       }
 
       run_result(list(
@@ -1114,7 +1121,7 @@ app_server <- function(input, output, session) {
     } else {
       # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string, 
       #under the parent environment of the run_env()
-      tmp_env <- new.env(parent = run_env_start())
+      tmp_env <- list2env(run_env_start())
       eval(parse(text = clean_cmd(logs$code, input$select_data)), envir = tmp_env)
     }
   })
@@ -1374,6 +1381,7 @@ app_server <- function(input, output, session) {
     }
     # add the data to the current environment
     run_env(rlang::env(run_env(), df = current_data()))
+    run_env_start(as.list(run_env()))
   })
 
 

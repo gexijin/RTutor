@@ -22,6 +22,7 @@ max_query_length <- 2000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314")
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4 (slow & costly)")
+default_model <- 2 # ChatGPT, 
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code."
 pre_text_python <- "Write correct, efficient Python code."
@@ -181,7 +182,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
   txt <- gsub("\n", " ", txt)
   txt <- paste(
     txt, 
-    " ggplot2 is preferred for plotting if requested. "
+    " ggplot2 is preferred for plotting if requested. If multiple plots are generated, try to combine them into one."
     )
   #cat("\n", txt)
   return(txt)
