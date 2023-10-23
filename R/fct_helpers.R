@@ -179,6 +179,10 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
+  txt <- paste(
+    txt, 
+    " ggplot2 is preferred for plotting if requested. "
+    )
   #cat("\n", txt)
   return(txt)
 }

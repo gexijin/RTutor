@@ -912,7 +912,10 @@ app_server <- function(input, output, session) {
       language = ifelse(input$use_python, "Python", "R"),
       # saves the rendered file in the logs object.
       html_file = ifelse(input$use_python, python_to_html(), -1),
-      env = run_env()
+      # save a copy of the data in the environment as a list.
+      # if save environment, only reference is saved. 
+      # This needs more memory, but works.
+      env = as.list(run_env())
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -946,7 +949,9 @@ app_server <- function(input, output, session) {
 
     #change env for previous chunks
     if(id < length(logs$code_history)) {
-      run_env(logs$code_history[[id]]$env)
+      # convert list to environment; use it as a parent environment; 
+      # update the run_env reactive value.
+      run_env(new.env(parent = list2env(logs$code_history[[id]]$env)))
     }
 
     updateTextInput(
@@ -1378,16 +1383,7 @@ app_server <- function(input, output, session) {
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
         if(!input$use_python && logs$language == "R") { # not python
-          withProgress(message = "Updating values ...", {
-            incProgress(0.4)
-            try(
-              eval(
-                parse(
-                  text = clean_cmd(logs$code, input$select_data)
-                )
-              ),
-            )
-          })
+          df <- run_env()$df
         }
       }
     }
