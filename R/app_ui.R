@@ -283,17 +283,26 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 # shows error message in local machine, but not on the server
                 verbatimTextOutput("console_output"),
                 uiOutput("plot_ui"),
-                checkboxInput(
-                  inputId = "make_ggplot_interactive",
-                  label = NULL,
-                  value = FALSE
+                fluidRow(
+                  column(
+                    width = 5,
+                    checkboxInput(
+                      inputId = "make_ggplot_interactive",
+                      label = NULL,
+                      value = FALSE
+                    ),
+                    align = "right"
+                  ),
+                  column(
+                    width = 5,
+                    checkboxInput(
+                      inputId = "make_cx_interactive",
+                      label = NULL,
+                      value = FALSE
+                    ),
+                    align = "left"
+                  )
                 ),
-                checkboxInput(
-                  inputId = "make_cx_interactive",
-                  label = NULL,
-                  value = FALSE
-                ),
-
                 br(),
                 uiOutput("tips_interactive"),
               ),

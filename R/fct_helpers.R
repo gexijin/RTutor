@@ -347,9 +347,9 @@ clean_cmd <- function(cmd, selected_data) {
 
   # use pacman, load if installed; otherwise install it first then load.
   cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
-  if (selected_data != no_data) {
-    cmd <- c("df <- as.data.frame(current_data())", cmd)
-  }
+  #if (selected_data != no_data) {
+  #  cmd <- c("df <- as.data.frame(current_data())", cmd)
+  #}
 
   return(cmd)
 

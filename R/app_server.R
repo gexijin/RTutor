@@ -911,7 +911,8 @@ app_server <- function(input, output, session) {
       rmd = Rmd_chunk(),
       language = ifelse(input$use_python, "Python", "R"),
       # saves the rendered file in the logs object.
-      html_file = ifelse(input$use_python, python_to_html(), -1)
+      html_file = ifelse(input$use_python, python_to_html(), -1),
+      env = run_env()
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -938,10 +939,16 @@ app_server <- function(input, output, session) {
   # change code when past code is selected.
   observeEvent(input$selected_chunk, {
     #req(run_result())
-
+    req(input$selected_chunk)
     id <- as.integer(input$selected_chunk)
     logs$code <- logs$code_history[[id]]$code
     logs$raw <- logs$code_history[[id]]$raw
+
+    #change env for previous chunks
+    if(id < length(logs$code_history)) {
+      run_env(logs$code_history[[id]]$env)
+    }
+
     updateTextInput(
       session,
       "input_text",
@@ -1020,16 +1027,12 @@ app_server <- function(input, output, session) {
   # define a reactive variable that holds an R environment to be used for running the code.
   # This is needed for the Rmd chunk.
   run_env <- reactiveVal(new.env())
-
+  run_env_start <- reactiveVal(new.env())
 
   # stores the results after running the generated code.
   # return error indicator and message
-
-  # Note that the code is run three times!!!!!
-
   # Sometimes returns NULL, even when code run fine. Especially when
   # a base R plot is generated.
-
   run_result <- reactive({
     req(logs$code)
     req(input$submit_button != 0)
@@ -1039,6 +1042,8 @@ app_server <- function(input, output, session) {
       incProgress(0.4)
       console_output <- NULL
       error_message <- NULL
+#      browser()
+      run_env_start(run_env()) # keep a copy of the current environment
       result <- tryCatch({
         eval_result <- eval(
           parse(text = clean_cmd(logs$code, input$select_data)), 
@@ -1094,8 +1099,10 @@ app_server <- function(input, output, session) {
     if (inherits(run_result()$result, "ggplot") || is.null(run_result()$console_output)) {
       return(run_result()$result)
     } else {
-      # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string, under the parent environment of the run_env()
-      eval(parse(text = clean_cmd(logs$code, input$select_data)), envir = parent.env(run_env()))
+      # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string, 
+      #under the parent environment of the run_env()
+      tmp_env <- new.env(parent = run_env_start())
+      eval(parse(text = clean_cmd(logs$code, input$select_data)), envir = tmp_env)
     }
   })
 
@@ -1520,6 +1527,16 @@ app_server <- function(input, output, session) {
     )
   }
 
+  Rmd_script <- paste0(
+    Rmd_script,
+    # Get the data from the params list for every chunk-----------
+    # Do not change this without changing the output$Rmd_source function
+    # this chunk is removed for local knitting.
+    "```{R, echo = FALSE}\n",
+    "df <- params$df\n",
+    "```\n"
+  )
+  
   #------------------Add selected chunks
   if("All chunks" %in% input$selected_chunk_report) {
       ix <- 1:length(logs$code_history)
@@ -1548,15 +1565,6 @@ app_server <- function(input, output, session) {
     req(openAI_prompt())
 
     Rmd_script <- ""
-    Rmd_script <- paste0(
-      Rmd_script,
-      # Get the data from the params list for every chunk-----------
-      # Do not change this without changing the output$Rmd_source function
-      # this chunk is removed for local knitting.
-      "```{R, echo = FALSE}\n",
-      "df <- params$df\n",
-      "```\n"
-    )
 
     if(input$use_python) {
       Rmd_script <- paste0(
