@@ -160,8 +160,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                     "Chat with your data in dozens of human languages."
                   ),
                   br(),
-                  h4("Sept 26, 2023: With v0.96, fixed an issue of forgetting column names in longer sessions. 
-                  GPT-4 is available (Settings). All feedbacks are welcome!"),
+                  h4("Oct 23, 2023: With v0.97, GPT-4 becomes the default. Make ggplot2 a preferred method for plotting.  Use R environment to enable successive data manipulation."),
                   br(),
                   h4("Also try ",
                     a(
@@ -567,6 +566,10 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         hr(),
         h4("Update log:"),
         tags$ul(
+          tags$li(
+            "v 0.97  10/23/2023. GPT-4 becomes the default. Make ggplot2 a preferred method for plotting.
+             Use R environment to enable successive data manipulation."
+          ),
           tags$li(
             "v 0.96  9/26/2023. Include column names in all requests. GPT-4 is available."
           ),

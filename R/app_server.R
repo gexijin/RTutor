@@ -157,7 +157,7 @@ app_server <- function(input, output, session) {
     updateTextInput(
       session,
       "input_text",
-      value = paste0("Error! ", run_result()$message)
+      value = paste0("Error! ", run_result()$error_message)
     )
   })
 
@@ -637,7 +637,7 @@ app_server <- function(input, output, session) {
   })
 
   selected_model <- reactive({
-      model <- language_models[2] #gpt-4
+      model <- language_models[3] #gpt-4
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
@@ -915,7 +915,7 @@ app_server <- function(input, output, session) {
       # save a copy of the data in the environment as a list.
       # if save environment, only reference is saved. 
       # This needs more memory, but works.
-      env = as.list(run_env())
+      env = as.list(run_env_start())
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -1038,16 +1038,21 @@ app_server <- function(input, output, session) {
   # return error indicator and message
   # Sometimes returns NULL, even when code run fine. Especially when
   # a base R plot is generated.
-  run_result <- reactive({
+
+  # define a reactive variable. Reactive function not returning error
+  run_result <- reactiveVal(list())
+
+  observeEvent(input$submit_button, {
     req(logs$code)
     req(input$submit_button != 0)
     req(!input$use_python)
+    result <- NULL
+    console_output <- NULL
+    error_message <- NULL
 
     withProgress(message = "Running the code ...", {
       incProgress(0.4)
-      console_output <- NULL
-      error_message <- NULL
-#      browser()
+
       run_env_start(run_env()) # keep a copy of the current environment
       result <- tryCatch({
         eval_result <- eval(
@@ -1055,17 +1060,22 @@ app_server <- function(input, output, session) {
           envir = run_env()
         )
         console_output <- capture.output(print(eval_result))
-        eval_result
       }, error = function(e) {
-        error_message <- capture.output(print(e$message))
-        return(list(error_value = -1, message = error_message, error_status = TRUE))
+        list(error_message = e$message) # won't work if not inside a list!!!!
       })
-      
-      list(
+
+      # update the error message, if any
+      if(length(names(result)) != 0) {
+        if(names(result)[1] == "error_message") {
+          error_message <- result$error_message
+        }
+      }
+
+      run_result(list(
         result = result,
         console_output = console_output,
         error_message = error_message
-      )
+      ))
     })
   })
 
@@ -1074,17 +1084,15 @@ app_server <- function(input, output, session) {
   code_error <- reactive({
     error_status <- FALSE
     req(input$submit_button != 0)
-
     if(!input$use_python) { # R
-      return(!is.null(run_result()$error_message))
+      return(!is.null(run_result()$error_message) && run_result()$error_message != "")
     } else { # Python
       return(python_to_html() == -1)
     }
-
   })
 
   output$error_message <- renderUI({
-    req(!is.null(code_error()))
+    req(code_error())
     if(code_error()) {
       h4(paste("Error!", run_result()$error_message), style = "color:red")
     } else {
