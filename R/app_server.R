@@ -871,34 +871,14 @@ app_server <- function(input, output, session) {
 
   observeEvent(input$submit_button, {
     logs$id <- logs$id + 1
-    # if not continue
-    if(!input$continue) {
-      logs$code <-  openAI_response()$cmd
 
-      logs$raw <- openAI_response()$cmd #openAI_response()$response$choices[1, 1]
-      # remove one or more blank lines in the beginning.
-      logs$raw <- gsub("^\n+", "", logs$raw)
+    logs$code <-  openAI_response()$cmd
 
-      logs$last_code <- ""
-
-      logs$language <- ifelse(input$use_python, "Python", "R")
-
-    } else { # if continue
-      logs$last_code <- logs$code  # last code
-      logs$code <- paste(
-        logs$code,
-        "\n",
-        "#-------------------------------",
-        openAI_response()$cmd
-      )
-      logs$raw <- paste(
-        logs$raw,
-        "\n\n#-------------------------\n",
-        gsub("^\n+", "", openAI_response()$response$choices[1, 1])
-      )
-
-      logs$language <- ifelse(input$use_python, "Python", "R")
-    }
+    logs$raw <- openAI_response()$cmd #openAI_response()$response$choices[1, 1]
+    # remove one or more blank lines in the beginning.
+    logs$raw <- gsub("^\n+", "", logs$raw)
+    logs$last_code <- ""
+    logs$language <- ifelse(input$use_python, "Python", "R")
 
     # A list holds current request
     current_code <- list(
@@ -1652,10 +1632,6 @@ app_server <- function(input, output, session) {
     # remove empty line
     if(nchar(cmd[1]) == 0) {
       cmd <- cmd[-1]
-    }
-
-    if(input$continue) {
-      cmd <- c(logs$last_code, "\n#-----------------", cmd)
     }
 
     # Add R code
