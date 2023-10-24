@@ -216,9 +216,8 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                 ),
                 tags$li(
                   "Your data is not sent to the AI. To ask general questions, 
-                  briefly explain the background and the  
-                  the columns first. Just like emailing a clueless statistician 
-                  who knows nothing about your data."
+                   explain the background and the  
+                  the columns first, like emailing a clueless statistician."
                 )
               ),
               hr()
