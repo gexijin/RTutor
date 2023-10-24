@@ -1058,10 +1058,12 @@ app_server <- function(input, output, session) {
 
       result <- tryCatch({
         eval_result <- eval(
+          #parse(text = "log('error')"),
           parse(text = clean_cmd(logs$code, input$select_data)), 
           envir = run_env()
         )
         console_output <- capture.output(print(eval_result))
+        eval_result  # without this the interactive plots does not work
       }, error = function(e) {
         list(error_message = e$message) # won't work if not inside a list!!!!
       })
