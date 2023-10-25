@@ -24,7 +24,7 @@ language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301",
 names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "Davinci")
 default_model <- "GPT-4 (03/23)" #"ChatGPT" 
 default_temperature <- 0.2
-pre_text <- "Write correct, efficient R code."
+pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 1000 # max n. of characters in the Q&A
@@ -35,7 +35,9 @@ max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor
 unique_ratio <- 0.2   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
-system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation."
+system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
+If the goal can be achieved by showing qantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. 
+If multiple plots are generated, try to combine them into one."
 # voice input parameters
 wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
@@ -153,17 +155,16 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         list_levels = TRUE, 
         relevant_var = relevant_var
       )
+      # Always add 'use the df data frame.'
+      txt <- paste(txt, after_text)
 
-      #if it is the first chunk;  always do this when Davinci model
-      more_info <- chunk_id == 0 || selected_model == "text-davinci-003"
-      more_info <- TRUE # override
-      if (more_info) {
-        txt <- paste(txt, after_text)
-      }
-      
+      n_words <- length(unlist(strsplit(data_info, " ")))
+      #if it is the first chunk;  always do this when Davinci model; or if data description is short
+      more_info <- chunk_id == 0 || selected_model == "text-davinci-003" || n_words < 100
+
       # add data descrdiption
       # if it is not the first chunk and data description is long, do not add.
-      if (more_info && !(chunk_id > 1 && nchar(data_info) > 2000)) {
+      if (more_info && !(chunk_id > 0 && n_words > 500)) {
         txt <- paste(txt, data_info)
       }
     }
@@ -180,10 +181,6 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  txt <- paste(
-    txt, 
-    "If the goal can be achieved by showing qantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. If multiple plots are generated, try to combine them into one."
-    )
   #cat("\n", txt)
   return(txt)
 }
@@ -271,7 +268,7 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
         relevant_cat_var <- intersect(relevant_var, cat_var)
       # describe the levels in categorical variable
         for (var in relevant_cat_var) {
-          max_lelvels_description <- 10
+          max_lelvels_description <- 4
           ix <- match(var, colnames(df))
           factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
           factor_levels <- names(factor_levels)
