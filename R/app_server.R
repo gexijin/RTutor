@@ -1209,7 +1209,7 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (inherits(run_result()$result, "ggplot") && # if  ggplot2, and it is 
+    if ((inherits(run_result()$result, "ggplot")|| grepl("ggplot", txt)) && # if  ggplot2, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
@@ -1232,7 +1232,7 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (inherits(run_result()$result, "ggplot") && # if  canvasXpress, and it is 
+    if ((inherits(run_result()$result, "ggplot")|| grepl("ggplot", txt)) && # if  canvasXpress, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
