@@ -136,10 +136,9 @@ app_server <- function(input, output, session) {
   # copy error message
   observeEvent(code_error(), {
     # not Davinci
-    req(selected_model() != language_models[1])
+    req(selected_model() != "text-davinci-003")
     req(code_error())
     output$send_error_message <- renderUI({
-      req(code_error())
       tagList(
         actionButton(
           inputId = "send_error",
@@ -673,7 +672,7 @@ app_server <- function(input, output, session) {
       #cat("\n", prepared_request, "\n")
       # Send to openAI
       tryCatch(
-        if(selected_model() == language_models[1]) { # completion model: davinci-text-003
+        if(selected_model() == "text-davinci-003") { # completion model: davinci-text-003
           response <- openai::create_completion(
             engine_id = selected_model(),
             prompt = prepared_request,
@@ -927,11 +926,22 @@ app_server <- function(input, output, session) {
     logs$code <- logs$code_history[[id]]$code
     logs$raw <- logs$code_history[[id]]$raw
 
-    #change env for previous chunks
+    #Switch to previous chunks
     if(id < length(logs$code_history)) {
-      # convert list to environment; use it as a parent environment; 
+      # convert list to environment; 
       # update the run_env reactive value.
       run_env(list2env(logs$code_history[[id]]$env))
+
+      # enable re-calculation of the code
+      reverted(reverted() + 1)
+
+      showNotification(
+        ui = paste("Switched back to chunk #", id,
+        ". Any change in the data is also reverted." ),  
+        id = "revert_chunk",
+        duration = 5,
+        type = "warning"
+      )
     }
 
     updateTextInput(
@@ -1012,10 +1022,12 @@ app_server <- function(input, output, session) {
   # define a reactive variable that holds an R environment
   # This is needed for the Rmd chunk.
   run_env <- reactiveVal(new.env())
+
   # a list stores all data objects before running the code.
   run_env_start <- reactiveVal(list()) 
 
   # a counter for update results, change dependency structure
+  # so that plots are updated.
   results_counter <- reactiveVal(0)
 
   # stores the results after running the generated code.
@@ -1026,7 +1038,14 @@ app_server <- function(input, output, session) {
   # define a reactive variable. Reactive function not returning error
   run_result <- reactiveVal(list())
 
-  observeEvent(input$submit_button, {
+  # change value when a previous code chunk is selected.
+  reverted <- reactiveVal(0)
+
+  observeEvent(
+    eventExpr = {
+      input$submit_button  # when submit is clicked 
+      reverted()           # or when a previous code chunk is selected
+    }, {
     req(logs$code)
     req(input$submit_button != 0)
     req(!input$use_python)
@@ -1177,7 +1196,7 @@ app_server <- function(input, output, session) {
     req(input$submit_button)
     req(!input$use_python)
     req(!code_error())
-
+    req(results_counter()) # ensure results are ready, propagate to plots
     if (
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive) # converted
