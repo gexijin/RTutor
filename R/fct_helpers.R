@@ -158,13 +158,13 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       # Always add 'use the df data frame.'
       txt <- paste(txt, after_text)
 
-      n_words <- length(unlist(strsplit(data_info, " ")))
+      n_words <- estimate_tokens(data_info)
       #if it is the first chunk;  always do this when Davinci model; or if data description is short
-      more_info <- chunk_id == 0 || selected_model == "text-davinci-003" || n_words < 100
+      more_info <- chunk_id == 0 || selected_model == "text-davinci-003" || n_words < 200
 
       # add data descrdiption
       # if it is not the first chunk and data description is long, do not add.
-      if (more_info && !(chunk_id > 0 && n_words > 500)) {
+      if (more_info && !(chunk_id > 0 && n_words > 600)) {
         txt <- paste(txt, data_info)
       }
     }
@@ -933,4 +933,28 @@ describe_data <- function(df) {
   }
   a <- gsub(":,", ": ", a)
   return(a)
+}
+
+
+#' Estimate tokens from text
+#' 
+#'
+#' @param text a string
+#'
+#' @return a number
+#' 
+estimate_tokens <- function(text) {
+  # Approximate tokenization by splitting on spaces and punctuations
+  tokens <- unlist(strsplit(text, "[[:space:]]|[[:punct:]]"))
+  
+  # Filter out empty tokens
+  tokens <- tokens[nchar(tokens) > 0]
+  
+  # Further split longer tokens (this is a very crude approximation)
+  long_tokens <- tokens[nchar(tokens) > 3]
+  additional_tokens <- sum(nchar(long_tokens) %/% 4)
+  
+  total_tokens <- length(tokens) + additional_tokens
+  
+  return(total_tokens)
 }
