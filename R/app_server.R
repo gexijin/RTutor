@@ -13,16 +13,21 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
+  read_additional_data()
 #                            1.
 #____________________________________________________________________________
 #  General UI, observers, etc.
 #____________________________________________________________________________
 
   # increase max input file size
-  options(shiny.maxRequestSize = 1000 * 1024^2) # 10MB
+
+  options(shiny.maxRequestSize = 1024 * 1024^2) # 10MB
+
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
+  shinyjs::hide(id = "use_python")
+  shinyjs::hide(id = "api_button")
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
@@ -267,7 +272,7 @@ app_server <- function(input, output, session) {
       inputId = "select_data",
       label = "Data",
       choices = datasets,
-      selected = "mpg",
+      selected = "default_stats",
       multiple = FALSE,
       selectize = FALSE
     )
@@ -301,7 +306,7 @@ app_server <- function(input, output, session) {
     choices <- demo_related$requests
     names(choices) <- demo_related$name
 
-    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq)) {
+    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq, "home_loan", "default_stats")) {
       return(
         selectInput(
           inputId = "demo_prompt",
@@ -1335,13 +1340,13 @@ app_server <- function(input, output, session) {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
-    if (convert_to_factor()) {
-      df <- numeric_to_factor(
-        df,
-        max_levels_factor(),
-        max_proptortion_factor()
-      )
-    }
+#    if (convert_to_factor()) {
+#      df <- numeric_to_factor(
+#        df,
+#        max_levels_factor(),
+#        max_proptortion_factor()
+#      )
+#    }
 
     # if the first column looks like id?
     if(

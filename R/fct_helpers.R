@@ -18,19 +18,21 @@ names(no_data) <- "No data (examples)"
 rna_seq <- "rna_seq"  # RNA-Seq read counts
 names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
-max_query_length <- 2000 # max # of characters
+
+max_query_length <- 50000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
-language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314")
-names(language_models) <- c("Davinci", "ChatGPT", "GPT-4 (slow & costly)")
+language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314") #"gpt-4-0314"
 default_model <- 3 # ChatGPT, 
-default_temperature <- 0.2
-pre_text <- "Write correct, efficient R code."
+names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
+default_temperature <- 0.1
+pre_text <- "Write correct, efficient R code to analyze data."
+
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 1000 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
-max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor if less than or equal to this many levels
+max_levels_factor_conversion <- 50 # Numeric columns will be converted to factor if less than or equal to this many levels
 # if a column is numeric but only have a few unique values, treat as categorical
 unique_ratio <- 0.2   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
@@ -96,6 +98,46 @@ move_front <- function(v, e){
   return(v)
 }
 
+#' Read built-in datasets
+#'
+#' Read user data files
+#' @return Returns a cleaned up version, so that it could be sent to GPT.
+read_additional_data <- function() {
+
+  # Running on laptop, specify absolute path to the folder
+  data_path <- "G:/My Drive/other/Exchange Robotics/"
+
+  # data file should be stored in 
+  if(file.exists(on_server)) {
+    data_path <- "../../data/"
+  }
+
+  if(0) {
+    home_loan <<- readr::read_csv(
+      paste0(data_path, "Home_loan.csv"),
+      col_types = readr::cols(
+        id = readr::col_integer(),
+        FIPS = readr::col_integer(), STNUM = readr::col_integer(),
+        ZIPCODE = readr::col_character(), PLUS4 = readr::col_integer(),
+        BOOK = readr::col_integer(), PAGE = readr::col_integer(),
+        DOCNUM = readr::col_integer(), DATE = readr::col_character(),
+        BUYERZIP = readr::col_integer(), BUYERPLUS4 = readr::col_integer()
+      )
+    )
+
+    # home_loan <<- na.omit(home_loan)
+    home_loan$DATE <<- as.Date(as.character(home_loan$DATE), format="%Y%m%d")
+
+    home_loan <<- home_loan[which(!is.na(home_loan$MORTGAGE)),]
+    home_loan <<- as.data.frame(home_loan)
+  }
+
+  home_loan <<- readRDS(paste0(data_path, "home_loan.RDS"))
+  default_stats <<- readRDS(paste0(data_path, "default_stats.RDS"))
+  #default_stats_full <<- readRDS(paste0(data_path, "default_stats_full.RDS"))
+
+
+} 
 
 #' Prepare User input.
 #'
@@ -150,13 +192,15 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
       data_info <- describe_df(
         df, 
-        list_levels = TRUE, 
+        list_levels = FALSE, 
         relevant_var = relevant_var
       )
 
       #if it is the first chunk;  always do this when Davinci model
       more_info <- chunk_id == 0 || selected_model == language_models[1]
-      more_info <- TRUE # override
+      
+      more_info <- TRUE # force append data description
+
       if (more_info) {
         txt <- paste(txt, after_text)
       }
@@ -174,6 +218,19 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       use_python,
       pre_text_python,
       pre_text
+    ),
+    ifelse(
+      selected_data == "home_loan",
+      " Each row is a home loan.",  # home_loan data
+      ifelse(
+        selected_data == "default_stats",
+        "Each row contain information about loan default statistics by STATE, CITY, LENDER and YEAR. ",  # loan default data, reduced
+        ifelse(
+          selected_data == "default_stats_full",
+          "Each row contain information about loan default statistics by STATE, CITY, LENDER and YEAR. ",  # loan default data
+          ""
+      )
+      )
     ),
     txt
   )
@@ -429,6 +486,7 @@ datasets <- move_front(datasets, "mtcars")
 
 # append a dummy value, used when user upload their data.
 datasets <- c(datasets, uploaded_data)
+
 # move it to 2nd place
 datasets <- move_front(datasets, uploaded_data)
 
@@ -445,6 +503,12 @@ datasets <- move_front(datasets, no_data)
 datasets <- move_front(datasets, "diamonds")
 # default
 datasets <- move_front(datasets, "mpg")
+#datasets <- c(datasets, "default_stats_full")
+#datasets <- move_front(datasets, "default_stats_full")
+datasets <- c(datasets, "home_loan")
+datasets <- move_front(datasets, "home_loan")
+datasets <- c(datasets, "default_stats")
+datasets <- move_front(datasets, "default_stats")
 
 datasets <- setNames(datasets, datasets)
 
