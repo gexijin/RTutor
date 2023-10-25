@@ -23,6 +23,7 @@ max_query_length <- 2000 # max # of characters
 language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "text-davinci-003")
 names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "Davinci")
 default_model <- "GPT-4 (03/23)" #"ChatGPT" 
+max_content_length <- 8000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
@@ -158,7 +159,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       # Always add 'use the df data frame.'
       txt <- paste(txt, after_text)
 
-      n_words <- estimate_tokens(data_info)
+      n_words <- tokens(data_info)
       #if it is the first chunk;  always do this when Davinci model; or if data description is short
       more_info <- chunk_id == 0 || selected_model == "text-davinci-003" || n_words < 200
 
@@ -943,7 +944,7 @@ describe_data <- function(df) {
 #'
 #' @return a number
 #' 
-estimate_tokens <- function(text) {
+tokens <- function(text) {
   # Approximate tokenization by splitting on spaces and punctuations
   tokens <- unlist(strsplit(text, "[[:space:]]|[[:punct:]]"))
   
