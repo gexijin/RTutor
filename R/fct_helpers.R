@@ -155,15 +155,15 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       )
 
       #if it is the first chunk;  always do this when Davinci model
-      more_info <- chunk_id == 0 || selected_model == language_models[1]
+      more_info <- chunk_id == 1 || selected_model == "text-davinci-003"
       more_info <- TRUE # override
       if (more_info) {
         txt <- paste(txt, after_text)
       }
       
       # add data descrdiption
-      # if user is not trying to convert data; 
-      if (!grepl("Convert |convert ", txt) && more_info) {
+      # if it is not the first chunk and data description is long, do not add.
+      if (more_info && !(chunk_id > 1 && nchar(data_info) > 2000)) {
         txt <- paste(txt, data_info)
       }
     }
@@ -182,7 +182,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
   txt <- gsub("\n", " ", txt)
   txt <- paste(
     txt, 
-    " ggplot2 is preferred for plotting if requested. If multiple plots are generated, try to combine them into one."
+    "If the goal can be achieved by showing qantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. If multiple plots are generated, try to combine them into one."
     )
   #cat("\n", txt)
   return(txt)
