@@ -20,9 +20,9 @@ names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
-language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314")
-names(language_models) <- c("Davinci", "ChatGPT", "GPT-4 (slow & costly)")
-default_model <- 3 # ChatGPT, 
+language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "text-davinci-003")
+names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "Davinci")
+default_model <- "GPT-4 (03/23)"
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code."
 pre_text_python <- "Write correct, efficient Python code."

@@ -179,6 +179,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               h3("Instructions:"),
               tags$ul(
                 tags$li(
+                  "Analyzing your data for free using AI."
+                ),
+                tags$li(
                   "Start small. First, try simple requests 
                   such as distributions, basic plots, or simple models. 
                   Then customize it or add variables. Gradually add complexity. 
