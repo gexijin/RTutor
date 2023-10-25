@@ -1015,6 +1015,9 @@ app_server <- function(input, output, session) {
   # a list stores all data objects before running the code.
   run_env_start <- reactiveVal(list()) 
 
+  # a counter for update results, change dependency structure
+  results_counter <- reactiveVal(0)
+
   # stores the results after running the generated code.
   # return error indicator and message
   # Sometimes returns NULL, even when code run fine. Especially when
@@ -1065,12 +1068,17 @@ app_server <- function(input, output, session) {
         console_output = console_output,
         error_message = error_message
       ))
+      # Increment the results counter
+      results_counter(results_counter() + 1)
     })
   })
 
 
   # Error when run the generated code?
   code_error <- reactive({
+    # ensure results are ready, propagate to plots
+    # solves the issues of plot not showing up. Or shows plots from previous run.
+    req(results_counter())  
     error_status <- FALSE
     req(input$submit_button != 0)
     if(!input$use_python) { # R
