@@ -198,7 +198,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       )
 
       #if it is the first chunk;  always do this when Davinci model
-      more_info <- chunk_id == 1 || selected_model == "text-davinci-003"
+      more_info <- chunk_id == 0 || selected_model == "text-davinci-003"
       
       #more_info <- TRUE # force append data description
 
