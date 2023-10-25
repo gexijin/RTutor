@@ -11,22 +11,25 @@
 # Global variables
 ###################################################
 
-release <- "0.95" # RTutor
+release <- "0.97" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
 rna_seq <- "rna_seq"  # RNA-Seq read counts
 names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
+
 max_query_length <- 50000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_models <- c("text-davinci-003", "gpt-3.5-turbo", "gpt-4-0314") #"gpt-4-0314"
+default_model <- 3 # ChatGPT, 
 names(language_models) <- c("Davinci", "ChatGPT", "GPT-4")
 default_temperature <- 0.1
 pre_text <- "Write correct, efficient R code to analyze data."
+
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
-max_char_question <- 280 # max n. of characters in the Q&A
+max_char_question <- 1000 # max n. of characters in the Q&A
 max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
 max_data_points <- 10000  # max number of data points for interactive plot
 max_levels_factor_conversion <- 50 # Numeric columns will be converted to factor if less than or equal to this many levels
@@ -195,7 +198,9 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
       #if it is the first chunk;  always do this when Davinci model
       more_info <- chunk_id == 0 || selected_model == language_models[1]
+      
       more_info <- TRUE # force append data description
+
       if (more_info) {
         txt <- paste(txt, after_text)
       }
@@ -232,6 +237,10 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
+  txt <- paste(
+    txt, 
+    " ggplot2 is preferred for plotting if requested. If multiple plots are generated, try to combine them into one."
+    )
   #cat("\n", txt)
   return(txt)
 }
@@ -400,9 +409,9 @@ clean_cmd <- function(cmd, selected_data) {
 
   # use pacman, load if installed; otherwise install it first then load.
   cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
-  if (selected_data != no_data) {
-    cmd <- c("df <- as.data.frame(current_data())", cmd)
-  }
+  #if (selected_data != no_data) {
+  #  cmd <- c("df <- as.data.frame(current_data())", cmd)
+  #}
 
   return(cmd)
 

@@ -107,6 +107,7 @@ app_ui <- function(request) {
             h4("Exchange Robotics", style = "color: purple;"),
             shinyjs::useShinyjs(),
             conditionalPanel(
+
               condition = "input.submit_button != 0",
               fluidRow(
                 column(
@@ -116,19 +117,10 @@ app_ui <- function(request) {
                     label = "AI generated code:",
                     selected = NULL,
                     choices = NULL
-                  )
-                ),
-                column(
-                  width = 4,
-                  style = "margin-top: 10px;",
-                  checkboxInput(
-                    inputId = "continue",
-                    label = "Continue from this chunk",
-                    value = FALSE
                   ),
                   tippy::tippy_this(
-                    "continue",
-                    "If selected, the current R scripts will be kept in the next questions. We build upon the code chunk.",
+                    "selected_chunk",
+                    "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
                     theme = "light-border"
                   )
                 )
@@ -139,22 +131,31 @@ app_ui <- function(request) {
 
                 uiOutput("error_message"),
                 uiOutput("send_error_message"),
-                h4("Results:"),
+                strong("Results:"),
 
                 # shows error message in local machine, but not on the server
                 verbatimTextOutput("console_output"),
                 uiOutput("plot_ui"),
-                checkboxInput(
-                  inputId = "make_ggplot_interactive",
-                  label = NULL,
-                  value = FALSE
+                fluidRow(
+                  column(
+                    width = 5,
+                    checkboxInput(
+                      inputId = "make_ggplot_interactive",
+                      label = NULL,
+                      value = FALSE
+                    ),
+                    align = "right"
+                  ),
+                  column(
+                    width = 5,
+                    checkboxInput(
+                      inputId = "make_cx_interactive",
+                      label = NULL,
+                      value = FALSE
+                    ),
+                    align = "left"
+                  )
                 ),
-                checkboxInput(
-                  inputId = "make_cx_interactive",
-                  label = NULL,
-                  value = FALSE
-                ),
-
                 br(),
                 uiOutput("tips_interactive"),
               ),
@@ -183,6 +184,7 @@ app_ui <- function(request) {
           ) #mainPanel
         ) #sideBarpanel
       ), #tabPanel
+
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
