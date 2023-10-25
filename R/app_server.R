@@ -1020,6 +1020,8 @@ app_server <- function(input, output, session) {
   # a list stores all data objects before running the code.
   run_env_start <- reactiveVal(list()) 
 
+  # a reactive variable that indicates if the results are ready
+  results_counter <- reactiveVal(0)
   # stores the results after running the generated code.
   # return error indicator and message
   # Sometimes returns NULL, even when code run fine. Especially when
@@ -1070,12 +1072,15 @@ app_server <- function(input, output, session) {
         console_output = console_output,
         error_message = error_message
       ))
+      # Increment the results counter
+      results_counter(results_counter() + 1)
     })
   })
 
 
   # Error when run the generated code?
   code_error <- reactive({
+    req(results_counter())  # ensure results are ready
     error_status <- FALSE
     req(input$submit_button != 0)
     if(!input$use_python) { # R
@@ -1087,6 +1092,7 @@ app_server <- function(input, output, session) {
 
   output$error_message <- renderUI({
     req(code_error())
+    req(results_counter())  # ensure results are ready
     if(code_error()) {
       h4(paste("Error!", run_result()$error_message), style = "color:red")
     } else {
