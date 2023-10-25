@@ -22,8 +22,8 @@ min_query_length <- 6  # minimum # of characters
 max_query_length <- 50000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 
-language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "text-davinci-003")
-names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "Davinci")
+language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "gpt-4-32k-0613", "text-davinci-003")
+names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "GPT-4 32k", "Davinci")
 default_model <- "GPT-4 (03/23)" #"ChatGPT" 
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code to analyze data."
@@ -198,17 +198,17 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       )
 
       #if it is the first chunk;  always do this when Davinci model
-      more_info <- chunk_id == 0 || selected_model == language_models[1]
+      more_info <- chunk_id == 1 || selected_model == "text-davinci-003"
       
-      more_info <- TRUE # force append data description
+      #more_info <- TRUE # force append data description
 
       if (more_info) {
         txt <- paste(txt, after_text)
       }
-      
+
       # add data descrdiption
-      # if user is not trying to convert data; 
-      if (!grepl("Convert |convert ", txt) && more_info) {
+      # if it is not the first chunk and data description is long, do not add.
+      if (more_info && !(chunk_id > 1 && nchar(data_info) > 2000)) {
         txt <- paste(txt, data_info)
       }
     }
@@ -240,7 +240,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
   txt <- gsub("\n", " ", txt)
   txt <- paste(
     txt, 
-    " ggplot2 is preferred for plotting if requested. If multiple plots are generated, try to combine them into one."
+    "If the goal can be achieved with showing qantitative results, do not produce a plot. If a plot is required, ggplot2 is preferred. If multiple plots are generated, try to combine them into one."
     )
   #cat("\n", txt)
   return(txt)
