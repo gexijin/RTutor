@@ -1246,7 +1246,7 @@ app_server <- function(input, output, session) {
 
     req(!code_error())
     req(logs$code)
-    #txt <- paste(openAI_response()$cmd, collapse = " ")
+    txt <- paste(openAI_response()$cmd, collapse = " ")
 
     if (inherits(run_result()$result, "ggplot") && # if  canvasXpress, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
