@@ -19,7 +19,7 @@ run_app()
 if(0){
 remove.packages("RTutor")
 
-remotes::install_github("gexijin/RTutor", upgrade = "never")
+remotes::install_github("gexijin/RTutor@Exchange_Robotics2", upgrade = "never")
 
 .rs.restartR()
 

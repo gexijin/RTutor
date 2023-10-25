@@ -13,16 +13,21 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
+  read_additional_data()
 #                            1.
 #____________________________________________________________________________
 #  General UI, observers, etc.
 #____________________________________________________________________________
 
   # increase max input file size
-  options(shiny.maxRequestSize = 1000 * 1024^2) # 10MB
+
+  options(shiny.maxRequestSize = 1024 * 1024^2) # 10MB
+
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
+  shinyjs::hide(id = "use_python")
+  shinyjs::hide(id = "api_button")
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
@@ -266,7 +271,7 @@ app_server <- function(input, output, session) {
       inputId = "select_data",
       label = "Data",
       choices = datasets,
-      selected = "mpg",
+      selected = "default_stats",
       multiple = FALSE,
       selectize = FALSE
     )
@@ -300,7 +305,7 @@ app_server <- function(input, output, session) {
     choices <- demo_related$requests
     names(choices) <- demo_related$name
 
-    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq)) {
+    if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq, "home_loan", "default_stats")) {
       return(
         selectInput(
           inputId = "demo_prompt",
@@ -1026,9 +1031,11 @@ app_server <- function(input, output, session) {
   # a list stores all data objects before running the code.
   run_env_start <- reactiveVal(list()) 
 
+
   # a counter for update results, change dependency structure
   # so that plots are updated.
   results_counter <- reactiveVal(0)
+
 
   # stores the results after running the generated code.
   # return error indicator and message
@@ -1095,9 +1102,11 @@ app_server <- function(input, output, session) {
 
   # Error when run the generated code?
   code_error <- reactive({
+
     # ensure results are ready, propagate to plots
     # solves the issues of plot not showing up. Or shows plots from previous run.
     req(results_counter())  
+
     error_status <- FALSE
     req(input$submit_button != 0)
     if(!input$use_python) { # R
@@ -1109,6 +1118,7 @@ app_server <- function(input, output, session) {
 
   output$error_message <- renderUI({
     req(code_error())
+    req(results_counter())  # ensure results are ready
     if(code_error()) {
       h4(paste("Error!", run_result()$error_message), style = "color:red")
     } else {
@@ -1225,7 +1235,7 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (inherits(run_result()$result, "ggplot") && # if  ggplot2, and it is 
+    if ((inherits(run_result()$result, "ggplot")|| grepl("ggplot", txt)) && # if  ggplot2, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
@@ -1248,7 +1258,7 @@ app_server <- function(input, output, session) {
     req(logs$code)
     #txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (inherits(run_result()$result, "ggplot") && # if  canvasXpress, and it is 
+    if ((inherits(run_result()$result, "ggplot")|| grepl("ggplot", txt)) && # if  canvasXpress, and it is 
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
@@ -1362,13 +1372,13 @@ app_server <- function(input, output, session) {
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
-    if (convert_to_factor()) {
-      df <- numeric_to_factor(
-        df,
-        max_levels_factor(),
-        max_proptortion_factor()
-      )
-    }
+#    if (convert_to_factor()) {
+#      df <- numeric_to_factor(
+#        df,
+#        max_levels_factor(),
+#        max_proptortion_factor()
+#      )
+#    }
 
     # if the first column looks like id?
     if(
