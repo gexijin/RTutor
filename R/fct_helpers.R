@@ -197,7 +197,9 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         list_levels = FALSE, 
         relevant_var = relevant_var
       )
-
+      # Always add 'use the df data frame.'
+      txt <- paste(txt, after_text)
+      
       n_words <- tokens(data_info)
       #if it is the first chunk;  always do this when Davinci model; or if data description is short
       more_info <- chunk_id <= 1 || selected_model == "text-davinci-003" || n_words < 300
