@@ -1129,6 +1129,7 @@ app_server <- function(input, output, session) {
 
   output$error_message <- renderUI({
     req(code_error())
+    req(logs$code)  
     if(code_error()) {
       h4(paste("Error!", run_result()$error_message), style = "color:red")
     } else {
@@ -1143,7 +1144,8 @@ app_server <- function(input, output, session) {
 
   output$result_plot <- renderPlot({
     req(!code_error())
-    
+    req(logs$code)
+    req(results_counter())
     # Check if the result is not a ggplot or a known plot type
     if (inherits(run_result()$result, "ggplot") || is.null(run_result()$console_output)) {
       return(run_result()$result)
@@ -1216,6 +1218,7 @@ app_server <- function(input, output, session) {
     req(input$submit_button)
     req(!input$use_python)
     req(!code_error())
+    req(logs$code)
     req(results_counter()) # ensure results are ready, propagate to plots
     if (
       is_interactive_plot() ||   # natively interactive
