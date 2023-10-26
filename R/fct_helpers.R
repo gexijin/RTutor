@@ -39,7 +39,7 @@ max_levels_factor_conversion <- 50 # Numeric columns will be converted to factor
 unique_ratio <- 0.2   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
-system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation."
+system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. If the goal can be achieved with showing qantitative results, do not produce a plot. If a plot is required, ggplot2 is preferred. If multiple plots are generated, try to combine them into one."
 # voice input parameters
 wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
@@ -197,19 +197,14 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         list_levels = FALSE, 
         relevant_var = relevant_var
       )
-
-      #if it is the first chunk;  always do this when Davinci model
-      more_info <- chunk_id == 0 || selected_model == "text-davinci-003"
-      
-      #more_info <- TRUE # force append data description
-
-      if (more_info) {
-        txt <- paste(txt, after_text)
-      }
+browser()
+      n_words <- tokens(data_info)
+      #if it is the first chunk;  always do this when Davinci model; or if data description is short
+      more_info <- chunk_id == 0 || selected_model == "text-davinci-003" || n_words < 200
 
       # add data descrdiption
       # if it is not the first chunk and data description is long, do not add.
-      if (more_info && !(chunk_id > 1 && nchar(data_info) > 2000)) {
+      if (more_info && !(chunk_id > 0 && n_words > 800)) {
         txt <- paste(txt, data_info)
       }
     }
@@ -239,10 +234,6 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  txt <- paste(
-    txt, 
-    "If the goal can be achieved with showing qantitative results, do not produce a plot. If a plot is required, ggplot2 is preferred. If multiple plots are generated, try to combine them into one."
-    )
   cat("\n", txt)
   return(txt)
 }
@@ -1002,4 +993,28 @@ describe_data <- function(df) {
   }
   a <- gsub(":,", ": ", a)
   return(a)
+}
+
+
+#' Estimate tokens from text
+#' 
+#'
+#' @param text a string
+#'
+#' @return a number
+#' 
+tokens <- function(text) {
+  # Approximate tokenization by splitting on spaces and punctuations
+  tokens <- unlist(strsplit(text, "[[:space:]]|[[:punct:]]"))
+  
+  # Filter out empty tokens
+  tokens <- tokens[nchar(tokens) > 0]
+  
+  # Further split longer tokens (this is a very crude approximation)
+  long_tokens <- tokens[nchar(tokens) > 3]
+  additional_tokens <- sum(nchar(long_tokens) %/% 4)
+  
+  total_tokens <- length(tokens) + additional_tokens
+  
+  return(total_tokens)
 }

@@ -651,6 +651,7 @@ app_server <- function(input, output, session) {
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
+  
     prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model())
   })
 
