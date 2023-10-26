@@ -206,7 +206,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       if (more_info) {
         txt <- paste(txt, after_text)
       }
-browser()
+
       # add data descrdiption
       # if it is not the first chunk and data description is long, do not add.
       if (more_info && !(chunk_id > 1 && nchar(data_info) > 2000)) {
