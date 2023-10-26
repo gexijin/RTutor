@@ -197,14 +197,14 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         list_levels = FALSE, 
         relevant_var = relevant_var
       )
-browser()
+
       n_words <- tokens(data_info)
       #if it is the first chunk;  always do this when Davinci model; or if data description is short
-      more_info <- chunk_id == 0 || selected_model == "text-davinci-003" || n_words < 200
+      more_info <- chunk_id <= 1 || selected_model == "text-davinci-003" || n_words < 300
 
       # add data descrdiption
       # if it is not the first chunk and data description is long, do not add.
-      if (more_info && !(chunk_id > 0 && n_words > 800)) {
+      if (more_info && !(chunk_id > 1 && n_words > 800)) {
         txt <- paste(txt, data_info)
       }
     }
@@ -234,7 +234,7 @@ browser()
 
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  cat("\n", txt)
+  #cat("\n", txt)
   return(txt)
 }
 
