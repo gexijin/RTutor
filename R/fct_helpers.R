@@ -161,11 +161,13 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
       n_words <- tokens(data_info)
       #if it is the first chunk;  always do this when Davinci model; or if data description is short
-      more_info <- chunk_id == 0 || selected_model == "text-davinci-003" || n_words < 200
+      more_info <- chunk_id <= 1 || selected_model == "text-davinci-003" || n_words < 200
+
+      # in a session, sometimes the first chunk has the id of 0. sometimes 1?????
 
       # add data descrdiption
       # if it is not the first chunk and data description is long, do not add.
-      if (more_info && !(chunk_id > 0 && n_words > 600)) {
+      if (more_info && !(chunk_id > 1 && n_words > 600)) {
         txt <- paste(txt, data_info)
       }
     }
