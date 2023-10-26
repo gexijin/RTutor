@@ -704,9 +704,24 @@ app_server <- function(input, output, session) {
 
           # add history, first, if any
           if (length(logs$code_history) > 0) {
-            # add each chunk
+            # manage context length. If it is too long, remove the oldest ones, except the first one
+            history_tokens <- sapply(
+              1:length(logs$code_history), 
+              function(i) {
+                tokens(logs$code_history[[i]]$prompt_all) + tokens(logs$code_history[[i]]$raw)
+            })
+
+            #cumulative from backwards
+            cum_sum <- rev(cumsum(rev(history_tokens))) 
+                                                                  # new request               # first one
+            cutoff <-  max_content_length - tokens(system_role) - tokens(prepared_request) - history_tokens[1]
+
+            cum_sum[1] <- 0 # do not remove the first one
+            included <- which(cum_sum < cutoff)  # 1, 4, 5, 6, 7
+
+            # add each chunk, only keep chunk
             history <- list()
-            for(i in 1:length(logs$code_history)) {
+            for(i in included) {
               history <- append(
                 history,
                 list(list(role = "user", content = logs$code_history[[i]]$prompt_all))

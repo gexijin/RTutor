@@ -18,13 +18,14 @@ names(no_data) <- "No data (examples)"
 rna_seq <- "rna_seq"  # RNA-Seq read counts
 names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
-
+max_content_length <- 8000 # max tokens:  Change according to model !!!!
 max_query_length <- 50000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 
 language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "gpt-4-32k-0613", "text-davinci-003")
 names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "GPT-4 32k", "Davinci")
 default_model <- "GPT-4 (03/23)" #"ChatGPT" 
+max_content_length <- 8000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code to analyze data."
 
@@ -205,7 +206,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       if (more_info) {
         txt <- paste(txt, after_text)
       }
-
+browser()
       # add data descrdiption
       # if it is not the first chunk and data description is long, do not add.
       if (more_info && !(chunk_id > 1 && nchar(data_info) > 2000)) {
@@ -242,7 +243,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
     txt, 
     "If the goal can be achieved with showing qantitative results, do not produce a plot. If a plot is required, ggplot2 is preferred. If multiple plots are generated, try to combine them into one."
     )
-  #cat("\n", txt)
+  cat("\n", txt)
   return(txt)
 }
 
