@@ -810,11 +810,11 @@ app_server <- function(input, output, session) {
 
       shinybusy::remove_modal_spinner()
 
-    # update usage via global reactive value
-    counter$tokens <- counter$tokens + response$usage$completion_tokens
+    # update usage via global reactive value/ ouput token is twice as expensive
+    counter$tokens <- counter$tokens + response$usage$completion_tokens * 2 + response$usage$prompt_tokens
     counter$requests <- counter$requests + 1
     counter$time <- round(api_time, 0)
-    counter$tokens_current <- response$usage$completion_tokens
+    counter$tokens_current <- response$usage$completion_tokens * 2 + response$usage$prompt_tokens
 
       return(
         list(
@@ -1007,8 +1007,8 @@ app_server <- function(input, output, session) {
         "Total API Cost: $",
         ifelse(
           grepl("gpt-4", selected_model()),
-          sprintf("%5.3f", counter$tokens * 4.5e-4),
-          sprintf("%5.3f", counter$tokens * 2e-5)
+          sprintf("%5.3f", counter$tokens * 3e-5),
+          sprintf("%5.3f", counter$tokens * 1.5e-6)
         )
       )
     }
