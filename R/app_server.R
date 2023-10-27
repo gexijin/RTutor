@@ -1050,12 +1050,6 @@ app_server <- function(input, output, session) {
   # a list stores all data objects before running the code.
   run_env_start <- reactiveVal(list()) 
 
-
-  # a counter for update results, change dependency structure
-  # so that plots are updated.
-  results_counter <- reactiveVal(0)
-
-
   # stores the results after running the generated code.
   # return error indicator and message
   # Sometimes returns NULL, even when code run fine. Especially when
@@ -1071,8 +1065,9 @@ app_server <- function(input, output, session) {
     eventExpr = {
       input$submit_button  # when submit is clicked 
       reverted()           # or when a previous code chunk is selected
+      logs$code
     }, {
-    req(logs$code)
+    req(logs$code != "")
     req(input$submit_button != 0)
     req(!input$use_python)
     result <- NULL
@@ -1113,18 +1108,12 @@ app_server <- function(input, output, session) {
         console_output = console_output,
         error_message = error_message
       ))
-      # Increment the results counter
-      results_counter(results_counter() + 1)
     })
   })
 
 
   # Error when run the generated code?
   code_error <- reactive({
-
-    # ensure results are ready, propagate to plots
-    # solves the issues of plot not showing up. Or shows plots from previous run.
-    req(results_counter())  
 
     error_status <- FALSE
     req(input$submit_button != 0)
@@ -1137,7 +1126,7 @@ app_server <- function(input, output, session) {
 
   output$error_message <- renderUI({
     req(code_error())
-    req(results_counter())  # ensure results are ready
+
     if(code_error()) {
       h4(paste("Error!", run_result()$error_message), style = "color:red")
     } else {
@@ -1225,7 +1214,7 @@ app_server <- function(input, output, session) {
     req(input$submit_button)
     req(!input$use_python)
     req(!code_error())
-    req(results_counter()) # ensure results are ready, propagate to plots
+
     if (
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive) # converted
