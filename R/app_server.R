@@ -640,6 +640,8 @@ app_server <- function(input, output, session) {
       if (!is.null(input$language_model)) {
          model <- input$language_model
       }
+      # get the name of the model for display
+      names(model) <- names(language_models)[language_models == model]
       return(model)
   })
 
@@ -1002,9 +1004,12 @@ app_server <- function(input, output, session) {
     } else {
     #req(openAI_response()$cmd)
       paste0(
-        "Cumulative API Cost: ",
-        sprintf("%5.1f", counter$tokens * 2e-3),
-        "¢"
+        "Total API Cost: $",
+        ifelse(
+          grepl("gpt-4", selected_model()),
+          sprintf("%5.3f", counter$tokens * 4.5e-4),
+          sprintf("%5.3f", counter$tokens * 2e-5)
+        )
       )
     }
   })
@@ -1013,7 +1018,8 @@ app_server <- function(input, output, session) {
     req(openAI_response()$cmd)
 
     paste0(
-        "Temperature: ",
+        names(selected_model()),
+        ", Temperature=",
         sample_temp()
     )
   })
@@ -1046,10 +1052,6 @@ app_server <- function(input, output, session) {
   # a list stores all data objects before running the code.
   run_env_start <- reactiveVal(list()) 
 
-  # a counter for update results, change dependency structure
-  # so that plots are updated.
-  results_counter <- reactiveVal(0)
-
   # stores the results after running the generated code.
   # return error indicator and message
   # Sometimes returns NULL, even when code run fine. Especially when
@@ -1065,9 +1067,9 @@ app_server <- function(input, output, session) {
     eventExpr = {
       input$submit_button  # when submit is clicked 
       reverted()           # or when a previous code chunk is selected
+      logs$code
     }, {
-    req(logs$code)
-    req(input$submit_button != 0)
+    req(logs$code != "")
     req(!input$use_python)
     result <- NULL
     console_output <- NULL
@@ -1107,17 +1109,12 @@ app_server <- function(input, output, session) {
         console_output = console_output,
         error_message = error_message
       ))
-      # Increment the results counter
-      results_counter(results_counter() + 1)
     })
   })
 
 
   # Error when run the generated code?
   code_error <- reactive({
-    # ensure results are ready, propagate to plots
-    # solves the issues of plot not showing up. Or shows plots from previous run.
-    req(results_counter())  
     error_status <- FALSE
     req(input$submit_button != 0)
     if(!input$use_python) { # R
@@ -1129,6 +1126,7 @@ app_server <- function(input, output, session) {
 
   output$error_message <- renderUI({
     req(code_error())
+    req(logs$code)  
     if(code_error()) {
       h4(paste("Error!", run_result()$error_message), style = "color:red")
     } else {
@@ -1143,7 +1141,7 @@ app_server <- function(input, output, session) {
 
   output$result_plot <- renderPlot({
     req(!code_error())
-    
+    req(logs$code)
     # Check if the result is not a ggplot or a known plot type
     if (inherits(run_result()$result, "ggplot") || is.null(run_result()$console_output)) {
       return(run_result()$result)
@@ -1151,7 +1149,13 @@ app_server <- function(input, output, session) {
       # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string, 
       #under the parent environment of the run_env()
       tmp_env <- list2env(run_env_start())
-      eval(parse(text = clean_cmd(logs$code, input$select_data)), envir = tmp_env)
+      tryCatch({
+        eval_result <- eval(
+          #parse(text = "log('error')"),
+          parse(text = clean_cmd(logs$code, input$select_data)), 
+          envir = tmp_env
+        )
+      })
     }
   })
 
@@ -1211,12 +1215,11 @@ app_server <- function(input, output, session) {
   })
 
 
-
   output$plot_ui <- renderUI({
     req(input$submit_button)
     req(!input$use_python)
     req(!code_error())
-    req(results_counter()) # ensure results are ready, propagate to plots
+    req(logs$code)
     if (
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive) # converted
@@ -1640,9 +1643,12 @@ app_server <- function(input, output, session) {
         ),
         collapse = " "
       ),
-      paste(
-        "\n Sampling temperature:",
-        sample_temp()
+      paste0(
+        "\n ",
+        names(selected_model()),
+        " (Temperature=",
+        sample_temp(),
+        ")"
       ),
       "\n"
     )
