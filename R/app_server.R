@@ -705,18 +705,23 @@ app_server <- function(input, output, session) {
 
           # add history, first, if any
           if (length(logs$code_history) > 0) {
-          
+        
             # manage context length. If it is too long, remove the oldest ones, except the first one
             history_tokens <- sapply(
               1:length(logs$code_history), 
               function(i) {
-                tokens(logs$code_history[[i]]$prompt_all) + tokens(logs$code_history[[i]]$raw)
+                if(i == 1) {
+                  logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens
+                } else {
+                  # since the chat history includes previous prompt and output
+                  logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens  - logs$code_history[[i - 1]]$prompt_tokens - logs$code_history[[i - 1]]$output_tokens
+                }
             })
-
+ 
             #cumulative from backwards
             cum_sum <- rev(cumsum(rev(history_tokens))) 
                                                                   # new request               # first one
-            cutoff <-  max_content_length - tokens(system_role) - tokens(prepared_request) - history_tokens[1]
+            cutoff <-  max_content_length - tokens(prepared_request) - history_tokens[1]
 
             cum_sum[1] <- 0 # do not remove the first one
             included <- which(cum_sum < cutoff)  # 1, 4, 5, 6, 7
@@ -811,10 +816,11 @@ app_server <- function(input, output, session) {
       shinybusy::remove_modal_spinner()
 
     # update usage via global reactive value/ ouput token is twice as expensive
-    counter$tokens <- counter$tokens + response$usage$completion_tokens * 2 + response$usage$prompt_tokens
+    counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens    
     counter$requests <- counter$requests + 1
     counter$time <- round(api_time, 0)
-    counter$tokens_current <- response$usage$completion_tokens * 2 + response$usage$prompt_tokens
+    counter$costs_total <- counter$costs_total + 
+      api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
 
       return(
         list(
@@ -849,8 +855,8 @@ app_server <- function(input, output, session) {
     req(file.exists(on_server))
     req(!openAI_response()$error)
 
-    cost_session <-  round(counter$tokens * 3e-3, 0)
-    if (cost_session %% 20  == 0 & cost_session != 0) {
+    cost_session <-  counter$costs * 10
+    if (cost_session %% 5  == 0 & cost_session != 0) {
       shiny::showModal(
         shiny::modalDialog(
           size = "s",
@@ -916,6 +922,8 @@ app_server <- function(input, output, session) {
       # save a copy of the data in the environment as a list.
       # if save environment, only reference is saved. 
       # This needs more memory, but works.
+      prompt_tokens = openAI_response()$response$usage$prompt_tokens,
+      output_tokens = openAI_response()$response$usage$completion_tokens,
       env = run_env_start() # it is a list
     )
 
@@ -1005,11 +1013,7 @@ app_server <- function(input, output, session) {
     #req(openAI_response()$cmd)
       paste0(
         "Total API Cost: $",
-        ifelse(
-          grepl("gpt-4", selected_model()),
-          sprintf("%5.3f", counter$tokens * 3e-5),
-          sprintf("%5.3f", counter$tokens * 1.5e-6)
-        )
+        sprintf("%5.3f", counter$costs_total) 
       )
     }
   })
@@ -1033,7 +1037,7 @@ app_server <- function(input, output, session) {
    })
  # Defining & initializing the reactiveValues object
   counter <- reactiveValues(
-    tokens = 0, # cummulative tokens
+    costs_total = 0, # cummulative cost
     requests = 0, # cummulative requests    
     tokens_current = 0,  # tokens for current query
     time = 0 # response time for current
@@ -1959,7 +1963,7 @@ output$answer <- renderText({
         engine_id = selected_model(),
         prompt = prepared_request,
         openai_api_key = api_key_session()$api_key,
-        max_tokens = 500,
+        max_tokens = 1000,
         temperature = sample_temp()
       ),
       error = function(e) {
@@ -2018,10 +2022,13 @@ output$answer <- renderText({
     shinybusy::remove_modal_spinner()
 
     # update usage via global reactive value
-    counter$tokens <- counter$tokens + response$usage$completion_tokens
+    # update usage via global reactive value/ ouput token is twice as expensive
+    counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens    
     counter$requests <- counter$requests + 1
     counter$time <- round(api_time, 0)
-    counter$tokens_current <- response$usage$completion_tokens
+    counter$costs_total <- counter$costs_total + 
+      api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
+
 
     humor <- c(
       "Seriously? Statistics only!",

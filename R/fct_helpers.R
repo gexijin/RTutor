@@ -23,7 +23,7 @@ max_query_length <- 2000 # max # of characters
 language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "text-davinci-003")
 names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "Davinci")
 default_model <- "GPT-4 (03/23)" #"ChatGPT" 
-max_content_length <- 8000 # max tokens:  Change according to model !!!!
+max_content_length <- 3000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
@@ -961,3 +961,28 @@ tokens <- function(text) {
   
   return(total_tokens)
 }
+
+#' Estimate API cost
+#' 
+#'
+#' @param prompt_tokens a number
+#' @param completion_tokens a number
+#' @param selected_model a string
+#'
+#' @return a number
+#' 
+api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
+  if(grepl("gpt-4", selected_model)) { # gpt4
+    # input token $0.03 / 1k token, Output is $0.06 / 1k for GPT-4
+    completion_tokens * 6e-5+ prompt_tokens  * 3e-5
+  } else {
+    # ChatGPT
+    completion_tokens * 2e-6+ prompt_tokens  * 1.5e-6 
+  }
+
+
+}
+
+
+
+
