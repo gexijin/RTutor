@@ -1911,7 +1911,7 @@ app_server <- function(input, output, session) {
     }
   })
 
-output$answer <- renderText({
+output$answer <- renderUI({
   req(input$ask_button)
 
   isolate({
@@ -2012,7 +2012,7 @@ output$answer <- renderText({
       response <- NULL
       error_message <- response$message
     } else {
-      cmd <- response$choices[1, 1]
+      ans <- response$choices[1, 4]
     }
 
     shinybusy::remove_modal_spinner()
@@ -2034,7 +2034,6 @@ output$answer <- renderText({
       "Gee..., Statistics only!!"
     )
 
-    ans <- response$choices[1, 4]
     if (grepl("No comment", ans)) {
       ans <- paste(
         sample(humor, 1),
@@ -2042,7 +2041,10 @@ output$answer <- renderText({
         be helpful to add \"in statistics\" to the question."
       )
     }
-    return(ans)
+    # Replace double newlines with HTML paragraph tags
+    ans <- gsub("\n\n", "</p><p>", ans)
+    ans <- paste0("<p>", ans, "</p>")
+    return(HTML(ans))
   })
 
 })

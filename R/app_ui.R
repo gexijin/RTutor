@@ -53,7 +53,7 @@ app_ui <- function(request) {
               column(
                 width = 6,
                 style = "margin-top: -10px;",
-p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>"))
+                  p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>"))
               )
             ),
             fluidRow(
@@ -131,7 +131,27 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
                ),
               selected = "Beginner"
             ),
-            actionButton("save_feedbck", "Save Feedback")
+            actionButton("save_feedbck", "Save Feedback"),
+            hr(), br(),    
+            tags$style(type = "text/css", "textarea {width:100%}"),
+            tags$textarea(
+              id = "ask_question",
+              placeholder = NULL,
+              rows = 2,
+              ""
+            ),
+            actionButton("ask_button", strong("Ask RTutor")),
+            htmlOutput("answer"),
+            tags$head(
+              tags$style(
+                "#answer{
+                  color: purple;
+                  font-size: 16px
+                }"
+              )
+            )
+
+
           ),
 
       ###############################################################################
@@ -450,13 +470,7 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
         fluidRow(
           column(
             width = 7,
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "ask_question",
-              placeholder = NULL,
-              rows = 2,
-              ""
-            )
+
           ),
           column(
             width = 5,
@@ -466,20 +480,9 @@ p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></di
               label = NULL
             )
           )
-        ),
-
-        actionButton("ask_button", strong("Ask RTutor")),
-        br(),
-        hr(),
-        wellPanel(textOutput("answer")),
-        tags$head(
-          tags$style(
-            "#answer{
-              color: purple;
-              font-size: 16px
-            }"
-          )
         )
+
+
       ),
 
       tabPanel(

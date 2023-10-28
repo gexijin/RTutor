@@ -22,7 +22,7 @@ max_query_length <- 2000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "text-davinci-003")
 names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "Davinci")
-default_model <- "GPT-4 (03/23)" #"ChatGPT" 
+default_model <- "ChatGPT" # "GPT-4 (03/23)" #
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code to analyze data."
@@ -39,9 +39,9 @@ sqltable <- "usage"
 system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
 If the goal can be achieved by showing qantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. 
 If multiple plots are generated, try to combine them into one."
-system_role_tutor <- "Act as a professor of statistics and computer science. You will answer questions by providing detailed 
-explanation to students in a kind and easy to understand way. If the question is in languages other than English, respond in that language. 
-If the question is not remotely related to statistics, mathematics, data science, computer science, respond with 'No comment'."
+system_role_tutor <- "Act as a professor of statistics, computer science and mathematics. 
+You will respond like answering questions by students in a kind way. If the question is in languages other than English, respond in that language. 
+If the question is not remotely related to your expertise, respond with 'No comment'."
 # voice input parameters
 wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
