@@ -1939,12 +1939,9 @@ output$answer <- renderText({
       txt <- paste(txt, ".", sep = "")
     }
 
-    prepared_request <- paste(
-      "If the next question is not broadly related to statistics, algorithms, or computer science
-       say 'Statistics only!' If the question is in languages other than English, 
-       respond in that language.",
-      txt
-    )
+    prepared_request <- txt 
+    
+
 
     #----------------------------Send request
     shinybusy::show_modal_spinner(
@@ -1954,17 +1951,33 @@ output$answer <- renderText({
       ),
       color = "#000000"
     )
+    prompt_total <- list()
 
-    start_time <- Sys.time()
+    # System role: You are an experience programmar, etc
+    if (!is.null(system_role)) {
+      if (nchar(system_role) > 10) {
+        prompt_total <- append(
+          prompt_total,
+          list(list(
+            role = "system",
+            content = system_role_tutor
+          ))
+        )
+      }
+    }
+    # add new user prompt
+    prompt_total <- append(
+      prompt_total,
+      list(list(role = "user", content = prepared_request))
+    )
 
     # Send to openAI
     tryCatch(
-      response <- openai::create_completion(
-        engine_id = selected_model(),
-        prompt = prepared_request,
+      response <- openai::create_chat_completion(
+        model = "gpt-3.5-turbo", 
         openai_api_key = api_key_session()$api_key,
-        max_tokens = 1000,
-        temperature = sample_temp()
+        temperature = sample_temp(),
+        messages = prompt_total
       ),
       error = function(e) {
         # remove spinner, show message for 5s, & reload
@@ -2002,32 +2015,14 @@ output$answer <- renderText({
       cmd <- response$choices[1, 1]
     }
 
-    api_time <- difftime(
-      Sys.time(),
-      start_time,
-      units = "secs"
-    )[[1]]
-
-    # if more than 10 requests, slow down. Only on server.
-    if (counter$requests > 20 && file.exists(on_server)) {
-      Sys.sleep(counter$requests / 5 + runif(1, 0, 5))
-    }
-    if (counter$requests > 50 && file.exists(on_server)) {
-      Sys.sleep(counter$requests / 10 + runif(1, 0, 10))
-    }
-    if (counter$requests > 100 && file.exists(on_server)) {
-      Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
-    }
-
     shinybusy::remove_modal_spinner()
 
     # update usage via global reactive value
     # update usage via global reactive value/ ouput token is twice as expensive
     counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens    
     counter$requests <- counter$requests + 1
-    counter$time <- round(api_time, 0)
     counter$costs_total <- counter$costs_total + 
-      api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
+      api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, "gpt-3.5-turbo")
 
 
     humor <- c(
@@ -2039,8 +2034,8 @@ output$answer <- renderText({
       "Gee..., Statistics only!!"
     )
 
-    ans <- response$choices[1, 1]
-    if (grepl("Statistics only!", ans)) {
+    ans <- response$choices[1, 4]
+    if (grepl("No comment", ans)) {
       ans <- paste(
         sample(humor, 1),
         "     Ask again with more context. It might

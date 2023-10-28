@@ -39,6 +39,9 @@ sqltable <- "usage"
 system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
 If the goal can be achieved by showing qantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. 
 If multiple plots are generated, try to combine them into one."
+system_role_tutor <- "Act as a professor of statistics and computer science. You will answer questions by providing detailed 
+explanation to students in a kind and easy to understand way. If the question is in languages other than English, respond in that language. 
+If the question is not remotely related to statistics, mathematics, data science, computer science, respond with 'No comment'."
 # voice input parameters
 wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.
 # this triggers the submit button
