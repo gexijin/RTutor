@@ -2026,7 +2026,8 @@ answer_one <- reactive({
     }
     # Replace double newlines with HTML paragraph tags
     ans <- gsub("\n\n", "</p><p>", ans)
-    ans <- paste0("<p>", ans, "</p>")
+    ans <- paste0("<p><strong>", prepared_request, "</strong></p>", "<p>", ans, "</p>")
+
     return(HTML(ans))
   })
 
@@ -2037,6 +2038,16 @@ output$answer <- renderUI({
   req(answer_one())
   answer_one()
 })
+
+# JavaScript to trigger the send button when Enter key is pressed
+shinyjs::runjs("
+    $('#ask_question').on('keyup', function (e) {
+        if (e.keyCode === 13) {
+            $('#ask_button').click();
+        }
+    });
+")
+
 #                                      10.
 #______________________________________________________________________________
 #
@@ -2518,7 +2529,6 @@ output$answer <- renderUI({
     showModal(
       modalDialog(
         title = "Q & A",
-         h5("ksdfasdfasd"),
          htmlOutput("answer"),
         tags$head(
           tags$style(
@@ -2536,8 +2546,6 @@ output$answer <- renderUI({
       )
     )
   })
-
-
 
 
 }

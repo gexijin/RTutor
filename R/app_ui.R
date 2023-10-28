@@ -136,11 +136,11 @@ app_ui <- function(request) {
             tags$style(type = "text/css", "textarea {width:100%}"),
             tags$textarea(
               id = "ask_question",
-              placeholder = NULL,
+              placeholder = "Ask a question, such as \'Explain linear regression\''.",
               rows = 2,
               ""
             ),
-            actionButton("ask_button", strong("Ask RTutor"))
+            shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor")))
           ),
 
       ###############################################################################
