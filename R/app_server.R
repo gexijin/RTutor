@@ -939,14 +939,6 @@ app_server <- function(input, output, session) {
       choices = choices,
       selected = logs$id
     )
-
-    # turn off continue button
-    updateCheckboxInput(
-      session = session,
-      inputId = "continue",
-      label = "Continue from this chunk",
-      value = FALSE
-    )
   })
 
   # change code when past code is selected.
@@ -1980,9 +1972,23 @@ app_server <- function(input, output, session) {
             history,
             list(list(role = "user", content = logs$code_history[[i]]$prompt_all))
           )
+
+          #Note error message is not properly stored in the logs variable. 
+          # only add error for the current one
+          # append error message, if any
+          code <- logs$code_history[[i]]$raw
+          if(i == length(logs$code_history) && code_error()) {
+            code <- paste0(
+              code,
+              "\n\nError: ",
+              run_result()$error_message,
+              "\n"
+            )
+          }
+
           history <- append(
             history,
-            list(list(role = "assistant", content = logs$code_history[[i]]$raw))
+            list(list(role = "assistant", content = code))
           )
         }
         prompt_total <- append(prompt_total, history)
@@ -2111,7 +2117,7 @@ app_server <- function(input, output, session) {
   observeEvent(answer_one(), {
     showModal(
       modalDialog(
-        title = "Q & A",
+        title = "Chat with your tutor",
         # Custom CSS to make the chat area scrollable
         tags$head(
             tags$style(HTML("
@@ -2514,10 +2520,22 @@ app_server <- function(input, output, session) {
     showModal(
       modalDialog(
         title = "Verify data types (important!)",
-        uiOutput("column_type_ui"),
+        # Custom CSS to make the chat area scrollable
+        tags$head(
+            tags$style(HTML("
+                #data_type_window {
+                    height: 400px;  /* Adjust the height as needed */
+                    overflow-y: auto;  /* Enables vertical scrolling */
+                    padding: 10px;
+                    border-radius: 5px;
+                }
+            "))
+        ),
+        div( id = "data_type_window", uiOutput("column_type_ui")),
         h4("If a column represents categories, choose 'Factor', even if 
         it is coded as numbers. Some columns are 
-        automatically converted. See Settings.", 
+        automatically converted. For columns that are numbers, but with few unique values, RTutor 
+        automatically convert them to factors. See Settings.", 
         style = "color: blue"),
         br(),
         footer = tagList(
@@ -2607,7 +2625,18 @@ app_server <- function(input, output, session) {
     showModal(
       modalDialog(
         title = "Data description",
-        textOutput("data_description"),
+        # Custom CSS to make the chat area scrollable
+        tags$head(
+            tags$style(HTML("
+                #description_window {
+                    height: 400px;  /* Adjust the height as needed */
+                    overflow-y: auto;  /* Enables vertical scrolling */
+                    padding: 10px;
+                    border-radius: 5px;
+                }
+            "))
+        ),
+        div( id = "description_window", textOutput("data_description")),
         tags$style(type="text/css", "#data_description {white-space: pre-wrap;}"),
         footer = tagList(
           modalButton("Close")

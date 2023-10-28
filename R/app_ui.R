@@ -121,6 +121,16 @@ app_ui <- function(request) {
             ),
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
             br(),
+            fluidRow(
+              column(
+                width = 6,
+                actionButton("data_edit_modal", "Data Types")
+              ),
+              column(
+                width = 6,
+                actionButton("data_desc_modal", "Description")
+              )
+            ),
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
@@ -311,17 +321,7 @@ app_ui <- function(request) {
               hr(),
             ),
 
-            fluidRow(
-              column(
-                width = 3,
-                actionButton("data_edit_modal", "Data Types")
-              ),
-              column(
-                width = 3,
-                actionButton("data_desc_modal", "Description")
-              )
-            ),
-            br(),br(),
+            br(),
             verbatimTextOutput("data_structure"),
             #,tableOutput("data_table")
 
