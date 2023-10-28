@@ -140,18 +140,7 @@ app_ui <- function(request) {
               rows = 2,
               ""
             ),
-            actionButton("ask_button", strong("Ask RTutor")),
-            htmlOutput("answer"),
-            tags$head(
-              tags$style(
-                "#answer{
-                  color: purple;
-                  font-size: 16px
-                }"
-              )
-            )
-
-
+            actionButton("ask_button", strong("Ask RTutor"))
           ),
 
       ###############################################################################
@@ -160,6 +149,7 @@ app_ui <- function(request) {
 
           mainPanel(
             shinyjs::useShinyjs(),
+
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
@@ -199,7 +189,7 @@ app_ui <- function(request) {
               h3("Instructions:"),
               tags$ul(
                 tags$li(
-                  "Analyzing your data for free using AI."
+                  "Analyzing your data for free using AI. Learn R coding in the process."
                 ),
                 tags$li(
                   "Start small. First, try simple requests 
@@ -465,21 +455,6 @@ app_ui <- function(request) {
           src = "www/tutor.jpg",
           width = "344",
           height = "309"
-        ),
-        br(), br(),
-        fluidRow(
-          column(
-            width = 7,
-
-          ),
-          column(
-            width = 5,
-            selectInput(
-              inputId = "demo_question",
-              choices = demo_questions,
-              label = NULL
-            )
-          )
         )
 
 

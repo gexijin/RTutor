@@ -992,7 +992,7 @@ app_server <- function(input, output, session) {
   })
 
   output$usage <- renderText({
-    req(input$submit_button != 0 || input$ask_button != 0)
+    req(input$submit_button != 0)
 
     paste0(
       "R",
@@ -1005,7 +1005,7 @@ app_server <- function(input, output, session) {
   })
 
   output$total_cost <- renderText({
-    if(input$submit_button == 0 & input$ask_button == 0) {
+    if(input$submit_button == 0) {
       return("OpenAI charges us $1 for about 30 requests via GPT-4. Heavy users please
       use your API key. See Settings."
       )
@@ -1893,30 +1893,13 @@ app_server <- function(input, output, session) {
 #
 #  Q and A
 #______________________________________________________________________________
-  # load demo data when clicked
-  observeEvent(input$demo_question,{
-     if(input$demo_question != demo_questions[1]) {
-      updateTextInput(
-        session,
-        "ask_question",
-        value = input$demo_question
-      )
-    } else { # if not mpg data, reset
-      updateTextInput(
-        session,
-        "ask_question",
-        value = "",
-        placeholder = "Ask me anything statistics. See examples. Enable voice naration in Settings."
-      )
-    }
-  })
 
-output$answer <- renderUI({
+
+answer_one <- reactive({
   req(input$ask_button)
 
   isolate({
-    req(input$ask_question) 
-
+   req(input$ask_question)    
     #----------------------------Prep question
     txt <- input$ask_question
 
@@ -2049,6 +2032,11 @@ output$answer <- renderUI({
 
 })
 
+output$answer <- renderUI({
+  req(input$ask_button)
+  req(answer_one())
+  answer_one()
+})
 #                                      10.
 #______________________________________________________________________________
 #
@@ -2281,7 +2269,7 @@ output$answer <- renderUI({
 
 
   output$slava_ukraini <- renderUI({
-    if (input$submit_button == 0 && input$ask_button == 0) {
+    if (input$submit_button == 0) {
       tagList(
         br(),
 
@@ -2525,5 +2513,31 @@ output$answer <- renderUI({
       )
     )
   })
+
+  observeEvent(answer_one(), {
+    showModal(
+      modalDialog(
+        title = "Q & A",
+         h5("ksdfasdfasd"),
+         htmlOutput("answer"),
+        tags$head(
+          tags$style(
+            "#answer{
+              color: purple;
+              font-size: 16px
+            }"
+          )
+        ),
+        footer = tagList(
+          modalButton("Close")
+        ),
+        size = "m",
+        easyClose = TRUE
+      )
+    )
+  })
+
+
+
 
 }
