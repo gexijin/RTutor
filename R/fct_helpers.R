@@ -115,7 +115,7 @@ move_front <- function(v, e){
 #' @param chunk_id  first or not? First chunk add data description
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model) {
+prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, df2 = NULL) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -161,7 +161,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         relevant_var = relevant_var
       )
       # Always add 'use the df data frame.'
-      txt <- paste(txt, after_text)
+      #txt <- paste(txt, after_text)
 
       n_words <- tokens(data_info)
       #if it is the first chunk;  always do this when Davinci model; or if data description is short
@@ -174,6 +174,21 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       if (more_info && !(chunk_id > 1 && n_words > 600)) {
         txt <- paste(txt, data_info)
       }
+      
+      # if there is a second data frame, add that too.
+      if(!is.null(df2)) {
+        data_info2 <- describe_df(
+          df2, 
+          list_levels = TRUE, 
+          relevant_var = relevant_var
+        )
+        n_words <- tokens(data_info)
+        if (more_info && !(chunk_id > 1 && n_words > 600)) {
+          txt <- paste(txt, data_info)
+        }
+      }
+
+
     }
   }
 

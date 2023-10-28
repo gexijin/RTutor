@@ -70,6 +70,7 @@ app_ui <- function(request) {
               column(
                 width = 6,
                 uiOutput("data_upload_ui")
+                ,uiOutput("data_upload_ui_2")
               )
             ),
 
@@ -164,8 +165,6 @@ app_ui <- function(request) {
               selected = "Beginner"
             ),
             actionButton("save_feedbck", "Save Feedback")
- 
-
           ),
 
       ###############################################################################

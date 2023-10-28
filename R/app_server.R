@@ -650,7 +650,7 @@ app_server <- function(input, output, session) {
     req(input$select_data)
     req(input$input_text)
     isolate({ # so that it does not do it twice with each submit
-      prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model())      
+      prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model(), df2 = current_data_2())      
     })
 
   })
@@ -2645,6 +2645,222 @@ app_server <- function(input, output, session) {
         easyClose = TRUE
       )
     )
+  })
+
+
+  # Upload the second file
+  output$data_upload_ui_2 <- renderUI({
+    req(!is.null(input$user_file))
+
+    req(is.null(input$user_file_2))
+
+    fileInput(
+      inputId = "user_file_2",
+      label = "Upload 2nd file",
+      accept = c(
+        "text/csv",
+        "text/comma-separated-values",
+        "text/tab-separated-values",
+        "text/plain",
+        ".csv",
+        ".tsv",
+        ".txt",
+        ".xls",
+        ".xlsx"
+      )
+    )
+  })
+
+ # uploaded data
+  user_data_2 <- reactive({
+
+    req(input$user_file_2)
+    in_file <- input$user_file_2
+    in_file <- in_file$datapath
+    req(!is.null(in_file))
+
+    isolate({
+      df <- data.frame()
+      file_type <- "read_excel"
+      # Excel file ---------------
+      if (grepl("xls$|xlsx$", in_file, ignore.case = TRUE)) {
+        try(
+          df <- readxl::read_excel(in_file)
+        )
+        df <- as.data.frame(df)
+      } else {
+        #CSV --------------------
+        try(
+          df <- read.csv(in_file)
+        )
+        file_type <- "read.csv"
+
+        # Tab-delimented file ----------
+        if (ncol(df) <= 1) { # unable to parse with comma
+          try(
+            df <- read.table(
+              in_file,
+              sep = "\t",
+              header = TRUE
+            )
+          )
+          file_type <- "read.table"
+        }
+      }
+
+      if (ncol(df) == 0) { # no data read in. Empty
+        return(NULL)
+      } else {
+
+        # clean column names
+        df <- df %>% janitor::clean_names()
+        return(
+          list(
+            df = df,
+            file_type = file_type
+          )
+        )
+      }
+    })
+  })
+
+show_pop_up_2 <- function() {
+    showModal(
+      modalDialog(
+        title = "Verify data types (important!)  2",
+        # Custom CSS to make the chat area scrollable
+        tags$head(
+            tags$style(HTML("
+                #data_type_window {
+                    height: 400px;  /* Adjust the height as needed */
+                    overflow-y: auto;  /* Enables vertical scrolling */
+                    padding: 10px;
+                    border-radius: 5px;
+                }
+            "))
+        ),
+        div( id = "data_type_window", uiOutput("column_type_ui_2")),
+        h4("If a column represents categories, choose 'Factor', even if 
+        it is coded as numbers. Some columns are 
+        automatically converted. For columns that are numbers, but with few unique values, RTutor 
+        automatically convert them to factors. See Settings.", 
+        style = "color: blue"),
+        br(),
+        footer = tagList(
+          modalButton("Close")
+        ),
+        size = "l",
+        easyClose = TRUE
+      )
+    )
+  }
+
+  observeEvent(input$user_file_2, {
+     showNotification("Data uploaded. Please select the data type for each column.")
+     show_pop_up_2()
+
+  })
+
+   
+  # The current data
+  current_data_2 <- reactiveVal(NULL)
+
+  observeEvent(input$user_file_2, {
+    req(input$select_data)
+
+    if(input$select_data == uploaded_data) {
+      eval(parse(text = paste0("df <- user_data_2()$df")))
+    } 
+    if (convert_to_factor()) {
+      df <- numeric_to_factor(
+        df,
+        max_levels_factor(),
+        max_proptortion_factor()
+      )
+    }
+
+    # if the first column looks like id?
+    if(
+      length(unique(df[, 1])) == nrow(df) &&  # all unique
+      is.character(df[, 1])  # first column is character
+    ) {
+       row.names(df) <- df[, 1]
+       df <- df[, -1]
+    }
+
+    # sometimes no row is left after processing.
+    if(is.null(df)) { # no_data
+      current_data_2(NULL)
+    } else if(nrow(df) == 0) {
+      current_data_2(NULL)
+    } else { # there are data in the dataframe
+
+      current_data_2(df)
+    }
+    # add the data to the current environment
+    run_env(rlang::env(run_env(), df2 = current_data_2()))
+    run_env_start(as.list(run_env()))
+  })
+
+
+  output$column_type_ui_2 <- renderUI({
+    req(current_data_2())
+    req(input$select_data)
+    column_names <- names(current_data_2())
+    examples <- capture.output(str(current_data_2()))
+    examples <- examples[-1]
+    examples <- gsub(" \\$ ", "", examples)
+
+    lapply(seq_along(column_names), function(i) {
+      column_name <- column_names[i]
+      fluidRow(
+        column(
+          width = 3,
+          selectInput(
+            inputId = paste0("column_type_2_", i),
+            label = NULL,
+            choices = c("Character" = "character",
+                        "Numeric" = "numeric",
+                        "Integer" = "integer",
+                        "Date" = "Date",
+                        "Factor" = "factor"),
+            selected = class(current_data_2()[[i]])
+          )
+        ),
+        column(
+          width = 9,          
+          align = "left",
+          style = "margin-top: -5px;",
+          h5(examples[i])
+        )
+      )
+
+    })
+  })
+
+  # convert data types
+  observe({
+    req(current_data_2())
+    for (i in seq_along(current_data_2())) {
+      col_type <- input[[paste0("column_type_2_", i)]]
+      if (!is.null(col_type)) {
+        updated_data <- isolate(current_data_2())
+
+        # when converting to factor the as function gives an error
+        if(col_type == "factor") {
+          updated_data[[i]] <- as.factor(updated_data[[i]])
+        } else if (col_type == "Date") {
+          updated_data[[i]] <- lubridate::parse_date_time(
+            updated_data[[i]],
+            orders = c("mdy", "dmy", "ymd")            
+          )
+          updated_data[[i]] <- as.Date(updated_data[[i]])
+        } else {
+          updated_data[[i]] <- as(updated_data[[i]], col_type)
+        }
+        current_data_2(updated_data)
+      }
+    }
   })
 
 }
