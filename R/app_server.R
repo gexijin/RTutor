@@ -2797,8 +2797,8 @@ show_pop_up_2 <- function() {
 
       current_data_2(df)
     }
-    # add the data to the current environment
-    run_env(rlang::env(run_env(), df2 = current_data_2()))
+
+    run_env(list2env(append(as.list(run_env()), list(df2 = current_data_2()))))
     run_env_start(as.list(run_env()))
   })
 
