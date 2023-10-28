@@ -1948,6 +1948,45 @@ app_server <- function(input, output, session) {
           )
         }
       }
+
+      # add history, first, if any
+      if (length(logs$code_history) > 0) {
+    
+        # manage context length. If it is too long, remove the oldest ones, except the first one
+        history_tokens <- sapply(
+          1:length(logs$code_history), 
+          function(i) {
+            if(i == 1) {
+              logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens
+            } else {
+              # since the chat history includes previous prompt and output
+              logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens  - logs$code_history[[i - 1]]$prompt_tokens - logs$code_history[[i - 1]]$output_tokens
+            }
+        })
+
+        #cumulative from backwards
+        cum_sum <- rev(cumsum(rev(history_tokens))) 
+                                                              # new request               # first one
+        cutoff <-  max_content_length_ask - tokens(prepared_request) - history_tokens[1]
+
+        cum_sum[1] <- 0 # do not remove the first one
+        included <- which(cum_sum < cutoff)  # 1, 4, 5, 6, 7
+
+        # add each chunk, only keep chunk
+        history <- list()
+        for(i in included) {
+          history <- append(
+            history,
+            list(list(role = "user", content = logs$code_history[[i]]$prompt_all))
+          )
+          history <- append(
+            history,
+            list(list(role = "assistant", content = logs$code_history[[i]]$raw))
+          )
+        }
+        prompt_total <- append(prompt_total, history)
+      }
+
       # add new user prompt
       prompt_total <- append(
         prompt_total,
@@ -2069,7 +2108,7 @@ app_server <- function(input, output, session) {
         tags$head(
             tags$style(HTML("
                 #chat_window {
-                    height: 500px;  /* Adjust the height as needed */
+                    height: 400px;  /* Adjust the height as needed */
                     overflow-y: auto;  /* Enables vertical scrolling */
                     padding: 10px;
                     border-radius: 5px;

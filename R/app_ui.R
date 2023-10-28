@@ -39,7 +39,13 @@ app_ui <- function(request) {
                 )
             )
         ),
-
+        # Embed the CSS directly in the UI
+        tags$style("
+          .modal-dialog {
+            position: absolute;
+            bottom: 0;
+          }
+        "),
         # Sidebar with a slider input for number of bins
         sidebarLayout(
           sidebarPanel(
@@ -99,6 +105,20 @@ app_ui <- function(request) {
               )
             ),
             br(),
+            tags$style(type = "text/css", "textarea {width:100%}"),
+            tags$textarea(
+              id = "ask_question",
+              placeholder = "Chat with RTutor",
+              rows = 1,
+              ""
+            ),
+            tippy::tippy_this(
+              "ask_question",
+              "Ask a question on the code or statistics in general. \'Explain this code\'. \'What is a p-value?\'",
+              theme = "light-border"
+            ),
+            shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
+            br(),
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
@@ -131,16 +151,9 @@ app_ui <- function(request) {
                ),
               selected = "Beginner"
             ),
-            actionButton("save_feedbck", "Save Feedback"),
-            hr(), br(),    
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "ask_question",
-              placeholder = "Ask a question, e.g. \'Explain this code\' or \' What is linear regression?\'.",
-              rows = 2,
-              ""
-            ),
-            shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor")))
+            actionButton("save_feedbck", "Save Feedback")
+ 
+
           ),
 
       ###############################################################################
