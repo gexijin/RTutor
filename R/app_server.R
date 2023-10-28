@@ -915,6 +915,7 @@ app_server <- function(input, output, session) {
       prompt = input$input_text,
       prompt_all = openAI_prompt(), # entire prompt, as sent to openAI
       error = code_error(),
+      error_message = run_result()$error_message,
       rmd = Rmd_chunk(),
       language = ifelse(input$use_python, "Python", "R"),
       # saves the rendered file in the logs object.
@@ -2078,6 +2079,13 @@ app_server <- function(input, output, session) {
     if (new_message != "") {
       chat_content(c(new_message, chat_content()))
       #updateTextInput(session, "ask_question", value = "")
+      updateTextInput(
+        session,
+        inputId = "ask_question",
+        label = NULL,
+        placeholder = "Ask a question on the code or statistics",
+        value = ""
+      )
     }
   })
 

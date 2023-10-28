@@ -105,16 +105,18 @@ app_ui <- function(request) {
               )
             ),
             br(),
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "ask_question",
-              placeholder = "Chat with RTutor",
-              rows = 1,
-              ""
+            textInput(
+              inputId = "ask_question",
+              label = NULL,
+              placeholder = "Ask a question on the code or statistics",
+              value = ""
             ),
+
             tippy::tippy_this(
               "ask_question",
-              "Ask a question on the code or statistics in general. \'Explain this code\'. \'What is a p-value?\'",
+              "Walk me through this code. What does this error mean? 
+              Explain logistic regression. 
+              Give me R packages for time series analysis.  ",
               theme = "light-border"
             ),
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
@@ -122,8 +124,8 @@ app_ui <- function(request) {
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
-            uiOutput("slava_ukraini"),
-            br(),
+            #uiOutput("slava_ukraini"),
+            #br(),
             textOutput("retry_on_error"),
             checkboxInput("Comments", "Comments & questions"),
             tags$style(type = "text/css", "textarea {width:100%}"),
