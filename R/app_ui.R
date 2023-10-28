@@ -136,7 +136,7 @@ app_ui <- function(request) {
             tags$style(type = "text/css", "textarea {width:100%}"),
             tags$textarea(
               id = "ask_question",
-              placeholder = "Ask a question, such as \'Explain linear regression\''.",
+              placeholder = "Ask a question, e.g. \'Explain this code\' or \' What is linear regression?\'.",
               rows = 2,
               ""
             ),
@@ -446,18 +446,6 @@ app_ui <- function(request) {
             plotOutput("ggpairs")
           )
         )
-      ),
-
-      tabPanel(
-        title = "Ask",
-        value = "Ask",
-        img(
-          src = "www/tutor.jpg",
-          width = "344",
-          height = "309"
-        )
-
-
       ),
 
       tabPanel(
