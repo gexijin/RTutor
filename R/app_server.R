@@ -1777,18 +1777,55 @@ app_server <- function(input, output, session) {
   })
 
   # Markdown report from DataExplorer package; does not work
-#  output$eda_report <- downloadHandler(
+  output$eda_report <- downloadHandler(
     # For PDF output, change this to "report.pdf"
-#    filename = "DataExplorer_report.html",
-#    content = function(file) {
-#      DataExplorer::create_report(
-#        iris,
-#        output_file = file,
-#        output_dir = file.path(file),
-#        knit_root_dir = file.path(file)
-#      )
-#    }
-#  )
+    filename = "DataExplorer_report.html",
+    content = function(file) {
+      withProgress(message = "Generating Report ...", {
+        incProgress(0.2)
+        target <- NULL
+        if(input$eda_target_variable != "") {
+          target <- input$eda_target_variable
+        }
+        DataExplorer::create_report(
+          ggpairs_data()[, input$eda_variables],
+          output_format = rmarkdown::html_document(toc = TRUE, toc_depth = 6, theme = "yeti"),
+          output_file = basename(file),
+          output_dir = dirname(file),
+          y = target
+        )
+      })
+    }
+  )
+
+  output$eda_report_ui <- renderUI({
+    req(input$select_data != no_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+    df <- ggpairs_data()
+    tagList(
+      br(),
+      downloadButton(
+        outputId = "eda_report",
+        label = "Generate EDA Report"
+      ),
+      br(),br(),
+      selectInput(
+        inputId = "eda_target_variable",
+        label = "Select a target variable:",
+        choices = c("", colnames(df)),
+        multiple = FALSE
+      ),
+      br(),
+      checkboxGroupInput(
+        inputId = "eda_variables",
+        label = "Select other variables:",
+        choices = colnames(df),
+        selected = colnames(df)
+      )
+    )
+
+  })
 
   # Markdown report
   output$Rmd_source <- downloadHandler(

@@ -476,7 +476,12 @@ app_ui <- function(request) {
               "package."
             ),
             plotOutput("ggpairs")
-          )
+          ),
+          tabPanel(
+            title = "Report",
+            h4("EDA reports generated using the DataExplorer package."),
+            uiOutput("eda_report_ui")
+          ),
         )
       ),
 
