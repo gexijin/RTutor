@@ -18,6 +18,7 @@ app_ui <- function(request) {
     navbarPage(
       "RTutor",
     #  windowTitle = "RTutor",
+    # theme = bslib::bs_theme(bootswatch = "darkly"),
       id = "tabs",
       tabPanel(
         title = "Home",
@@ -108,7 +109,7 @@ app_ui <- function(request) {
             textInput(
               inputId = "ask_question",
               label = NULL,
-              placeholder = "Ask about the code, result, error, or statistics",
+              placeholder = "Ask about the code, result, error, or statistics in general.",
               value = ""
             ),
 
@@ -327,7 +328,7 @@ app_ui <- function(request) {
               div(
                 id = "first_file",
                 hr(),
-                h3("Default data.frame:  df"),
+                h4("Default dataset:  df"),
                 verbatimTextOutput("data_structure"),
               )
             ),
@@ -335,7 +336,7 @@ app_ui <- function(request) {
               div(
                 id = "second_file",
                 hr(),
-                h3("2nd data.frame: df2"),
+                h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
                 verbatimTextOutput("data_structure_2")
               )
             )
