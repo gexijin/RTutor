@@ -1133,7 +1133,14 @@ app_server <- function(input, output, session) {
 
   output$console_output <- renderText({
     req(!code_error())
-    paste(run_result()$console_output, collapse = "\n")
+    #paste(run_result()$console_output, collapse = "\n")
+    tmp_env <- list2env(run_env_start())
+    tryCatch({
+      eval_result <- eval(
+        parse(text = clean_cmd(logs$code, input$select_data)), 
+        envir = tmp_env
+      )
+    })
   })
 
   output$result_plot <- renderPlot({
@@ -1148,7 +1155,6 @@ app_server <- function(input, output, session) {
       tmp_env <- list2env(run_env_start())
       tryCatch({
         eval_result <- eval(
-          #parse(text = "log('error')"),
           parse(text = clean_cmd(logs$code, input$select_data)), 
           envir = tmp_env
         )
@@ -1488,8 +1494,40 @@ app_server <- function(input, output, session) {
     )
   })
 
+  # The data, after running the chunk
+  data_afterwards_2 <- reactive({
+    req(!is.null(input$user_file_2))
+    req(input$select_data)
+    req(current_data())
 
+    if (input$submit_button == 0) {
+      return(current_data())
+    }
 
+    df <- current_data()
+    # This updates the data by running hte entire code one more time.
+    if(input$submit_button != 0) {
+      if (code_error() == FALSE && !is.null(logs$code)) {
+        if(!input$use_python && logs$language == "R") { # not python
+          df <- run_env()$df2
+        }
+      }
+    }
+
+    # sometimes no row is left after processing.
+    if(is.null(df)) { # no_data
+      return(NULL)
+    } else if(nrow(df) == 0) {
+      return(NULL)
+    } else { # there are data in the dataframe
+      return(df)
+    }
+  })
+
+  output$data_structure_2 <- renderPrint({
+    req(!is.null(data_afterwards_2()))
+    str(data_afterwards_2())
+  })
   #                                 7.
   #____________________________________________________________________________
   # Logs and Reports

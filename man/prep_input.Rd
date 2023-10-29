@@ -11,7 +11,8 @@ prep_input(
   use_python,
   chunk_id,
   selected_model,
-  df2 = NULL
+  df2 = NULL,
+  df2_name = NULL
 )
 }
 \arguments{

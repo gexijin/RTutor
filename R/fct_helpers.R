@@ -115,7 +115,7 @@ move_front <- function(v, e){
 #' @param chunk_id  first or not? First chunk add data description
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, df2 = NULL) {
+prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, df2 = NULL, df2_name = NULL) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -177,14 +177,23 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       
       # if there is a second data frame, add that too.
       if(!is.null(df2)) {
-        data_info2 <- describe_df(
-          df2, 
-          list_levels = TRUE, 
-          relevant_var = relevant_var
-        )
-        n_words <- tokens(data_info)
-        if (more_info && !(chunk_id > 1 && n_words > 600)) {
-          txt <- paste(txt, data_info)
+        if(is.null(df2_name)) {
+          df2_name <- "df2"
+        } 
+
+        # 2nd data must be specificall called
+        if(grepl(df2_name, txt)) {
+          data_info_2 <- describe_df(
+            df2, 
+            list_levels = TRUE, 
+            relevant_var = relevant_var
+          )
+          data_info_2 <- gsub("df data frame", paste0(df2_name, " data frame"), data_info_2)
+
+          n_words <- tokens(data_info_2)
+          if (more_info && !(chunk_id > 1 && n_words > 600)) {
+            txt <- paste(txt, data_info_2)
+          }
         }
       }
 
@@ -203,7 +212,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  #cat("\n", txt)
+  cat("\n", txt)
   return(txt)
 }
 

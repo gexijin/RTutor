@@ -322,6 +322,7 @@ app_ui <- function(request) {
 
             br(),
             verbatimTextOutput("data_structure"),
+            verbatimTextOutput("data_structure_2")
             #,tableOutput("data_table")
 
 
