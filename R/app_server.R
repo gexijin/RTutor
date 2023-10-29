@@ -156,7 +156,7 @@ app_server <- function(input, output, session) {
     updateTextInput(
       session,
       "input_text",
-      value = paste0("Error! ", run_result()$error_message)
+      value = paste0("Fix this error from running the last chunk. Error: ", run_result()$error_message)
     )
   })
 
@@ -305,7 +305,7 @@ app_server <- function(input, output, session) {
         selectInput(
           inputId = "demo_prompt",
           choices = choices,
-          label = "Example requests:"
+          label = NULL
         )
       )
     }
@@ -325,7 +325,7 @@ app_server <- function(input, output, session) {
         tags$head(
             tags$style(HTML("
                 #settings_window {
-                    height: 700px;  /* Adjust the height as needed */
+                    height: 400px;  /* Adjust the height as needed */
                     overflow-y: auto;  /* Enables vertical scrolling */
                     padding: 10px;
                     border-radius: 5px;
@@ -1015,7 +1015,7 @@ app_server <- function(input, output, session) {
   output$total_cost <- renderText({
     if(input$submit_button == 0) {
       return("OpenAI charges us $1 for about 30 requests via GPT-4. Heavy users please
-      use your API key. See Settings."
+      use your own API key (Settings), or help cover the fee via PayPal(gexijin@gmail.com)."
       )
     } else {
     #req(openAI_response()$cmd)
@@ -2037,6 +2037,19 @@ app_server <- function(input, output, session) {
             )
           }
 
+          # append result, only the printed out. Figures in the future with gpt-4V
+          if(i == length(logs$code_history) && !is.null(run_result()$console_output)) {
+            result <- paste(run_result()$console_output, collapse = "\n")
+            if(nchar(result) > 10) {
+              code <- paste0(
+                code,
+                "\n\nResult: ",
+                result,
+                "\n"
+              )              
+            }
+          }
+
           history <- append(
             history,
             list(list(role = "assistant", content = code))
@@ -2192,7 +2205,7 @@ app_server <- function(input, output, session) {
         footer = tagList(
           modalButton("Close")
         ),
-        size = "m",
+        size = "s",
         easyClose = TRUE
       )
     )

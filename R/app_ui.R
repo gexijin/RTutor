@@ -30,9 +30,9 @@ app_ui <- function(request) {
         tags$head(
           tags$style(
             HTML(".shiny-notification {
-                  width: 200px;
+                  width: 300px;
                   position:fixed;
-                  top: calc(10%);
+                  top: calc(90%);
                   left: calc(10%);
                   }
                   "
@@ -75,7 +75,6 @@ app_ui <- function(request) {
             ),
 
             uiOutput("prompt_ui"),
-
             tags$style(type = "text/css", "textarea {width:100%}"),
             tags$textarea(
               id = "input_text",
@@ -109,15 +108,16 @@ app_ui <- function(request) {
             textInput(
               inputId = "ask_question",
               label = NULL,
-              placeholder = "Ask a question on the code or statistics",
+              placeholder = "Ask about the code, result, error, or statistics",
               value = ""
             ),
 
             tippy::tippy_this(
               "ask_question",
-              "Walk me through this code. What does this error mean? 
-              Explain logistic regression. 
-              Give me R packages for time series analysis.  ",
+              "Walk me through this code. What does this result mean? 
+              What is this error about? Explain logistic regression. 
+              List R packages for time series analysis. 
+              Hit Enter to send the request.",
               theme = "light-border"
             ),
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
@@ -194,7 +194,7 @@ app_ui <- function(request) {
                     "Chat with your data in your languages."
                   ),
                   br(),
-                  h4(" Oct 28 (v0.98):  Ask questions about code, error. Second data file upload.
+                  h4(" Oct 28 (v0.98):  Ask questions about code, result, error, or statistics in general. Second data file upload.
                   Oct 23 (v0.97): GPT-4 becomes the default.
                   Makes ggplot2 a preferred method for plotting. Sequential data manipulation is enabled."),
                   br(),

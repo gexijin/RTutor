@@ -1,5 +1,5 @@
 ﻿data,R,Python,name,requests,memo
-mpg,1,1, ... , Example requests,
+mpg,1,1, Examples: , Example requests,
 mpg,1,0,"Boxplot, ggplot2 ",Create a boxplot of highway vs. type. Color by type. Add jitter points.,
 mpg,0,1,"Boxplot, plotnine",Use the plotnine package to create a boxplot of highway vs. type. Color by type. ,
 mpg,1,0,Distribution (D): Numers ,Show me the distribution of highway.,
