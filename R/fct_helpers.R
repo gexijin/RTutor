@@ -161,7 +161,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         relevant_var = relevant_var
       )
       # Always add 'use the df data frame.'
-      #txt <- paste(txt, after_text)
+      txt <- paste(txt, after_text)
 
       n_words <- tokens(data_info)
       #if it is the first chunk;  always do this when Davinci model; or if data description is short
@@ -212,7 +212,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 
   # replace newline with space.
   txt <- gsub("\n", " ", txt)
-  cat("\n", txt)
+  #cat("\n", txt)
   return(txt)
 }
 

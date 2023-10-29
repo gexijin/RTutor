@@ -238,7 +238,7 @@ app_server <- function(input, output, session) {
   output$data_upload_ui <- renderUI({
 
     # Hide this input box after the first run.
-    req(input$submit_button == 0)
+    #req(input$submit_button == 0)
     req(is.null(input$user_file))
     fileInput(
       inputId = "user_file",
@@ -1133,14 +1133,7 @@ app_server <- function(input, output, session) {
 
   output$console_output <- renderText({
     req(!code_error())
-    #paste(run_result()$console_output, collapse = "\n")
-    tmp_env <- list2env(run_env_start())
-    tryCatch({
-      eval_result <- eval(
-        parse(text = clean_cmd(logs$code, input$select_data)), 
-        envir = tmp_env
-      )
-    })
+    paste(run_result()$console_output, collapse = "\n")
   })
 
   output$result_plot <- renderPlot({
@@ -1501,7 +1494,7 @@ app_server <- function(input, output, session) {
     req(current_data())
 
     if (input$submit_button == 0) {
-      return(current_data())
+      return(current_data_2())
     }
 
     df <- current_data()
@@ -2686,7 +2679,14 @@ app_server <- function(input, output, session) {
   })
 
 
-  # Upload the second file
+  # Upload the second file------------------------------------------------------
+  observe({
+      if (!is.null(input$user_file_2)) {
+          shinyjs::show("second_file")  # Show the panel when a file is uploaded
+      } else {
+          shinyjs::hide("second_file")  # Hide the panel if no file is uploaded
+      }
+  })
   output$data_upload_ui_2 <- renderUI({
     req(!is.null(input$user_file))
 
@@ -2794,9 +2794,8 @@ show_pop_up_2 <- function() {
   }
 
   observeEvent(input$user_file_2, {
-     showNotification("Data uploaded. Please select the data type for each column.")
+     showNotification("2nd file uploaded! To use it, specify with its name df2.")
      show_pop_up_2()
-
   })
 
    

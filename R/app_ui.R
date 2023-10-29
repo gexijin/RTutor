@@ -321,8 +321,16 @@ app_ui <- function(request) {
             ),
 
             br(),
+            h3("Data frame name:  df"),
             verbatimTextOutput("data_structure"),
-            verbatimTextOutput("data_structure_2")
+            shinyjs::hidden(
+              div(
+                id = "second_file",
+                hr(),
+                h3("2nd data frame name: df2"),
+                verbatimTextOutput("data_structure_2")
+              )
+            )
             #,tableOutput("data_table")
 
 
