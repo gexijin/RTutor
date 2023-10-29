@@ -321,192 +321,207 @@ app_server <- function(input, output, session) {
       shiny::modalDialog(
         size = "l",
         footer = modalButton("Confirm"),
-        tagList(
+                # Custom CSS to make the chat area scrollable
+        tags$head(
+            tags$style(HTML("
+                #settings_window {
+                    height: 700px;  /* Adjust the height as needed */
+                    overflow-y: auto;  /* Enables vertical scrolling */
+                    padding: 10px;
+                    border-radius: 5px;
+                }
+            "))
+        ),
+        div( id = "settings_window", 
+
+          tagList(
+            fluidRow(
+              column(
+                width = 2,
+                "Model:",
+                align = "center"
+              ),
+              column(
+                width = 10,
+                align = "left",
+                selectInput(
+                  inputId = "language_model",
+                  choices = language_models,
+                  label = NULL,
+                  selected = selected_model()
+                )
+              ),
+              column(
+                width = 4,
+                sliderInput(
+                  inputId = "temperature",
+                  label = "Sampling temperature",
+                  min = 0,
+                  max = 1,
+                  value = sample_temp(),
+                  step = .1,
+                  round = FALSE,
+                  width = "100%"
+                )
+              ),
+              column(
+                width = 8,
+                p("This important parameter controls the AI's behavior in choosing 
+                among possible answers. A higher sampling temperature tells the AI 
+                to take more risks, producing more diverse and creative 
+                solutions when the same request is repeated. A lower  temperature
+                (such as 0) results in more
+                conservative and well-defined solutions, 
+                but less variety when repeated.
+                "),
+              )
+            ),
+            hr(),
+            h4("Use your own API key"),
+            h5("We pay a small fee to use the AI for every request.
+              If you use this regularily, 
+              please take a few minutes to create your own API key: "),
+
+            tags$ul(
+                tags$li(
+                  "Create a personal account at",
+                  a(
+                    "OpenAI.",
+                    href = "https://openai.com/api/",
+                    target = "_blank"
+                  )
+                ),
+                tags$li("After logging in, click \"Personal\" from top right."),
+                tags$li(
+                  "Click \"Manage Account\" and then \"Billing\",
+                  where you can add \"Payment methods\" and set \"Usage 
+                  limits\". $5 per month is more than enough."
+                ),
+                tags$li(
+                  "Click \"API keys\" to create a new key, 
+                  which can be copied and pasted it below."
+                ),
+            ),
+            textInput(
+              inputId = "api_key",
+              label = h5("Paste your API key from OpenAI:"),
+              value = NULL,
+              placeholder = "sk-..... (51 characters)"
+            ),
+            uiOutput("valid_key"),
+            uiOutput("save_api_ui"),
+            verbatimTextOutput("session_api_source"),
+            hr(),
+
+            fluidRow(
+              column(
+                width = 6,
+                checkboxInput(
+                  inputId = "use_voice",
+                  label = strong("Enable voice narration"),
+                  value = use_voice()
+                )
+              ),
+              column(
+                width = 6,
+                # this causes the use_voice() to refresh twice,
+                # triggering the permission seeking in Chrome.
+                # Don't know why, but this works. I'm a stable genius.
+                actionButton("use_voice_button", strong("Seek mic permission"))
+              )
+            ),
+            h5("First select the checkbox and then seek 
+            permission to use the microphone. Your browser should have a popup 
+            window. Otherwise, check the both ends of the URL bar for a 
+            blocked icon, which
+            could be clicked to grant permission. If successful, you will see 
+            a red dot on top of the tab in Chrome.
+            Voice naration can be used in both the Main and the 
+            Ask Me Anything tabs by just saying \"Tutor ...\".
+            To submit the request, say \"Tutor submit\", or \"Tutor go ahead.\"     
+            If not satisfied, try again to overwrite. 
+            To continue, say \"Tutor Continue ...\""),
+          ),
+
+          hr(),
           fluidRow(
             column(
-              width = 2,
-              "Model:",
-              align = "center"
-            ),
-            column(
-              width = 10,
-              align = "left",
-              selectInput(
-                inputId = "language_model",
-                choices = language_models,
-                label = NULL,
-                selected = selected_model()
+              width = 4,
+              checkboxInput(
+                inputId = "numeric_as_factor",
+                label = strong("Treat as factors"),
+                value = convert_to_factor()
+              ),
+              tippy::tippy_this(
+                elementId = "numeric_as_factor",
+                tooltip = "Treat the columns that looks like a category 
+                as a category. This applies to columns that contain numbers
+                but have very few unique values. ",
+                theme = "light-border"
               )
             ),
             column(
               width = 4,
-              sliderInput(
-                inputId = "temperature",
-                label = "Sampling temperature",
-                min = 0,
-                max = 1,
-                value = sample_temp(),
-                step = .1,
-                round = FALSE,
-                width = "100%"
+              numericInput(
+                inputId = "max_levels_factor",
+                label = "Max levels",
+                value = max_levels_factor(),
+                min = 3,
+                max = 50,
+                step = 1
+              ),
+              tippy::tippy_this(
+                elementId = "max_levels_factor",
+                tooltip = "To convert a numeric column as category, 
+                the column must have no more than this number of unique values.",
+                theme = "light-border"
+              )
+            ),
+            column(
+              width = 4,
+              numericInput(
+                inputId = "max_proptortion_factor",
+                label = "Max proportion",
+                value = max_proptortion_factor(),
+                min = 0.05,
+                max = 0.5,
+                step = 0.1
+              ),
+              tippy::tippy_this(
+                elementId = "max_proptortion_factor",
+                tooltip = "To convert a numeric column as category, 
+                the number of unique values in a column must not exceed 
+                more this proportion of the total number of rows.",
+                theme = "light-border"
+              )
+            )
+          ),
+          h5("Some columns contains numbers but should be treated 
+          as categorical values or factors. For example, we sometimes 
+          use 1 to label success and 0 for failure.
+          If this is selected, using the default setting, a column 
+          is treated as categories when the number of unique values 
+          is less than or equal to 12, and less than 10% of the total rows."
+          ),
+          hr(),
+          fluidRow(
+            column(
+              width = 4,
+              checkboxInput(
+                inputId = "contribute_data",
+                label = "Help us make RTutor better",
+                value = contribute_data()
               )
             ),
             column(
               width = 8,
-              p("This important parameter controls the AI's behavior in choosing 
-              among possible answers. A higher sampling temperature tells the AI 
-              to take more risks, producing more diverse and creative 
-              solutions when the same request is repeated. A lower  temperature
-              (such as 0) results in more
-              conservative and well-defined solutions, 
-              but less variety when repeated.
-              "),
-            )
-          ),
-          hr(),
-          h4("Use your own API key"),
-          h5("We pay a small fee to use the AI for every request.
-            If you use this regularily, 
-            please take a few minutes to create your own API key: "),
-
-          tags$ul(
-              tags$li(
-                "Create a personal account at",
-                a(
-                  "OpenAI.",
-                  href = "https://openai.com/api/",
-                  target = "_blank"
-                )
-              ),
-              tags$li("After logging in, click \"Personal\" from top right."),
-              tags$li(
-                "Click \"Manage Account\" and then \"Billing\",
-                where you can add \"Payment methods\" and set \"Usage 
-                limits\". $5 per month is more than enough."
-              ),
-              tags$li(
-                "Click \"API keys\" to create a new key, 
-                which can be copied and pasted it below."
-              ),
-          ),
-          textInput(
-            inputId = "api_key",
-            label = h5("Paste your API key from OpenAI:"),
-            value = NULL,
-            placeholder = "sk-..... (51 characters)"
-          ),
-          uiOutput("valid_key"),
-          uiOutput("save_api_ui"),
-          verbatimTextOutput("session_api_source"),
-          hr(),
-
-          fluidRow(
-            column(
-              width = 6,
-              checkboxInput(
-                inputId = "use_voice",
-                label = strong("Enable voice narration"),
-                value = use_voice()
-              )
-            ),
-            column(
-              width = 6,
-              # this causes the use_voice() to refresh twice,
-              # triggering the permission seeking in Chrome.
-              # Don't know why, but this works. I'm a stable genius.
-              actionButton("use_voice_button", strong("Seek mic permission"))
-            )
-          ),
-          h5("First select the checkbox and then seek 
-          permission to use the microphone. Your browser should have a popup 
-          window. Otherwise, check the both ends of the URL bar for a 
-          blocked icon, which
-          could be clicked to grant permission. If successful, you will see 
-          a red dot on top of the tab in Chrome.
-          Voice naration can be used in both the Main and the 
-          Ask Me Anything tabs by just saying \"Tutor ...\".
-          To submit the request, say \"Tutor submit\", or \"Tutor go ahead.\"     
-          If not satisfied, try again to overwrite. 
-          To continue, say \"Tutor Continue ...\""),
-        ),
-        hr(),
-        fluidRow(
-          column(
-            width = 4,
-            checkboxInput(
-              inputId = "numeric_as_factor",
-              label = strong("Treat as factors"),
-              value = convert_to_factor()
-            ),
-            tippy::tippy_this(
-              elementId = "numeric_as_factor",
-              tooltip = "Treat the columns that looks like a category 
-              as a category. This applies to columns that contain numbers
-              but have very few unique values. ",
-              theme = "light-border"
-            )
-          ),
-          column(
-            width = 4,
-            numericInput(
-              inputId = "max_levels_factor",
-              label = "Max levels",
-              value = max_levels_factor(),
-              min = 3,
-              max = 50,
-              step = 1
-            ),
-            tippy::tippy_this(
-              elementId = "max_levels_factor",
-              tooltip = "To convert a numeric column as category, 
-              the column must have no more than this number of unique values.",
-              theme = "light-border"
-            )
-          ),
-          column(
-            width = 4,
-            numericInput(
-              inputId = "max_proptortion_factor",
-              label = "Max proportion",
-              value = max_proptortion_factor(),
-              min = 0.05,
-              max = 0.5,
-              step = 0.1
-            ),
-            tippy::tippy_this(
-              elementId = "max_proptortion_factor",
-              tooltip = "To convert a numeric column as category, 
-              the number of unique values in a column must not exceed 
-              more this proportion of the total number of rows.",
-              theme = "light-border"
+              h5("Save your requests and the structure of your data 
+              such as column names and data types, not the data itself. 
+              We can learn from users about creative ways to use AI. 
+              And we can try to improve unsuccessful attempts. ")
             )
           )
-        ),
-        h5("Some columns contains numbers but should be treated 
-        as categorical values or factors. For example, we sometimes 
-        use 1 to label success and 0 for failure.
-        If this is selected, using the default setting, a column 
-        is treated as categories when the number of unique values 
-        is less than or equal to 12, and less than 10% of the total rows."
-        ),
-        hr(),
-        fluidRow(
-          column(
-            width = 4,
-            checkboxInput(
-              inputId = "contribute_data",
-              label = "Help us make RTutor better",
-              value = contribute_data()
-            )
-          ),
-          column(
-            width = 8,
-            h5("Save your requests and the structure of your data 
-            such as column names and data types, not the data itself. 
-            We can learn from users about creative ways to use AI. 
-            And we can try to improve unsuccessful attempts. ")
-          )
-        ),
+        ), #div
         easyClose = TRUE
       )
     )
@@ -1486,6 +1501,11 @@ app_server <- function(input, output, session) {
       collapse = "\n"
     )
   })
+  observe({
+    req(!is.null(data_afterwards()))
+    shinyjs::show(id = "first_file")
+  })
+
 
   # The data, after running the chunk
   data_afterwards_2 <- reactive({

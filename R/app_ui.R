@@ -194,7 +194,8 @@ app_ui <- function(request) {
                     "Chat with your data in your languages."
                   ),
                   br(),
-                  h4("Major upgrade!!! Oct 23, 2023: With v0.97, GPT-4 becomes the default.
+                  h4(" Oct 28 (v0.98):  Ask questions about code, error. Second data file upload.
+                  Oct 23 (v0.97): GPT-4 becomes the default.
                   Makes ggplot2 a preferred method for plotting. Sequential data manipulation is enabled."),
                   br(),
                   h4("Also try ",
@@ -321,13 +322,20 @@ app_ui <- function(request) {
             ),
 
             br(),
-            h3("Data frame name:  df"),
-            verbatimTextOutput("data_structure"),
+
+            shinyjs::hidden(
+              div(
+                id = "first_file",
+                hr(),
+                h3("Default data.frame:  df"),
+                verbatimTextOutput("data_structure"),
+              )
+            ),
             shinyjs::hidden(
               div(
                 id = "second_file",
                 hr(),
-                h3("2nd data frame name: df2"),
+                h3("2nd data.frame: df2"),
                 verbatimTextOutput("data_structure_2")
               )
             )
@@ -527,6 +535,9 @@ app_ui <- function(request) {
         hr(),
         h4("Update log:"),
         tags$ul(
+          tags$li(
+            "v 0.98  10/28/2023. Ask questions about code, error. Second data file upload."
+          ),          
           tags$li(
             "v 0.97  10/23/2023. GPT-4 becomes the default. Make ggplot2 a preferred method for plotting.
              Use R environment to enable successive data manipulation."
