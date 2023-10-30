@@ -1784,7 +1784,7 @@ app_server <- function(input, output, session) {
       withProgress(message = "Generating Report ...", {
         incProgress(0.2)
         target <- NULL
-        if(input$eda_target_variable != "") {
+        if(input$eda_target_variable != "<None>") {
           target <- input$eda_target_variable
         }
         DataExplorer::create_report(
@@ -1809,11 +1809,11 @@ app_server <- function(input, output, session) {
         outputId = "eda_report",
         label = "Generate EDA Report"
       ),
-      br(),br(),
+      br(),br(),br(),
       selectInput(
         inputId = "eda_target_variable",
         label = "Select a target variable:",
-        choices = c("", colnames(df)),
+        choices = c("<None>", colnames(df)),
         multiple = FALSE
       ),
       br(),
