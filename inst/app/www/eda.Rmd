@@ -1,0 +1,472 @@
+---
+title: "A general approach to exploratory data analysis"
+author: "Steven Ge"
+output: 
+  html_document:
+    number_sections: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+```
+
+# Data pre-process
+```{r, echo=FALSE}
+df <- iris
+df <- mpg
+df[2:50, 2] <- NA
+df[2:30, 5] <- NA
+df$id <- as.character(1:nrow(df))
+df <- diamonds
+target_var <- "clarity"
+```
+
+If a numeric variable has less unique values, it will be converted into categorical variable.
+Here if the total number of unique values is less than 20% of the total rows, convert.
+```{r}
+# Iterate over each column of the data frame
+for (i in seq_along(df)) {
+  # Check if the column is numeric and has less than 5 unique values
+  if (is.numeric(df[[i]]) && length(unique(df[[i]])) / nrow(df) < 0.05 && length(unique(df[[i]])) < 13) {
+    # Convert the column to a factor
+    df[[i]] <- as.factor(df[[i]])
+    cat("\nColumn ", colnames(df)[i], "was converted to a factor.")
+  }
+}
+```
+
+If a non-numeric variable has too many unique values, it might be names or IDs that is not useful in analysis. 
+```{r}
+cutoff <- 0.8
+# Initialize a vector to store the names of columns to be removed
+cols_to_remove <- c()
+
+# Loop through each column
+for (col_name in names(df)) {
+  # Check if column is non-numeric and has unique values > 80% of total rows
+  if (!is.numeric(df[[col_name]]) && length(unique(df[[col_name]])) > cutoff * nrow(df)) {
+    cols_to_remove <- c(cols_to_remove, col_name)
+    cat("\nColumn", cols_to_remove, " was excluded from analysis.")
+  }
+}
+
+# Remove the identified columns
+df <- df %>% select(-one_of(cols_to_remove))
+```
+```{r}
+target_var <- "cty"
+
+# Check if the target_var is in the dataframe and is not NA
+if (!is.na(target_var) && target_var %in% names(df)) {
+  # Check if the target variable is numerical
+  if (is.numeric(df[[target_var]])) {
+    # Create bins for the numerical target variable
+    df[["target_bin"]] <- cut(df[[target_var]],
+      breaks = 5,
+      labels = c("low", "low_mid", "mid", "upper_mid", "high"),
+      include.lowest = TRUE
+    )
+    print(paste("Binned target variable", target_var, "created as", "target_bin"))
+  } else {
+    print(paste(target_var, ", the target variable, is a categorical variable."))
+  }
+} else {
+  print("No valid target variable selected. Proceeding with general EDA.")
+}
+```
+
+
+
+# Basic summary
+
+```{R}
+str(df)
+summary(df)
+```
+
+# Missing values
+```{r}
+# Calculate the total number of missing values per column
+missing_values <- sapply(df, function(x) sum(is.na(x)))
+
+# Calculate the number of cases with at least one missing value
+cases_with_missing <- sum(apply(df, 1, function(x) any(is.na(x))))
+
+# Check if there are any missing values
+if (all(missing_values == 0)) {
+  print("There is no missing data in any columns.")
+} else {
+  # Create a data frame for plotting
+  missing_data_df <- data.frame(
+    Column = c(names(missing_values), "At Least One Missing"),
+    MissingValues = c(missing_values, cases_with_missing)
+  )
+  # Calculate the percentage of missing values per column
+  # missing_percentage <- (missing_values / nrow(df)) * 100
+  # Plot the number of missing values for all columns with labels
+  ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -0.3) + # Add labels to the bars
+    # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
+    coord_flip() + # Makes the bars horizontal
+    labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +
+    scale_fill_brewer(palette = "Set3") + # Use a color palette for different bars
+    theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
+    scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits by 10%
+}
+```
+
+## Outliers
+
+```{r}
+detect_outliers_mad <- function(df, accuracy = 0.99) {
+  # Function to calculate MAD
+  mad_function <- function(x) {
+    median(abs(x - median(x)))
+  }
+
+  # Calculate z-score equivalent for the given accuracy
+  z_threshold <- qnorm(accuracy + (1 - accuracy) / 2)
+
+  # Calculate MAD threshold
+  mad_threshold <- z_threshold
+
+  # Initialize a list to store outlier indices for each numeric column
+  outliers_list <- list()
+
+  # Initialize a vector to keep track of rows with outliers
+  rows_with_outliers <- rep(FALSE, nrow(df))
+
+  # Loop through each column in the dataframe
+  for (col_name in names(df)) {
+    # Check if the column is numeric
+    if (is.numeric(df[[col_name]])) {
+      # Calculate MAD and median for the column
+      mad_value <- mad_function(df[[col_name]])
+      median_value <- median(df[[col_name]])
+
+      # Calculate the deviation scores (using a modified z-score)
+      deviation_scores <- 0.6745 * (df[[col_name]] - median_value) / mad_value
+
+      # Identify indices of outliers
+      outlier_indices <- which(abs(deviation_scores) > mad_threshold)
+
+      # Store the indices in the list
+      outliers_list[[col_name]] <- outlier_indices
+
+      # Update rows with outliers
+      rows_with_outliers[outlier_indices] <- TRUE
+    }
+  }
+
+  # Calculate the number of outliers in each column
+  num_outliers_each_col <- sapply(outliers_list, length)
+
+  # Calculate the number of rows with at least one outlier
+  num_rows_with_outliers <- sum(rows_with_outliers)
+
+  # Combine the results into one vector
+  combined_results <- c(num_outliers_each_col, "Rows with At Least One Outlier" = num_rows_with_outliers)
+
+  # Return the combined results
+  return(combined_results)
+}
+
+# Detect outliers using the previously defined function
+outliers_info <- detect_outliers_mad(df)
+
+# Check if there are any outliers
+if (all(outliers_info == 0)) {
+  print("There are no outliers in any columns.")
+} else {
+  # Create a data frame for plotting
+  outliers_data_df <- data.frame(
+    Column = names(outliers_info),
+    Outliers = outliers_info,
+    OutlierPercentage = (outliers_info / nrow(df)) * 100 # Calculate the percentage of outliers
+  )
+
+  # Plot the number of outliers for all columns with labels
+  ggplot(outliers_data_df, aes(x = Column, y = Outliers, fill = Column)) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = sprintf("%.2f%%", OutlierPercentage)), hjust = -0.3, vjust = 0) + # Add labels to the bars
+    coord_flip() + # Makes the bars horizontal
+    labs(title = "Number of Outliers by Column", x = "Column", y = "Number of Outliers") +
+    scale_fill_brewer(palette = "Set3") + # Use a color palette for different bars
+    theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
+    scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits
+}
+```
+
+
+# Univeriable distributions: Numeric
+
+```{r}
+library(gridExtra)
+library(e1071) # for skewness
+
+# Function to check if the variable is highly skewed
+is_highly_skewed <- function(x) {
+  # Remove missing values before computing skewness
+  x <- na.omit(x)
+  abs(e1071::skewness(x)) > 1
+}
+
+create_plots <- function(df, var) {
+  skewness_value <- round(skewness(df[[var]]), 2)
+
+  # Histogram
+  p1 <- ggplot(df, aes_string(x = var)) +
+    geom_histogram(bins = 15, fill = "skyblue", color = "black") +
+    ggtitle(paste("Histogram of", var)) +
+    annotate("text", x = Inf, y = Inf, label = paste("Skewness:", skewness_value), hjust = 1.1, vjust = 1.1)
+
+  # QQ Plot with reference line
+  p2 <- ggplot(df, aes_string(sample = var)) +
+    stat_qq() +
+    stat_qq_line(color = "red") +
+    ggtitle(paste("QQ Plot of", var))
+
+  if (is_highly_skewed(df[[var]])) {
+    df$log_transformed <- log(df[[var]] + 1)
+    skewness_log_value <- round(skewness(df$log_transformed), 2)
+
+    # Histogram after log transformation
+    p3 <- ggplot(df, aes(x = log_transformed)) +
+      geom_histogram(bins = 15, fill = "lightgreen", color = "black") +
+      ggtitle(paste("Log-transformed", var)) +
+      annotate("text", x = Inf, y = Inf, label = paste("Skewness:", skewness_log_value), hjust = 1.1, vjust = 1.1)
+
+    # QQ Plot after log transformation
+    p4 <- ggplot(df, aes(sample = log_transformed)) +
+      stat_qq() +
+      stat_qq_line(color = "red") +
+      ggtitle(paste("log-transformed", var))
+
+    return(grid.arrange(p1, p2, p3, p4, ncol = 2))
+  } else {
+    return(grid.arrange(p1, p2, ncol = 2))
+  }
+}
+
+# Apply the function to each numeric variable in the dataframe
+lapply(names(df)[sapply(df, is.numeric)], function(var) create_plots(df, var))
+```
+
+
+# Univariate distribution: Categorical variables
+```{r}
+# Function to create bar plots
+create_bar_plot <- function(df, column_name) {
+  # Checking if the column is a factor
+  if (is.factor(df[[column_name]])) {
+    factor_levels <- levels(df[[column_name]])
+  } else {
+    factor_levels <- NULL
+  }
+
+  # Modify the data for plotting
+  plot_data <- df %>%
+    count(!!sym(column_name)) %>%
+    arrange(desc(n)) %>%
+    mutate(value = ifelse(row_number() > 12, "Other", as.character(!!sym(column_name)))) %>%
+    group_by(value) %>%
+    summarize(n = sum(n))
+
+  # If the column is a factor, adjust the value names
+  if (!is.null(factor_levels)) {
+    plot_data$value <- factor(plot_data$value, levels = c(factor_levels, "Other"))
+  }
+
+  # Finding the maximum value for adjusting y-axis
+  max_value <- max(plot_data$n)
+
+  # Creating the bar plot
+  p <- ggplot(plot_data, aes(x = value, y = n, fill = value)) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = paste0(round(n / sum(n) * 100, 1), "%")),
+      vjust = -0.5
+    ) +
+    labs(title = paste("Bar Plot for", column_name), y = "Count") +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      axis.title.x = element_blank()
+    ) +
+    theme(legend.position = "none") + # Remove the legend
+    scale_y_continuous(limits = c(0, max_value * 1.2)) # Extend y-axis by 20%
+
+  print(p) # Explicitly print the plot
+}
+
+# Iterating over each column
+for (column_name in names(df)) {
+  if (!is.numeric(df[[column_name]])) { # Checking if the column is non-numeric
+    unique_values <- length(unique(df[[column_name]]))
+    if (unique_values != nrow(df)) { # Ignoring columns with all unique values
+      create_bar_plot(df, column_name)
+    }
+  }
+}
+```
+
+# Overview heatmap
+```{r, fig.height=8}
+library(pheatmap)
+df_clean <- df
+
+
+# Prepare annotation for the heatmap if the target_var is not NA and exists in the dataframe
+
+
+# Filter out rows with missing values
+df_clean <- na.omit(df_clean)
+# Standardize the numeric columns
+numeric_cols <- sapply(df_clean, is.numeric)
+# Prepare data for the heatmap
+df_clean <- df_clean[numeric_cols]
+
+if (ncol(df_clean) > 1) {
+  data_for_heatmap <- df_clean
+  # If the dataframe has more than 2000 rows, sample 2000 rows randomly
+  if (nrow(df_clean) > 2000) {
+    set.seed(123) # Set a random seed for reproducibility
+    data_for_heatmap <- df_clean[sample(nrow(df_clean), 2000), ]
+  }
+
+  data_for_heatmap <- scale(data_for_heatmap)
+
+
+  # Determine whether to include row names based on the number of rows
+  show_row_names <- nrow(df_clean) <= 100
+
+  # Create the heatmap with clustering trees and optional color bar
+  pheatmap(data_for_heatmap,
+    scale = "row",
+    clustering_distance_rows = "euclidean",
+    clustering_distance_cols = "euclidean",
+    clustering_method = "complete",
+    border_color = NA,
+    show_rownames = show_row_names
+  )
+}
+```
+
+# Bivariate correlation
+
+## Correlation matrix.
+```{r, height = 10, width =10}
+library(corrplot)
+df2 <- df[sapply(df, is.numeric)]
+M <- cor(df2)
+testRes <- cor.mtest(df2, conf.level = 0.95)
+## leave blank on non-significant coefficient
+## add significant correlation coefficients
+corrplot(M,
+  p.mat = testRes$p, method = "circle", type = "lower", insig = "blank",
+  addCoef.col = "black", number.cex = 0.8, order = "AOE", diag = FALSE
+)
+```
+
+## Among numeric variables
+
+```{r}
+library(GGally)
+library(hexbin)
+
+num_cols <- names(df)[sapply(df, is.numeric)]
+num_col_pairs <- combn(num_cols, 2, simplify = FALSE)
+
+for (pair in num_col_pairs) {
+  col_x <- pair[1]
+  col_y <- pair[2]
+
+  # Perform correlation test
+  corr_test <- cor.test(df[[col_x]], df[[col_y]], method = "pearson")
+
+  if (corr_test$p.value < 0.01 && abs(corr_test$estimate) > 0.1) {
+    corr_label <- paste("R =", round(corr_test$estimate, 2), "\nP =", format(corr_test$p.value, scientific = TRUE, digits = 2))
+
+    if (nrow(df) > 5000) {
+      # Use hexbin plot
+      p <- ggplot(df, aes_string(x = col_x, y = col_y)) +
+        labs(title = paste(col_x, "vs", col_y), x = col_x, y = col_y) +
+        geom_hex(bins = 70) +
+        scale_fill_continuous(type = "viridis")
+    } else {
+      # Use scatter plot
+      if (!is.na(target_var) && target_var != col_x && target_var != col_y) {
+        color_var <- ifelse(!is.numeric(df[[target_var]]), target_var, "target_bin")
+        p <- ggplot(df, aes_string(x = col_x, y = col_y, color = color_var)) +
+          geom_point(alpha = 0.7) +
+          labs(title = paste(col_x, "vs", col_y), x = col_x, y = col_y) +
+          guides(color = guide_legend(title = color_var))
+      } else {
+        p <- ggplot(df, aes_string(x = col_x, y = col_y)) +
+          geom_point(alpha = 0.7) +
+          labs(title = paste(col_x, "vs", col_y), x = col_x, y = col_y)
+      }
+    }
+
+    p <- p + annotate("text", x = Inf, y = Inf, label = corr_label, hjust = 1.1, vjust = 1.1, size = 4)
+    print(p)
+  }
+}
+```
+
+
+## Between numeric and categorical
+```{r}
+num_cols <- sapply(df, is.numeric)
+cat_cols <- sapply(df, is.factor)
+# Perform ANOVA and create violin plots for significant cases
+for (num_var in names(df)[num_cols]) {
+  for (cat_var in names(df)[cat_cols]) {
+    if (cat_var != "target_bin") {
+      anova_result <- aov(df[[num_var]] ~ df[[cat_var]], data = df)
+      p_value <- summary(anova_result)[[1]]$"Pr(>F)"[1]
+      if (p_value < 0.01) {
+        plot <- ggplot(df, aes_string(x = cat_var, y = num_var)) +
+          geom_violin(trim = FALSE, fill = "lightblue", color = "black") +
+          geom_boxplot(width = 0.2, fill = "white", color = "black") +
+          labs(title = paste(num_var, "by", cat_var, "(ANOVA P =", format(p_value, scientific = TRUE, digits = 2), ")"), x = cat_var, y = num_var)
+
+        if (nrow(df) < 300) {
+          plot <- plot + geom_jitter(width = 0.2, color = "black")
+        }
+        print(plot)
+      }
+    }
+  }
+}
+```
+
+## Between two categorical variables
+
+```{r}
+cat_cols <- !(sapply(df, is.numeric)) & names(df) != "target_bin"
+cat_var_names <- names(df)[cat_cols]
+
+# Perform chi-squared tests and create stacked bar plots if p-value < 0.01
+for (i in 1:(length(cat_var_names) - 1)) {
+  for (j in (i + 1):length(cat_var_names)) {
+    tab <- table(df[[cat_var_names[i]]], df[[cat_var_names[j]]])
+    chi_test <- chisq.test(tab)
+    if (is.na(chi_test$p.value)) next
+    if (chi_test$p.value < 0.01) {
+      p <- ggplot(df, aes_string(x = cat_var_names[i], fill = cat_var_names[j])) +
+        geom_bar(position = "fill") +
+        labs(
+          title = paste(cat_var_names[i], "vs", cat_var_names[j], "(Chisq P =", format(chi_test$p.value, scientific = TRUE, digits = 2), ")"),
+          x = paste(cat_var_names[i]),
+          y = "Proportion"
+        ) +
+        coord_flip()
+      print(p)
+    }
+  }
+}
+```
