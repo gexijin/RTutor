@@ -479,7 +479,7 @@ app_ui <- function(request) {
           ),
           tabPanel(
             title = "Report",
-            h4("EDA reports generated using the DataExplorer package."),
+            h4("Comprehensive EDA reports. Please wait for 2 minutes for the report to be generated."),
             uiOutput("eda_report_ui")
           ),
         )
