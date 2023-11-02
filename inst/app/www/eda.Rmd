@@ -318,21 +318,17 @@ for (column_name in names(df)) {
 ```
 
 # Overview heatmap
-```{r heatmap, fig.height=8}
+```{r heatmap}
 library(pheatmap)
 df_clean <- df
 
-
-# Prepare annotation for the heatmap if the target_var is not NA and exists in the dataframe
-
-
-# Filter out rows with missing values
-df_clean <- na.omit(df_clean)
-# Standardize the numeric columns
 numeric_cols <- sapply(df_clean, is.numeric)
 # Prepare data for the heatmap
 df_clean <- df_clean[numeric_cols]
+# Filter out rows with missing values
+df_clean <- na.omit(df_clean)
 
+# too many rows for heatmap? 
 if (ncol(df_clean) > 1) {
   data_for_heatmap <- df_clean
   # If the dataframe has more than 2000 rows, sample 2000 rows randomly
@@ -341,8 +337,8 @@ if (ncol(df_clean) > 1) {
     data_for_heatmap <- df_clean[sample(nrow(df_clean), 2000), ]
   }
 
+# Standardize the numeric columns
   data_for_heatmap <- scale(data_for_heatmap)
-
 
   # Determine whether to include row names based on the number of rows
   show_row_names <- nrow(df_clean) <= 100
@@ -376,7 +372,7 @@ corrplot(M,
 )
 ```
 
-## Among numeric variables
+## Correlation between numeric variables
 
 ```{r two-number}
 library(GGally)
@@ -430,7 +426,7 @@ if(length(num_cols) > 1) {
 
 
 
-## Between numeric and categorical
+## Correlation between a numeric and a categorical variable
 ```{r numeric-categorical}
 num_cols <- sapply(df, is.numeric)
 cat_cols <- sapply(df, is.factor)
@@ -460,7 +456,7 @@ if(length(num_cols) > 1 & length(cat_cols) > 1) {
 }
 ```
 
-## Between two categorical variables
+## Correlation between two categorical variables
 
 ```{r two-categories}
 cat_cols <- !(sapply(df, is.numeric)) & names(df) != "target_bin"
