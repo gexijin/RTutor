@@ -1856,7 +1856,7 @@ app_server <- function(input, output, session) {
 
         # This should retrieve the project location on your device:
         # "C:/Users/bdere/Documents/GitHub/idepGolem"
-        wd <- getwd()
+        #wd <- getwd()
 
         markdown_location <- app_sys("app/www/eda.Rmd")
         file.copy(from = markdown_location, to = tempReport, overwrite = TRUE)
@@ -1867,7 +1867,7 @@ app_server <- function(input, output, session) {
         }
         # Set up parameters to pass to Rmd document
         params <- list(
-          df = ,
+          df = df,
           target = input$eda_target_variable
         )
         req(params)
