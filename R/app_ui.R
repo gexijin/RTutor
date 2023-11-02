@@ -447,7 +447,7 @@ app_ui <- function(request) {
             plotOutput("ggpairs")
           ),
           tabPanel(
-            title = "Report",
+            title = "EDA Report",
             h4("Comprehensive EDA reports. Please wait for 2 minutes for the report to be generated."),
             uiOutput("eda_report_ui")
           ),
