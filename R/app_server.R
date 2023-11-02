@@ -1806,13 +1806,6 @@ app_server <- function(input, output, session) {
     df <- ggpairs_data()
     tagList(
       br(),
-      selectInput(
-        inputId = "eda_target_variable",
-        label = "Select a target variable (optional):",
-        choices = c("<None>", colnames(df)),
-        multiple = FALSE
-      ),
-      br(),
       fluidRow(
         column(
           width = 3,
@@ -1825,9 +1818,16 @@ app_server <- function(input, output, session) {
           width = 3,
           downloadButton(
             outputId = "eda_report",
-            label = "EDA Report using DataExplorer"
+            label = "DataExplorer EDA Report"
           )
         )
+      ),
+      br(),
+      selectInput(
+        inputId = "eda_target_variable",
+        label = "Select a target variable (optional):",
+        choices = c("<None>", colnames(df)),
+        multiple = FALSE
       ),
       br(),
       checkboxGroupInput(
@@ -1860,14 +1860,10 @@ app_server <- function(input, output, session) {
 
         markdown_location <- app_sys("app/www/eda.Rmd")
         file.copy(from = markdown_location, to = tempReport, overwrite = TRUE)
-        df <- current_data()
-        # if analyses are run, use the original data
-        if(length(logs$code_history)) {
-          df <- logs$code_history[[1]]$env$df
-        }
+
         # Set up parameters to pass to Rmd document
         params <- list(
-          df = df,
+          df = ggpairs_data()[, input$eda_variables],
           target = input$eda_target_variable
         )
         req(params)
@@ -2402,8 +2398,13 @@ app_server <- function(input, output, session) {
     })
   })
 
+  # data used for EDA
   ggpairs_data <- reactive({
     df <- current_data()
+    # if analyses are run, use the original data
+    if(length(logs$code_history) > 0) {
+      df <- logs$code_history[[1]]$env$df
+    }
     df <- na.omit(df) # remove missing values
     cat_variables <- colnames(df)[!sapply(df, is.numeric)]
     # ggpairs does not tolerate variables with too many levels
