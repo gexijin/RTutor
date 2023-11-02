@@ -935,12 +935,12 @@ app_server <- function(input, output, session) {
       language = ifelse(input$use_python, "Python", "R"),
       # saves the rendered file in the logs object.
       html_file = ifelse(input$use_python, python_to_html(), -1),
+      prompt_tokens = openAI_response()$response$usage$prompt_tokens,
+      output_tokens = openAI_response()$response$usage$completion_tokens,
       # save a copy of the data in the environment as a list.
       # if save environment, only reference is saved. 
       # This needs more memory, but works.
-      prompt_tokens = openAI_response()$response$usage$prompt_tokens,
-      output_tokens = openAI_response()$response$usage$completion_tokens,
-      env = run_env_start() # it is a list
+      env = run_env_start() # it is a list; 
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
@@ -968,6 +968,7 @@ app_server <- function(input, output, session) {
     if(id < length(logs$code_history)) {
       # convert list to environment; 
       # update the run_env reactive value.
+      # restore the environment to the before  running the ith chunk
       run_env(list2env(logs$code_history[[id]]$env))
 
       # enable re-calculation of the code
@@ -1859,10 +1860,14 @@ app_server <- function(input, output, session) {
 
         markdown_location <- app_sys("app/www/eda.Rmd")
         file.copy(from = markdown_location, to = tempReport, overwrite = TRUE)
-
+        df <- current_data()
+        # if analyses are run, use the original data
+        if(length(logs$code_history)) {
+          df <- logs$code_history[[1]]$env$df
+        }
         # Set up parameters to pass to Rmd document
         params <- list(
-          df = current_data(),
+          df = ,
           target = input$eda_target_variable
         )
         req(params)

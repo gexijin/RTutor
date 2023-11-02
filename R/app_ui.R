@@ -195,7 +195,8 @@ app_ui <- function(request) {
                     "Chat with your data in your languages."
                   ),
                   br(),
-                  h4(" Oct 28 (v0.98):  Ask questions about code, result, error, or statistics in general. Second data file upload.
+                  h4(" Nov. 1: (v0.98.2): Comprehensive EDA report! 
+                   Oct 28 (v0.98):  Ask questions about code, result, error, or statistics in general. Second data file upload.
                   Oct 23 (v0.97): GPT-4 becomes the default.
                   Makes ggplot2 a preferred method for plotting. Sequential data manipulation is enabled."),
                   br(),
@@ -354,46 +355,13 @@ app_ui <- function(request) {
         DT::dataTableOutput("data_table_DT")
       ),
       tabPanel(
-        title = "Report",
-        value = "Report",
-        br(),
-        selectInput(
-          inputId = "selected_chunk_report",
-          label = "Code chunks to include:",
-          selected = NULL,
-          choices = NULL,
-          multiple = TRUE
-        ),
-        fluidRow(
-          column(
-            width = 6,
-            uiOutput("html_report")
-          ),
-          column(
-            width = 6,
-            downloadButton(
-              outputId = "Rmd_source",
-              label = "RMarkdown"
-            ),
-            tippy::tippy_this(
-              "Rmd_source",
-              "Download a R Markdown source file.",
-              theme = "light-border"
-            )
-          )
-        ),
-        br(),
-        verbatimTextOutput("rmd_chunk_output")
-      ),
-
-      tabPanel(
         title = "EDA",
         value = "EDA",
         tabsetPanel(
-          tabPanel(
-            title = "Basic",
-            verbatimTextOutput("data_summary")
-          ),
+          #tabPanel(
+          #  title = "Basic",
+          #  verbatimTextOutput("data_summary")
+          #),
           tabPanel(
             title = "Summary",
             verbatimTextOutput("dfSummary"),
@@ -421,6 +389,7 @@ app_ui <- function(request) {
               "package."
             )
           ),
+
           tabPanel(
             title = "Categorical",
             h4(
@@ -486,6 +455,41 @@ app_ui <- function(request) {
       ),
 
       tabPanel(
+        title = "Report",
+        value = "Report",
+        br(),
+        selectInput(
+          inputId = "selected_chunk_report",
+          label = "Code chunks to include:",
+          selected = NULL,
+          choices = NULL,
+          multiple = TRUE
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            uiOutput("html_report")
+          ),
+          column(
+            width = 6,
+            downloadButton(
+              outputId = "Rmd_source",
+              label = "RMarkdown"
+            ),
+            tippy::tippy_this(
+              "Rmd_source",
+              "Download a R Markdown source file.",
+              theme = "light-border"
+            )
+          )
+        ),
+        br(),
+        verbatimTextOutput("rmd_chunk_output")
+      ),
+
+
+
+      tabPanel(
         title = "About",
         value = "About",
         uiOutput("RTutor_version"),
@@ -541,6 +545,10 @@ app_ui <- function(request) {
         hr(),
         h4("Update log:"),
         tags$ul(
+          
+           tags$li(
+            "v0.98.2  11/1/2023. Comprehensive EDA report!"
+          ),           
           tags$li(
             "v 0.98  10/28/2023. Ask questions about code, error. Second data file upload."
           ),          
