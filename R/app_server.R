@@ -1839,26 +1839,40 @@ app_server <- function(input, output, session) {
     )
 
   })
-  # Create a reactive variable that holds the list of eda_variables
-  selected_eda_variables <- reactiveVal(c())
-  
-  #Add the selected target variable to the list of selected_eda_variables
-  observeEvent(input$eda_target_variable, {
-    req(!is.null(input$user_file))
-    req(input$select_data == uploaded_data)
-    req(!input$use_python)
-    if(input$eda_target_variable %in% selected_eda_variables() == FALSE) {
-      selected_eda_variables(c(input$eda_target_variable, selected_eda_variables()))
-    }
-  })
-
-  # if there is more than 20 items in the selected_eda_variable, only keep the first 20. Show a warning that disappears in 5 seconds.
-  observeEvent(selected_eda_variables(), {
+   # when user uploads a file and has more than 20 columns, only the first 20 is selected by eda_variables.
+  observeEvent(input$user_file, {
     req(!is.null(input$user_file))
     req(input$select_data == uploaded_data)
     req(!input$use_python)
     req(!is.null(current_data()))
-    if(length(selected_eda_variables()) > 5) {
+    df <- ggpairs_data()
+    if(ncol(df) > max_eda_var) {
+      updateCheckboxGroupInput(
+        session = session,
+        inputId = "eda_variables",
+        label = "Deselect variables to ignore(optional):",
+        choices = colnames(df),
+        selected = colnames(df)[1:max_eda_var]
+      )
+    }
+  })
+
+  # if user selects more than 20 columns for the eda_variables, only the first 20 is selected by eda_variables. Show a warning.
+  observeEvent(c(input$eda_variables, input$eda_target_variable), {
+    req(!is.null(input$user_file))
+    req(input$select_data == uploaded_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+    selected_var <- input$eda_variables
+    # if the selected target variable is not included in the eda_variables, add it to the top of the list.
+    if (input$eda_target_variable != "<None>" && !(input$eda_target_variable %in% selected_var)) {
+      selected_var <- c(input$eda_target_variable, selected_var)
+    }
+
+    df <- ggpairs_data()
+    if(length(selected_var) > max_eda_var) {
+      selected_var <- selected_var[1:max_eda_var]
+
       showNotification(
         ui = paste("Only the first 20 variables are selected for EDA. 
         Please deselect some variables to continue."),
@@ -1866,23 +1880,14 @@ app_server <- function(input, output, session) {
         duration = 5,
         type = "error"
       )
-      selected_eda_variables(selected_eda_variables()[1:5])
+      updateCheckboxGroupInput(
+        session = session,
+        inputId = "eda_variables",
+        label = "Deselect variables to ignore(optional):",
+        choices = colnames(df),
+        selected = selected_var
+      )
     }
-  })
-
-  # update the eda_variables checkboxGroupInput with the selected_eda_variables
-  observeEvent(selected_eda_variables(), {
-    req(!is.null(input$user_file))
-    req(input$select_data == uploaded_data)
-    req(!input$use_python)
-    req(!is.null(current_data()))
-    updateCheckboxGroupInput(
-      session = session,
-      inputId = "eda_variables",
-      label = "Deselect variables to ignore(optional):",
-      choices = colnames(ggpairs_data()),
-      selected = selected_eda_variables()
-    )
   })
 
 
@@ -2458,15 +2463,15 @@ app_server <- function(input, output, session) {
     for (v in cat_variables) {
       counts <- sort(table(df[, v]), decreasing = TRUE)
       # more than 12 levels?
-      if (length(counts) > max_levels) {
+      if (length(counts) > max_eda_levels) {
         # if the top 12 levels represent more than 30% of the observations
-        if (sum(counts[1:max_levels]) / dim(df)[1] > 0.30) {
+        if (sum(counts[1:max_eda_levels]) / dim(df)[1] > 0.30) {
 
           df[, v] <- unlist(
             sapply(
               1:dim(df)[1],
               function(x) {
-                if (df[x, v] %in% names(counts)[1:max_levels]) {
+                if (df[x, v] %in% names(counts)[1:max_eda_levels]) {
                   return(df[x, v])
                 } else {
                   return("Other")

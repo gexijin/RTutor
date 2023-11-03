@@ -30,11 +30,12 @@ pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
 max_char_question <- 1000 # max n. of characters in the Q&A
-max_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
+max_eda_levels <- 12 # max number of levels in categorical varaible for EDA, ggairs
+max_eda_var <- 20 # maximum num of variables in EDA
 max_data_points <- 10000  # max number of data points for interactive plot
-max_levels_factor_conversion <- 12 # Numeric columns will be converted to factor if less than or equal to this many levels
+max_levels_factor_conversion <- 5 # Numeric columns will be converted to factor if less than or equal to this many levels
 # if a column is numeric but only have a few unique values, treat as categorical
-unique_ratio <- 0.2   # number of unique values / total # of rows
+unique_ratio <- 0.05   # number of unique values / total # of rows
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
 system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
