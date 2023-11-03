@@ -2462,7 +2462,7 @@ app_server <- function(input, output, session) {
     if(length(logs$code_history) > 0) {
       df <- logs$code_history[[1]]$env$df
     }
-    df <- na.omit(df) # remove missing values
+    #df <- na.omit(df) # remove missing values
     cat_variables <- colnames(df)[!sapply(df, is.numeric)]
     # ggpairs does not tolerate variables with too many levels
     for (v in cat_variables) {

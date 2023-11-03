@@ -19,7 +19,7 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(knitr)
 library(dplyr)
 library(ggplot2)
@@ -29,8 +29,8 @@ target_var <- params$target
 
 # Data pre-process
 
-If a numeric variable has less unique values, it will be converted into categorical variable.
-Here if the total number of unique values is less than 20% of the total rows, convert.
+If a numeric variable has just a fwe unique values, it might make more sense to convert it into categorical variable.
+If the total number of unique values is less than 5% of the total rows, convert.
 ```{r convert-factor}
 # Iterate over each column of the data frame
 for (i in seq_along(df)) {
@@ -73,9 +73,9 @@ if (!is.na(target_var) && target_var %in% names(df)) {
       labels = c("low", "low_mid", "mid", "upper_mid", "high"),
       include.lowest = TRUE
     )
-    print(paste("Binned target variable", target_var, "created as", "target_bin"))
+    print(paste("Binned target variable", target_var, " as", "target_bin"))
   } else {
-    print(paste(target_var, ", the target variable, is a categorical variable."))
+    print(paste("The target variable, ", target_var, ", is a categorical variable."))
   }
 } else {
   print("No valid target variable selected. Proceeding with general EDA.")
@@ -416,6 +416,7 @@ if (sum(numeric_cols) > 1) {
 ```{r correlation-map, height = 10, width =10}
 library(corrplot)
 df2 <- df[sapply(df, is.numeric)]
+df2 <- na.omit(df2)
 M <- cor(df2)
 testRes <- cor.mtest(df2, conf.level = 0.95)
 ## leave blank on non-significant coefficient

@@ -195,10 +195,15 @@ app_ui <- function(request) {
                     "Chat with your data in your languages."
                   ),
                   br(),
-                  h4(" Nov. 1: (v0.98.2): Comprehensive EDA report! 
-                   Oct 28 (v0.98):  Ask questions about code, result, error, or statistics in general. Second data file upload.
+                  h4(" Nov. 1: (v0.98.2): Just upload your data, RTutor can generate ",
+                    a(
+                      "a comprehensive EDA report",
+                      href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
+                      target = "_blank"
+                    ),  
+                   " Oct 28 (v0.98):  Ask questions about the code, result, error, or statistics in general! Upload a second file.
                   Oct 23 (v0.97): GPT-4 becomes the default.
-                  Makes ggplot2 a preferred method for plotting. Sequential data manipulation is enabled."),
+                  Using ggplot2 is now preferred. Consectitive data manipulation is enabled and tracked."),
                   br(),
                   h4("Also try ",
                     a(
