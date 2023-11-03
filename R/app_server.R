@@ -1844,7 +1844,7 @@ app_server <- function(input, output, session) {
     req(!is.null(input$user_file))
     req(input$select_data == uploaded_data)
     req(!input$use_python)
-    req(!is.null(current_data()))
+    req(!is.null(ggpairs_data()))
     df <- ggpairs_data()
     if(ncol(df) > max_eda_var) {
       updateCheckboxGroupInput(
@@ -1859,17 +1859,17 @@ app_server <- function(input, output, session) {
 
   # if user selects more than 20 columns for the eda_variables, only the first 20 is selected by eda_variables. Show a warning.
   observeEvent(c(input$eda_variables, input$eda_target_variable), {
-    req(!is.null(input$user_file))
-    req(input$select_data == uploaded_data)
     req(!input$use_python)
-    req(!is.null(current_data()))
+    req(!is.null(ggpairs_data()))
+
     selected_var <- input$eda_variables
+    update_selection <- FALSE
     # if the selected target variable is not included in the eda_variables, add it to the top of the list.
     if (input$eda_target_variable != "<None>" && !(input$eda_target_variable %in% selected_var)) {
       selected_var <- c(input$eda_target_variable, selected_var)
+      update_selection <- TRUE
     }
 
-    df <- ggpairs_data()
     if(length(selected_var) > max_eda_var) {
       selected_var <- selected_var[1:max_eda_var]
 
@@ -1880,11 +1880,16 @@ app_server <- function(input, output, session) {
         duration = 5,
         type = "error"
       )
+      update_selection <- TRUE
+    }
+
+    # if target variable is selected, add to it; if too many, only keep the first 20
+    if(update_selection){
       updateCheckboxGroupInput(
         session = session,
         inputId = "eda_variables",
         label = "Deselect variables to ignore(optional):",
-        choices = colnames(df),
+        choices = colnames(ggpairs_data()),
         selected = selected_var
       )
     }
