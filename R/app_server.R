@@ -1832,13 +1832,106 @@ app_server <- function(input, output, session) {
       br(),
       checkboxGroupInput(
         inputId = "eda_variables",
-        label = "Deselect variables to ignore(optional):",
+        label = "Select up to 20 variables (optional):",
         choices = colnames(df),
         selected = colnames(df)
       )
     )
 
   })
+  # Create a reactive variable that holds the list of eda_variables
+  selected_eda_variables <- reactiveVal(colnames(ggpairs_data()))
+  
+  #Add the selected target variable to the list of selected_eda_variables
+  observeEvent(input$eda_target_variable, {
+    req(!is.null(input$user_file))
+    req(input$select_data == uploaded_data)
+    req(!input$use_python)
+    if(input$eda_target_variable %in% selected_eda_variables() == FALSE) {
+      selected_eda_variables(c(input$eda_target_variable, selected_eda_variables()))
+    }
+  })
+
+  # if there is more than 20 items in the selected_eda_variable, only keep the first 20. Show a warning that disappears in 5 seconds.
+  observeEvent(selected_eda_variables(), {
+    req(!is.null(input$user_file))
+    req(input$select_data == uploaded_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+    if(length(selected_eda_variables()) > 20) {
+      showNotification(
+        ui = paste("Only the first 20 variables are selected for EDA. 
+        Please deselect some variables to continue."),
+        id = "eda_variables_warning",
+        duration = 5,
+        type = "error"
+      )
+      selected_eda_variables(selected_eda_variables()[1:20])
+    }
+  })
+
+  # update the eda_variables checkboxGroupInput with the selected_eda_variables
+  observeEvent(selected_eda_variables(), {
+    req(!is.null(input$user_file))
+    req(input$select_data == uploaded_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+    updateCheckboxGroupInput(
+      session = session,
+      inputId = "eda_variables",
+      label = "Deselect variables to ignore(optional):",
+      choices = colnames(ggpairs_data()),
+      selected = selected_eda_variables()
+    )
+  })
+
+
+
+
+  # when user uploads a file and has more than 20 columns, only the first 20 is selected by eda_variables.
+  observeEvent(input$user_file, {
+    req(!is.null(input$user_file))
+    req(input$select_data == uploaded_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+    df <- ggpairs_data()
+    if(ncol(df) > 20) {
+      updateCheckboxGroupInput(
+        session = session,
+        inputId = "eda_variables",
+        label = "Deselect variables to ignore(optional):",
+        choices = colnames(df),
+        selected = colnames(df)[1:20]
+      )
+    }
+  })
+
+  # if user selects more than 20 columns for the eda_variables, only the first 20 is selected by eda_variables. Show a warning.
+  observeEvent(input$eda_variables, {
+    req(!is.null(input$user_file))
+    req(input$select_data == uploaded_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+    df <- ggpairs_data()
+    if(length(input$eda_variables) > 20) {
+      showNotification(
+        ui = paste("Only the first 20 variables are selected for EDA. 
+        Please deselect some variables to continue."),
+        id = "eda_variables_warning",
+        duration = 5,
+        type = "error"
+      )
+      updateCheckboxGroupInput(
+        session = session,
+        inputId = "eda_variables",
+        label = "Deselect variables to ignore(optional):",
+        choices = colnames(df),
+        selected = colnames(df)[1:20]
+      )
+    }
+  })
+
+
 
   # Markdown report
   output$eda_report_rtutor <- downloadHandler(

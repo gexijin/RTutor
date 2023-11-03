@@ -62,7 +62,6 @@ for (col_name in names(df)) {
 df <- df %>% select(-one_of(cols_to_remove))
 ```
 
-
 ```{r generate-target}
 # Check if the target_var is in the dataframe and is not NA
 if (!is.na(target_var) && target_var %in% names(df)) {
@@ -267,12 +266,13 @@ lapply(names(df)[sapply(df, is.numeric)], function(var) create_plots(df, var))
 # Function to create bar plots
 create_bar_plot <- function(df, column_name) {
   # Checking if the column is a factor
-  if (is.factor(df[[column_name]])) {
+  if (!is.numeric(df[[column_name]])) {
+    df[[column_name]] <- as.factor(df[[column_name]])
     factor_levels <- levels(df[[column_name]])
   } else {
     factor_levels <- NULL
   }
-
+levels
   # Modify the data for plotting
   plot_data <- df %>%
     count(!!sym(column_name)) %>%
@@ -283,7 +283,7 @@ create_bar_plot <- function(df, column_name) {
 
   # If the column is a factor, adjust the value names
   if (!is.null(factor_levels)) {
-    plot_data$value <- factor(plot_data$value, levels = c(factor_levels, "Other"))
+    plot_data$value <- factor(plot_data$value, levels = unique(c(factor_levels, "Other")))
   }
 
   # Finding the maximum value for adjusting y-axis
@@ -319,38 +319,93 @@ for (column_name in names(df)) {
 
 # Overview heatmap
 ```{r heatmap, fig.height=8}
-df_clean <- df
+data_for_heatmap <- df
 
-numeric_cols <- sapply(df_clean, is.numeric)
+numeric_cols <- sapply(data_for_heatmap, is.numeric)
+
 # Prepare data for the heatmap
-df_clean <- df_clean[numeric_cols]
 # Filter out rows with missing values
-df_clean <- na.omit(df_clean)
+data_for_heatmap <- na.omit(data_for_heatmap)
 
-# too many rows for heatmap? 
-if (ncol(df_clean) > 1) {
-  data_for_heatmap <- df_clean
+# more than 2 numeric columns
+if (sum(numeric_cols) > 1) {
   # If the dataframe has more than 2000 rows, sample 2000 rows randomly
-  if (nrow(df_clean) > 2000) {
+  if (nrow(data_for_heatmap) > 2000) {
     set.seed(123) # Set a random seed for reproducibility
-    data_for_heatmap <- df_clean[sample(nrow(df_clean), 2000), ]
+    data_for_heatmap <- data_for_heatmap[sample(nrow(data_for_heatmap), 2000), ]
+    cat("Since there are too many rows, 2000 randomly selected rows are shown in this heatmap")
   }
-
-# Standardize the numeric columns
-  data_for_heatmap <- scale(data_for_heatmap)
-
+  
   # Determine whether to include row names based on the number of rows
-  show_row_names <- nrow(df_clean) <= 100
-
-  # Create the heatmap with clustering trees and optional color bar
-  pheatmap::pheatmap(data_for_heatmap,
-    scale = "row",
-    clustering_distance_rows = "euclidean",
-    clustering_distance_cols = "euclidean",
-    clustering_method = "complete",
-    border_color = NA,
-    show_rownames = show_row_names
-  )
+  show_row_names <- nrow(data_for_heatmap) <= 100
+  
+  # Define a color palette from yellow to blue
+  my_palette <- colorRampPalette(c("yellow", "blue"))(n = 299)
+  
+  # Initialize the RowSideColors parameter as NULL
+  row_side_colors <- NULL
+  
+  dist_pearson <- function(x, ...)
+    as.dist(1-cor(t(x), method="pearson"))
+    
+  # Check if target_var is provided and not null
+  if (!is.null(target_var) && target_var %in% names(data_for_heatmap)) {
+    # Use the 'target_bin' column if it exists, otherwise use the column specified by target_var
+    target_col <- ifelse("target_bin" %in% names(data_for_heatmap), 'target_bin',  target_var)
+    
+    # define groups of rows
+    groups <- data_for_heatmap[[target_col]]
+    groups_colors <- as.numeric(factor(groups))
+    unique_groups <- unique(groups)
+    row_side_colors <- rainbow(length(unique_groups))[groups_colors]
+    
+    # Create the heatmap with clustering trees and color bar
+    gplots::heatmap.2(
+      as.matrix(data_for_heatmap[numeric_cols]),
+      scale = "column",  # Data is already scaled, so no scaling is needed here
+      distfun = dist_pearson,  # for distance between rows
+      hclustfun = function(x) hclust(x, method = "average"),  # for hierarchical clustering
+      dendrogram = "both",  # only row dendrograms
+      trace = "none",  # turns off trace lines inside the heatmap
+      density.info = "none",  # turns off density plot inside color legend
+      margins = c(8, 8),  # adjusts the margins around the plot
+      Colv = TRUE,  # cluster columns
+      Rowv = TRUE,  # always cluster rows
+      labRow = if(show_row_names) rownames(data_for_heatmap) else NA,  # show/hide row names
+      key = TRUE,  # whether to show the color key
+      keysize = 1,  # size of the color key
+      symbreaks = FALSE , # whether to make color breaks symmetrical around zero
+      col = my_palette, # yellow and blue
+      RowSideColors = row_side_colors,  # add side color bar if side_colors is not NULL
+      cexCol = 0.9,         # Make column labels smaller
+      srtCol = 45,          # Rotate column labels 45 degrees
+      adjCol = c(1,0)   # Adjust the position of the column labels
+    )
+    legend("topright", legend = unique_groups, fill = rainbow(length(unique_groups)), title = target_var)
+    
+  } else {   # RowSideColors = NULL gives errors. 
+    # Create the heatmap without the color bar
+    gplots::heatmap.2(
+      as.matrix(data_for_heatmap[numeric_cols]),
+      scale = "column",  # Data is already scaled, so no scaling is needed here
+      distfun = dist_pearson,  # for distance between rows
+      hclustfun = function(x) hclust(x, method = "average"),  # for hierarchical clustering
+      dendrogram = "both",  # only row dendrograms
+      trace = "none",  # turns off trace lines inside the heatmap
+      density.info = "none",  # turns off density plot inside color legend
+      margins = c(8, 8),  # adjusts the margins around the plot
+      Colv = TRUE,  # cluster columns
+      Rowv = TRUE,  # always cluster rows
+      labRow = if(show_row_names) rownames(data_for_heatmap) else NA,  # show/hide row names
+      key = TRUE,  # whether to show the color key
+      keysize = 1,  # size of the color key
+      symbreaks = FALSE , # whether to make color breaks symmetrical around zero
+      col = my_palette, # yellow and blue
+      cexCol = 0.9,         # Make column labels smaller
+      srtCol = 45,          # Rotate column labels 45 degrees
+      adjCol = c(1,0)   # Adjust the position of the column labels
+    )
+  }
 }
 ```
 
