@@ -1465,7 +1465,7 @@ app_server <- function(input, output, session) {
       data_afterwards(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
-        pageLength = 1000,
+        pageLength = 20,
         dom = 'ftp',
         scrollX = "400px"
       ),
@@ -1503,8 +1503,11 @@ app_server <- function(input, output, session) {
     )
   })
   observe({
-    req(!is.null(data_afterwards()))
-    shinyjs::show(id = "first_file")
+    if(input$select_data != no_data && !is.null(data_afterwards())) {
+    shinyjs::show(id = "first_file")      
+    } else {
+      shinyjs::hide(id = "first_file")
+    }
   })
 
 
@@ -2780,31 +2783,33 @@ app_server <- function(input, output, session) {
     examples <- capture.output(str(current_data()))
     examples <- examples[-1]
     examples <- gsub(" \\$ ", "", examples)
-
-    lapply(seq_along(column_names), function(i) {
-      column_name <- column_names[i]
-      fluidRow(
-        column(
-          width = 3,
-          selectInput(
-            inputId = paste0("column_type_", i),
-            label = NULL,
-            choices = c("Character" = "character",
-                        "Numeric" = "numeric",
-                        "Integer" = "integer",
-                        "Date" = "Date",
-                        "Factor" = "factor"),
-            selected = class(current_data()[[i]])
+    withProgress(message = "Verifying data types ...", {
+      incProgress(0.3)
+      lapply(seq_along(column_names), function(i) {
+        column_name <- column_names[i]
+        fluidRow(
+          column(
+            width = 3,
+            selectInput(
+              inputId = paste0("column_type_", i),
+              label = NULL,
+              choices = c("Character" = "character",
+                          "Numeric" = "numeric",
+                          "Integer" = "integer",
+                          "Date" = "Date",
+                          "Factor" = "factor"),
+              selected = class(current_data()[[i]])
+            )
+          ),
+          column(
+            width = 9,          
+            align = "left",
+            style = "margin-top: -5px;",
+            h5(examples[i])
           )
-        ),
-        column(
-          width = 9,          
-          align = "left",
-          style = "margin-top: -5px;",
-          h5(examples[i])
         )
-      )
 
+      })
     })
   })
   

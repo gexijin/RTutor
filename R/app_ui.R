@@ -335,7 +335,9 @@ app_ui <- function(request) {
                 id = "first_file",
                 hr(),
                 h4("Default dataset:  df"),
-                verbatimTextOutput("data_structure"),
+                textOutput("data_size"),
+                DT::dataTableOutput("data_table_DT")
+
               )
             ),
             shinyjs::hidden(
@@ -346,7 +348,7 @@ app_ui <- function(request) {
                 verbatimTextOutput("data_structure_2")
               )
             )
-            #,tableOutput("data_table")
+            #,tableOutput("data_table"),
 
 
           ) #mainPanel
@@ -354,19 +356,17 @@ app_ui <- function(request) {
       ), #tabPanel
 
       tabPanel(
-        title = "Data",
-        value = "Data",
-        textOutput("data_size"),
-        DT::dataTableOutput("data_table_DT")
-      ),
-      tabPanel(
         title = "EDA",
         value = "EDA",
         tabsetPanel(
-          #tabPanel(
-          #  title = "Basic",
-          #  verbatimTextOutput("data_summary")
-          #),
+          tabPanel(
+            title = "Basic",
+            h4("Data structure:"),
+            verbatimTextOutput("data_structure"),
+            br(),hr(),
+            h4("Data summary:"),
+            verbatimTextOutput("data_summary")
+          ),
           tabPanel(
             title = "Summary",
             verbatimTextOutput("dfSummary"),
