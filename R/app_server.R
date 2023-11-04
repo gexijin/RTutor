@@ -1504,6 +1504,18 @@ app_server <- function(input, output, session) {
     )
   })
 
+  #ploting missing values
+  output$missing_values <- plotly::renderPlotly({
+    req(!is.null(data_afterwards()))
+    p <- missing_values_plot(data_afterwards())
+    if(!is.null(p)) { 
+      plotly::ggplotly(p)
+    } else {
+      return(NULL)
+    }
+  })
+
+
   output$data_table_DT_2 <- DT::renderDataTable({
     req(data_afterwards_2())
     DT::datatable(
@@ -1854,7 +1866,7 @@ app_server <- function(input, output, session) {
           width = 3,
           downloadButton(
             outputId = "eda_report_rtutor",
-            label = "Render EDA Report"
+            label = "EDA Report"
           )
         ),
         column(
@@ -1875,7 +1887,7 @@ app_server <- function(input, output, session) {
       br(),
       checkboxGroupInput(
         inputId = "eda_variables",
-        label = "Select up to 20 variables (optional):",
+        label = "Select up to 20 variables:",
         choices = colnames(df),
         selected = colnames(df)
       )
