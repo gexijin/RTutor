@@ -1469,7 +1469,7 @@ app_server <- function(input, output, session) {
         dom = 'ftp',
         scrollX = "400px"
       ),
-      rownames = TRUE
+      rownames = FALSE
     )
   })
 
@@ -1526,7 +1526,7 @@ app_server <- function(input, output, session) {
         dom = 'ftp',
         scrollX = "400px"
       ),
-      rownames = TRUE
+      rownames = FALSE
     )
   })
 
