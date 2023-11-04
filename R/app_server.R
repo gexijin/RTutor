@@ -1488,6 +1488,7 @@ app_server <- function(input, output, session) {
       dim(data_afterwards())[2], "columns"
     )
   })
+
   output$data_structure <- renderPrint({
     req(!is.null(data_afterwards()))
     str(data_afterwards())
@@ -1502,6 +1503,45 @@ app_server <- function(input, output, session) {
       collapse = "\n"
     )
   })
+
+  output$data_table_DT_2 <- DT::renderDataTable({
+    req(data_afterwards_2())
+    DT::datatable(
+      data_afterwards(),
+      options = list(
+        lengthMenu = c(5, 20, 50, 100),
+        pageLength = 20,
+        dom = 'ftp',
+        scrollX = "400px"
+      ),
+      rownames = TRUE
+    )
+  })
+
+  output$data_size_2 <- renderText({
+    req(!is.null(data_afterwards_2()))
+    paste(
+      dim(data_afterwards_2())[1], "rows X ",
+      dim(data_afterwards_2())[2], "columns"
+    )
+  })
+
+  output$data_structure_2 <- renderPrint({
+    req(!is.null(data_afterwards_2()))
+    str(data_afterwards_2())
+  })
+
+  output$data_summary_2 <- renderText({
+    req(!is.null(data_afterwards_2()))
+    paste(
+      capture.output(
+        summary(data_afterwards_2())
+      ),
+      collapse = "\n"
+    )
+  })
+
+
   observe({
     if(input$select_data != no_data && !is.null(data_afterwards())) {
     shinyjs::show(id = "first_file")      
@@ -2873,9 +2913,11 @@ app_server <- function(input, output, session) {
   # Upload the second file------------------------------------------------------
   observe({
       if (!is.null(input$user_file_2)) {
+          shinyjs::show("second_file_summary")  # Show the panel when a file is uploaded
           shinyjs::show("second_file")  # Show the panel when a file is uploaded
       } else {
           shinyjs::hide("second_file")  # Hide the panel if no file is uploaded
+          shinyjs::hide("second_file_summary")  # Hide the panel if no file is uploaded
       }
   })
   output$data_upload_ui_2 <- renderUI({

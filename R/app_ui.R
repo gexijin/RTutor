@@ -251,7 +251,10 @@ app_ui <- function(request) {
                   Change if needed, especially when numbers are used to code for categories.
                    Data types make a big difference in analyses and plots!"
                 ),
-
+                tags$li(
+                  "A second file can be uploaded as df2. To use this file, you have to specify it in your prompts. 
+                  You can merge it with the first file."
+                ),
                 tags$li(
                   "Before sending your request to OpenAI, we add \"Generate R code\" before it, and 
                   append something like \"Use the df data frame. 
@@ -345,7 +348,9 @@ app_ui <- function(request) {
                 id = "second_file",
                 hr(),
                 h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
-                verbatimTextOutput("data_structure_2")
+                textOutput("data_size_2"),
+                DT::dataTableOutput("data_table_DT_2")
+
               )
             )
             #,tableOutput("data_table"),
@@ -361,11 +366,22 @@ app_ui <- function(request) {
         tabsetPanel(
           tabPanel(
             title = "Basic",
-            h4("Data structure:"),
+            h4("Data structure: df"),
             verbatimTextOutput("data_structure"),
             br(),hr(),
-            h4("Data summary:"),
-            verbatimTextOutput("data_summary")
+            h4("Data summary: df"),
+            verbatimTextOutput("data_summary"),
+            shinyjs::hidden(
+              div(
+                id = "second_file_summary",
+                br(),hr(),
+                h4("Data structure: df2"),
+                verbatimTextOutput("data_structure_2"),
+                br(),hr(),
+                h4("Data summary: df2"),
+                verbatimTextOutput("data_summary_2")
+              )
+            )
           ),
           tabPanel(
             title = "Summary",

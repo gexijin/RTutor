@@ -69,7 +69,7 @@ if (!is.na(target_var) && target_var %in% names(df)) {
   # Check if the target variable is numerical
   if (is.numeric(df[[target_var]])) {
     # Create bins for the numerical target variable
-    df[["target_bin"]] <- cut(df[[target_var]],
+    target_bin <- cut(df[[target_var]],
       breaks = 5,
       labels = c("low", "low_mid", "mid", "upper_mid", "high"),
       include.lowest = TRUE
@@ -175,7 +175,7 @@ detect_outliers_mad <- function(df, accuracy = 0.99) {
   num_rows_with_outliers <- sum(rows_with_outliers)
 
   # Combine the results into one vector
-  combined_results <- c(num_outliers_each_col, "Rows with At Least One Outlier" = num_rows_with_outliers)
+  combined_results <- c(num_outliers_each_col, "Rows w/ Outliers" = num_rows_with_outliers)
 
   # Return the combined results
   return(combined_results)
@@ -328,7 +328,9 @@ for (column_name in names(df)) {
 # Overview heatmap
 ```{r heatmap, fig.height=8}
 data_for_heatmap <- df
-
+if(!is.null(target_bin)) {
+  data_for_heatmap$target_bin <- target_bin
+}
 numeric_cols <- sapply(data_for_heatmap, is.numeric)
 
 # Prepare data for the heatmap
@@ -420,7 +422,7 @@ if (sum(numeric_cols) > 1) {
 
 # Bivariate correlation
 
-## Correlation matrix.
+## Correlation matrix (Blank indicates not significant, P > 0.05)
 ```{r correlation-map, height = 10, width =10}
 library(corrplot)
 df2 <- df[sapply(df, is.numeric)]
@@ -465,8 +467,13 @@ if(length(num_cols) > 1) {
         # Use scatter plot
         if (!is.null(target_var) && !is.na(target_var)) {
           if(target_var != col_x && target_var != col_y){
+            df_ggplot <- df
+            if(!is.null(target_bin)) {
+              df_ggplot$target_bin <- target_bin
+            }
+            
             color_var <- ifelse(!is.numeric(df[[target_var]]), target_var, "target_bin")
-            p <- ggplot(df, aes_string(x = col_x, y = col_y, color = color_var)) +
+            p <- ggplot(df_ggplot, aes_string(x = col_x, y = col_y, color = color_var)) +
               geom_point(alpha = 0.7) +
               labs(title = paste(col_x, "vs", col_y), x = col_x, y = col_y) +
               guides(color = guide_legend(title = color_var))
