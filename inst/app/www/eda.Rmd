@@ -25,6 +25,7 @@ library(dplyr)
 library(ggplot2)
 df <- params$df
 target_var <- params$target
+max_data_points_eda <- 2000
 ```
 
 # Data pre-process
@@ -206,7 +207,7 @@ if (all(outliers_info == 0)) {
 }
 ```
 
-# Univeriate distributions: Numeric
+# Univariate distributions: Numeric
 
 ```{r distribution-numbers}
 library(gridExtra)
@@ -220,7 +221,7 @@ is_highly_skewed <- function(x) {
 }
 
 create_plots <- function(df, var) {
-  skewness_value <- round(skewness(df[[var]]), 2)
+  skewness_value <- round(e1071::skewness(na.omit(df[[var]])), 2)
 
   # Histogram
   p1 <- ggplot(df, aes_string(x = var)) +
@@ -236,7 +237,7 @@ create_plots <- function(df, var) {
 
   if (is_highly_skewed(df[[var]])) {
     df$log_transformed <- log(df[[var]] + 1)
-    skewness_log_value <- round(skewness(df$log_transformed), 2)
+    skewness_log_value <- round(e1071::skewness(na.omit(df$log_transformed)), 2)
 
     # Histogram after log transformation
     p3 <- ggplot(df, aes(x = log_transformed)) +
@@ -255,9 +256,16 @@ create_plots <- function(df, var) {
     return(grid.arrange(p1, p2, ncol = 2))
   }
 }
+  # If the dataframe has more than 2000 rows, sample 2000 rows randomly
+  df_reduced <- df
+  if (nrow(df) > max_data_points_eda) {
+    set.seed(123) # Set a random seed for reproducibility
+    df_reduced <- df_reduced[sample(nrow(df_reduced), 2000), ]
+    cat("Since there are too many rows, ", max_data_points_eda," randomly selected rows are shown scatter plots.")
+  }
 
 # Apply the function to each numeric variable in the dataframe
-lapply(names(df)[sapply(df, is.numeric)], function(var) create_plots(df, var))
+lapply(names(df_reduced)[sapply(df_reduced, is.numeric)], function(var) create_plots(df, var))
 ```
 
 
@@ -330,10 +338,10 @@ data_for_heatmap <- na.omit(data_for_heatmap)
 # more than 2 numeric columns
 if (sum(numeric_cols) > 1) {
   # If the dataframe has more than 2000 rows, sample 2000 rows randomly
-  if (nrow(data_for_heatmap) > 2000) {
+  if (nrow(data_for_heatmap) > max_data_points_eda) {
     set.seed(123) # Set a random seed for reproducibility
     data_for_heatmap <- data_for_heatmap[sample(nrow(data_for_heatmap), 2000), ]
-    cat("Since there are too many rows, 2000 randomly selected rows are shown in this heatmap")
+    cat("Since there are too many rows, ", max_data_points_eda," randomly selected rows are shown in this heatmap")
   }
   
   # Determine whether to include row names based on the number of rows

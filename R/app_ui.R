@@ -432,7 +432,7 @@ app_ui <- function(request) {
                 href="https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html",
                 target = "_blank"
               ),
-              "package."
+              "package. Blanks indicate no significant correlations."
             ),
             plotOutput("corr_map")
           ),

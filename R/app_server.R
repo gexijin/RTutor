@@ -1096,7 +1096,7 @@ app_server <- function(input, output, session) {
       result <- tryCatch({
         eval_result <- eval(
           #parse(text = "log('error')"),
-          parse(text = clean_cmd(logs$code, input$select_data)), 
+          parse(text = clean_cmd(logs$code, input$select_data, file.exists(on_server))), 
           envir = run_env()
         )
         console_output <- capture.output(print(eval_result))
@@ -1164,7 +1164,7 @@ app_server <- function(input, output, session) {
       tmp_env <- list2env(run_env_start())
       tryCatch({
         eval_result <- eval(
-          parse(text = clean_cmd(logs$code, input$select_data)), 
+          parse(text = clean_cmd(logs$code, input$select_data, file.exists(on_server))), 
           envir = tmp_env
         )
       })

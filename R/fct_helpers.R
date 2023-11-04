@@ -351,8 +351,9 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
 #'
 #' @param cmd A string that stores the completion from GTP3.
 #' @param selected_data, name of the selected dataset. 
+#' @param on_server, whether or not running on the server.
 #' @return Returns a cleaned up version, so that it could be executed as R command.
-clean_cmd <- function(cmd, selected_data) {
+clean_cmd <- function(cmd, selected_data, on_server = FALSE) {
   req(cmd)
   # simple way to check
   if(grepl("That model is currently overloaded with other requests.|Error:", cmd)) {
@@ -380,7 +381,9 @@ clean_cmd <- function(cmd, selected_data) {
   )
 
   # use pacman, load if installed; otherwise install it first then load.
-  cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
+  if(!on_server) {
+    cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
+  }
   #if (selected_data != no_data) {
   #  cmd <- c("df <- as.data.frame(current_data())", cmd)
   #}
