@@ -1045,7 +1045,7 @@ api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
       # Plot the number of missing values for all columns with labels
       ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
         geom_bar(stat = "identity") +
-        geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -0.3) + # Add labels to the bars
+        geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
         # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
         coord_flip() + # Makes the bars horizontal
         labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +

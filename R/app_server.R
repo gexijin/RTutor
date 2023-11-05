@@ -1695,7 +1695,7 @@ app_server <- function(input, output, session) {
     # Do not change this without changing the output$Rmd_source function
     # this chunk is removed for local knitting.
     "```{R, echo = FALSE}\n",
-    "df <- params$df\n",
+    "df <- params$df\ndf2 <- params$df2\n",
     "```\n"
   )
   
@@ -2058,6 +2058,7 @@ app_server <- function(input, output, session) {
           "output: html_document\n",
           "params:\n",
           "  df:\n",
+          "  df2:\n",
           "printcode:\n",
           "  label: \"Display Code\"\n",
           "  value: TRUE\n",
@@ -2086,14 +2087,19 @@ app_server <- function(input, output, session) {
 
         # Set up parameters to pass to Rmd document
         params <- list(df = iris) # dummy
-
+        df2 <- NULL
+        if(!is.null(current_data_2())) {
+          df2 <- current_data_2()          
+        }
         # if uploaded, use that data
         req(input$select_data)
         if (input$select_data != no_data) {
           params <- list(
-            df = current_data()
+            df = current_data(),
+            df2 = df2
           )
         }
+
 
         req(params)
         # Knit the document, passing in the `params` list, and eval it in a
@@ -2819,8 +2825,7 @@ app_server <- function(input, output, session) {
         ),
         div( id = "data_type_window", uiOutput("column_type_ui")),
         h4("If a column represents categories, choose 'Factor', even if 
-        it is coded as numbers. Some columns are 
-        automatically converted. For columns that are numbers, but with few unique values, RTutor 
+        it contains numbers. For columns that are numbers, but with few unique values, RTutor 
         automatically convert them to factors. See Settings.", 
         style = "color: blue"),
         br(),
