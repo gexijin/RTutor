@@ -364,7 +364,6 @@ clean_cmd <- function(cmd, selected_data, on_server = FALSE) {
   cmd <- capture.output(
     cat(cmd)
   )
-
   cmd <- polish_cmd(cmd)
 
   # replace install.packages by "#install.packages"

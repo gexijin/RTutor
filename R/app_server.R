@@ -18,8 +18,12 @@ app_server <- function(input, output, session) {
 #  General UI, observers, etc.
 #____________________________________________________________________________
 
-  # increase max input file size
-  options(shiny.maxRequestSize = 1000 * 1024^2) # 10MB
+  # limit max file size to 10MB, if it is running on server
+  if(file.exists(on_server)){ #server
+    options(shiny.maxRequestSize = 500 * 1024^2) # 500 MB
+  } else { # local
+    options(shiny.maxRequestSize = 10000 * 1024^2) # 10 GB
+  }
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
 
@@ -1465,7 +1469,7 @@ app_server <- function(input, output, session) {
       data_afterwards(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
-        pageLength = 20,
+        pageLength = 10,
         dom = 'ftp',
         scrollX = "400px"
       ),
@@ -1519,10 +1523,10 @@ app_server <- function(input, output, session) {
   output$data_table_DT_2 <- DT::renderDataTable({
     req(data_afterwards_2())
     DT::datatable(
-      data_afterwards(),
+      data_afterwards_2(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
-        pageLength = 20,
+        pageLength = 10,
         dom = 'ftp',
         scrollX = "400px"
       ),
@@ -1553,6 +1557,16 @@ app_server <- function(input, output, session) {
     )
   })
 
+  #ploting missing values
+  output$missing_values_2 <- plotly::renderPlotly({
+    req(!is.null(data_afterwards_2()))
+    p <- missing_values_plot(data_afterwards_2())
+    if(!is.null(p)) { 
+      plotly::ggplotly(p)
+    } else {
+      return(NULL)
+    }
+  })
 
   observe({
     if(input$select_data != no_data && !is.null(data_afterwards())) {
@@ -1817,7 +1831,7 @@ app_server <- function(input, output, session) {
     tagList(
       downloadButton(
         outputId = "report",
-        label = "Render report for analysis"
+        label = "Session report"
       ),
       tippy::tippy_this(
         "report",
@@ -1837,7 +1851,7 @@ app_server <- function(input, output, session) {
     # For PDF output, change this to "report.pdf"
     filename = "DataExplorer_report.html",
     content = function(file) {
-      withProgress(message = "Generating Report ...", {
+      withProgress(message = "Generating Report (5 minutes)...", {
         incProgress(0.2)
         target <- NULL
         if(input$eda_target_variable != "<None>") {

@@ -380,7 +380,8 @@ app_ui <- function(request) {
                 verbatimTextOutput("data_structure_2"),
                 br(),hr(),
                 h4("Data summary: df2"),
-                verbatimTextOutput("data_summary_2")
+                verbatimTextOutput("data_summary_2"),
+                plotly::plotlyOutput("missing_values", width = "60%"),
               )
             )
           ),
