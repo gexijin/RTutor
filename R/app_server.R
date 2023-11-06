@@ -20,7 +20,7 @@ app_server <- function(input, output, session) {
 
   # limit max file size to 10MB, if it is running on server
   if(file.exists(on_server)){ #server
-    options(shiny.maxRequestSize = 500 * 1024^2) # 500 MB
+    options(shiny.maxRequestSize = 50 * 1024^2) # 50 MB
   } else { # local
     options(shiny.maxRequestSize = 10000 * 1024^2) # 10 GB
   }
@@ -2578,7 +2578,7 @@ app_server <- function(input, output, session) {
     tagList(
       fluidRow(
         column(
-          width = 6,
+          width = 4,
           selectInput(
             inputId = "ggpairs_variables",
             label = "Select variables",
@@ -2586,15 +2586,23 @@ app_server <- function(input, output, session) {
             multiple = TRUE,
             selected = selected
           )
-
         ),
         column(
-          width = 6,
+          width = 3,
           selectInput(
             inputId = "ggpairs_variables_color",
             label = "Select a category for coloring",
             choices = colnames(df)[!sapply(df, is.numeric)],
             multiple = FALSE
+          )
+        ),
+        #add a submit button to refresh the plot
+        column(
+          width = 3,
+          actionButton(
+            inputId = "ggpairs_submit",
+            label = strong("Submit"),
+            style = "margin-top: 15px;"
           )
         )
       )
@@ -2603,29 +2611,32 @@ app_server <- function(input, output, session) {
   })
 
   output$ggpairs <- renderPlot({
-    req(input$ggpairs_variables)
-    #req(input$ggpairs_variables_color)
-    req(length(input$ggpairs_variables) > 0)
-    req(ggpairs_data())
+    req(ggpairs_data())    
+    req(input$ggpairs_submit)
+    isolate({
+      req(input$ggpairs_variables)
+      #req(input$ggpairs_variables_color)
+      req(length(input$ggpairs_variables) > 0)
 
-    withProgress(message = "Running ggpairs ...", {
-      incProgress(0.3)
-      df <- as.data.frame(ggpairs_data())
-      if(input$ggpairs_variables_color != "") {
-        GGally::ggpairs(
-          df[, input$ggpairs_variables],
-          mapping = aes(
-            color = df[, input$ggpairs_variables_color],
-            alpha = 0.5
+      withProgress(message = "Running ggpairs ...", {
+        incProgress(0.3)
+        df <- as.data.frame(ggpairs_data())
+        if(input$ggpairs_variables_color != "") {
+          GGally::ggpairs(
+            df[, input$ggpairs_variables],
+            mapping = aes(
+              color = df[, input$ggpairs_variables_color],
+              alpha = 0.5
+            )
           )
-        )
 
-      } else {  # no color
-        GGally::ggpairs(
-          df[, input$ggpairs_variables]
-        )
-      }
-    })
+        } else {  # no color
+          GGally::ggpairs(
+            df[, input$ggpairs_variables]
+          )
+        }
+      })
+   })
   },
   width = 1200,
   height = 1200)

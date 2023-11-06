@@ -196,9 +196,9 @@ app_ui <- function(request) {
                   ),
                   br(),
                   h4(
-                    " Start by watching a 10-minuate tutorial on ",
+                    "Start by watching a 10-min tutorial on ",
                     a(
-                      "YouTube.",
+                      "YouTube!",
                       href="https://youtu.be/a-bZW26nK9k",
                       target = "_blank"
                     ),  
@@ -233,9 +233,9 @@ app_ui <- function(request) {
                   "Analyzing your data for free using AI. Learn R coding in the process."
                 ),
                 tags$li(
-                  "Start small. First, try simple requests 
+                  "Start small. Gradually add complexity. Try simple requests 
                   such as distributions, basic plots, or simple models. 
-                  Then customize it or add variables. Gradually add complexity. 
+                  Then customize it or add variables. 
                   ", style = "color:red"
                 ),
                 tags$li(
@@ -349,7 +349,6 @@ app_ui <- function(request) {
                 h4("Default dataset:  df"),
                 textOutput("data_size"),
                 DT::dataTableOutput("data_table_DT")
-
               )
             ),
             shinyjs::hidden(
