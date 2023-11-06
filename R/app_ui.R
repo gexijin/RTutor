@@ -195,6 +195,15 @@ app_ui <- function(request) {
                     "Chat with your data in your languages."
                   ),
                   br(),
+                  h4(
+                    " Start by watching a 10-minuate tutorial on ",
+                    a(
+                      "YouTube.",
+                      href="https://youtu.be/a-bZW26nK9k",
+                      target = "_blank"
+                    ),  
+                    style="color:red"
+                  ),
                   h4(" Nov. 1: (v0.98.2): Just upload your data, RTutor can generate ",
                     a(
                       "a comprehensive EDA report.",
