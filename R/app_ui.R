@@ -276,8 +276,7 @@ app_ui <- function(request) {
                    explain the background and the  
                   the columns first, like emailing a clueless statistician."
                 )
-              ),
-              hr()
+              )
             ),
             conditionalPanel(
               condition = "input.submit_button != 0",
@@ -302,7 +301,7 @@ app_ui <- function(request) {
                 condition = "input.use_python == 0",
 
                 uiOutput("error_message"),
-                uiOutput("send_error_message"),
+                #uiOutput("send_error_message"),
                 strong("Results:"),
 
                 # shows error message in local machine, but not on the server
@@ -334,10 +333,7 @@ app_ui <- function(request) {
               conditionalPanel(
                 condition = "input.use_python == 1",
                 uiOutput("python_markdown")
-              ),
-
-
-              hr(),
+              )
             ),
 
             br(),

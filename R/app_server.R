@@ -164,6 +164,18 @@ app_server <- function(input, output, session) {
     )
   })
 
+# Show notification when error
+  observeEvent(code_error(), {
+  # show notification message
+    if(code_error()) {
+      showNotification(
+        "Resubmit the same request to see if ChatGPT can resolve the error.
+        If that fails, change the request.",
+        duration = 10
+      )
+    }
+  })
+
 
   #                             3.
   #____________________________________________________________________________
@@ -752,9 +764,21 @@ app_server <- function(input, output, session) {
                 history,
                 list(list(role = "user", content = logs$code_history[[i]]$prompt_all))
               )
+
+              #append error message. Only the last one
+              # prevent error status are not logged correctly
+              code_plus_error <- logs$code_history[[i]]$raw
+              if(i == length(logs$code_history) && code_error()) {
+                code_plus_error <- paste0(
+                  code_plus_error,
+                  "\n\nError: ",
+                  run_result()$error_message
+                )
+              }
+
               history <- append(
                 history,
-                list(list(role = "assistant", content = logs$code_history[[i]]$raw))
+                list(list(role = "assistant", content = code_plus_error))
               )
             }
             prompt_total <- append(prompt_total, history)

@@ -407,6 +407,9 @@ polish_cmd <- function(cmd) {
   # remove anything after ```
   cmd <- gsub("```.*", "", cmd)
   
+  # sometimes ChatGPT returns \r\n as new lines. The \r causes error.
+  cmd <- gsub("\r", "", cmd)
+  
   return(paste0("\n", cmd))
 }
 

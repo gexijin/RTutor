@@ -280,7 +280,7 @@ create_bar_plot <- function(df, column_name) {
   } else {
     factor_levels <- NULL
   }
-levels
+
   # Modify the data for plotting
   plot_data <- df %>%
     count(!!sym(column_name)) %>%
