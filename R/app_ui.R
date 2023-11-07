@@ -26,7 +26,7 @@ app_ui <- function(request) {
           id = "load_message",
           h2("Chat with your data via AI ..."),
         ),
-        uiOutput("use_heyshiny"),
+        #uiOutput("use_heyshiny"), # remove it
         # move notifications and progress bar to the center of screen
         tags$head(
           tags$style(

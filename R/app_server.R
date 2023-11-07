@@ -42,7 +42,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use demo data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first, especially the relevant columns. See examples above. If unsuccessful, try again with the same request or ask differently. Code works correctly some of the times. To use voice input, click Settings."
+"Upload a file or use demo data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples above."
       )
     }
   })
@@ -427,36 +427,6 @@ app_server <- function(input, output, session) {
             uiOutput("valid_key"),
             uiOutput("save_api_ui"),
             verbatimTextOutput("session_api_source"),
-            hr(),
-
-            fluidRow(
-              column(
-                width = 6,
-                checkboxInput(
-                  inputId = "use_voice",
-                  label = strong("Enable voice narration"),
-                  value = use_voice()
-                )
-              ),
-              column(
-                width = 6,
-                # this causes the use_voice() to refresh twice,
-                # triggering the permission seeking in Chrome.
-                # Don't know why, but this works. I'm a stable genius.
-                actionButton("use_voice_button", strong("Seek mic permission"))
-              )
-            ),
-            h5("First select the checkbox and then seek 
-            permission to use the microphone. Your browser should have a popup 
-            window. Otherwise, check the both ends of the URL bar for a 
-            blocked icon, which
-            could be clicked to grant permission. If successful, you will see 
-            a red dot on top of the tab in Chrome.
-            Voice naration can be used in both the Main and the 
-            Ask Me Anything tabs by just saying \"Tutor ...\".
-            To submit the request, say \"Tutor submit\", or \"Tutor go ahead.\"     
-            If not satisfied, try again to overwrite. 
-            To continue, say \"Tutor Continue ...\""),
           ),
 
           hr(),
