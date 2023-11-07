@@ -204,7 +204,7 @@ app_ui <- function(request) {
                     ),  
                     style="color:red"
                   ),
-                  h4(" Nov. 1: (v0.98.2): Just upload your data, RTutor can generate ",
+                  h4(" Nov. 7: GPT-4 Turbo becomes default model. Nov. 1: (v0.98.2): Just upload your data, RTutor can generate ",
                     a(
                       "a comprehensive EDA report.",
                       href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
