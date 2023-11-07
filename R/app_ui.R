@@ -474,7 +474,7 @@ app_ui <- function(request) {
             plotOutput("ggpairs")
           ),
           tabPanel(
-            title = "EDA Report",
+            title = "EDA Reports",
             h4("Comprehensive EDA(exploratory data analysis) reports."),
             uiOutput("eda_report_ui")
           ),

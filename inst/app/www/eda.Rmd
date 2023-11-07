@@ -6,6 +6,7 @@ output:
   html_document:
     number_sections: true
     code_folding: hide
+    toc: true
 params:
   df:
   target:
@@ -30,7 +31,7 @@ max_data_points_eda <- 2000
 
 # Data pre-process
 
-If a numeric variable has just a fwe unique values, it might make more sense to convert it into categorical variable.
+If a numeric variable has just a few unique values, it might make more sense to convert it into categorical variable.
 If the total number of unique values is less than 5% of the total rows, convert.
 ```{r convert-factor}
 # Iterate over each column of the data frame
@@ -63,6 +64,7 @@ for (col_name in names(df)) {
 df <- df %>% select(-one_of(cols_to_remove))
 ```
 
+If target variable is specified, bin this variable into another variable called target_bin.
 ```{r generate-target}
 # Check if the target_var is in the dataframe and is not NA
 if (!is.na(target_var) && target_var %in% names(df)) {
