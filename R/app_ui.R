@@ -194,6 +194,10 @@ app_ui <- function(request) {
                   h4(
                     "Chat with your data in your languages."
                   ),
+                  h2(
+                    "OpenAI's API is down right now. Please try again in an hour or so.",  
+                    style="color:red"
+                  ),
                   br(),
                   h4(
                     "Start by watching a 10-min tutorial on ",
