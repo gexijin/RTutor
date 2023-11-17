@@ -22,9 +22,9 @@ max_content_length <- 8000 # max tokens:  Change according to model !!!!
 max_query_length <- 50000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
 
-language_models <- c("gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "gpt-4-32k-0613", "text-davinci-003")
-names(language_models) <- c("ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "GPT-4 32k", "Davinci")
-default_model <- "GPT-4 (03/23)" #"ChatGPT" 
+language_models <- c("gpt-4-1106-preview", "gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314", "gpt-4-32k-0613", "text-davinci-003")
+names(language_models) <- c("GPT-4 Turbo", "ChatGPT", "ChatGPT 16k", "ChatGPT (03/23)", "GPT-4", "GPT-4 (03/23)", "GPT-4 32k", "Davinci")
+default_model <- "GPT-4 Turbo" #"GPT-4 (03/23)" #"ChatGPT" 
 max_content_length <- 8000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
 pre_text <- "Write correct, efficient R code to analyze data."
