@@ -820,9 +820,6 @@ app_ui <- function(request) {
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
-    ,tags$head(includeScript(app_sys("app", "www", "ga.js")))
-    # old covid tracker called "virus"
-
   )
 }
 
