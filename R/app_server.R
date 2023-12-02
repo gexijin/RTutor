@@ -1013,7 +1013,7 @@ app_server <- function(input, output, session) {
 
   output$total_cost <- renderText({
     if(input$submit_button == 0) {
-      return("OpenAI charges us $1 for about 30 requests via GPT-4. Heavy users please
+      return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
       use your own API key (Settings), or help cover the fee via PayPal(gexijin@gmail.com)."
       )
     } else {
