@@ -196,7 +196,7 @@ app_ui <- function(request) {
                   ),
                   br(),
                   h4(
-                    "Start by watching a 10-min tutorial on ",
+                    "Start by watching a 8-min video on ",
                     a(
                       "YouTube!",
                       href="https://youtu.be/a-bZW26nK9k",
@@ -222,6 +222,8 @@ app_ui <- function(request) {
                     ),
                     " a general platform for analyzing data through chats. Multiple files with different formats. Python support."
                   ),
+                  h4("As a small startup, we are open to partnerships with both academia and industry. 
+                  Open to requests for demos and seminars if time permits."),
                   align = "left"
                 )
               ),
@@ -530,8 +532,7 @@ app_ui <- function(request) {
             href = "https://openai.com/",
             target = "_blank"
           ),
-          " powerful large ",
-          "language model",
+          " powerful large language models",
           " to translate natural language into R code, which is then excuted.",
           "You can request your analysis,
           just like asking a real person.",
@@ -539,22 +540,13 @@ app_ui <- function(request) {
           and just analyze it in plain English. 
           Your results can be downloaded as an HTML report in minutes!"
         ),
-        p("NO WARRANTY! Some of the scripts run but yield incorrect result. 
+        p("NO WARRANTY! Some of the scripts run but may yield incorrect result. 
         Please use the auto-generated code as a starting 
-        point for further refinement and validation.
-          The RTutor.ai website and the 
-          source code (CC BY-NC 3.0 license) are freely 
-          availble for academic and 
-          non-profit organizations only. 
-          Commercial use beyond testing please contact ",
-        a(
-          "gexijin@gmail.com.",
-          href = "mailto:gexijin@gmail.com?Subject=RTutor"
-          )
+        point for further refinement and validation."
         ),
 
         hr(),
-        p(" Personal project by Dr. Steven Ge",
+        p(" Written by Dr. Steven Ge",
           a(
             "(Twitter, ",
             href = "https://twitter.com/StevenXGe",
@@ -565,7 +557,7 @@ app_ui <- function(request) {
             href = "https://www.linkedin.com/in/steven-ge-ab016947/",
             target = "_blank"
           ),       
-          " For feedback, please email",
+          ", as part of RTutor LLC. For feedback, please email",
           a(
             "gexijin@gmail.com.",
             href = "mailto:gexijin@gmail.com?Subject=RTutor"
@@ -576,8 +568,12 @@ app_ui <- function(request) {
             href = "https://github.com/gexijin/RTutor"
           ),
           " from where you can also find 
-          instruction to install RTutor as an R package."
+          instruction to install RTutor as an R package. 
+          For non-profit organizations only. "
         ),
+        h4("Businesses: RTutor.ai and Chatlize.ai can be customized and locally installed to  
+        gain insights from your data (multiple files, SQL databases, APIs) at extremely low cost. 
+        "),
         hr(),
         h4("Update log:"),
         tags$ul(

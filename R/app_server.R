@@ -254,7 +254,7 @@ app_server <- function(input, output, session) {
   output$data_upload_ui <- renderUI({
 
     # Hide this input box after the first run.
-    #req(input$submit_button == 0)
+    req(input$submit_button == 0)
     req(is.null(input$user_file))
     fileInput(
       inputId = "user_file",
