@@ -59,8 +59,16 @@ app_ui <- function(request) {
               ),
               column(
                 width = 6,
-                style = "margin-top: -10px;",
-                  p(HTML("<div align=\"right\"> <A HREF=\"javascript:history.go(0)\">Reset</A></div>"))
+                actionButton("reset_button", strong("Reset")),
+                tags$head(tags$style(
+                  "#reset_button{font-size: 16px;color: blue}"
+                )),
+                align = "right",
+                tippy::tippy_this(
+                  "reset_button",
+                  "Reset before uploading a new file. Clears data objects, chat history, and code chunks.",
+                  theme = "light-border"
+                )
               )
             ),
             fluidRow(
@@ -196,9 +204,9 @@ app_ui <- function(request) {
                   ),
                   br(),
                   h4(
-                    "Start by watching a 8-min video on ",
+                    "Start by watching an 8-min ",
                     a(
-                      "YouTube!",
+                      "YouTube video!",
                       href="https://youtu.be/a-bZW26nK9k",
                       target = "_blank"
                     ),  
@@ -213,17 +221,23 @@ app_ui <- function(request) {
                    " Oct 28 (v0.98):  Ask questions about the code, result, error, or statistics in general! Upload a second file.
                   Oct 23 (v0.97): GPT-4 becomes the default.
                   Using ggplot2 is now preferred. Consectitive data manipulation is enabled and tracked."),
-                  br(),
+                  h4("See",
+                    a(
+                      "GitHub",
+                      href = "https://github.com/gexijin/RTutor"
+                    ),
+                    " for source code, bug reports, and instructions to install RTutor as an R package."
+                  ),
                   h4("Also try ",
                     a(
                       "Chatlize.ai,",
                       href="https://chatlize.ai",
                       target = "_blank"
                     ),
-                    " a general platform for analyzing data through chats. Multiple files with different formats. Python support."
+                    " a more general platform for analyzing data through chats. Multiple files with different formats. Python support."
                   ),
                   h4("As a small startup, we are open to partnerships with both academia and industry. 
-                  Open to requests for demos and seminars if time permits."),
+                  We can do demos and seminars via Zoom if time permits."),
                   align = "left"
                 )
               ),
@@ -254,14 +268,17 @@ app_ui <- function(request) {
                 ),
                 tags$li(
                   "Once uploaded, your data is automatically loaded into
-                  RTutor as a data frame called df. 
+                  R as a data frame called df!!! You do not need to ask RTutor to load data. 
                   Check if the data types of the columns are correct.
                   Change if needed, especially when numbers are used to code for categories.
                    Data types make a big difference in analyses and plots!"
                 ),
                 tags$li(
-                  "A second file can be uploaded as df2. To use this file, you have to specify it in your prompts. 
-                  You can merge it with the first file."
+                  "An additional file can be uploaded as df2 to be analyze togehter with the first file. To use this file, you have to specify 'df2' in your prompts. 
+                  If the second file has nothing to do with the first one, click the Reset button first!!!"
+                ),
+                tags$li(
+                  "Click the Reset button to start over or upload a new file. All data objects and code chunks will be cleared."
                 ),
                 tags$li(
                   "Use the chat box to ask questions about the code, result, error, or statistics in general."
@@ -553,11 +570,11 @@ app_ui <- function(request) {
             target = "_blank"
           ),
           a(
-            "LinkedIn).",
+            "LinkedIn),",
             href = "https://www.linkedin.com/in/steven-ge-ab016947/",
             target = "_blank"
           ),       
-          ", as part of RTutor LLC. For feedback, please email",
+          " as part of RTutor LLC. For feedback, please email",
           a(
             "gexijin@gmail.com.",
             href = "mailto:gexijin@gmail.com?Subject=RTutor"
@@ -569,11 +586,144 @@ app_ui <- function(request) {
           ),
           " from where you can also find 
           instruction to install RTutor as an R package. 
-          For non-profit organizations only. "
+          The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
         ),
-        h4("Businesses: RTutor.ai and Chatlize.ai can be customized and locally installed to  
-        gain insights from your data (multiple files, SQL databases, APIs) at extremely low cost. 
-        "),
+        h4("For businesses, RTutor can be customized and locally installed to  
+        easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
+
+        hr(),
+        p("RTutor went viral on ", 
+            a(
+              "LinkedIn, ",
+              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+            ), 
+            a(
+              "Twitter, ",
+              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+            ),
+            a(
+              "Twitter(Physacourses),",
+              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+            ),
+            " and ",
+            a(
+              "Facebook (Carlo Pecoraro).",
+              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+            )
+        ),
+
+        hr(),
+
+        uiOutput("package_list"),
+
+        hr(),
+
+        h3("Frequently asked questions:"),
+
+        h5("1.	What is RTutor?"),
+        p("It is an artificial intelligence (AI)-based app that enables 
+        users to interact with your data via natural language.
+        After uploading a 
+        dataset, users ask questions about or request analyses in 
+        English. The app generates and runs R code to answer that question 
+        with plots and numeric results."),
+
+        h5("2.	How does RTutor work?"),
+        p("The requests are structured and sent to OpenAI’s AI
+        system, which returns R code. The R code is cleaned up and 
+        executed in a Shiny 
+        environment, showing results or error messages. Multiple 
+        requests are logged to produce an R Markdown file, which can be
+          knitted into an HTML report. This enables record keeping 
+          and reproducibility."),
+
+        h5("3. Is my data uploaded to OpenAI?"),
+        p("No. The column names of your data, not the data itself, is sent to OpenAI as a prompt to generate R code. Your data is not stored in our server after the session."),
+
+        h5("4.	Who is it for?"),
+        p("The primary goal is to help people with some R experience to learn
+        R or be more productive. RTutor can be used to quickly speed up the 
+        coding process using R. It gives you a draft code to test and 
+        refine. Be wary of bugs and errors. "),
+
+        h5("5.	How do you make sure the results are correct? "),
+        p("Try to word your question differently. And try 
+        the same request several time. A higher temperature parameter will give 
+        diverse choices. Then users can double-check to see 
+        if you get the same results from different runs."),
+
+        h5("6.	Can you use RTutor to do R coding homework?"),
+        p("No. That will defy the purpose. You need to learn
+        R coding properly to be able to tell if the generated 
+        R coding is correct.  "),
+
+        h5("7.	Can private companies use RTutor? "),
+        p("No. It can be tried as a demo. RTutor website 
+        dnd source code are freely available for non-profit organizations
+        only and distributed using the CC NC 3.0 license."),
+
+        h5("8.	Can you run RTutor locally?"),
+        p("Yes. Download the R package and install it locally. 
+        Then you need to obtain an API key from OpenAI."),
+
+        h5("9.	Why do I get different results with the same request? "),
+        p("OpenAI’s language model has a certain degree of randomness 
+        that could be adjusted by parameters called \"temperature\". 
+        Set this in  Settings"),
+
+        h5("10.	Can people without R coding experience use RTutor for statistical analysis? "),
+        p("Not entirely. This is because the generated code can be wrong.
+        However, it could be used to quickly conduct data 
+        visualization, and exploratory data analysis (EDA). 
+        Just be mindful of this experimental technology. "),
+
+        h5("11.	Can this replace statisticians or data scientists?"),
+        p("No. But RTutor can make them more efficient."),
+
+        h5("12.	How do I  write my request effectively?"),
+        p("Imagine you have a summer intern, 
+        a collge student 
+        who took one semester of statistics and R. You send the 
+        intern emails with instructions and he/she sends 
+        back code and results. The intern is not experienced, 
+        thus error-prone, but is hard working. Thanks to AI, this
+        intern is lightning fast and nearly free."),
+
+        h5("13. Can I install R package in the AI generated code?"),
+        p("No. But we are working to pre-install all the R
+          packages on the server! Right now we finished the top 5000 most 
+          frequently used R packages. Chances are that your favorite package
+          is already installed."),
+
+        h5("14. Can I upload big files to the site?"),
+        p("Not if it is more than 10MB. Try to get a small portion of your data. 
+        Upload it to the site to get the code, which can be run locally on your 
+        laptop. Alternatively, download RTutor R package, and use it from your
+        own computer."),
+
+
+        h5("15. Voice input does not work!"),
+        p("One of the main reason
+        is that your browser block the website site from accessing the microphone. 
+        Make sure you access the site using",
+        a(
+          "https://RTutor.ai.",
+          href = "https://RTutor.ai"
+        ),
+        "With http, mic access is automatically blocked in Chrome.
+        Speak closer to the mic. Make sure there 
+        is only one browser tab using the mic. "),
+
+        h5("16. Is that your photo? "),
+        p("No. I am an old guy. The photo was synthesized by AI. 
+        Using prompts \'statistics tutor\', the image was generated by ",
+        a(
+          "Stable Diffusion 2.0.",
+          href = "https://stability.ai/"
+        ),
+        "If you look carefully, you can see that her fingers are messed up."),
+
+
         hr(),
         h4("Update log:"),
         tags$ul(
@@ -659,158 +809,6 @@ app_ui <- function(request) {
             "V0.1 12/11/2022. Initial launch"
           )
         ),
-
-        hr(),
-        h4("RTutor went viral!"),
-        tags$ul(
-          tags$li(
-            a(
-              "LinkedIn",
-              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
-            )
-          ),
-          tags$li(
-            a(
-              "Twitter",
-              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
-            )
-          ),
-          tags$li(
-            a(
-              "Twitter(Physacourses)",
-              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
-          )
-          ),
-          tags$li(
-            a(
-              "Facebook (Carlo Pecoraro)",
-              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
-            )
-          )
-        ),
-        hr(),
-        uiOutput("package_list"),
-
-        hr(),
-
-        h4("Frequently asked questions:"),
-
-        h5("1.	What is RTutor?"),
-        p("It is an artificial intelligence (AI)-based app that enables 
-        users to interact with your data via natural language.
-        After uploading a 
-        dataset, users ask questions about or request analyses in 
-        English. The app generates and runs R code to answer that question 
-        with plots and numeric results."),
-
-        h5("2.	How does RTutor work?"),
-        p("The requests are structured and sent to OpenAI’s AI
-        system, which returns R code. The R code is cleaned up and 
-        executed in a Shiny 
-        environment, showing results or error messages. Multiple 
-        requests are logged to produce an R Markdown file, which can be
-          knitted into an HTML report. This enables record keeping 
-          and reproducibility."),
-
-        h5("3.	Can people without R coding experience use RTutor for statistical analysis? "),
-        p("Not entirely. This is because the generated code can be wrong.
-        However, it could be used to quickly conduct data 
-        visualization, and exploratory data analysis (EDA). 
-        Just be mindful of this experimental technology. "),
-
-        h5("4.	Who is it for?"),
-        p("The primary goal is to help people with some R experience to learn
-        R or be more productive. RTutor can be used to quickly speed up the 
-        coding process using R. It gives you a draft code to test and 
-        refine. Be wary of bugs and errors. "),
-
-        h5("5.	How do you make sure the results are correct? "),
-        p("Try to word your question differently. And try 
-        the same request several time. A higher temperature parameter will give 
-        diverse choices. Then users can double-check to see 
-        if you get the same results from different runs."),
-
-        h5("6.	Can you use RTutor to do R coding homework?"),
-        p("No. That will defy the purpose. You need to learn
-        R coding properly to be able to tell if the generated 
-        R coding is correct.  "),
-
-        h5("7.	Can private companies use RTutor? "),
-        p("No. It can be tried as a demo. RTutor website 
-        dnd source code are freely available for non-profit organizations
-        only and distributed using the CC NC 3.0 license."),
-
-        h5("8.	Can you run RTutor locally?"),
-        p("Yes. Download the R package and install it locally. 
-        Then you need to obtain an API key from OpenAI."),
-
-        h5("9.	Why do I get different results with the same request? "),
-        p("OpenAI’s language model has a certain degree of randomness 
-        that could be adjusted by parameters called \"temperature\". 
-        Set this in  Settings"),
-
-        h5("10.	How much does the OpenAI’s cost per session?"),
-        p("About $0.01 to $0.1, if you send 10 to 50 requests. We have a
-        monthly usage limit. Once that is exceeded, the website will
-          not work for the month. If you use it regularly, please use 
-          your API key. Currently, RTutor receives no funding. 
-          We might ask users to contribute later.
-          "),
-
-        h5("11.	Can this replace statisticians or data scientists?"),
-        p("No. But RTutor can make them more efficient."),
-
-        h5("12.	How do I  write my request effectively?"),
-        p("Imagine you have a summer intern, 
-        a collge student 
-        who took one semester of statistics and R. You send the 
-        intern emails with instructions and he/she sends 
-        back code and results. The intern is not experienced, 
-        thus error-prone, but is hard working. Thanks to AI, this
-        intern is lightning fast and nearly free."),
-
-        h5("13. Can I install R package in the AI generated code?"),
-        p("No. But we are working to pre-install all the R
-          packages on the server! Right now we finished the top 5000 most 
-          frequently used R packages. Chances are that your favorite package
-          is already installed."),
-
-        h5("14. Can I upload big files to the site?"),
-        p("Not if it is more than 10MB. Try to get a small portion of your data. 
-        Upload it to the site to get the code, which can be run locally on your 
-        laptop. Alternatively, download RTutor R package, and use it from your
-        own computer."),
-
-        h5("15. The server is busy. Or the website is stuck!"),
-        p("Start a new browser window, not another tab. You will be assigned
-        to a new worker process. You can also try our mirror site ",
-        a(
-          "http://149.165.170.244/",
-          href = "http://149.165.170.244/"
-        )
-        ),
-
-        h5("16. Voice input does not work!"),
-        p("One of the main reason
-        is that your browser block the website site from accessing the microphone. 
-        Make sure you access the site using",
-        a(
-          "https://RTutor.ai.",
-          href = "https://RTutor.ai"
-        ),
-        "With http, mic access is automatically blocked in Chrome.
-        Speak closer to the mic. Make sure there 
-        is only one browser tab using the mic. "),
-
-        h5("17. Is that your photo? "),
-        p("No. I am an old guy. The photo was synthesized by AI. 
-        Using prompts \'statistics tutor\', the image was generated by ",
-        a(
-          "Stable Diffusion 2.0.",
-          href = "https://stability.ai/"
-        ),
-        "If you look carefully, you can see that her fingers are messed up."),
-
         hr(),
         uiOutput("session_info")
       ),

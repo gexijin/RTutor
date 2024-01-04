@@ -68,6 +68,10 @@ app_server <- function(input, output, session) {
   })
   outputOptions(output, 'file_uploaded', suspendWhenHidden = FALSE)
 
+  observeEvent(input$reset_button, {
+    # reset session
+    session$reload()
+  })
 
 #                                    2.
 #____________________________________________________________________________
