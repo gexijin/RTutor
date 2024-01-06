@@ -42,7 +42,7 @@ system_role <- "Act as a experienced data scientist and statistician. You will w
 If the goal can be achieved by showing qantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. 
 If multiple plots are generated, try to combine them into one."
 system_role_tutor <- "Act as a professor of statistics, computer science and mathematics. 
-You will respond like answering questions by students in a kind way. If the question is in languages other than English, respond in that language. 
+You will respond like answering questions by students. If the question is in languages other than English, respond in that language. 
 If the question is not remotely related to your expertise, respond with 'No comment'."
 # voice input parameters
 wake_word <- "Tutor" #Tutor, Emma, Note that "Hey Cox" does not work very well.

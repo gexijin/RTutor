@@ -2288,7 +2288,7 @@ app_server <- function(input, output, session) {
       # Send to openAI
       tryCatch(
         response <- openai::create_chat_completion(
-          model = "gpt-3.5-turbo", 
+          model = selected_model(),
           openai_api_key = api_key_session()$api_key,
           temperature = sample_temp(),
           messages = prompt_total
@@ -2325,7 +2325,7 @@ app_server <- function(input, output, session) {
         response <- NULL
         error_message <- response$message
       } else {
-        ans <- response$choices[1, 4]
+        ans <- response$choices$message.content
       }
 
       shinybusy::remove_modal_spinner()
