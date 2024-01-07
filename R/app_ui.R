@@ -721,7 +721,9 @@ app_ui <- function(request) {
         hr(),
         h4("Update log:"),
         tags$ul(
-          
+           tags$li(
+            "v0.98.3  11/1/2023. Fix issue with EDA report when the target variable is categorical or not specified."
+          ),  
            tags$li(
             "v0.98.2  11/1/2023. Comprehensive EDA report!"
           ),           
