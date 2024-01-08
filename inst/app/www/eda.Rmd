@@ -26,7 +26,7 @@ library(dplyr)
 library(ggplot2)
 df <- params$df
 target_var <- params$target
-max_data_points_eda <- 2000
+max_data_points_eda <- 1000
 ```
 
 # Data pre-process
@@ -522,7 +522,7 @@ if(length(num_cols) > 1 & length(cat_cols) > 1) {
         if (p_value < 0.01) {
           plot <- ggplot(df, aes_string(x = cat_var, y = num_var)) +
             geom_violin(trim = FALSE, fill = "lightblue", color = "black") +
-            geom_boxplot(width = 0.2, fill = "white", color = "black") +
+            #geom_boxplot(width = 0.2, fill = "white", color = "black") +
             labs(title = paste(num_var, "by", cat_var, "(ANOVA P =", format(p_value, scientific = TRUE, digits = 2), ")"), x = cat_var, y = num_var)
 
           if (nrow(df) < 300) {

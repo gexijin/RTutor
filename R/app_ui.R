@@ -493,7 +493,8 @@ app_ui <- function(request) {
           tabPanel(
             title = "EDA Reports",
             h4("Comprehensive EDA(exploratory data analysis) reports."),
-            uiOutput("eda_report_ui")
+            uiOutput("eda_report_ui"),
+            p("If you select too many variables, the report may take a long time to generate. The server might time out."),
           ),
         )
       ),

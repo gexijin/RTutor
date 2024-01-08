@@ -1962,7 +1962,9 @@ app_server <- function(input, output, session) {
     }
   })
 
-
+  # some EDA reports takes a long time. This prevents timeout
+  keep_alive <- shiny::reactiveTimer(intervalMs = 10000, session = shiny::getDefaultReactiveDomain())
+  shiny::observe({keep_alive()})
 
   # Markdown report
   output$eda_report_rtutor <- downloadHandler(
