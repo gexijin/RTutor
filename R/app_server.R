@@ -1827,13 +1827,13 @@ app_server <- function(input, output, session) {
   output$html_report <- renderUI({
     req(openAI_response()$cmd)
     tagList(
-      downloadButton(
-        outputId = "report",
+      actionButton(
+        inputId = "report",
         label = "Session report"
       ),
       tippy::tippy_this(
         "report",
-        "Download a HTML report for this session.",
+        "Render a HTML report for this session.",
         theme = "light-border"
       )
    )
@@ -2036,8 +2036,130 @@ app_server <- function(input, output, session) {
     }
   )
 
+
+  report_file <- reactiveVal(NULL)
+
+  observeEvent(input$report, {
+    req(input$select_data != no_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+
+
+    withProgress(message = "Generating Report (5 minutes)", {
+      incProgress(0.2)
+      tempReport <- file.path(tempdir(), "report.Rmd")
+      # tempReport
+      tempReport <- gsub("\\", "/", tempReport, fixed = TRUE)
+
+      req(openAI_response()$cmd)
+      req(openAI_prompt())
+      output_file <- gsub("Rmd$", "html", tempReport)
+
+      #RMarkdown file's Header
+      Rmd_script <- paste0(
+        "---\n",
+        "title: \"RTutor.ai report\"\n",
+        "author: \"RTutor v.",
+        release,
+        ", Powered by ChatGPT\"\n",
+        "date: \"",
+        date(), "\"\n",
+        "output: html_document\n",
+        "params:\n",
+        "  df:\n",
+        "  df2:\n",
+        "printcode:\n",
+        "  label: \"Display Code\"\n",
+        "  value: TRUE\n",
+        "  input: checkbox\n",
+        "---\n"
+      )
+
+      Rmd_script <- paste0(
+        Rmd_script,
+        "\n\n### "
+      )
+
+      # R Markdown code chunk----------------------
+
+      # Add R code
+      Rmd_script <- paste(
+        Rmd_script,
+        Rmd_total()
+      )
+
+      write(
+        Rmd_script,
+        file = tempReport,
+        append = FALSE
+      )
+
+      # Set up parameters to pass to Rmd document
+      params <- list(df = iris) # dummy
+      df2 <- NULL
+      if(!is.null(current_data_2())) {
+        df2 <- current_data_2()          
+      }
+      # if uploaded, use that data
+      req(input$select_data)
+      if (input$select_data != no_data) {
+        params <- list(
+          df = current_data(),
+          df2 = df2
+        )
+      }
+
+
+      req(params)
+
+      tryCatch({
+        rmarkdown::render(
+          input = tempReport, # markdown_location,
+          output_file = output_file,
+          params = params,
+          envir = new.env(parent = globalenv())
+        )
+      }, 
+        error = function(e) {
+          showNotification(
+            ui = paste("Error when generating the report. Please try again."),
+            id = "report_error",
+            duration = 5,
+            type = "error"
+          )
+      },
+        finally = {
+          report_file(output_file)
+          # show modal with download button
+          showModal(modalDialog(
+            title = "Successfully rendered the report!",
+            downloadButton(
+              outputId = "download_report",
+              label = "Download"
+            ),
+            easyClose = TRUE
+          ))
+        }
+      )
+    })
+  })
+
+
   # Markdown report
-  output$report <- downloadHandler(
+  output$download_report <- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = "RTutor_report.html",
+    content = function(file) {
+      validate(
+        need(!is.null(report_file()), "File not found.")
+      )
+      file.copy(from = report_file(), to = file, overwrite = TRUE)
+    }
+  )
+
+
+  # Markdown report
+  output$report_dsdsdf <- downloadHandler(
     # For PDF output, change this to "report.pdf"
     filename = "RTutor_report.html",
     content = function(file) {
