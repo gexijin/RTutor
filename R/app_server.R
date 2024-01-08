@@ -2967,20 +2967,30 @@ app_server <- function(input, output, session) {
         automatically convert them to factors. See Settings.", 
         style = "color: blue"),
         br(),
-        footer = tagList(
-          modalButton("Close")
-        ),
+        footer = actionButton("dismiss_modal",label = "Dismiss"),
         size = "l",
         easyClose = TRUE
       )
     )
   }
 
+  modal_closed <- reactiveVal(FALSE)
+
+  observeEvent(input$dismiss_modal,{
+    modal_closed(TRUE)
+    shiny::removeModal()
+  })  
+
   observeEvent(input$user_file, {
     show_pop_up()
+  })
+
+  # The notification is shown when the pop-up is closed
+  observeEvent(modal_closed(), {
+    req(modal_closed())
     shiny::showNotification(
       "Know thy enemy. Exploratory your data at the EDA tab first.",
-      duration = 30
+      duration = 10
     )
   })
 
