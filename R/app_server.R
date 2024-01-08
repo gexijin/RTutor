@@ -2851,6 +2851,10 @@ app_server <- function(input, output, session) {
 
   observeEvent(input$user_file, {
     show_pop_up()
+    shiny::showNotification(
+      "Know thy enemy. Exploratory your data at the EDA tab first.",
+      duration = 10
+    )
   })
 
   # Trigger the pop-up when a file is uploaded
