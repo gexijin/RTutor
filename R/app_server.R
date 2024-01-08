@@ -1844,28 +1844,6 @@ app_server <- function(input, output, session) {
     Rmd_total()
   })
 
-  # Markdown report from DataExplorer package; does not work
-  output$eda_report <- downloadHandler(
-    # For PDF output, change this to "report.pdf"
-    filename = "DataExplorer_report.html",
-    content = function(file) {
-      withProgress(message = "Generating Report (5 minutes)...", {
-        incProgress(0.2)
-        target <- NULL
-        if(input$eda_target_variable != "<None>") {
-          target <- input$eda_target_variable
-        }
-        DataExplorer::create_report(
-          ggpairs_data()[, input$eda_variables],
-          output_format = rmarkdown::html_document(toc = TRUE, toc_depth = 6, theme = "yeti"),
-          output_file = basename(file),
-          output_dir = dirname(file),
-          y = target
-        )
-      })
-    }
-  )
-
   output$eda_report_ui <- renderUI({
     req(input$select_data != no_data)
     req(!input$use_python)
@@ -1876,16 +1854,9 @@ app_server <- function(input, output, session) {
       fluidRow(
         column(
           width = 3,
-          downloadButton(
-            outputId = "eda_report_rtutor",
-            label = "EDA Report"
-          )
-        ),
-        column(
-          width = 3,
-          downloadButton(
-            outputId = "eda_report",
-            label = "DataExplorer EDA Report"
+          actionButton(
+            inputId = "render_eda_report_rtutor",
+            label = "Render Report"
           )
         )
       ),
@@ -1962,43 +1933,81 @@ app_server <- function(input, output, session) {
     }
   })
 
+  eda_file <- reactiveVal(NULL)
+
+  observeEvent(input$render_eda_report_rtutor, {
+    req(input$select_data != no_data)
+    req(!input$use_python)
+    req(!is.null(current_data()))
+
+
+    withProgress(message = "Generating Report (5 minutes)", {
+      incProgress(0.2)
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "RTutor_EDA.Rmd")
+      # tempReport
+      tempReport <- gsub("\\", "/", tempReport, fixed = TRUE)
+      output_file <- gsub("Rmd$", "html", tempReport)
+      # This should retrieve the project location on your device:
+      # "C:/Users/bdere/Documents/GitHub/idepGolem"
+      #wd <- getwd()
+
+      markdown_location <- app_sys("app/www/eda.Rmd")
+      file.copy(from = markdown_location, to = tempReport, overwrite = TRUE)
+
+      # Set up parameters to pass to Rmd document
+      params <- list(
+        df = ggpairs_data()[, input$eda_variables],
+        target = input$eda_target_variable
+      )
+      req(params)
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      tryCatch({
+        rmarkdown::render(
+          input = tempReport, # markdown_location,
+          output_file = output_file,
+          params = params,
+          envir = new.env(parent = globalenv())
+        )
+      }, 
+        error = function(e) {
+          showNotification(
+            ui = paste("Error when generating the report. Please try again."),
+            id = "eda_report_error",
+            duration = 5,
+            type = "error"
+          )
+      },
+        finally = {
+          eda_file(output_file)
+          # show modal with download button
+          showModal(modalDialog(
+            title = "Successfully rendered the report!",
+            downloadButton(
+              outputId = "eda_report_rtutor",
+              label = "Download"
+            ),
+            easyClose = TRUE
+          ))
+        }
+      )
+    })
+  })
+
+
   # Markdown report
   output$eda_report_rtutor <- downloadHandler(
     # For PDF output, change this to "report.pdf"
     filename = "RTutor_EDA.html",
     content = function(file) {
-      withProgress(message = "Generating Report (5 minutes)", {
-        incProgress(0.2)
-        # Copy the report file to a temporary directory before processing it, in
-        # case we don't have write permissions to the current working dir (which
-        # can happen when deployed).
-        tempReport <- file.path(tempdir(), "RTutor_EDA.Rmd")
-        # tempReport
-        tempReport <- gsub("\\", "/", tempReport, fixed = TRUE)
-
-        # This should retrieve the project location on your device:
-        # "C:/Users/bdere/Documents/GitHub/idepGolem"
-        #wd <- getwd()
-
-        markdown_location <- app_sys("app/www/eda.Rmd")
-        file.copy(from = markdown_location, to = tempReport, overwrite = TRUE)
-
-        # Set up parameters to pass to Rmd document
-        params <- list(
-          df = ggpairs_data()[, input$eda_variables],
-          target = input$eda_target_variable
-        )
-        req(params)
-        # Knit the document, passing in the `params` list, and eval it in a
-        # child of the global environment (this isolates the code in the document
-        # from the code in this app).
-        rmarkdown::render(
-          input = tempReport, # markdown_location,
-          output_file = file,
-          params = params,
-          envir = new.env(parent = globalenv())
-        )
-      })
+      validate(
+        need(!is.null(eda_file()), "File not found.")
+      )
+      file.copy(from = eda_file(), to = file, overwrite = TRUE)
     }
   )
 
