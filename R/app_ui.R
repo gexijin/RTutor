@@ -189,15 +189,6 @@ app_ui <- function(request) {
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
-                  width = 3,
-                  img(
-                    src = "www/tutor.jpg",
-                    width = "120",
-                    height = "108"
-                  ),
-                  align = 'left'
-                ),
-                column(
                   width = 9,
                   h4(
                     "Start by watching an 8-min ",
@@ -236,6 +227,15 @@ app_ui <- function(request) {
                   ),
 
                   align = "left"
+                ),
+                column(
+                  width = 3,
+                  img(
+                    src = "www/logo.png",
+                    width = "155",
+                    height = "77"
+                  ),
+                  align = 'left'
                 )
               ),
               hr(),
