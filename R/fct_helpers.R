@@ -345,13 +345,13 @@ describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRU
   if(head) {
     #randomly select 5 rows, print out, convert to string
     sample_rows <- paste0(
-      capture.output(head(df[sample(nrow(df), 5),])), 
+      capture.output(as.data.frame(df[sample(nrow(df), 5),])), 
       collapse = "\n"
     )
     # if too long, use only 2 rows
-    if(nchar(sample_rows) > 2000) {
+    if(nchar(sample_rows) > 1000) {
       sample_rows <- paste0(
-        capture.output(head(df[sample(nrow(df), 2),])), 
+        capture.output(as.data.frame(df[sample(nrow(df), 2),])), 
         collapse = "\n"
       )
     }
@@ -361,7 +361,7 @@ describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRU
     )
     
     # if still too long, skip
-    if(nchar(sample_rows) > 3000) {
+    if(nchar(sample_rows) > 2000) {
       sample_rows <- ""
     }
 
