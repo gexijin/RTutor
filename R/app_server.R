@@ -756,7 +756,81 @@ app_server <- function(input, output, session) {
               )
             }
             prompt_total <- append(prompt_total, history)
-          }
+          } else {  # if first prompt,  identify and load dataset
+
+            # construct prompt for selecting a dataset
+            data_prompt <- list()
+            data_prompt <- append(
+              data_prompt,
+              list(list(
+                role = "system",
+                content = "Act as an experienced data engineer. You will identify a file that is best suited for a task. "
+              ))
+            )
+            data_prompt <- append(
+              data_prompt,
+              list(list(
+                role = "user", 
+                content = paste(
+                  "Identify a single file by file name, without explanation, that contain information related to this question or analytical goal.  Use the latest data.
+                   Respon with \"Not found\" if no file is found. ",
+                  input$input_text,
+                  #"Plot the distribution of residential electricity rates in South Dakota. ",
+                  #"Proportion of engergy use in the automotive industry in the US. ", # fail
+                  # "Plot total energy use by sector in the US.",
+
+                  " Available datasets: \"\"\"",
+                  meta_data,
+                  "\"\"\""
+                )
+              ))
+            )
+
+            # ChatGPT API
+            response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
+              model = selected_model(),
+              openai_api_key = api_key_session()$api_key,
+              #max_tokens = 500,
+              temperature = sample_temp(),
+                messages = data_prompt
+            )
+
+            selected_file <- response$choices$message.content
+            # show message for 10s with the fine name
+            showNotification(
+              paste("Selected file: ", selected_file)
+            )
+
+            selected_file <- paste0(data_path, selected_file)
+
+            # if file is found, load it and update the current_data() reactive value
+            if(selected_file != "Not found" && file.exists(selected_file)) {
+
+              df <- readRDS(selected_file)
+              # update the current_data() reactive value
+              current_data(df) 
+            } else {
+              # show error message
+              showNotification(
+                "No file is found. Please try again.",
+                duration = 10
+              )
+
+              # restart
+              Sys.sleep(5)
+              session$reload()
+
+
+            }
+
+            # update runtime environment with new data frame
+            run_env(rlang::env(run_env(), df = current_data()))
+            run_env_start(as.list(run_env()))
+
+
+          } # end loading selected data
+
+          prepared_request = prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model(), df2 = current_data_2())
 
           # add new user prompt
           prompt_total <- append(
@@ -1609,6 +1683,20 @@ app_server <- function(input, output, session) {
     req(!is.null(data_afterwards_2()))
     str(data_afterwards_2())
   })
+
+  # Add a download button for current_data()
+  output$download_data <- downloadHandler(
+    filename = function() {
+      paste("data-", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(current_data(), file, row.names = FALSE)
+    }
+  )
+
+
+
+
   #                                 7.
   #____________________________________________________________________________
   # Logs and Reports

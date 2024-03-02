@@ -85,6 +85,17 @@ df = r.df
 on_server <- "on_server.txt"
 
 
+# folder with RDS files
+data_path <- "../../data/datasets/"
+
+# load meta data, from JSON file
+meta_data <- readr::read_file(paste0(data_path, "metadata.json"))
+# meta_data <- readr::read_file("C:/work/RTutor/inst/app/www/metadata.json")
+
+# load meta data, from CSV file
+#meta_data <- readr::read_file(app_sys("app", "www", "metadata_reduced_notes.csv"))
+
+
 #' Move an element to the front of a vector
 #'
 #' The response from GPT3 sometimes contains strings that are not R commands.
@@ -159,7 +170,8 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       data_info <- describe_df(
         df, 
         list_levels = TRUE, 
-        relevant_var = relevant_var
+        relevant_var = relevant_var,
+        head = TRUE
       )
       # Always add 'use the df data frame.'
       txt <- paste(txt, after_text)
@@ -187,7 +199,8 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
           data_info_2 <- describe_df(
             df2, 
             list_levels = TRUE, 
-            relevant_var = relevant_var
+            relevant_var = relevant_var,
+            head = TRUE
           )
           data_info_2 <- gsub("df data frame", paste0(df2_name, " data frame"), data_info_2)
 
@@ -226,9 +239,9 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 #' @param df a data frame
 #' @param list_levels whether to list levels for factors
 #' @param relevant_var  a list of variables mentioned by the user
+#' @param head whether to list the first few rows
 #' @return Returns a cleaned up version, so that it could be executed as R command.
-
-describe_df <- function(df, list_levels = FALSE, relevant_var) {
+describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = FALSE) {
 
       data_info <- ""
       numeric_index <- sapply(
@@ -298,7 +311,7 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
 
         # only list for categorical variables specified in user prompt
         relevant_cat_var <- intersect(relevant_var, cat_var)
-      # describe the levels in categorical variable
+        # describe the levels in categorical variable
         for (var in relevant_cat_var) {
           max_lelvels_description <- 4
           ix <- match(var, colnames(df))
@@ -339,6 +352,35 @@ describe_df <- function(df, list_levels = FALSE, relevant_var) {
             ". "
           )
         }
+      }
+
+      if(head) {
+        #randomly select 5 rows, print out, convert to string
+        sample_rows <- paste0(
+          capture.output(head(df[sample(nrow(df), 5),])), 
+          collapse = "\n"
+        )
+        # if too long, use only 2 rows
+        if(nchar(sample_rows) > 2000) {
+          sample_rows <- paste0(
+            capture.output(head(df[sample(nrow(df), 2),])), 
+            collapse = "\n"
+          )
+        }
+        sample_rows <- paste(
+          "The df data frame looks like this: \n",
+          sample_rows
+        )
+        
+        # if still too long, skip
+        if(nchar(sample_rows) > 3000) {
+          sample_rows <- ""
+        }
+
+        data_info <- paste0(
+          data_info,
+          sample_rows    
+        )
       }
       
       return(data_info)
@@ -1017,43 +1059,43 @@ api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
 
 }
 
-#' Estimate API cost
+#' Plot missing values
 #' 
 #'
 #' @param df a dataframe
 #'
 #' @return a plot
 #' 
-  #ploting missing values
-  missing_values_plot <- function(df) {
-    req(!is.null(df))
+#ploting missing values
+missing_values_plot <- function(df) {
+  req(!is.null(df))
 
-    # Calculate the total number of missing values per column
-    missing_values <- sapply(df, function(x) sum(is.na(x)))
+  # Calculate the total number of missing values per column
+  missing_values <- sapply(df, function(x) sum(is.na(x)))
 
-    # Calculate the number of cases with at least one missing value
-    cases_with_missing <- sum(apply(df, 1, function(x) any(is.na(x))))
+  # Calculate the number of cases with at least one missing value
+  cases_with_missing <- sum(apply(df, 1, function(x) any(is.na(x))))
 
-    # Check if there are any missing values
-    if (all(missing_values == 0)) {
-      return(NULL)
-    } else {
-      # Create a data frame for plotting
-      missing_data_df <- data.frame(
-        Column = c(names(missing_values), "At Least One Missing"),
-        MissingValues = c(missing_values, cases_with_missing)
-      )
-      # Calculate the percentage of missing values per column
-      # missing_percentage <- (missing_values / nrow(df)) * 100
-      # Plot the number of missing values for all columns with labels
-      ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
-        geom_bar(stat = "identity") +
-        geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
-        # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
-        coord_flip() + # Makes the bars horizontal
-        labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +
-        scale_fill_brewer(palette = "Set3") + # Use a color palette for different bars
-        theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
-        scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits by 10%
-    }
+  # Check if there are any missing values
+  if (all(missing_values == 0)) {
+    return(NULL)
+  } else {
+    # Create a data frame for plotting
+    missing_data_df <- data.frame(
+      Column = c(names(missing_values), "At Least One Missing"),
+      MissingValues = c(missing_values, cases_with_missing)
+    )
+    # Calculate the percentage of missing values per column
+    # missing_percentage <- (missing_values / nrow(df)) * 100
+    # Plot the number of missing values for all columns with labels
+    ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
+      geom_bar(stat = "identity") +
+      geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
+      # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
+      coord_flip() + # Makes the bars horizontal
+      labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +
+      scale_fill_brewer(palette = "Set3") + # Use a color palette for different bars
+      theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
+      scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits by 10%
   }
+}

@@ -133,13 +133,18 @@ app_ui <- function(request) {
             br(),
             fluidRow(
               column(
-                width = 6,
+                width = 4,
                 actionButton("data_edit_modal", "Data Types")
               ),
               column(
-                width = 6,
+                width = 4,
                 actionButton("data_desc_modal", "Description")
-              )
+              ),
+              column(
+                width = 4,
+                # download data
+                downloadButton("download_data", "Data")
+              ),
             ),
             textOutput("usage"),
             textOutput("total_cost"),
