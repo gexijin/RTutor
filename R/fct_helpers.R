@@ -159,7 +159,8 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
       data_info <- describe_df(
         df, 
         list_levels = TRUE, 
-        relevant_var = relevant_var
+        relevant_var = relevant_var,
+        head = TRUE
       )
       # Always add 'use the df data frame.'
       txt <- paste(txt, after_text)
@@ -187,7 +188,8 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
           data_info_2 <- describe_df(
             df2, 
             list_levels = TRUE, 
-            relevant_var = relevant_var
+            relevant_var = relevant_var,
+            head = TRUE
           )
           data_info_2 <- gsub("df data frame", paste0(df2_name, " data frame"), data_info_2)
 
@@ -227,121 +229,150 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 #' @param list_levels whether to list levels for factors
 #' @param relevant_var  a list of variables mentioned by the user
 #' @return Returns a cleaned up version, so that it could be executed as R command.
+describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRUE) {
 
-describe_df <- function(df, list_levels = FALSE, relevant_var) {
+  data_info <- ""
+  numeric_index <- sapply(
+    df,
+    function(x) {
+      if (is.numeric(x)) {
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
+    }
+  )
 
-      data_info <- ""
-      numeric_index <- sapply(
-        df,
-        function(x) {
-          if (is.numeric(x)) {
-            return(TRUE)
-          } else {
-            return(FALSE)
-          }
-        }
+  numeric_var <- colnames(df)[numeric_index]
+  cat_var <- colnames(df)[!numeric_index]
+
+  # calculate total number of unique levels
+  total_levels <- sapply(cat_var, function(x) {length(unique(df[, x]))})
+  # remove columns that are names, strings, etc
+  cat_var <- cat_var[total_levels < nrow(df) * 0.8]
+
+  # numeric variables
+  if (length(numeric_var) == 1) {
+    data_info <- paste0(
+      data_info,
+      "The df data frame has a column ",
+      numeric_var,
+      " that contains a numeric variable. "
+    )
+  } else if (length(numeric_var) > 1) {
+    data_info <- paste0(
+      data_info,
+      "The df data frame contains these numeric variables: ",
+      paste0(
+        numeric_var[1:(length(numeric_var) - 1)],
+        collapse = ", "
+      ),
+      ", and ",
+      numeric_var[length(numeric_var)],
+      ". "
+    )
+  }
+  # Categorical variables-----------------------------
+  # numeric variables
+  if (length(cat_var) == 1) {
+    data_info <- paste0(
+      data_info,
+      "The df data frame has a column ",
+      cat_var,
+      " that contains a categorical variable. "
+    )
+  } else if (length(cat_var) > 1) {
+    data_info <- paste0(
+      data_info,
+      "The df data frame contains these categorical variables: ",
+      paste0(
+        cat_var[1:(length(cat_var) - 1)],
+        collapse = ", "
+      ),
+      ", and ",
+      cat_var[length(cat_var)],
+      ". "
+    )
+  }
+  
+  if(list_levels & length(relevant_var) > 0) {
+
+    # only list for categorical variables specified in user prompt
+    relevant_cat_var <- intersect(relevant_var, cat_var)
+  # describe the levels in categorical variable
+    for (var in relevant_cat_var) {
+      max_lelvels_description <- 4
+      ix <- match(var, colnames(df))
+      factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
+      factor_levels <- names(factor_levels)
+
+      # have more than 6 levels?
+      many_levels <- FALSE
+
+      if (length(factor_levels) > max_lelvels_description) {
+        many_levels <- TRUE
+        factor_levels <- factor_levels[1:max_lelvels_description]
+      }
+
+      last_level <- factor_levels[length(factor_levels)]
+      factor_levels <- factor_levels[-1 * length(factor_levels)]
+      tem <- paste0(
+        factor_levels,
+        collapse = "', '"
       )
-
-      numeric_var <- colnames(df)[numeric_index]
-      cat_var <- colnames(df)[!numeric_index]
-
-      # calculate total number of unique levels
-      total_levels <- sapply(cat_var, function(x) {length(unique(df[, x]))})
-      # remove columns that are names, strings, etc
-      cat_var <- cat_var[total_levels < nrow(df) * 0.8]
-
-     # numeric variables
-      if (length(numeric_var) == 1) {
-        data_info <- paste0(
-          data_info,
-          "The df data frame has a column ",
-          numeric_var,
-          " that contains a numeric variable. "
-        )
-      } else if (length(numeric_var) > 1) {
-        data_info <- paste0(
-          data_info,
-          "The df data frame contains these numeric variables: ",
-          paste0(
-            numeric_var[1:(length(numeric_var) - 1)],
-            collapse = ", "
-          ),
-          ", and ",
-          numeric_var[length(numeric_var)],
-          ". "
+      if (!many_levels) { # less than 6 levels
+        factor_levels <- paste0("'", tem, "', and '", last_level, "'")
+      } else { # more than 6 levels
+        factor_levels <- paste0(
+          "'",
+          tem,
+          "', '",
+          last_level,
+          "', etc"
         )
       }
-      # Categorical variables-----------------------------
-     # numeric variables
-      if (length(cat_var) == 1) {
-        data_info <- paste0(
-          data_info,
-          "The df data frame has a column ",
-          cat_var,
-          " that contains a categorical variable. "
-        )
-      } else if (length(cat_var) > 1) {
-        data_info <- paste0(
-          data_info,
-          "The df data frame contains these categorical variables: ",
-          paste0(
-            cat_var[1:(length(cat_var) - 1)],
-            collapse = ", "
-          ),
-          ", and ",
-          cat_var[length(cat_var)],
-          ". "
-        )
-      }
-      
-      if(list_levels & length(relevant_var) > 0) {
+      data_info <- paste0(
+        data_info,
+        "The categorical variable ",
+        var,
+        " has these levels: ",
+        factor_levels,
+        ". "
+      )
+    }
+  }
+  
+  if(head) {
+    #randomly select 5 rows, print out, convert to string
+    sample_rows <- paste0(
+      capture.output(head(df[sample(nrow(df), 5),])), 
+      collapse = "\n"
+    )
+    # if too long, use only 2 rows
+    if(nchar(sample_rows) > 2000) {
+      sample_rows <- paste0(
+        capture.output(head(df[sample(nrow(df), 2),])), 
+        collapse = "\n"
+      )
+    }
+    sample_rows <- paste(
+      "The df data frame looks like this: \n",
+      sample_rows
+    )
+    
+    # if still too long, skip
+    if(nchar(sample_rows) > 3000) {
+      sample_rows <- ""
+    }
 
-        # only list for categorical variables specified in user prompt
-        relevant_cat_var <- intersect(relevant_var, cat_var)
-      # describe the levels in categorical variable
-        for (var in relevant_cat_var) {
-          max_lelvels_description <- 4
-          ix <- match(var, colnames(df))
-          factor_levels <- sort(table(df[, ix]), decreasing = TRUE)
-          factor_levels <- names(factor_levels)
+    data_info <- paste0(
+      data_info,
+      sample_rows    
+    )
+  }
 
-          # have more than 6 levels?
-          many_levels <- FALSE
 
-          if (length(factor_levels) > max_lelvels_description) {
-            many_levels <- TRUE
-            factor_levels <- factor_levels[1:max_lelvels_description]
-          }
-
-          last_level <- factor_levels[length(factor_levels)]
-          factor_levels <- factor_levels[-1 * length(factor_levels)]
-          tem <- paste0(
-            factor_levels,
-            collapse = "', '"
-          )
-          if (!many_levels) { # less than 6 levels
-            factor_levels <- paste0("'", tem, "', and '", last_level, "'")
-          } else { # more than 6 levels
-            factor_levels <- paste0(
-              "'",
-              tem,
-              "', '",
-              last_level,
-              "', etc"
-            )
-          }
-          data_info <- paste0(
-            data_info,
-            "The categorical variable ",
-            var,
-            " has these levels: ",
-            factor_levels,
-            ". "
-          )
-        }
-      }
-      
-      return(data_info)
+  return(data_info)
 }
 
 
@@ -673,58 +704,58 @@ create_usage_db <- function() {
 #' @param filesize size
 #' 
 #' @return nothing
-  save_data <- function(
-    date,
-    time,
-    request,
-    code,
-    error_status,
-    data_str,
-    dataset,
-    session,
-    filename,
-    filesize,
-    chunk,
-    api_time,
-    tokens,
-    language
-  ) {
-    # if db does not exist, create one
-    if (file.exists(sqlitePath)) {
-      # Connect to the database
-      db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RW)
-      # Construct the update query by looping over the data fields
-      txt <- sprintf(
-        "INSERT INTO %s (%s) VALUES ('%s')",
-        sqltable,
-        "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language",
-        paste(
-          c(
-            as.character(date),
-            as.character(time),
-            clean_txt(request),
-            clean_txt(code),
-            as.integer(error_status),
-            clean_txt(data_str),
-            dataset,
-            session,
-            filename,
-            filesize,
-            chunk,
-            api_time,
-            tokens,
-            language
-          ),
-          collapse = "', '"
-        )
+save_data <- function(
+  date,
+  time,
+  request,
+  code,
+  error_status,
+  data_str,
+  dataset,
+  session,
+  filename,
+  filesize,
+  chunk,
+  api_time,
+  tokens,
+  language
+) {
+  # if db does not exist, create one
+  if (file.exists(sqlitePath)) {
+    # Connect to the database
+    db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RW)
+    # Construct the update query by looping over the data fields
+    txt <- sprintf(
+      "INSERT INTO %s (%s) VALUES ('%s')",
+      sqltable,
+      "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language",
+      paste(
+        c(
+          as.character(date),
+          as.character(time),
+          clean_txt(request),
+          clean_txt(code),
+          as.integer(error_status),
+          clean_txt(data_str),
+          dataset,
+          session,
+          filename,
+          filesize,
+          chunk,
+          api_time,
+          tokens,
+          language
+        ),
+        collapse = "', '"
       )
-      # Submit the update query and disconnect
-      try(
-        RSQLite::dbExecute(db, txt)
-      )
-      RSQLite::dbDisconnect(db)
-    }
+    )
+    # Submit the update query and disconnect
+    try(
+      RSQLite::dbExecute(db, txt)
+    )
+    RSQLite::dbDisconnect(db)
   }
+}
 
 #' Clean up text strings for inserting into SQL
 #' 
@@ -1024,36 +1055,36 @@ api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
 #'
 #' @return a plot
 #' 
-  #ploting missing values
-  missing_values_plot <- function(df) {
-    req(!is.null(df))
+#ploting missing values
+missing_values_plot <- function(df) {
+  req(!is.null(df))
 
-    # Calculate the total number of missing values per column
-    missing_values <- sapply(df, function(x) sum(is.na(x)))
+  # Calculate the total number of missing values per column
+  missing_values <- sapply(df, function(x) sum(is.na(x)))
 
-    # Calculate the number of cases with at least one missing value
-    cases_with_missing <- sum(apply(df, 1, function(x) any(is.na(x))))
+  # Calculate the number of cases with at least one missing value
+  cases_with_missing <- sum(apply(df, 1, function(x) any(is.na(x))))
 
-    # Check if there are any missing values
-    if (all(missing_values == 0)) {
-      return(NULL)
-    } else {
-      # Create a data frame for plotting
-      missing_data_df <- data.frame(
-        Column = c(names(missing_values), "At Least One Missing"),
-        MissingValues = c(missing_values, cases_with_missing)
-      )
-      # Calculate the percentage of missing values per column
-      # missing_percentage <- (missing_values / nrow(df)) * 100
-      # Plot the number of missing values for all columns with labels
-      ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
-        geom_bar(stat = "identity") +
-        geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
-        # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
-        coord_flip() + # Makes the bars horizontal
-        labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +
-        scale_fill_brewer(palette = "Set3") + # Use a color palette for different bars
-        theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
-        scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits by 10%
-    }
+  # Check if there are any missing values
+  if (all(missing_values == 0)) {
+    return(NULL)
+  } else {
+    # Create a data frame for plotting
+    missing_data_df <- data.frame(
+      Column = c(names(missing_values), "At Least One Missing"),
+      MissingValues = c(missing_values, cases_with_missing)
+    )
+    # Calculate the percentage of missing values per column
+    # missing_percentage <- (missing_values / nrow(df)) * 100
+    # Plot the number of missing values for all columns with labels
+    ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
+      geom_bar(stat = "identity") +
+      geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
+      # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
+      coord_flip() + # Makes the bars horizontal
+      labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +
+      scale_fill_brewer(palette = "Set3") + # Use a color palette for different bars
+      theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
+      scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits by 10%
   }
+}
