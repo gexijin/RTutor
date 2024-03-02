@@ -807,6 +807,13 @@ app_server <- function(input, output, session) {
             if(selected_file != "Not found" && file.exists(selected_file)) {
 
               df <- readRDS(selected_file)
+              if (convert_to_factor()) {
+                df <- numeric_to_factor(
+                  df,
+                  max_levels_factor(),
+                  max_proptortion_factor()
+                )
+              }
               # update the current_data() reactive value
               current_data(df) 
             } else {
