@@ -1412,7 +1412,6 @@ app_server <- function(input, output, session) {
       df <- rna_seq_data()
     } else {
       # otherwise built-in data is unavailable when running from R package.
-      library(tidyverse)
       eval(parse(text = paste0("df <- ", input$select_data)))
     }
 
