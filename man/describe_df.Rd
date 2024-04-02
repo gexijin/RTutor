@@ -12,6 +12,8 @@ describe_df(df, list_levels = FALSE, relevant_var = NULL, head = TRUE)
 \item{list_levels}{whether to list levels for factors}
 
 \item{relevant_var}{a list of variables mentioned by the user}
+
+\item{head}{randomly select 5 rows}
 }
 \value{
 Returns a cleaned up version, so that it could be executed as R command.

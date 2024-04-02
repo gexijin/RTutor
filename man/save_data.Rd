@@ -30,6 +30,14 @@ save_data(
 
 \item{code}{AI generated code}
 
+\item{error_status}{status, TRUE, error}
+
+\item{data_str}{Data directory}
+
+\item{dataset}{Dataset name}
+
+\item{session}{Current session ID}
+
 \item{filename}{name of the uploaded file}
 
 \item{filesize}{size}
@@ -40,7 +48,7 @@ save_data(
 
 \item{tokens}{total completion tokens}
 
-\item{error}{status, TRUE, error}
+\item{language}{language}
 }
 \value{
 nothing

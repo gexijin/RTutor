@@ -10,8 +10,13 @@
 #'
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
-#' @import shiny
+#' @rawNamespace import(shiny, except=c(dataTableOutput, renderDataTable))
+#'
 #' @noRd
+#' @importFrom DT dataTableOutput
+#' @importFrom plotly plotlyOutput
+#' @importFrom shinyjs hidden useShinyjs
+#' @importFrom tippy tippy_this
 app_ui <- function(request) {
   tagList(
     golem_add_external_resources(),
@@ -64,7 +69,7 @@ app_ui <- function(request) {
                   "#reset_button{font-size: 16px;color: blue}"
                 )),
                 align = "right",
-                tippy::tippy_this(
+                tippy_this(
                   "reset_button",
                   "Reset before uploading a new file. Clears data objects, chat history, and code chunks.",
                   theme = "light-border"
@@ -98,7 +103,7 @@ app_ui <- function(request) {
                 tags$head(tags$style(
                   "#submit_button{font-size: 16px;color: red}"
                 )),
-                tippy::tippy_this(
+                tippy_this(
                   "submit_button",
                   "ChatGPT can return different results for the same request.",
                   theme = "light-border"
@@ -121,15 +126,15 @@ app_ui <- function(request) {
               value = ""
             ),
 
-            tippy::tippy_this(
+            tippy_this(
               "ask_question",
-              "Walk me through this code. What does this result mean? 
-              What is this error about? Explain logistic regression. 
-              List R packages for time series analysis. 
+              "Walk me through this code. What does this result mean?
+              What is this error about? Explain logistic regression.
+              List R packages for time series analysis.
               Hit Enter to send the request.",
               theme = "light-border"
             ),
-            shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
+            hidden(actionButton("ask_button", strong("Ask RTutor"))),
             br(),
             fluidRow(
               column(
@@ -181,7 +186,7 @@ app_ui <- function(request) {
       ###############################################################################
 
           mainPanel(
-            shinyjs::useShinyjs(),
+            useShinyjs(),
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
@@ -306,7 +311,7 @@ app_ui <- function(request) {
                     selected = NULL,
                     choices = NULL
                   ),
-                  tippy::tippy_this(
+                  tippy_this(
                     "selected_chunk",
                     "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
                     theme = "light-border"
@@ -355,22 +360,22 @@ app_ui <- function(request) {
 
             br(),
 
-            shinyjs::hidden(
+            hidden(
               div(
                 id = "first_file",
                 hr(),
                 h4("Default dataset:  df"),
                 textOutput("data_size"),
-                DT::dataTableOutput("data_table_DT")
+                dataTableOutput("data_table_DT")
               )
             ),
-            shinyjs::hidden(
+            hidden(
               div(
                 id = "second_file",
                 hr(),
                 h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
                 textOutput("data_size_2"),
-                DT::dataTableOutput("data_table_DT_2")
+                dataTableOutput("data_table_DT_2")
 
               )
             )
@@ -392,8 +397,8 @@ app_ui <- function(request) {
             hr(),
             h4("Data summary: df"),
             verbatimTextOutput("data_summary"),
-            plotly::plotlyOutput("missing_values", width = "60%"),
-            shinyjs::hidden(
+            plotlyOutput("missing_values", width = "60%"),
+            hidden(
               div(
                 id = "second_file_summary",
                 br(),hr(),
@@ -402,7 +407,7 @@ app_ui <- function(request) {
                 br(),hr(),
                 h4("Data summary: df2"),
                 verbatimTextOutput("data_summary_2"),
-                plotly::plotlyOutput("missing_values_2", width = "60%")
+                plotlyOutput("missing_values_2", width = "60%")
               )
             )
           ),
@@ -520,7 +525,7 @@ app_ui <- function(request) {
               outputId = "Rmd_source",
               label = "RMarkdown"
             ),
-            tippy::tippy_this(
+            tippy_this(
               "Rmd_source",
               "Download a R Markdown source file.",
               theme = "light-border"
@@ -830,7 +835,7 @@ app_ui <- function(request) {
 #' This function is internally used to add external
 #' resources inside the Shiny application.
 #'
-#' @import shiny
+#' @importFrom shiny tags
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
 #' @noRd
 golem_add_external_resources <- function() {

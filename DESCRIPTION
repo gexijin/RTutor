@@ -12,7 +12,6 @@ Imports:
     config,
     golem,
     tippy,
-    gridExtra,
     openai,
     DT,
     shinybusy,
@@ -26,15 +25,21 @@ Imports:
     janitor,
     RSQLite,
     canvasXpress,
-    moments
-Depends:
-    tidyverse
+    moments,
+    shiny,
+    heyshiny,
+    lubridate,
+    readxl,
+    rlang,
+    ggplot2,
+    dplyr,
+    methods,
+    rmarkdown
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Suggests: 
     knitr,
-    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr

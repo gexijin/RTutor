@@ -22,6 +22,7 @@ app_sys <- function(...) {
 #' @param file Location of the config file
 #'
 #' @noRd
+#' @importFrom config get
 get_golem_config <- function(
   value,
   config = Sys.getenv(
@@ -35,7 +36,7 @@ get_golem_config <- function(
   # Modify this if your config file is somewhere else
   file = app_sys("golem-config.yml")
 ) {
-  config::get(
+  get(
     value = value,
     config = config,
     file = file,

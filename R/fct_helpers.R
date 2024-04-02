@@ -114,14 +114,17 @@ move_front <- function(v, e){
 #' @param df the data frame
 #' @param use_python  whether or not using python instead of R
 #' @param chunk_id  first or not? First chunk add data description
+#' @param selected_model Selected GPT model
+#' @param df2 the second data frame
+#' @param df2_name the name of the second data frame
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
 prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, df2 = NULL, df2_name = NULL) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
-  } 
-  # if too short, do not send. 
+  }
+  # if too short, do not send.
   if(nchar(txt) < min_query_length || nchar(txt) > max_query_length) {
     return(NULL)
   }
@@ -130,7 +133,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
    txt <- gsub(" *$|\n*$", "", txt)
    # some times it is like " \n "
    txt <- gsub(" *$|\n*$", "", txt)
-   # if last character is not a period. Add it. Otherwise, 
+   # if last character is not a period. Add it. Otherwise,
    # Davinci will try to complete a sentence.
    if (!grepl("\\.$|?", txt)) {
      txt <- paste(txt, ".", sep = "")
@@ -228,6 +231,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 #' @param df a data frame
 #' @param list_levels whether to list levels for factors
 #' @param relevant_var  a list of variables mentioned by the user
+#' @param head randomly select 5 rows
 #' @return Returns a cleaned up version, so that it could be executed as R command.
 describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRUE) {
 
@@ -381,9 +385,10 @@ describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRU
 #' The response from GTP3 sometimes contains strings that are not R commands.
 #'
 #' @param cmd A string that stores the completion from GTP3.
-#' @param selected_data, name of the selected dataset. 
+#' @param selected_data, name of the selected dataset.
 #' @param on_server, whether or not running on the server.
 #' @return Returns a cleaned up version, so that it could be executed as R command.
+#' @importFrom utils capture.output
 clean_cmd <- function(cmd, selected_data, on_server = FALSE) {
   req(cmd)
   # simple way to check
@@ -453,12 +458,14 @@ polish_cmd <- function(cmd) {
 # A file, demo requests for different datasets, demo questions,
 demo <- read.csv(app_sys("app", "www", "demo_questions.csv"))
 
+mpg <- ggplot2::mpg
+
 ix <- which(demo$data == "questions")
 demo_questions <- demo$requests[ix]
 names(demo_questions) <- demo$name[ix]
 
 jokes <- demo[
-  which(demo$data == "jokes"), 
+  which(demo$data == "jokes"),
   "requests"
 ]
 
@@ -574,8 +581,8 @@ if (file.exists(file.path(getwd(), "api_key.txt"))) {
 #' But could be turned on. if you use if(input$selected), it will
 #' give an error.
 #'
-#' @param x
-#'
+#' @param x x value
+#' @noRd
 #' @return Returns TRUE or FALSE
 turned_on <- function(x) {
 
@@ -595,7 +602,7 @@ turned_on <- function(x) {
 }
 
 
-#' Returns a data frame with some numeric columns with fewer levels 
+#' Returns a data frame with some numeric columns with fewer levels
 #' converted as factors
 #'
 #'
@@ -604,7 +611,7 @@ turned_on <- function(x) {
 #' @param max_proportion_factor max proportion
 #'
 #' @return Returns a data frame
-numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
+numeric_to_factor <- function(df, max_levels_factor, max_proportion_factor) {
   # some columns looks like numbers but have few levels
   # convert these to factors
 
@@ -614,7 +621,7 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
       if (
         (is.numeric(x) || is.character(x)) &&
         # if there are few unique values compared to total values
-        length(unique(x)) / length(x) < max_proptortion_factor &&
+        length(unique(x)) / length(x) < max_proportion_factor &&
         length(unique(x)) <= max_levels_factor  # less than 12 unique values
           # relcassify numeric variable as categorical
       ) {
@@ -639,16 +646,17 @@ numeric_to_factor <- function(df, max_levels_factor, max_proptortion_factor) {
 
 
 #' Creates a SQLite database file for collecting user data
-#' 
-#' The data file should be stored in the ../../data folder inside 
-#' the container. From outside in the RTutor_server folder, 
+#'
+#' The data file should be stored in the ../../data folder inside
+#' the container. From outside in the RTutor_server folder,
 #' it is in data folder.
 #'  Only works on local machines. Not on linux.
 #' @return nothing
+#' @importFrom RSQLite dbConnect SQLite dbExecute dbDisconnect
 create_usage_db <- function() {
   # if db does not exist, create one
   if(!file.exists(sqlitePath)) {
-    db <- RSQLite::dbConnect(RSQLite::SQLite(), gsub(".*/", "", sqlitePath))
+    db <- dbConnect(SQLite(), gsub(".*/", "", sqlitePath))
     txt <- sprintf(
       paste0(
       "CREATE TABLE ",
@@ -663,8 +671,8 @@ create_usage_db <- function() {
       )
     )
       # Submit the update query and disconnect
-      RSQLite::dbExecute(db, txt)
-      RSQLite::dbDisconnect(db)
+      dbExecute(db, txt)
+      dbDisconnect(db)
   }
 }
 
@@ -690,20 +698,25 @@ create_usage_db <- function() {
 
 
 #' Saves user queries, code, and error status
-#' 
+#'
 #'
 #' @param date Date in the format of "2023-01-04"
 #' @param time Time "13:05:12"
 #' @param request, user request
 #' @param code AI generated code
-#' @param error status, TRUE, error
+#' @param error_status status, TRUE, error
+#' @param data_str Data directory
+#' @param dataset Dataset name
+#' @param session Current session ID
+#' @param filename name of the uploaded file
+#' @param filesize size
 #' @param chunk, id, from 1, 2, ...
 #' @param api_time  time in seconds for API response
 #' @param tokens  total completion tokens
-#' @param filename name of the uploaded file
-#' @param filesize size
-#' 
+#' @param language language
+#'
 #' @return nothing
+#' @importFrom RSQLite dbConnect SQLite SQLITE_RW dbExecute dbDisconnect
 save_data <- function(
   date,
   time,
@@ -723,7 +736,7 @@ save_data <- function(
   # if db does not exist, create one
   if (file.exists(sqlitePath)) {
     # Connect to the database
-    db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RW)
+    db <- dbConnect(SQLite(), sqlitePath, flags = SQLITE_RW)
     # Construct the update query by looping over the data fields
     txt <- sprintf(
       "INSERT INTO %s (%s) VALUES ('%s')",
@@ -751,14 +764,14 @@ save_data <- function(
     )
     # Submit the update query and disconnect
     try(
-      RSQLite::dbExecute(db, txt)
+      dbExecute(db, txt)
     )
-    RSQLite::dbDisconnect(db)
+    dbDisconnect(db)
   }
 }
 
 #' Clean up text strings for inserting into SQL
-#' 
+#'
 #'
 #' @param x a string that can contain ' or "
 #'
@@ -780,7 +793,7 @@ save_data <- function(
 
 
 #' Save user feedback
-#' 
+#'
 #'
 #' @param date Date in the format of "2023-01-04"
 #' @param time Time "13:05:12"
@@ -789,11 +802,12 @@ save_data <- function(
 #' @param experience  R experience
 #'
 #' @return nothing
+#' @importFrom RSQLite dbConnect SQLite SQLITE_RW dbExecute dbDisconnect
   save_comments <- function(date, time, comments, helpfulness, experience) {
     # if db does not exist, create one
     if (file.exists(sqlitePath)) {
       # Connect to the database
-      db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RW)
+      db <- dbConnect(SQLite(), sqlitePath, flags = SQLITE_RW)
       # Construct the update query by looping over the data fields
       txt <- sprintf(
         "INSERT INTO %s (%s) VALUES ('%s')",
@@ -812,24 +826,23 @@ save_data <- function(
       )
       # Submit the update query and disconnect
       try(
-        RSQLite::dbExecute(db, txt)
+        dbExecute(db, txt)
       )
-      RSQLite::dbDisconnect(db)
+      dbDisconnect(db)
     }
   }
 
 
 
 #' Generate html file from Python code
-#' 
 #'
-#' @param python_code, a chunk of code 
-#' @param html_file file name for output
+#'
+#' @param python_code, a chunk of code
 #' @param select_data input$select data
 #' @param current_data   current_data()
 #'
 #' @return -1 if failed. If success, the the designated html file is written
-#' 
+#' @importFrom rmarkdown render
 python_html <- function(python_code, select_data, current_data) {
   withProgress(message = "Running Python...", {
     incProgress(0.2)
@@ -851,7 +864,7 @@ python_html <- function(python_code, select_data, current_data) {
     )
 
     # Set up parameters to pass to Rmd document
-    params <- list(df = iris) # dummy
+    params <- list(df = datasets::iris) # dummy
 
     # if uploaded, use that data
     req(select_data)
@@ -866,7 +879,7 @@ python_html <- function(python_code, select_data, current_data) {
     # child of the global environment (this isolates the code in the document
     # from the code in this app).
     try(
-      rmarkdown::render(
+      render(
         input = temp_rmd, # markdown_location,
         params = params,
         envir = new.env(parent = globalenv())
@@ -874,30 +887,33 @@ python_html <- function(python_code, select_data, current_data) {
     )
 
   })  # progress bar
-    
+
 
     if(file.exists(html_file)) {
-      return(html_file)       
+      return(html_file)
     } else {
       return(-1)
     }
 }
 
 #' Describes the distribution of a column in a data frame, or a vector.
-#' 
+#'
 #'
 #' @param x a vector
 #'
 #' @return a text string
-#' 
+#'
+#' @importFrom stats sd
+#' @importFrom moments skewness
+#' @importFrom dplyr arrange
 distribution_description <- function(x) {
 
   if (is.numeric(x)) {
     desc <- paste0(" has a ",
                    " mean of ", round(mean(x, na.rm = TRUE), 2),
                    " and standard Deviation of ", round(sd(x, na.rm = TRUE), 2), ". ")
-    
-    skewness <- moments::skewness(x, na.rm = TRUE)
+
+    skewness <- skewness(x, na.rm = TRUE)
     if (abs(skewness) < 0.5) {
       desc <- paste0(desc, "The distribution is approximately symmetric.")
     } else {
@@ -918,7 +934,7 @@ distribution_description <- function(x) {
   } else if (is.factor(x)) {
     desc <- paste0(" has ")
     freq_table <- as.data.frame(table(x))
-    top_levels <- freq_table %>% arrange(desc(Freq))
+    top_levels <- arrange(freq_table, ~desc(.x$Freq))
     if(nrow(top_levels) > 3) {
       top_levels <- top_levels[1:2,]
     }
@@ -931,7 +947,7 @@ distribution_description <- function(x) {
   } else {
     desc <- ""
   }
-    
+
   desc <- gsub(",\\s*$", ".", desc)
   return(desc)
 }
@@ -939,12 +955,14 @@ distribution_description <- function(x) {
 
 
 #' Generate a plain text about the distribution and correlations.
-#' 
+#'
 #'
 #' @param df a data frame.
 #'
 #' @return a text string
-#' 
+#'
+#' @importFrom stats cor.test chisq.test aov
+#'
 describe_data <- function(df) {
   p_val_cutoff <- 1e-3
   R_cutoff <- 0.5
@@ -1005,56 +1023,59 @@ describe_data <- function(df) {
 
 
 #' Estimate tokens from text
-#' 
+#'
 #'
 #' @param text a string
 #'
 #' @return a number
-#' 
+#'
 tokens <- function(text) {
   # Approximate tokenization by splitting on spaces and punctuations
   tokens <- unlist(strsplit(text, "[[:space:]]|[[:punct:]]"))
-  
+
   # Filter out empty tokens
   tokens <- tokens[nchar(tokens) > 0]
-  
+
   # Further split longer tokens (this is a very crude approximation)
   long_tokens <- tokens[nchar(tokens) > 3]
   additional_tokens <- sum(nchar(long_tokens) %/% 4)
-  
+
   total_tokens <- length(tokens) + additional_tokens
-  
+
   return(total_tokens)
 }
 
 #' Estimate API cost
-#' 
+#'
 #'
 #' @param prompt_tokens a number
 #' @param completion_tokens a number
 #' @param selected_model a string
 #'
 #' @return a number
-#' 
+#'
 api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
   if(grepl("gpt-4", selected_model)) { # gpt4
     # input token $0.03 / 1k token, Output is $0.06 / 1k for GPT-4
     completion_tokens * 6e-5+ prompt_tokens  * 3e-5
   } else {
     # ChatGPT
-    completion_tokens * 2e-6+ prompt_tokens  * 1.5e-6 
+    completion_tokens * 2e-6+ prompt_tokens  * 1.5e-6
   }
 
 
 }
 
 #' Estimate API cost
-#' 
+#'
 #'
 #' @param df a dataframe
 #'
 #' @return a plot
-#' 
+#'
+#' @importFrom ggplot2 ggplot aes geom_bar geom_text coord_flip labs expansion
+#'                     scale_fill_brewer theme element_blank scale_y_continuous
+#'                     .data
 #ploting missing values
 missing_values_plot <- function(df) {
   req(!is.null(df))
@@ -1074,12 +1095,13 @@ missing_values_plot <- function(df) {
       Column = c(names(missing_values), "At Least One Missing"),
       MissingValues = c(missing_values, cases_with_missing)
     )
+
     # Calculate the percentage of missing values per column
     # missing_percentage <- (missing_values / nrow(df)) * 100
     # Plot the number of missing values for all columns with labels
-    ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
+    ggplot(missing_data_df, aes(x = .data$Column, y = .data$MissingValues, fill = .data$Column)) +
       geom_bar(stat = "identity") +
-      geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
+      geom_text(aes(label = sprintf("%.0f%%", .data$MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
       # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
       coord_flip() + # Makes the bars horizontal
       labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +

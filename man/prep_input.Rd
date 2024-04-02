@@ -25,6 +25,12 @@ prep_input(
 \item{use_python}{whether or not using python instead of R}
 
 \item{chunk_id}{first or not? First chunk add data description}
+
+\item{selected_model}{Selected GPT model}
+
+\item{df2}{the second data frame}
+
+\item{df2_name}{the name of the second data frame}
 }
 \value{
 Returns a cleaned up version, so that it could be sent to GPT.

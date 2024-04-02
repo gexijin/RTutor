@@ -9,7 +9,30 @@
 #'
 #' @param input,output,session Internal parameters for {shiny}.
 #'     DO NOT REMOVE.
-#' @import shiny
+#' @rawNamespace import(shiny, except=c(dataTableOutput, renderDataTable))
+#' @importFrom canvasXpress renderCanvasXpress canvasXpress canvasXpressOutput
+#' @importFrom corrplot cor.mtest corrplot
+#' @importFrom DT renderDataTable datatable
+#' @importFrom DataExplorer plot_bar plot_histogram plot_qq
+#' @importFrom GGally ggpairs
+#' @importFrom grDevices pdf
+#' @importFrom heyshiny useHeyshiny speechInput
+#' @importFrom janitor clean_names
+#' @importFrom lubridate parse_date_time
+#' @importFrom methods as
+#' @importFrom openai create_completion create_chat_completion
+#' @importFrom plotly renderPlotly plotlyOutput ggplotly
+#' @importFrom readxl read_excel
+#' @importFrom rlang env
+#' @importFrom rmarkdown render
+#' @importFrom shinyjs hideElement click showElement show runjs toggle hide
+#' @importFrom shiny showModal modalDialog removeModal showNotification
+#' @importFrom shinybusy show_modal_spinner remove_modal_spinner
+#' @importFrom summarytools dfSummary
+#' @importFrom stats runif na.omit cor
+#' @importFrom tableone CreateTableOne
+#' @importFrom tippy tippy_this
+#' @importFrom utils read.csv read.table capture.output str sessionInfo packageVersion
 #' @noRd
 app_server <- function(input, output, session) {
 
@@ -57,10 +80,10 @@ app_server <- function(input, output, session) {
 
 
   observe({
-    shinyjs::hideElement(id = "load_message")
+    hideElement(id = "load_message")
   })
 
-  # after file is uploaded, hide some UI elements. 
+  # after file is uploaded, hide some UI elements.
   # https://stackoverflow.com/questions/19686581/make-conditionalpanel-depend-on-files-uploaded-with-fileinput
   # On the UI, changed to output.file_uploaded == 0
   output$file_uploaded <- reactive({
@@ -93,8 +116,8 @@ app_server <- function(input, output, session) {
   output$use_heyshiny <- renderUI({
     req(use_voice())
       tagList(
-        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
-        heyshiny::speechInput(
+        useHeyshiny(language = "en-US"), # configure the heyshiny
+        speechInput(
           inputId = "hey_cmd",
           command = paste(wake_word, "*msg")  # hey cox is more sensitive than 'hi tutor'
         ), # set the input
@@ -117,7 +140,7 @@ app_server <- function(input, output, session) {
       }
       # submit the request when user said  action verb
       if (tolower(speech) %in% action_verbs) {
-        shinyjs::click("submit_button")
+        click("submit_button")
       } else {
         updateTextInput(
           session,
@@ -129,7 +152,7 @@ app_server <- function(input, output, session) {
     } else if (input$tabs == "Ask") {
       # submit the request when user said  action verb
       if (tolower(speech) %in% action_verbs) {
-        shinyjs::click("ask_button")
+        click("ask_button")
       } else {
         updateTextInput(
           session,
@@ -199,7 +222,7 @@ app_server <- function(input, output, session) {
       # Excel file ---------------
       if (grepl("xls$|xlsx$", in_file, ignore.case = TRUE)) {
         try(
-          df <- readxl::read_excel(in_file)
+          df <- read_excel(in_file)
         )
         df <- as.data.frame(df)
       } else {
@@ -225,7 +248,7 @@ app_server <- function(input, output, session) {
         return(NULL)
       } else {
         # clean column names
-        df <- df %>% janitor::clean_names()
+        df <- clean_names(df)
         return(
           list(
             df = df,
@@ -299,22 +322,16 @@ app_server <- function(input, output, session) {
     req(is.null(input$user_file))
 
     # subset based on dataset
-    demo_related <- subset(
-      demo,
-      data == input$select_data
-    )
+    # demo_related <- subset(demo, data == input$select_data)
+    demo_related <- demo[demo$data == input$selected_data, ]
 
     #subset based on R or Python
     if(input$use_python) {
-      demo_related <- subset(
-        demo_related,
-        Python == 1
-      )
+      # demo_related <- subset(demo_related, Python == 1)
+      demo_related <- demo_related[demo_related$Python == 1, ]
     } else {
-      demo_related <- subset(
-        demo_related,
-        R == 1
-      )
+      # demo_related <- subset(demo_related, R == 1)
+      demo_related <- demo_related[demo_related$R == 1, ]
     }
 
     choices <- demo_related$requests
@@ -337,8 +354,8 @@ app_server <- function(input, output, session) {
   #____________________________________________________________________________
   # pop up modal for Settings
   observeEvent(input$api_button, {
-    shiny::showModal(
-      shiny::modalDialog(
+    showModal(
+      modalDialog(
         size = "l",
         footer = modalButton("Confirm"),
                 # Custom CSS to make the chat area scrollable
@@ -442,9 +459,9 @@ app_server <- function(input, output, session) {
                 label = strong("Treat as factors"),
                 value = convert_to_factor()
               ),
-              tippy::tippy_this(
+              tippy_this(
                 elementId = "numeric_as_factor",
-                tooltip = "Treat the columns that looks like a category 
+                tooltip = "Treat the columns that looks like a category
                 as a category. This applies to columns that contain numbers
                 but have very few unique values. ",
                 theme = "light-border"
@@ -460,9 +477,9 @@ app_server <- function(input, output, session) {
                 max = 50,
                 step = 1
               ),
-              tippy::tippy_this(
+              tippy_this(
                 elementId = "max_levels_factor",
-                tooltip = "To convert a numeric column as category, 
+                tooltip = "To convert a numeric column as category,
                 the column must have no more than this number of unique values.",
                 theme = "light-border"
               )
@@ -477,20 +494,20 @@ app_server <- function(input, output, session) {
                 max = 0.5,
                 step = 0.1
               ),
-              tippy::tippy_this(
+              tippy_this(
                 elementId = "max_proptortion_factor",
-                tooltip = "To convert a numeric column as category, 
-                the number of unique values in a column must not exceed 
+                tooltip = "To convert a numeric column as category,
+                the number of unique values in a column must not exceed
                 more this proportion of the total number of rows.",
                 theme = "light-border"
               )
             )
           ),
-          h5("Some columns contains numbers but should be treated 
-          as categorical values or factors. For example, we sometimes 
+          h5("Some columns contains numbers but should be treated
+          as categorical values or factors. For example, we sometimes
           use 1 to label success and 0 for failure.
-          If this is selected, using the default setting, a column 
-          is treated as categories when the number of unique values 
+          If this is selected, using the default setting, a column
+          is treated as categories when the number of unique values
           is less than or equal to 12, and less than 10% of the total rows."
           ),
           hr(),
@@ -568,9 +585,9 @@ app_server <- function(input, output, session) {
         inputId = "save_api_button",
         label = "Save key file for next time."
       ),
-      tippy::tippy_this(
+      tippy_this(
         elementId = "save_api_button",
-        tooltip = "Save to a local file, 
+        tooltip = "Save to a local file,
         so that you do not have to copy and paste next time.",
         theme = "light-border"
       )
@@ -673,7 +690,7 @@ app_server <- function(input, output, session) {
         req(user_data())
       }
 
-      shinybusy::show_modal_spinner(
+      show_modal_spinner(
         spin = "orbit",
         text = sample(jokes, 1),
         color = "#000000"
@@ -684,7 +701,7 @@ app_server <- function(input, output, session) {
       # Send to openAI
       tryCatch(
         if(selected_model() == "text-davinci-003") { # completion model: davinci-text-003
-          response <- openai::create_completion(
+          response <- create_completion(
             engine_id = selected_model(),
             prompt = prepared_request,
             openai_api_key = api_key_session()$api_key,
@@ -764,7 +781,7 @@ app_server <- function(input, output, session) {
             list(list(role = "user", content = prepared_request))
           )
 
-          response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
+          response <- create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
             model = selected_model(),
             openai_api_key = api_key_session()$api_key,
             #max_tokens = 500,
@@ -777,8 +794,8 @@ app_server <- function(input, output, session) {
         },
         error = function(e) {
           # remove spinner, show message for 5s, & reload
-          shinybusy::remove_modal_spinner()
-          shiny::showModal(api_error_modal)
+          remove_modal_spinner()
+          showModal(api_error_modal)
           Sys.sleep(5)
           session$reload()
 
@@ -830,13 +847,13 @@ app_server <- function(input, output, session) {
         Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
       }
 
-      shinybusy::remove_modal_spinner()
+      remove_modal_spinner()
 
     # update usage via global reactive value/ ouput token is twice as expensive
-    counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens    
+    counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens
     counter$requests <- counter$requests + 1
     counter$time <- round(api_time, 0)
-    counter$costs_total <- counter$costs_total + 
+    counter$costs_total <- counter$costs_total +
       api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
 
       return(
@@ -852,14 +869,14 @@ app_server <- function(input, output, session) {
   })
 
   # a modal shows api connection error
-  api_error_modal <- shiny::modalDialog(
+  api_error_modal <- modalDialog(
     title = "API connection error!",
     tags$h4("Is the API key is correct?", style = "color:red"),
       tags$h4("How about the WiFi?", style = "color:red"),
-      tags$h4("Maybe the openAI.com website is taking forever to respond.", style = "color:red"),    
+      tags$h4("Maybe the openAI.com website is taking forever to respond.", style = "color:red"),
     tags$h5("If you keep having trouble, send us an email.", style = "color:red"),
     tags$h4(
-      "Auto-reset ...", 
+      "Auto-reset ...",
       style = "color:blue; text-align:right"
     ),
     easyClose = TRUE,
@@ -874,15 +891,15 @@ app_server <- function(input, output, session) {
 
     cost_session <-  counter$costs * 10
     if (cost_session %% 5  == 0 & cost_session != 0) {
-      shiny::showModal(
-        shiny::modalDialog(
+      showModal(
+        modalDialog(
           size = "s",
           easyClose	= TRUE,
           h4(
             paste0(
               "Cumulative API Cost reached ",
               cost_session,
-              "¢"
+              "\u00a2"
             )
           ),
           h4("Slow down. Please try to use your own API key.")
@@ -1191,7 +1208,7 @@ app_server <- function(input, output, session) {
 
   })
 
-  output$result_CanvasXpress <- canvasXpress::renderCanvasXpress({
+  output$result_CanvasXpress <- renderCanvasXpress({
     req(!code_error())
     req(!input$use_python)
 
@@ -1202,9 +1219,9 @@ app_server <- function(input, output, session) {
       !is.data.frame(g) &&
       !is.numeric(g)
     ) {
-      g <- canvasXpress::canvasXpress(g)
+      g <- canvasXpress(g)
     } else {
-      g <- canvasXpress::canvasXpress(destroy = TRUE)
+      g <- canvasXpress(destroy = TRUE)
     }
     return(g)
   })
@@ -1238,11 +1255,11 @@ app_server <- function(input, output, session) {
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive) # converted
     ){
-      plotly::plotlyOutput("result_plotly")
+      plotlyOutput("result_plotly")
     } else if (
       turned_on(input$make_cx_interactive) # converted
     ) {
-      canvasXpress::canvasXpressOutput("result_CanvasXpress")
+      canvasXpressOutput("result_CanvasXpress")
     } else {
       plotOutput("result_plot")
     }
@@ -1250,7 +1267,7 @@ app_server <- function(input, output, session) {
 
   observe({
     # hide it by default
-    shinyjs::hideElement(id = "make_ggplot_interactive")
+    hideElement(id = "make_ggplot_interactive")
     updateCheckboxInput(
       session = session,
       inputId = "make_ggplot_interactive",
@@ -1262,18 +1279,18 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (inherits(run_result()$result, "ggplot") && # if  ggplot2, and it is 
+    if (inherits(run_result()$result, "ggplot") && # if  ggplot2, and it is
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
     ) {
-      shinyjs::showElement(id = "make_ggplot_interactive")
+      showElement(id = "make_ggplot_interactive")
     }
   })
 
   observe({
     # hide it by default
-    shinyjs::hideElement(id = "make_cx_interactive")
+    hideElement(id = "make_cx_interactive")
     updateCheckboxInput(
       session = session,
       inputId = "make_cx_interactive",
@@ -1285,12 +1302,12 @@ app_server <- function(input, output, session) {
     req(logs$code)
     txt <- paste(openAI_response()$cmd, collapse = " ")
 
-    if (inherits(run_result()$result, "ggplot") && # if  canvasXpress, and it is 
+    if (inherits(run_result()$result, "ggplot") && # if  canvasXpress, and it is
       !is_interactive_plot() && #not already an interactive plot, show
        # if there are too many data points, don't do the interactive
       !(dim(current_data())[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
     ) {
-      shinyjs::showElement(id = "make_cx_interactive")
+      showElement(id = "make_cx_interactive")
     }
   })
 
@@ -1426,7 +1443,7 @@ app_server <- function(input, output, session) {
       current_data(df)
     }
     # add the data to the current environment
-    run_env(rlang::env(run_env(), df = current_data()))
+    run_env(env(run_env(), df = current_data()))
     run_env_start(as.list(run_env()))
   })
 
@@ -1461,9 +1478,9 @@ app_server <- function(input, output, session) {
   })
 
 
-  output$data_table_DT <- DT::renderDataTable({
+  output$data_table_DT <- renderDataTable({
     req(data_afterwards())
-    DT::datatable(
+    datatable(
       data_afterwards(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
@@ -1507,20 +1524,20 @@ app_server <- function(input, output, session) {
   })
 
   #ploting missing values
-  output$missing_values <- plotly::renderPlotly({
+  output$missing_values <- renderPlotly({
     req(!is.null(data_afterwards()))
     p <- missing_values_plot(data_afterwards())
-    if(!is.null(p)) { 
-      plotly::ggplotly(p)
+    if(!is.null(p)) {
+      ggplotly(p)
     } else {
       return(NULL)
     }
   })
 
 
-  output$data_table_DT_2 <- DT::renderDataTable({
+  output$data_table_DT_2 <- renderDataTable({
     req(data_afterwards_2())
-    DT::datatable(
+    datatable(
       data_afterwards_2(),
       options = list(
         lengthMenu = c(5, 20, 50, 100),
@@ -1556,11 +1573,11 @@ app_server <- function(input, output, session) {
   })
 
   #ploting missing values
-  output$missing_values_2 <- plotly::renderPlotly({
+  output$missing_values_2 <- renderPlotly({
     req(!is.null(data_afterwards_2()))
     p <- missing_values_plot(data_afterwards_2())
-    if(!is.null(p)) { 
-      plotly::ggplotly(p)
+    if(!is.null(p)) {
+      ggplotly(p)
     } else {
       return(NULL)
     }
@@ -1568,9 +1585,9 @@ app_server <- function(input, output, session) {
 
   observe({
     if(input$select_data != no_data && !is.null(data_afterwards())) {
-    shinyjs::show(id = "first_file")      
+    show(id = "first_file")
     } else {
-      shinyjs::hide(id = "first_file")
+      hide(id = "first_file")
     }
   })
 
@@ -1831,7 +1848,7 @@ app_server <- function(input, output, session) {
         inputId = "report",
         label = "Session report"
       ),
-      tippy::tippy_this(
+      tippy_this(
         "report",
         "Render a HTML report for this session.",
         theme = "light-border"
@@ -1967,13 +1984,13 @@ app_server <- function(input, output, session) {
       # child of the global environment (this isolates the code in the document
       # from the code in this app).
       tryCatch({
-        rmarkdown::render(
+        render(
           input = tempReport, # markdown_location,
           output_file = output_file,
           params = params,
           envir = new.env(parent = globalenv())
         )
-      }, 
+      },
         error = function(e) {
           showNotification(
             ui = paste("Error when generating the report. Please try again."),
@@ -2095,10 +2112,10 @@ app_server <- function(input, output, session) {
       )
 
       # Set up parameters to pass to Rmd document
-      params <- list(df = iris) # dummy
+      params <- list(df = datasets::iris) # dummy
       df2 <- NULL
       if(!is.null(current_data_2())) {
-        df2 <- current_data_2()          
+        df2 <- current_data_2()
       }
       # if uploaded, use that data
       req(input$select_data)
@@ -2113,13 +2130,13 @@ app_server <- function(input, output, session) {
       req(params)
 
       tryCatch({
-        rmarkdown::render(
+        render(
           input = tempReport, # markdown_location,
           output_file = output_file,
           params = params,
           envir = new.env(parent = globalenv())
         )
-      }, 
+      },
         error = function(e) {
           showNotification(
             ui = paste("Error when generating the report. Please try again."),
@@ -2213,10 +2230,10 @@ app_server <- function(input, output, session) {
         )
 
         # Set up parameters to pass to Rmd document
-        params <- list(df = iris) # dummy
+        params <- list(df = datasets::iris) # dummy
         df2 <- NULL
         if(!is.null(current_data_2())) {
-          df2 <- current_data_2()          
+          df2 <- current_data_2()
         }
         # if uploaded, use that data
         req(input$select_data)
@@ -2232,7 +2249,7 @@ app_server <- function(input, output, session) {
         # Knit the document, passing in the `params` list, and eval it in a
         # child of the global environment (this isolates the code in the document
         # from the code in this app).
-        rmarkdown::render(
+        render(
           input = tempReport, # markdown_location,
           output_file = file,
           params = params,
@@ -2316,12 +2333,12 @@ app_server <- function(input, output, session) {
         txt <- paste(txt, ".", sep = "")
       }
 
-      prepared_request <- txt 
-      
+      prepared_request <- txt
+
 
 
       #----------------------------Send request
-      shinybusy::show_modal_spinner(
+      show_modal_spinner(
         spin = "orbit",
         text = paste(
           sample(jokes, 1)
@@ -2416,7 +2433,7 @@ app_server <- function(input, output, session) {
 
       # Send to openAI
       tryCatch(
-        response <- openai::create_chat_completion(
+        response <- create_chat_completion(
           model = selected_model(),
           openai_api_key = api_key_session()$api_key,
           temperature = sample_temp(),
@@ -2424,8 +2441,8 @@ app_server <- function(input, output, session) {
         ),
         error = function(e) {
           # remove spinner, show message for 5s, & reload
-          shinybusy::remove_modal_spinner()
-          shiny::showModal(api_error_modal)
+          remove_modal_spinner()
+          showModal(api_error_modal)
           Sys.sleep(5)
           session$reload()
 
@@ -2457,13 +2474,13 @@ app_server <- function(input, output, session) {
         ans <- response$choices$message.content
       }
 
-      shinybusy::remove_modal_spinner()
+      remove_modal_spinner()
 
       # update usage via global reactive value
       # update usage via global reactive value/ ouput token is twice as expensive
-      counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens    
+      counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens
       counter$requests <- counter$requests + 1
-      counter$costs_total <- counter$costs_total + 
+      counter$costs_total <- counter$costs_total +
         api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, "gpt-3.5-turbo")
 
 
@@ -2518,7 +2535,7 @@ app_server <- function(input, output, session) {
   })
 
   # JavaScript to trigger the send button when Enter key is pressed
-  shinyjs::runjs("
+  runjs("
       $('#ask_question').on('keyup', function (e) {
           if (e.keyCode === 13) {
               setTimeout(function(){
@@ -2569,7 +2586,7 @@ app_server <- function(input, output, session) {
 
   output$dfSummary <- renderText({
     req(current_data())
-    res <- capture.output(summarytools::dfSummary(current_data()))
+    res <- capture.output(dfSummary(current_data()))
     res <- paste(res, collapse = "\n")
     return(res)
   })
@@ -2599,7 +2616,7 @@ app_server <- function(input, output, session) {
       incProgress(0.3)
       ix <- match(input$table1_strata, colnames(df))
       res <- capture.output(
-        tableone::CreateTableOne(
+        CreateTableOne(
           vars = colnames(df)[-ix],
           data = df,
           strata = input$table1_strata
@@ -2613,7 +2630,7 @@ app_server <- function(input, output, session) {
   output$distribution_category <- renderPlot({
     withProgress(message = "Barplots of categorical variables ...", {
       incProgress(0.3)
-      DataExplorer::plot_bar(current_data())
+      plot_bar(current_data())
     })
   },
   width = 800,
@@ -2623,14 +2640,14 @@ app_server <- function(input, output, session) {
   output$distribution_numeric <- renderPlot({
     withProgress(message = "Creating histograms ...", {
       incProgress(0.3)
-      DataExplorer::plot_histogram(current_data())
+      plot_histogram(current_data())
     })
   })
 
   output$qq_numeric <- renderPlot({
     withProgress(message = "Generating QQ plots ...", {
       incProgress(0.3)
-      DataExplorer::plot_qq(current_data())
+      plot_qq(current_data())
     })
   })
 
@@ -2642,8 +2659,8 @@ app_server <- function(input, output, session) {
       df <- df[, sapply(df, is.numeric)]
       df <- na.omit(df) # remove missing values
       M <- cor(df)
-      testRes <- corrplot::cor.mtest(df, conf.level = 0.95)
-      corrplot::corrplot(
+      testRes <- cor.mtest(df, conf.level = 0.95)
+      corrplot(
         M,
         p.mat = testRes$p,
         method = 'circle',
@@ -2738,7 +2755,7 @@ app_server <- function(input, output, session) {
   })
 
   output$ggpairs <- renderPlot({
-    req(ggpairs_data())    
+    req(ggpairs_data())
     req(input$ggpairs_submit)
     isolate({
       req(input$ggpairs_variables)
@@ -2749,7 +2766,7 @@ app_server <- function(input, output, session) {
         incProgress(0.3)
         df <- as.data.frame(ggpairs_data())
         if(input$ggpairs_variables_color != "") {
-          GGally::ggpairs(
+          ggpairs(
             df[, input$ggpairs_variables],
             mapping = aes(
               color = df[, input$ggpairs_variables_color],
@@ -2758,7 +2775,7 @@ app_server <- function(input, output, session) {
           )
 
         } else {  # no color
-          GGally::ggpairs(
+          ggpairs(
             df[, input$ggpairs_variables]
           )
         }
@@ -2886,23 +2903,23 @@ app_server <- function(input, output, session) {
     )
     }
 
-    # clear the comments after submitted. 
+    # clear the comments after submitted.
     # This prevents users submit the same thing twice.
     updateTextInput(
       session,
       "user_feedback",
       value = "",
-      placeholder = "Any questions? Suggestions? Things you like, don't like?" 
+      placeholder = "Any questions? Suggestions? Things you like, don't like?"
     )
 
 
   })
 
   observe({
-    shinyjs::toggle(id = "user_feedback", condition = input$Comments)
-    shinyjs::toggle(id = "save_feedbck", condition = input$Comments)
-    shinyjs::toggle(id = "helpfulness", condition = input$Comments)
-    shinyjs::toggle(id = "experience", condition = input$Comments)
+    toggle(id = "user_feedback", condition = input$Comments)
+    toggle(id = "save_feedbck", condition = input$Comments)
+    toggle(id = "helpfulness", condition = input$Comments)
+    toggle(id = "experience", condition = input$Comments)
 
   })
 
@@ -2978,8 +2995,8 @@ app_server <- function(input, output, session) {
 
   observeEvent(input$dismiss_modal,{
     modal_closed(TRUE)
-    shiny::removeModal()
-  })  
+    removeModal()
+  })
 
   observeEvent(input$user_file, {
     show_pop_up()
@@ -2988,7 +3005,7 @@ app_server <- function(input, output, session) {
   # The notification is shown when the pop-up is closed
   observeEvent(modal_closed(), {
     req(modal_closed())
-    shiny::showNotification(
+    showNotification(
       "Know thy enemy. Exploratory your data at the EDA tab first.",
       duration = 10
     )
@@ -2997,8 +3014,8 @@ app_server <- function(input, output, session) {
   # Trigger the pop-up when a file is uploaded
   observeEvent(input$data_edit_modal, {
     show_pop_up()
-  }) 
-   
+  })
+
   output$column_type_ui <- renderUI({
     req(current_data())
     req(input$select_data)
@@ -3025,7 +3042,7 @@ app_server <- function(input, output, session) {
             )
           ),
           column(
-            width = 9,          
+            width = 9,
             align = "left",
             style = "margin-top: -5px;",
             h5(examples[i])
@@ -3035,7 +3052,7 @@ app_server <- function(input, output, session) {
       })
     })
   })
-  
+
   observe({
     req(current_data())
     for (i in seq_along(current_data())) {
@@ -3047,9 +3064,9 @@ app_server <- function(input, output, session) {
         if(col_type == "factor") {
           updated_data[[i]] <- as.factor(updated_data[[i]])
         } else if (col_type == "Date") {
-          updated_data[[i]] <- lubridate::parse_date_time(
+          updated_data[[i]] <- parse_date_time(
             updated_data[[i]],
-            orders = c("mdy", "dmy", "ymd")            
+            orders = c("mdy", "dmy", "ymd")
           )
           updated_data[[i]] <- as.Date(updated_data[[i]])
         } else {
@@ -3096,11 +3113,11 @@ app_server <- function(input, output, session) {
   # Upload the second file------------------------------------------------------
   observe({
       if (!is.null(input$user_file_2)) {
-          shinyjs::show("second_file_summary")  # Show the panel when a file is uploaded
-          shinyjs::show("second_file")  # Show the panel when a file is uploaded
+          show("second_file_summary")  # Show the panel when a file is uploaded
+          show("second_file")  # Show the panel when a file is uploaded
       } else {
-          shinyjs::hide("second_file")  # Hide the panel if no file is uploaded
-          shinyjs::hide("second_file_summary")  # Hide the panel if no file is uploaded
+          hide("second_file")  # Hide the panel if no file is uploaded
+          hide("second_file_summary")  # Hide the panel if no file is uploaded
       }
   })
   output$data_upload_ui_2 <- renderUI({
@@ -3139,7 +3156,7 @@ app_server <- function(input, output, session) {
       # Excel file ---------------
       if (grepl("xls$|xlsx$", in_file, ignore.case = TRUE)) {
         try(
-          df <- readxl::read_excel(in_file)
+          df <- read_excel(in_file)
         )
         df <- as.data.frame(df)
       } else {
@@ -3167,7 +3184,7 @@ app_server <- function(input, output, session) {
       } else {
 
         # clean column names
-        df <- df %>% janitor::clean_names()
+        df <- clean_names(df)
         return(
           list(
             df = df,
@@ -3303,9 +3320,9 @@ show_pop_up_2 <- function() {
         if(col_type == "factor") {
           updated_data[[i]] <- as.factor(updated_data[[i]])
         } else if (col_type == "Date") {
-          updated_data[[i]] <- lubridate::parse_date_time(
+          updated_data[[i]] <- parse_date_time(
             updated_data[[i]],
-            orders = c("mdy", "dmy", "ymd")            
+            orders = c("mdy", "dmy", "ymd")
           )
           updated_data[[i]] <- as.Date(updated_data[[i]])
         } else {
