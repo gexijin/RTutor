@@ -628,7 +628,7 @@ app_ui <- function(request) {
         with plots and numeric results."),
 
         h5("2.	How does RTutor work?"),
-        p("The requests are structured and sent to OpenAI’s AI
+        p("The requests are structured and sent to OpenAI's AI
         system, which returns R code. The R code is cleaned up and 
         executed in a Shiny 
         environment, showing results or error messages. Multiple 
@@ -666,7 +666,7 @@ app_ui <- function(request) {
         Then you need to obtain an API key from OpenAI."),
 
         h5("9.	Why do I get different results with the same request? "),
-        p("OpenAI’s language model has a certain degree of randomness 
+        p("OpenAI's language model has a certain degree of randomness 
         that could be adjusted by parameters called \"temperature\". 
         Set this in  Settings"),
 
