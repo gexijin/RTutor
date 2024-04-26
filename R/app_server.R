@@ -570,8 +570,7 @@ app_server <- function(input, output, session) {
       ),
       tippy::tippy_this(
         elementId = "save_api_button",
-        tooltip = "Save to a local file, 
-        so that you do not have to copy and paste next time.",
+        tooltip = "Save to a local file called api_key.txt. Restart RStudio to use it.",
         theme = "light-border"
       )
     )
