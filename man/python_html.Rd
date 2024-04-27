@@ -12,8 +12,6 @@ python_html(python_code, select_data, current_data)
 \item{select_data}{input$select data}
 
 \item{current_data}{current_data()}
-
-\item{html_file}{file name for output}
 }
 \value{
 -1 if failed. If success, the the designated html file is written
