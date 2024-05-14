@@ -199,7 +199,7 @@ app_ui <- function(request) {
                     ),  
                     style="color:red"
                   ),
-                  h5("April 26, 2024: Defaults to the latest GPT-4V model of 4/09.  Nov. 1, 2023: (v0.98.2): Generate ",
+                  h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
                     a(
                       "a comprehensive EDA report.",
                       href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
@@ -722,6 +722,10 @@ app_ui <- function(request) {
         hr(),
         h4("Update log:"),
         tags$ul(
+           
+           tags$li(
+            "April 26, 2024: Defaults to the latest GPT-4V model of 4/09."
+          ),
            tags$li(
             "v0.98.4  3/2/2024. Add a few rows of data in prompt."
           ), 
