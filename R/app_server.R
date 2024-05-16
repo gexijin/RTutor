@@ -25,8 +25,8 @@ app_server <- function(input, output, session) {
     options(shiny.maxRequestSize = 10000 * 1024^2) # 10 GB
   }
 
-  #pdf(NULL) #otherwise, base R plots sometimes do not show.
-
+  pdf(NULL) #otherwise, base R plots sometimes do not show.
+  dev.off()  # Close the PDF device
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
