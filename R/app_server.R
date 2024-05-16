@@ -26,7 +26,13 @@ app_server <- function(input, output, session) {
   }
 
   pdf(NULL) #otherwise, base R plots sometimes do not show.
-
+  
+  # Ensure all devices are closed when the session ends
+  session$onSessionEnded(function() {
+    while (dev.cur() > 1) {
+      dev.off()
+    }
+  })
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
