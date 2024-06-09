@@ -659,6 +659,10 @@ app_server <- function(input, output, session) {
     })
 
   })
+ 
+  meta_data_res <- reactive({
+    meta_data()
+  })
 
   openAI_response <- reactive({
     req(input$submit_button)
@@ -780,7 +784,7 @@ app_server <- function(input, output, session) {
                   # "Plot total energy use by sector in the US.",
 
                   " Available datasets: \"\"\"",
-                  meta_data,
+                  meta_data_res(),
                   "\"\"\""
                 )
               ))

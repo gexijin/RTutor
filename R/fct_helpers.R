@@ -89,7 +89,9 @@ on_server <- "on_server.txt"
 data_path <- "../../data/datasets/"
 
 # load meta data, from JSON file
-meta_data <- readr::read_file(paste0(data_path, "metadata.json"))
+meta_data <- function() {
+  readr::read_file(paste0(data_path, "metadata.json"))
+}
 # meta_data <- readr::read_file("C:/work/RTutor/inst/app/www/metadata.json")
 
 # load meta data, from CSV file
