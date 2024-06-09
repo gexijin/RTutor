@@ -803,7 +803,8 @@ app_server <- function(input, output, session) {
             selected_file <- response$choices$message.content
             # show message for 10s with the fine name
             showNotification(
-              paste("Selected file: ", selected_file)
+              paste("Selected file: ", selected_file),
+              duration = 60
             )
             tem <- gsub("\\..*", "", selected_file)
             
