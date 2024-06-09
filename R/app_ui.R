@@ -71,15 +71,18 @@ app_ui <- function(request) {
                 )
               )
             ),
-            fluidRow(
-              column(
-                width = 6,
-                uiOutput("demo_data_ui")
-              ),
-              column(
-                width = 6,
-                uiOutput("data_upload_ui")
-                ,uiOutput("data_upload_ui_2")
+            conditionalPanel(
+              condition = "0",
+              fluidRow(
+                column(
+                  width = 6,
+                  uiOutput("demo_data_ui")
+                ),
+                column(
+                  width = 6,
+                  uiOutput("data_upload_ui")
+                  ,uiOutput("data_upload_ui_2")
+                )
               )
             ),
 
@@ -104,32 +107,38 @@ app_ui <- function(request) {
                   theme = "light-border"
                 )
               ),
-              column(
-                width = 4,
-                actionButton("api_button", "Settings")
-              ),
-              column(
-                width = 4,
-                checkboxInput("use_python", "Python", value = FALSE)
+              conditionalPanel(
+                condition = "0",
+                column(
+                  width = 4,
+                  actionButton("api_button", "Settings")
+                ),
+                column(
+                  width = 4,
+                  checkboxInput("use_python", "Python", value = FALSE)
+                )
               )
             ),
-            br(),
-            textInput(
-              inputId = "ask_question",
-              label = NULL,
-              placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
-              value = ""
-            ),
+            conditionalPanel( #hide
+              condition = "0",
+              br(),
+              textInput(
+                inputId = "ask_question",
+                label = NULL,
+                placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
+                value = ""
+              ),
 
-            tippy::tippy_this(
-              "ask_question",
-              "Walk me through this code. What does this result mean? 
-              What is this error about? Explain logistic regression. 
-              List R packages for time series analysis. 
-              Hit Enter to send the request.",
-              theme = "light-border"
+              tippy::tippy_this(
+                "ask_question",
+                "Walk me through this code. What does this result mean? 
+                What is this error about? Explain logistic regression. 
+                List R packages for time series analysis. 
+                Hit Enter to send the request.",
+                theme = "light-border"
+              ),
+              shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor")))
             ),
-            shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
             br(),
             fluidRow(
               column(
@@ -146,39 +155,42 @@ app_ui <- function(request) {
                 downloadButton("download_data", "Data")
               ),
             ),
-            textOutput("usage"),
-            textOutput("total_cost"),
-            textOutput("temperature"),
-            #uiOutput("slava_ukraini"),
-            #br(),
-            textOutput("retry_on_error"),
-            checkboxInput("Comments", "Comments & questions"),
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-              rows = 4,
-              ""
-            ),
-            radioButtons("helpfulness", "How useful is RTutor?",
-              c(
-                "Not at all",
-                "Slightly",
-                "Helpful",
-                "Extremely"
+            conditionalPanel(
+              condition = "0",
+              textOutput("usage"),
+              textOutput("total_cost"),
+              textOutput("temperature"),
+              #uiOutput("slava_ukraini"),
+              #br(),
+              textOutput("retry_on_error"),
+              checkboxInput("Comments", "Comments & questions"),
+              tags$style(type = "text/css", "textarea {width:100%}"),
+              tags$textarea(
+                id = "user_feedback",
+                placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+                rows = 4,
+                ""
               ),
-              selected = "Slightly"
-            ),
-            radioButtons("experience", "Your experience with R:",
-              c(
-                "None",
-                "Beginner",
-                "Intermediate",
-                "Advanced"
-               ),
-              selected = "Beginner"
-            ),
-            actionButton("save_feedbck", "Save Feedback")
+              radioButtons("helpfulness", "How useful is RTutor?",
+                c(
+                  "Not at all",
+                  "Slightly",
+                  "Helpful",
+                  "Extremely"
+                ),
+                selected = "Slightly"
+              ),
+              radioButtons("experience", "Your experience with R:",
+                c(
+                  "None",
+                  "Beginner",
+                  "Intermediate",
+                  "Advanced"
+                ),
+                selected = "Beginner"
+              ),
+              actionButton("save_feedbck", "Save Feedback")
+            )
           ),
 
       ###############################################################################
@@ -190,45 +202,11 @@ app_ui <- function(request) {
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
-
-              uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
                   width = 9,
-                  h4(
-                    "Start by watching an 8-min ",
-                    a(
-                      "YouTube video!",
-                      href="https://youtu.be/a-bZW26nK9k",
-                      target = "_blank"
-                    ),  
-                    style="color:red"
-                  ),
-                  h4("Nov. 9: Switching to the new GPT-4 Turbo model.  Nov. 1: (v0.98.2): RTutor can generate ",
-                    a(
-                      "a comprehensive EDA report.",
-                      href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
-                      target = "_blank"
-                    ),  
-                   " Oct 28 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
-                  Oct 23 (v0.97): GPT-4 becomes the default.
-                  Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
-                  h4("See",
-                    a(
-                      "GitHub",
-                      href = "https://github.com/gexijin/RTutor"
-                    ),
-                    " for source code, bug reports, and instructions to install RTutor as an R package.
-                    As a small startup, we are open to partnerships with both academia and industry. 
-                  We can do demos and seminars via Zoom if time permits."
-                  ),
-                  h4("Also try ",
-                    a(
-                      "Chatlize.ai,",
-                      href="https://chatlize.ai",
-                      target = "_blank"
-                    ),
-                    " a more general platform for analyzing data through chats. Multiple files with different formats. Python support."
+                  h3(
+                    "Sioux Falls Public Data Portal"
                   ),
 
                   align = "left"
@@ -243,62 +221,7 @@ app_ui <- function(request) {
                   align = 'left'
                 )
               ),
-              hr(),
 
-              h3("Quick start:"),
-              tags$ul(
-                tags$li(
-                  "Explore the data at the EDA tab first.  Then start analyzing the data using simple requests 
-                  such as distributions, basic plots & simple models. Gradually add complexity.
-                  ", style = "color:red"
-                ),
-                tags$li(
-                  "The default model is now GPT-4 Turbo, which is slower and expensive, but more accurate.
-                  In the same session, previous questions and code chunks become the context for your new request.
-                  For example, you can simply say \"Change background color to white\" to refine the
-                  plot generated by the previous chunk. You can also clean your data step by step. "
-                ),
-                tags$li(
-                  "To analyze a new, unrelated dataset, or to start over, click the Reset button first. 
-                  Always delete the photos of your ex-girlfriends before chasing new ones."
-                ), 
-                tags$li(
-                  "Prepare and clean your data in Excel first! Name columns properly. 
-                  ChatGPT tries to guess the meaning of column names, even abbrievated.
-                  RTutor can only analyze traditional 
-                  statistics data, where rows are 
-                  observations and columns are variables. For complex data, try https://chatlize.ai."
-                ),
-                tags$li(
-                  "Once uploaded, your data is automatically loaded into
-                  R as a data frame called df. You do NOT need to ask RTutor to load data. 
-                  Check if the data types of the columns are correct.
-                  Change if needed, especially when numbers are used to code for categories."
-                ),
-                tags$li(
-                  "An additional file can be uploaded as df2 to be analyze togehter. 
-                  To use it, you must specify 'df2' in your prompts. "
-                ),
-                tags$li(
-                  "Use the Q&A box to ask questions about the code, result, or error messages. 
-                  You can ask for methods to use or develop a step by step plan. "
-                ),
-                tags$li(
-                  "Before sending your request to OpenAI, we add \"Generate R code\" before it, and 
-                  append something like \"Use the df data frame. 
-                  Note that highway is numeric, ...\" afterward. 
-                  If you are not using any data (plot a function or simulations),
-                  choose \"No data\" from the Data dropdown."
-                ),
-                tags$li(
-                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session. 
-                  If you explain the background of the data and the meaning of  
-                  the columns, you can ask general questions like asking a clueless statistician."
-                ),
-                tags$li(
-                  "Be skeptical. The generated code can be logically wrong even if it produces results without error."
-                )
-              )
             ),
             conditionalPanel(
               condition = "input.submit_button != 0",
@@ -316,15 +239,30 @@ app_ui <- function(request) {
                     "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
                     theme = "light-border"
                   )
-                )
+                ),
+                column(
+                  width = 8,
+                  checkboxInput(
+                    inputId = "show_code",
+                    label = "Show code",
+                    value = FALSE
+                  ),
+                  align = "right"
+                )                
               ),
-              verbatimTextOutput("openAI"),
+
+              # show code based on the checkbox
+              conditionalPanel(
+                condition = "input.show_code == 1",
+                verbatimTextOutput("openAI")
+              ),
+
               conditionalPanel(
                 condition = "input.use_python == 0",
 
                 uiOutput("error_message"),
                 #uiOutput("send_error_message"),
-                strong("Results:"),
+                #strong("Results:"),
 
                 # shows error message in local machine, but not on the server
                 verbatimTextOutput("console_output"),
@@ -355,31 +293,32 @@ app_ui <- function(request) {
               conditionalPanel(
                 condition = "input.use_python == 1",
                 uiOutput("python_markdown")
+              ),
+              br(),
+
+              shinyjs::hidden(
+                div(
+                  id = "first_file",
+                  hr(),
+                  h4("Default dataset:  df"),
+                  textOutput("data_size"),
+                  DT::dataTableOutput("data_table_DT")
+                )
+              ),
+              shinyjs::hidden(
+                div(
+                  id = "second_file",
+                  hr(),
+                  h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
+                  textOutput("data_size_2"),
+                  DT::dataTableOutput("data_table_DT_2")
+
+                )
               )
+              #,tableOutput("data_table"),
             ),
 
-            br(),
 
-            shinyjs::hidden(
-              div(
-                id = "first_file",
-                hr(),
-                h4("Default dataset:  df"),
-                textOutput("data_size"),
-                DT::dataTableOutput("data_table_DT")
-              )
-            ),
-            shinyjs::hidden(
-              div(
-                id = "second_file",
-                hr(),
-                h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
-                textOutput("data_size_2"),
-                DT::dataTableOutput("data_table_DT_2")
-
-              )
-            )
-            #,tableOutput("data_table"),
 
 
           ) #mainPanel
