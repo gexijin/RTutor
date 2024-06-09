@@ -236,6 +236,7 @@ app_server <- function(input, output, session) {
     })
   })
 
+  selected_data_file <- reactiveVal("mpg")
 
   # showing the current dataset. Warning if no is uploaded.
   output$selected_dataset <- renderText({
@@ -249,7 +250,7 @@ app_server <- function(input, output, session) {
           txt <- "Dataset: uploaded."
         }
       } else {
-        txt <- paste0("Dataset: ", input$select_data)
+        txt <- paste0("", selected_data_file())
       }
 
       return(txt)
@@ -804,6 +805,9 @@ app_server <- function(input, output, session) {
             showNotification(
               paste("Selected file: ", selected_file)
             )
+            tem <- gsub("\\..*", "", selected_file)
+            
+            selected_data_file(tem <- gsub("_", " ", tem))
 
             selected_file <- paste0(data_path, selected_file)
 
