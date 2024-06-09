@@ -42,7 +42,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use demo data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples above."
+" Hi! I am a virtual data scientist. Ask me anything related to public data for the city of Sioux Falls."
       )
     }
   })
@@ -801,15 +801,15 @@ app_server <- function(input, output, session) {
             )
 
             selected_file <- response$choices$message.content
+
+            tem1 <- gsub("\\..*", "", selected_file)
+            tem2 <- gsub("_", " ", tem1)
+            selected_data_file(tem2)
             # show message for 10s with the fine name
             showNotification(
-              paste("Selected file: ", selected_file),
+              paste("Selected dataset: ", tem2),
               duration = 60
             )
-            tem <- gsub("\\..*", "", selected_file)
-            
-            selected_data_file(tem <- gsub("_", " ", tem))
-
             selected_file <- paste0(data_path, selected_file)
 
             # if file is found, load it and update the current_data() reactive value

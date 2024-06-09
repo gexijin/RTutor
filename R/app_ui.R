@@ -190,7 +190,10 @@ app_ui <- function(request) {
                 selected = "Beginner"
               ),
               actionButton("save_feedbck", "Save Feedback")
-            )
+            ),
+            br(),
+            h5("Reset after each question!"),
+            h5("Unsure what to ask? Say 'Find data on xxx( i.e. schools)' first. Look at it on the Data tab before asking."),
           ),
 
       ###############################################################################
@@ -206,8 +209,9 @@ app_ui <- function(request) {
                 column(
                   width = 9,
                   h3(
-                    "Sioux Falls Public Data Portal"
+                    "Sioux Falls Public Data Portal (demo)"
                   ),
+
 
                   align = "left"
                 ),
@@ -221,7 +225,107 @@ app_ui <- function(request) {
                   align = 'left'
                 )
               ),
+              h4("Based on 100+ datasets shared by the City of Sioux Falls on ", 
+                  a("Data.Gov", href = "https://catalog.data.gov/dataset/?organization=city-of-sioux-falls", target = "_blank")),
+              tags$ul(
 
+                tags$li("Address"),
+                tags$li("Airport"),
+                tags$li("Alcohol and Video Lottery Licensing"),
+                tags$li("Alleys"),
+                tags$li("Annexations"),
+                tags$li("Annexations"),
+                tags$li("Artworks"),
+                tags$li("Billboard Opportunity"),
+                tags$li("Bridges"),
+                tags$li("Building Footprints"),
+                tags$li("Building Permits"),
+                tags$li("Bus Routes"),
+                tags$li("Bus Snow Routes"),
+                tags$li("Bus Stops"),
+                tags$li("Capital Improvements Program (CIP) (Lines)"),
+                tags$li("Capital Improvements Program (CIP) (Points)"),
+                tags$li("City Council Districts, Precincts, and Addresses"),
+                tags$li("City Limits"),
+                tags$li("Civil Air Patrol Photos Spring 2019"),
+                tags$li("Commercial Projects"),
+                tags$li("Community Safety Zone"),
+                tags$li("Community Safety Zone Parcels"),
+                tags$li("Crime Free Mobile Homes"),
+                tags$li("Crime Free Multi Housing"),
+                tags$li("Curb Ramps"),
+                tags$li("Development Areas"),
+                tags$li("Easements"),
+                tags$li("Elementary School Bus Zones"),
+                tags$li("Elementary School Districts"),
+                tags$li("Emergency Shelters"),
+                tags$li("Entertainment Tax Growth"),
+                tags$li("Essential Responders"),
+                tags$li("Fire Dispatch Quadrants"),
+                tags$li("Fire Incidents"),
+                tags$li("Fire Station Territory"),
+                tags$li("Fire Stations"),
+                tags$li("Fire Travel Time"),
+                tags$li("Flood Restrictions in the City (FRIC)"),
+                tags$li("Historic Districts"),
+                tags$li("Historic Properties"),
+                tags$li("Hospitals"),
+                tags$li("Impervious"),
+                tags$li("Lakes"),
+                tags$li("Lincoln County Case Data"),
+                tags$li("Manufactured Housing Parks"),
+                tags$li("Middle School Bus Zones"),
+                tags$li("Middle School Districts"),
+                tags$li("Minnehaha Case Data"),
+                tags$li("Murals"),
+                tags$li("Neighborhood Associations"),
+                tags$li("Neighborhood Revitalization Program"),
+                tags$li("Neighborhood Watch Areas"),
+                tags$li("Nonprofit Organizations"),
+                tags$li("Off Premise Signs"),
+                tags$li("Off Premise Signs Buffers"),
+                tags$li("Parcels"),
+                tags$li("Park Amenities"),
+                tags$li("Park Fences"),
+                tags$li("Parks"),
+                tags$li("Pedestrian Signals"),
+                tags$li("PLSS Sections"),
+                tags$li("Police Calls for Service by Year"),
+                tags$li("Preliminary Parcels"),
+                tags$li("Rivers"),
+                tags$li("Salaried Workers"),
+                tags$li("Sales Tax Growth"),
+                tags$li("Sanitary Availability"),
+                tags$li("Schools"),
+                tags$li("Sidewalks"),
+                tags$li("Single Family Housing"),
+                tags$li("Sioux Falls Case Data"),
+                tags$li("Snow Districts"),
+                tags$li("Snow Routes"),
+                tags$li("South Dakota Case Data"),
+                tags$li("Street Names"),
+                tags$li("Street Query"),
+                tags$li("Streets"),
+                tags$li("Streets Pavement Condition"),
+                tags$li("Subdivisions"),
+                tags$li("Surface Water Quality Monitoring Data"),
+                tags$li("Sweeping Districts"),
+                tags$li("Total Permits"),
+                tags$li("Total Population"),
+                tags$li("Traffic Counts"),
+                tags$li("Traffic Counts (Model)"),
+                tags$li("Trees"),
+                tags$li("Unemployment Rate"),
+                tags$li("Vacated Streets"),
+                tags$li("Veterans Parkway Corridor"),
+                tags$li("Veterans Parkway Striping"),
+                tags$li("Violent Crimes by Year"),
+                tags$li("Voting Precincts"),
+                tags$li("Zoning"),
+                tags$li("Zoning - Conditional Rezoning")
+
+              )
+            
             ),
             conditionalPanel(
               condition = "input.submit_button != 0",
@@ -293,38 +397,35 @@ app_ui <- function(request) {
               conditionalPanel(
                 condition = "input.use_python == 1",
                 uiOutput("python_markdown")
-              ),
-              br(),
-
-              shinyjs::hidden(
-                div(
-                  id = "first_file",
-                  hr(),
-                  h4("Default dataset:  df"),
-                  textOutput("data_size"),
-                  DT::dataTableOutput("data_table_DT")
-                )
-              ),
-              shinyjs::hidden(
-                div(
-                  id = "second_file",
-                  hr(),
-                  h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
-                  textOutput("data_size_2"),
-                  DT::dataTableOutput("data_table_DT_2")
-
-                )
               )
-              #,tableOutput("data_table"),
-            ),
-
-
-
-
+            )
           ) #mainPanel
         ) #sideBarpanel
       ), #tabPanel
+      tabPanel(
+        title = "Data",
+        value = "Data",
+        shinyjs::hidden(
+          div(
+            id = "first_file",
+            hr(),
+            h4("Default dataset:  df"),
+            textOutput("data_size"),
+            DT::dataTableOutput("data_table_DT")
+          )
+        ),
+        shinyjs::hidden(
+          div(
+            id = "second_file",
+            hr(),
+            h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
+            textOutput("data_size_2"),
+            DT::dataTableOutput("data_table_DT_2")
 
+          )
+        )
+        #,tableOutput("data_table"),
+      ),
       tabPanel(
         title = "EDA",
         value = "EDA",
