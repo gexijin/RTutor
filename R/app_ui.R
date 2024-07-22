@@ -3,6 +3,7 @@
 # Author: Xijin Ge    gexijin@gmail.com
 # Dec. 6-12, 2022.
 # No warranty and not for commercial use.
+# Updated: Daniel Burkhalter    dburkhalter1500@gmail.com
 ###################################################
 
 
@@ -116,7 +117,7 @@ app_ui <- function(request) {
             br(),
             textInput(
               inputId = "ask_question",
-              label = NULL,
+              label = "(Optional) Ask about Results",
               placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
               value = ""
             ),
@@ -141,6 +142,7 @@ app_ui <- function(request) {
                 actionButton("data_desc_modal", "Description")
               )
             ),
+            hr(),
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
@@ -199,15 +201,15 @@ app_ui <- function(request) {
                     ),  
                     style="color:red"
                   ),
-                  h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
-                    a(
-                      "a comprehensive EDA report.",
-                      href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
-                      target = "_blank"
-                    ),  
-                   " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
-                  Oct 23, 2023 (v0.97): GPT-4 becomes the default.
-                  Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
+                  # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
+                  #   a(
+                  #     "a comprehensive EDA report.",
+                  #     href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
+                  #     target = "_blank"
+                  #   ),  
+                  #  " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
+                  # Oct 23, 2023 (v0.97): GPT-4 becomes the default.
+                  # Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
                   h5("See",
                     a(
                       "GitHub",
@@ -545,7 +547,7 @@ app_ui <- function(request) {
             target = "_blank"
           ),
           " powerful large language models",
-          " to translate natural language into R code, which is then excuted.",
+          " to translate natural language into R (or Python) code, which is then excuted.",
           "You can request your analysis,
           just like asking a real person.",
           "Upload a data file (CSV, TSV/tab-delimited text files, and Excel) 
@@ -613,208 +615,90 @@ app_ui <- function(request) {
 
         hr(),
 
-        h3("Frequently asked questions:"),
+        fluidRow(
+                    # Site Update Log component
+          column(
+            width = 8,
+            actionButton("faq_button", strong("FAQ")),
+              tags$head(tags$style(
+                "#faq_button{font-size: 16px;color: black}"
+            ))
+          ),
+          
+          conditionalPanel(
+            condition = "(input.faq_button % 2) == 1",
+            column(
+              width = 12,
 
-        h5("1.	What is RTutor?"),
-        p("It is an artificial intelligence (AI)-based app that enables 
-        users to interact with your data via natural language.
-        After uploading a 
-        dataset, users ask questions about or request analyses in 
-        English. The app generates and runs R code to answer that question 
-        with plots and numeric results."),
-
-        h5("2.	How does RTutor work?"),
-        p("The requests are structured and sent to OpenAI’s AI
-        system, which returns R code. The R code is cleaned up and 
-        executed in a Shiny 
-        environment, showing results or error messages. Multiple 
-        requests are logged to produce an R Markdown file, which can be
-          knitted into an HTML report. This enables record keeping 
-          and reproducibility."),
-
-        h5("3. Is my data uploaded to OpenAI?"),
-        p("No. The column names of your data, not the data itself, is sent to OpenAI as a prompt to generate R code. Your data is not stored in our server after the session."),
-
-        h5("4.	Who is it for?"),
-        p("The primary goal is to help people with some R experience to learn
-        R or be more productive. RTutor can be used to quickly speed up the 
-        coding process using R. It gives you a draft code to test and 
-        refine. Be wary of bugs and errors. "),
-
-        h5("5.	How do you make sure the results are correct? "),
-        p("Try to word your question differently. And try 
-        the same request several time. A higher temperature parameter will give 
-        diverse choices. Then users can double-check to see 
-        if you get the same results from different runs."),
-
-        h5("6.	Can you use RTutor to do R coding homework?"),
-        p("No. That will defy the purpose. You need to learn
-        R coding properly to be able to tell if the generated 
-        R coding is correct.  "),
-
-        h5("7.	Can private companies use RTutor? "),
-        p("No. It can be tried as a demo. RTutor website 
-        dnd source code are freely available for non-profit organizations
-        only and distributed using the CC NC 3.0 license."),
-
-        h5("8.	Can you run RTutor locally?"),
-        p("Yes. Download the R package and install it locally. 
-        Then you need to obtain an API key from OpenAI."),
-
-        h5("9.	Why do I get different results with the same request? "),
-        p("OpenAI’s language model has a certain degree of randomness 
-        that could be adjusted by parameters called \"temperature\". 
-        Set this in  Settings"),
-
-        h5("10.	Can people without R coding experience use RTutor for statistical analysis? "),
-        p("Not entirely. This is because the generated code can be wrong.
-        However, it could be used to quickly conduct data 
-        visualization, and exploratory data analysis (EDA). 
-        Just be mindful of this experimental technology. "),
-
-        h5("11.	Can this replace statisticians or data scientists?"),
-        p("No. But RTutor can make them more efficient."),
-
-        h5("12.	How do I  write my request effectively?"),
-        p("Imagine you have a summer intern, 
-        a collge student 
-        who took one semester of statistics and R. You send the 
-        intern emails with instructions and he/she sends 
-        back code and results. The intern is not experienced, 
-        thus error-prone, but is hard working. Thanks to AI, this
-        intern is lightning fast and nearly free."),
-
-        h5("13. Can I install R package in the AI generated code?"),
-        p("No. But we are working to pre-install all the R
-          packages on the server! Right now we finished the top 5000 most 
-          frequently used R packages. Chances are that your favorite package
-          is already installed."),
-
-        h5("14. Can I upload big files to the site?"),
-        p("Not if it is more than 10MB. Try to get a small portion of your data. 
-        Upload it to the site to get the code, which can be run locally on your 
-        laptop. Alternatively, download RTutor R package, and use it from your
-        own computer."),
-
-
-        h5("15. Voice input does not work!"),
-        p("One of the main reason
-        is that your browser block the website site from accessing the microphone. 
-        Make sure you access the site using",
-        a(
-          "https://RTutor.ai.",
-          href = "https://RTutor.ai"
-        ),
-        "With http, mic access is automatically blocked in Chrome.
-        Speak closer to the mic. Make sure there 
-        is only one browser tab using the mic. "),
-
-        h5("16. Is that your photo? "),
-        p("No. I am an old guy. The photo was synthesized by AI. 
-        Using prompts \'statistics tutor\', the image was generated by ",
-        a(
-          "Stable Diffusion 2.0.",
-          href = "https://stability.ai/"
-        ),
-        "If you look carefully, you can see that her fingers are messed up."),
-
-
-        hr(),
-        h4("Update log:"),
-        tags$ul(
-           
-           tags$li(
-            "April 26, 2024: Defaults to the latest GPT-4V model of 4/09."
-          ),
-           tags$li(
-            "v0.98.4  3/2/2024. Add a few rows of data in prompt."
-          ), 
-           tags$li(
-            "v0.98.3  11/1/2023. Fix issue with EDA report when the target variable is categorical or not specified."
-          ),  
-           tags$li(
-            "v0.98.2  11/1/2023. Comprehensive EDA report!"
-          ),           
-          tags$li(
-            "v 0.98  10/28/2023. Ask questions about code, error. Second data file upload."
-          ),          
-          tags$li(
-            "v 0.97  10/23/2023. GPT-4 becomes the default. Make ggplot2 a preferred method for plotting.
-             Use R environment to enable successive data manipulation."
-          ),
-          tags$li(
-            "v 0.96  9/26/2023. Include column names in all requests. GPT-4 is available."
-          ),
-          tags$li(
-            "v 0.95  6/11/2023. ChatGPT(gpt-3.5-turbo) becomes default model."
-          ),
-          tags$li(
-            "v 0.94  4/21/2023. Interactive plots using CanvasXpress."
-          ),
-          tags$li(
-            "v 0.93  3/26/2023. Change data types. Add data description. Improve voice input."
-          ),
-          tags$li(
-            "v 0.92  3/8/2023. Includes description of data structure in prompt."
-          ),
-          tags$li(
-            "v 0.91  2/6/2023. Voice input is improved. 
-            Just enable micphone and say Tutor..."
-          ),
-          tags$li(
-            "v 0.90  1/15/2023. Generates and runs Pyton code in addition to R!"
-          ),
-          tags$li(
-            "v 0.8.6  1/8/2023. Add description of the levels in factors."
-          ),
-          tags$li(
-            "v 0.8.5  1/6/2023. Demo in many foreign languages."
-          ),
-          tags$li(
-            "v 0.8.4  1/5/2023. Collect  user feedback."
-          ),
-          tags$li(
-            "v 0.8.3  1/5/2023. Collect some user data for improvement."
-          ),
-          tags$li(
-            "v 0.8.2  1/4/2023. Auto convert first column as row names."
-          ),
-          tags$li(
-            "v 0.8.1  1/3/2023. Option to convert some numeric columns with few unique levels to factors."
-          ),
-          tags$li(
-            "v 0.8.0  1/3/2023. Add description of columns (numeric vs. categorical)."
-          ),
-          tags$li(
-            "v 0.7.6 12/31/2022. Add RNA-seq data and example requests."
-          ),
-          tags$li(
-            "v 0.7.5 12/31/2022. Redesigned UI."
-          ),
-          tags$li(
-            "v 0.7 12/27/2022. Add EDA tab."
-          ),
-          tags$li(
-            "v 0.6 12/27/2022. Keeps record of all code chunks for resue and report."
-          ),
-          tags$li(
-            "v 0.5 12/24/2022. Keep current code and continue."
-          ),
-          tags$li(
-            "v 0.4 12/23/2022. Interactive plot. Voice input optional."
-          ),
-          tags$li(
-            "v0.3 12/20/2022. Add voice recognition."
-          ),
-          tags$li(
-            "V0.2 12/16/2022. Add temperature control. Server reboot reminder."
-          ),
-          tags$li(
-            "V0.1 12/11/2022. Initial launch"
+              h4(style = "font-weight: bold", "Frequently asked questions"),
+              uiOutput("faq_list"),
+              tags$style(HTML("
+                .faq-answer {
+                  display: none;
+                  padding-left: 10px;
+                }
+                .faq-question {
+                  cursor: pointer;
+                  padding: 5px;
+                  border: 1px solid #ccc;
+                  background-color: #f1f1f1;
+                }
+              ")),
+              tags$script(HTML('
+                $(document).on("click", ".faq-question", function() {
+                  var answer = $(this).next(".faq-answer");
+                  if (answer.is(":visible")) {
+                    answer.hide();
+                  } else {
+                    answer.show();
+                  }
+                });
+              '))
+            )
           )
         ),
+
         hr(),
-        uiOutput("session_info")
+        fluidRow(
+          # Site Update Log component
+          column(
+            width = 8,
+            actionButton("site_update_log", strong("See Site Updates Log")),
+              tags$head(tags$style(
+                "#site_update_log{font-size: 16px;color: black}"
+            ))
+          ),
+
+          conditionalPanel(
+            condition = "(input.site_update_log % 2) == 1",
+            column(
+              width = 6,
+              # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
+              tableOutput("site_updates_table")
+            )
+          )
+        ),
+
+        hr(),
+
+        # Session Info Section
+        fluidRow(
+          column(
+            width = 8,
+            actionButton("session_info_button", strong("R Session Info")),
+              tags$head(tags$style(
+                "#session_info_button{font-size: 16px;color: black}"
+            ))
+          ),
+          conditionalPanel(
+            condition = "(input.session_info_button % 2) == 1",
+              column(
+                width = 12,
+                uiOutput("session_info")
+              )
+          )
+        ),
+        hr()
       ),
 
 #      tabPanel(

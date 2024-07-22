@@ -48,7 +48,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use demo data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples above."
+"Upload a file or use the preloaded data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples above."
       )
     }
   })
@@ -268,7 +268,7 @@ app_server <- function(input, output, session) {
     req(is.null(input$user_file))
     fileInput(
       inputId = "user_file",
-      label = "File Upload",
+      label = "(Upload Your File)",
       accept = c(
         "text/csv",
         "text/comma-separated-values",
@@ -290,7 +290,7 @@ app_server <- function(input, output, session) {
 
     selectInput(
       inputId = "select_data",
-      label = "Data",
+      label = "1) Select Dataset",
       choices = datasets,
       selected = "mpg",
       multiple = FALSE,
@@ -331,7 +331,7 @@ app_server <- function(input, output, session) {
         selectInput(
           inputId = "demo_prompt",
           choices = choices,
-          label = NULL
+          label = "2) Send Request(s)"
         )
       )
     }
@@ -2781,9 +2781,12 @@ app_server <- function(input, output, session) {
 #  Miscellaneous
 #______________________________________________________________________________
 
-  output$RTutor_version <- renderUI({
-    h4(paste("RTutor Version", release))
-  })
+output$RTutor_version <- renderUI({
+  tags$h4(
+    style = "color: black;", # Apply the CSS styling here
+    paste("RTutor Version", release) # Combine text here
+  )
+})
 
   output$RTutor_version_main <- renderUI({
     tagList(
@@ -2910,6 +2913,29 @@ app_server <- function(input, output, session) {
     shinyjs::toggle(id = "experience", condition = input$Comments)
 
   })
+
+    # 'About' tab FAQ's and answers
+  output$faq_list <- renderUI({
+    faq_items <- lapply(seq_len(nrow(faqs)), function(i) {
+      tags$div(
+        class = "faq-item",
+        tags$h5(
+          class = "faq-question",
+          faqs$question[i]
+        ),
+        tags$p(
+          class = "faq-answer",
+          faqs$answer[i]
+        )
+      )
+    })
+    tagList(faq_items)
+  })
+
+    # 'About' tab Site Updates table
+  output$site_updates_table <- renderTable({
+    site_updates_df
+  }, striped = TRUE)
 
 
 #
