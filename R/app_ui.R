@@ -701,6 +701,22 @@ app_ui <- function(request) {
         hr()
       ),
 
+      navbarMenu(
+        title = "More",
+        tabPanel(
+          title = "1st Time User"
+        ),
+        tabPanel(
+          title = "About"
+        ),
+        tabPanel(
+          title = "FAQ"
+        ),
+        tabPanel(
+          title = "Settings"
+        )
+      )
+
 #      tabPanel(
 #        title = "Disqus",
 #        value = "Disqus",
