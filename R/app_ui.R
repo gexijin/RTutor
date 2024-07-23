@@ -191,16 +191,25 @@ app_ui <- function(request) {
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
-                  width = 12,
+                  width = 9,
+                  actionButton("first_user", strong("Quickstart: First Time User")),
+                  tags$head(tags$style(
+                    "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
+                  )),
+                  align = 'center'
+                ),
+                column(
+                  width = 3,
                   img(
                     src = "www/logo.png",
                     width = "155",
                     height = "77"
                   ),
-                  align = 'right'
+                  align = 'center'
                 )
               )
             ),
+            hr(),
             conditionalPanel(
               condition = "input.submit_button != 0",
               fluidRow(
@@ -259,13 +268,13 @@ app_ui <- function(request) {
               )
             ),
 
-            br(),
+            # br(),
 
             shinyjs::hidden(
               div(
                 id = "first_file",
-                hr(),
-                h4("Default dataset:  df"),
+                # hr(),
+                h4("Selected Dataset"),
                 textOutput("data_size"),
                 DT::dataTableOutput("data_table_DT")
               )
@@ -441,7 +450,8 @@ app_ui <- function(request) {
       navbarMenu(
         title = "More",
         tabPanel(
-          title = "1st Time User",
+          title = "First Time User",
+          value = "first-time-user",
           uiOutput("RTutor_version_main"),
           fluidRow(
             column(
@@ -714,7 +724,7 @@ app_ui <- function(request) {
         tabPanel(
           title = "Settings"
         )
-      )
+      ),
 
 #      tabPanel(
 #        title = "Disqus",
@@ -723,6 +733,13 @@ app_ui <- function(request) {
 #        tags$head(includeHTML(app_sys("app", "www", "disqus.html")))
 #        )
 #      )
+  # Include custom JavaScript to handle the button click
+    tags$script(HTML("
+      $(document).on('click', '#first_user', function() {
+        // Update the active tab to 'First Time User' within the 'More' navbarMenu
+        $('#tabs a[data-value=\"first-time-user\"]').tab('show');
+      });
+    "))
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
