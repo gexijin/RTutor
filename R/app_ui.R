@@ -16,8 +16,35 @@
 app_ui <- function(request) {
   tagList(
     golem_add_external_resources(),
+
+    # Add color to UI
+    tags$head(
+      tags$style(HTML("
+        /* navbar */
+        .navbar {
+          background-color: #C1E2BE;border-color: #90BD8C; color: #181818;font-weight: bold;
+        }
+
+        /* tabs */
+        .navbar-default .navbar-nav > li > a {
+          background-color: #C1E2BE;border-color: #9AC596;color: #181818;
+        }
+
+        /* active tab */
+        .navbar-default .navbar-nav > .active > a, 
+        .navbar-default .navbar-nav > .active > a:focus, 
+        .navbar-default .navbar-nav > .active > a:hover {
+          background-color: #A0BB9E;color: #181818;font-weight: bold;
+        }
+
+        /* sidebar panel */
+        .well {
+          background-color: #C1E2BE;border-color: #90BD8C;
+      "))
+    ),
+
     navbarPage(
-      "RTutor",
+      HTML('<span style="color: black;">RTutor</span>'),
     #  windowTitle = "RTutor",
     # theme = bslib::bs_theme(bootswatch = "darkly"),
       id = "tabs",
@@ -62,7 +89,7 @@ app_ui <- function(request) {
                 width = 6,
                 actionButton("reset_button", strong("Reset")),
                 tags$head(tags$style(
-                  "#reset_button{font-size: 16px;color: blue}"
+                  "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
                 )),
                 align = "right",
                 tippy::tippy_this(
@@ -79,13 +106,19 @@ app_ui <- function(request) {
               ),
               column(
                 width = 6,
-                uiOutput("data_upload_ui")
-                ,uiOutput("data_upload_ui_2")
+                uiOutput("data_upload_ui"),
+                uiOutput("data_upload_ui_2")
               )
             ),
 
             uiOutput("prompt_ui"),
-            tags$style(type = "text/css", "textarea {width:100%}"),
+            tags$style(HTML("
+              textarea {
+                width: 100%;
+                background-color: #F6FFF5;
+                border-color: #90BD8C;
+              }
+            ")),
             tags$textarea(
               id = "input_text",
               placeholder = NULL,
@@ -97,7 +130,7 @@ app_ui <- function(request) {
                 width = 4,
                 actionButton("submit_button", strong("Submit")),
                 tags$head(tags$style(
-                  "#submit_button{font-size: 16px;color: red}"
+                  "#submit_button{font-size: 16px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
                 )),
                 tippy::tippy_this(
                   "submit_button",
@@ -107,7 +140,10 @@ app_ui <- function(request) {
               ),
               column(
                 width = 4,
-                actionButton("api_button", "Settings")
+                actionButton("api_button", "Settings"),
+                tags$head(tags$style(
+                      "#api_button{color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+                )),
               ),
               column(
                 width = 4,
@@ -115,6 +151,15 @@ app_ui <- function(request) {
               )
             ),
             br(),
+            tags$head(
+              tags$style(HTML("
+                #ask_question {
+                  width: 100%;
+                  background-color: #F6FFF5;
+                  border-color: #90BD8C;
+                }
+              "))
+            ),
             textInput(
               inputId = "ask_question",
               label = "(Optional) Ask about Results",
@@ -133,15 +178,22 @@ app_ui <- function(request) {
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
             br(),
             fluidRow(
+              tags$head(tags$style(
+                  "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+                )),
               column(
                 width = 6,
                 actionButton("data_edit_modal", "Data Types")
               ),
+              tags$head(tags$style(
+                  "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+                )),
               column(
                 width = 6,
                 actionButton("data_desc_modal", "Description")
               )
             ),
+            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
             hr(),
             textOutput("usage"),
             textOutput("total_cost"),
@@ -385,8 +437,13 @@ app_ui <- function(request) {
       ), #tabPanel
 
       tabPanel(
-        title = "EDA",
+        title = div(id = "eda_tab", "EDA"),
         value = "EDA",
+        tippy::tippy_this(
+          "eda_tab",
+          "Exploratory Data Analysis",
+          theme = "light-border"
+        ),
         tabsetPanel(
           tabPanel(
             title = "Basic",
@@ -399,10 +456,10 @@ app_ui <- function(request) {
             shinyjs::hidden(
               div(
                 id = "second_file_summary",
-                br(),hr(),
+                br(), hr(),
                 h4("Data structure: df2"),
                 verbatimTextOutput("data_structure_2"),
-                br(),hr(),
+                br(), hr(),
                 h4("Data summary: df2"),
                 verbatimTextOutput("data_summary_2"),
                 plotly::plotlyOutput("missing_values_2", width = "60%")
@@ -502,8 +559,13 @@ app_ui <- function(request) {
       ),
 
       tabPanel(
-        title = "Report",
+        title = div(id = "report_tab", "Report"),
         value = "Report",
+        tippy::tippy_this(
+          "report_tab",
+          "Download a Results Report",
+          theme = "light-border"
+        ),
         br(),
         selectInput(
           inputId = "selected_chunk_report",
