@@ -99,6 +99,7 @@ app_ui <- function(request) {
                 )
               )
             ),
+            br(),
             fluidRow(
               column(
                 width = 6,
@@ -108,6 +109,20 @@ app_ui <- function(request) {
                 width = 6,
                 uiOutput("data_upload_ui"),
                 uiOutput("data_upload_ui_2")
+              )
+            ),
+
+            fluidRow(
+              column(
+                width = 6,
+                tags$label("2) Modify Data Fields (Optional)",
+                style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;")
+              ),
+              br(),
+              column(
+                width = 6,
+                actionButton("data_edit_modal", "Data Types"),
+                align = 'left'
               )
             ),
 
@@ -127,7 +142,7 @@ app_ui <- function(request) {
 
             fluidRow(
               column(
-                width = 4,
+                width = 12,
                 actionButton("submit_button", strong("Submit")),
                 tags$head(tags$style(
                   "#submit_button{font-size: 16px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
@@ -137,18 +152,21 @@ app_ui <- function(request) {
                   "ChatGPT can return different results for the same request.",
                   theme = "light-border"
                 )
-              ),
-              column(
-                width = 4,
-                actionButton("api_button", "Settings"),
-                tags$head(tags$style(
-                      "#api_button{color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-                )),
-              ),
-              column(
-                width = 4,
-                checkboxInput("use_python", "Python", value = FALSE)
-              )
+
+                )
+#               column(
+#                 width = 4,
+#                 actionButton("api_button", "Settings"),
+#                 tags$head(tags$style(
+#                       "#api_button{color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+#                 )),
+#               ),
+#               column(
+#                 width = 4,
+#                 checkboxInput("use_python", "Python", value = FALSE)
+#             )
+
+
             ),
             br(),
             tags$head(
@@ -162,7 +180,7 @@ app_ui <- function(request) {
             ),
             textInput(
               inputId = "ask_question",
-              label = "(Optional) Ask about Results",
+              label = "Ask about Results (Optional)",
               placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
               value = ""
             ),
@@ -176,58 +194,33 @@ app_ui <- function(request) {
               theme = "light-border"
             ),
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
-            br(),
-            fluidRow(
-              tags$head(tags$style(
-                  "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-                )),
-              column(
-                width = 6,
-                actionButton("data_edit_modal", "Data Types")
-              ),
-              tags$head(tags$style(
-                  "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-                )),
-              column(
-                width = 6,
-                actionButton("data_desc_modal", "Description")
-              )
-            ),
-            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+
+#             br(),
+#             fluidRow(
+#               tags$head(tags$style(
+#                   "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+#                 )),
+#               column(
+#                 width = 6,
+#                 actionButton("data_edit_modal", "Data Types")
+#               ),
+#               tags$head(tags$style(
+#                   "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+#                 )),
+#               column(
+#                 width = 6,
+#                 actionButton("data_desc_modal", "Description")
+#               )
+#             ),
+#             tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+
             hr(),
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
             #uiOutput("slava_ukraini"),
             #br(),
-            textOutput("retry_on_error"),
-            checkboxInput("Comments", "Comments & questions"),
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-              rows = 4,
-              ""
-            ),
-            radioButtons("helpfulness", "How useful is RTutor?",
-              c(
-                "Not at all",
-                "Slightly",
-                "Helpful",
-                "Extremely"
-              ),
-              selected = "Slightly"
-            ),
-            radioButtons("experience", "Your experience with R:",
-              c(
-                "None",
-                "Beginner",
-                "Intermediate",
-                "Advanced"
-               ),
-              selected = "Beginner"
-            ),
-            actionButton("save_feedbck", "Save Feedback")
+            textOutput("retry_on_error")
           ),
 
       ###############################################################################
@@ -244,43 +237,11 @@ app_ui <- function(request) {
               fluidRow(
                 column(
                   width = 9,
-                  h4(
-                    "Start by watching an 8-min ",
-                    a(
-                      "YouTube video!",
-                      href="https://youtu.be/a-bZW26nK9k",
-                      target = "_blank"
-                    ),  
-                    style="color:red"
-                  ),
-                  # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
-                  #   a(
-                  #     "a comprehensive EDA report.",
-                  #     href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
-                  #     target = "_blank"
-                  #   ),  
-                  #  " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
-                  # Oct 23, 2023 (v0.97): GPT-4 becomes the default.
-                  # Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
-                  h5("See",
-                    a(
-                      "GitHub",
-                      href = "https://github.com/gexijin/RTutor"
-                    ),
-                    " for source code, bug reports, and instructions to install RTutor as an R package.
-                    As a small startup, we are open to partnerships with both academia and industry. 
-                  We can do demos and seminars via Zoom if time permits."
-                  ),
-                  h5("Also try ",
-                    a(
-                      "Chatlize.ai,",
-                      href="https://chatlize.ai",
-                      target = "_blank"
-                    ),
-                    " a more general platform for analyzing data through chats. Multiple files with different formats. Python support."
-                  ),
-
-                  align = "left"
+                  actionButton("first_user", strong("Quickstart: First Time User")),
+                  tags$head(tags$style(
+                    "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
+                  )),
+                  align = 'center'
                 ),
                 column(
                   width = 3,
@@ -289,67 +250,11 @@ app_ui <- function(request) {
                     width = "155",
                     height = "77"
                   ),
-                  align = 'left'
-                )
-              ),
-              hr(),
-
-              h3("Quick start:"),
-              tags$ul(
-                tags$li(
-                  "Explore the data at the EDA tab first.  Then start with simple requests 
-                  such as distributions, basic plots. Gradually add complexity.
-                  ", style = "color:red"
-                ),
-                tags$li(
-                  "The default model is now GPT-4 Turbo, which is slower and expensive, but more accurate.
-                  In the same session, previous questions and code chunks become the context for your new request.
-                  For example, you can simply say \"Change background color to white\" to refine the
-                  plot generated by the previous chunk. You can also clean your data step by step. "
-                ),
-                tags$li(
-                  "To analyze a new dataset, or to start over, click the Reset button first. "
-                ), 
-                tags$li(
-                  "Prepare and clean your data in Excel first. Name columns properly. 
-                  ChatGPT tries to guess the meaning of column names, even if they are abbrievated."
-                ),
-                tags$li(
-                  "RTutor can only analyze traditional statistics data, where rows are 
-                  observations and columns are variables. For complex data, try https://chatlize.ai."
-                ),
-                tags$li(
-                  "Once uploaded, your data is automatically loaded into
-                  R as a data frame called df. You do NOT need to ask RTutor to load data. 
-                  Check if the data types of the columns are correct.
-                  Change if needed, especially when numbers are used to code for categories."
-                ),
-                tags$li(
-                  "An additional file can be uploaded as df2 to be analyze togehter. 
-                  To use it, you must specify 'df2' in your prompts. "
-                ),
-                tags$li(
-                  "Use the Q&A box to ask questions about the code, result, or error messages. 
-                  You can ask for methods to use or develop a plan. "
-                ),
-                tags$li(
-                  "Before sending your request to OpenAI, we do prompt engineering based on the uploaded data.
-                  We add \"Generate R code\" to the beginning, and 
-                  append something like \"Use the df data frame. 
-                  Note that highway is numeric, ...\" afterward. 
-                  If you are not using any data (plot a function or simulations),
-                  choose \"No data\" from the Data dropdown."
-                ),
-                tags$li(
-                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session. 
-                  If you explain the background of the data and the meaning of  
-                  the columns, you can ask general questions like asking a clueless statistician."
-                ),
-                tags$li(
-                  "Be skeptical. The generated code can be logically wrong even if it produces results without error."
+                  align = 'center'
                 )
               )
             ),
+            hr(),
             conditionalPanel(
               condition = "input.submit_button != 0",
               fluidRow(
@@ -408,13 +313,13 @@ app_ui <- function(request) {
               )
             ),
 
-            br(),
+            # br(),
 
             shinyjs::hidden(
               div(
                 id = "first_file",
-                hr(),
-                h4("Default dataset:  df"),
+                # hr(),
+                h4("Selected Dataset"),
                 textOutput("data_size"),
                 DT::dataTableOutput("data_table_DT")
               )
@@ -597,170 +502,459 @@ app_ui <- function(request) {
       ),
 
 
+      navbarMenu(
+        title = "More",
+        tabPanel(
+          title = "First Time User",
+          value = "first-time-user",
+          uiOutput("RTutor_version_main"),
+          fluidRow(
+            column(
+              width = 9,
+              h4(
+                "Start by watching an 8-min ",
+                a(
+                  "YouTube video!",
+                  href="https://youtu.be/a-bZW26nK9k",
+                  target = "_blank"
+                ),  
+                style="color:red"
+              ),
+              # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
+              #   a(
+              #     "a comprehensive EDA report.",
+              #     href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
+              #     target = "_blank"
+              #   ),  
+              #  " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
+              # Oct 23, 2023 (v0.97): GPT-4 becomes the default.
+              # Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
+              h5("See",
+                a(
+                  "GitHub",
+                  href = "https://github.com/gexijin/RTutor"
+                ),
+                " for source code, bug reports, and instructions to install RTutor as an R package.
+                As a small startup, we are open to partnerships with both academia and industry. 
+              We can do demos and seminars via Zoom if time permits."
+              ),
+              h5("Also try ",
+                a(
+                  "Chatlize.ai,",
+                  href="https://chatlize.ai",
+                  target = "_blank"
+                ),
+                " a more general platform for analyzing data through chats. Multiple files with different formats. Python support."
+              ),
 
-      tabPanel(
-        title = "About",
-        value = "About",
-        uiOutput("RTutor_version"),
-        p("RTutor uses ",
-          a(
-            "OpenAI's",
-            href = "https://openai.com/",
-            target = "_blank"
-          ),
-          " powerful large language models",
-          " to translate natural language into R (or Python) code, which is then excuted.",
-          "You can request your analysis,
-          just like asking a real person.",
-          "Upload a data file (CSV, TSV/tab-delimited text files, and Excel) 
-          and just analyze it in plain English. 
-          Your results can be downloaded as an HTML report in minutes!"
-        ),
-        p("NO WARRANTY! Some of the scripts run but may yield incorrect result. 
-        Please use the auto-generated code as a starting 
-        point for further refinement and validation."
-        ),
-
-        hr(),
-        p(" Written by Dr. Steven Ge",
-          a(
-            "(Twitter, ",
-            href = "https://twitter.com/StevenXGe",
-            target = "_blank"
-          ),
-          a(
-            "LinkedIn),",
-            href = "https://www.linkedin.com/in/steven-ge-ab016947/",
-            target = "_blank"
-          ),       
-          " as part of RTutor LLC. For feedback, please email",
-          a(
-            "gexijin@gmail.com.",
-            href = "mailto:gexijin@gmail.com?Subject=RTutor"
-          ),
-          " Source code at ",
-          a(
-            "GitHub,",
-            href = "https://github.com/gexijin/RTutor"
-          ),
-          " from where you can also find 
-          instruction to install RTutor as an R package. 
-          The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
-        ),
-        h4("For businesses, RTutor can be customized and locally installed to  
-        easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
-
-        hr(),
-        p("RTutor went viral on ", 
-            a(
-              "LinkedIn, ",
-              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
-            ), 
-            a(
-              "Twitter, ",
-              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+              align = "left"
             ),
-            a(
-              "Twitter(Physacourses),",
-              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
-            ),
-            " and ",
-            a(
-              "Facebook (Carlo Pecoraro).",
-              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+            column(
+              width = 3,
+              img(
+                src = "www/logo.png",
+                width = "155",
+                height = "77"
+              ),
+              align = 'left'
             )
-        ),
-
-        hr(),
-
-        uiOutput("package_list"),
-
-        hr(),
-
-        fluidRow(
-                    # Site Update Log component
-          column(
-            width = 8,
-            actionButton("faq_button", strong("FAQ")),
-              tags$head(tags$style(
-                "#faq_button{font-size: 16px;color: black}"
-            ))
           ),
           
-          conditionalPanel(
-            condition = "(input.faq_button % 2) == 1",
+          hr(),
+
+          fluidRow(
             column(
               width = 12,
-
-              h4(style = "font-weight: bold", "Frequently asked questions"),
-              uiOutput("faq_list"),
-              tags$style(HTML("
-                .faq-answer {
-                  display: none;
-                  padding-left: 10px;
-                }
-                .faq-question {
-                  cursor: pointer;
-                  padding: 5px;
-                  border: 1px solid #ccc;
-                  background-color: #f1f1f1;
-                }
-              ")),
-              tags$script(HTML('
-                $(document).on("click", ".faq-question", function() {
-                  var answer = $(this).next(".faq-answer");
-                  if (answer.is(":visible")) {
-                    answer.hide();
-                  } else {
-                    answer.show();
-                  }
-                });
-              '))
+              h3("Quick start:"),
+              tags$ul(
+                tags$li(
+                  "Explore the data at the EDA tab first.  Then start with simple requests 
+                  such as distributions, basic plots. Gradually add complexity.
+                  ", style = "color:red"
+                ),
+                tags$li(
+                  "The default model is now GPT-4 Turbo, which is slower and expensive, but more accurate.
+                  In the same session, previous questions and code chunks become the context for your new request.
+                  For example, you can simply say \"Change background color to white\" to refine the
+                  plot generated by the previous chunk. You can also clean your data step by step. "
+                ),
+                tags$li(
+                  "To analyze a new dataset, or to start over, click the Reset button first. "
+                ), 
+                tags$li(
+                  "Prepare and clean your data in Excel first. Name columns properly. 
+                  ChatGPT tries to guess the meaning of column names, even if they are abbrievated."
+                ),
+                tags$li(
+                  "RTutor can only analyze traditional statistics data, where rows are 
+                  observations and columns are variables. For complex data, try https://chatlize.ai."
+                ),
+                tags$li(
+                  "Once uploaded, your data is automatically loaded into
+                  R as a data frame called df. You do NOT need to ask RTutor to load data. 
+                  Check if the data types of the columns are correct.
+                  Change if needed, especially when numbers are used to code for categories."
+                ),
+                tags$li(
+                  "An additional file can be uploaded as df2 to be analyze togehter. 
+                  To use it, you must specify 'df2' in your prompts. "
+                ),
+                tags$li(
+                  "Use the Q&A box to ask questions about the code, result, or error messages. 
+                  You can ask for methods to use or develop a plan. "
+                ),
+                tags$li(
+                  "Before sending your request to OpenAI, we do prompt engineering based on the uploaded data.
+                  We add \"Generate R code\" to the beginning, and 
+                  append something like \"Use the df data frame. 
+                  Note that highway is numeric, ...\" afterward. 
+                  If you are not using any data (plot a function or simulations),
+                  choose \"No data\" from the Data dropdown."
+                ),
+                tags$li(
+                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session. 
+                  If you explain the background of the data and the meaning of  
+                  the columns, you can ask general questions like asking a clueless statistician."
+                ),
+                tags$li(
+                  "Be skeptical. The generated code can be logically wrong even if it produces results without error."
+                )
+              )
             )
           )
         ),
-
-        hr(),
-        fluidRow(
-          # Site Update Log component
-          column(
-            width = 8,
-            actionButton("site_update_log", strong("See Site Updates Log")),
-              tags$head(tags$style(
-                "#site_update_log{font-size: 16px;color: black}"
-            ))
+        tabPanel(
+          title = "About",
+          value = "About",
+          uiOutput("RTutor_version"),
+          p("RTutor uses ",
+            a(
+              "OpenAI's",
+              href = "https://openai.com/",
+              target = "_blank"
+            ),
+            " powerful large language models",
+            " to translate natural language into R (or Python) code, which is then excuted.",
+            "You can request your analysis,
+            just like asking a real person.",
+            "Upload a data file (CSV, TSV/tab-delimited text files, and Excel) 
+            and just analyze it in plain English. 
+            Your results can be downloaded as an HTML report in minutes!"
+          ),
+          p("NO WARRANTY! Some of the scripts run but may yield incorrect result. 
+          Please use the auto-generated code as a starting 
+          point for further refinement and validation."
           ),
 
-          conditionalPanel(
-            condition = "(input.site_update_log % 2) == 1",
+          hr(),
+          p(" Written by Dr. Steven Ge",
+            a(
+              "(Twitter, ",
+              href = "https://twitter.com/StevenXGe",
+              target = "_blank"
+            ),
+            a(
+              "LinkedIn),",
+              href = "https://www.linkedin.com/in/steven-ge-ab016947/",
+              target = "_blank"
+            ),       
+            " as part of RTutor LLC. For feedback, please email",
+            a(
+              "gexijin@gmail.com.",
+              href = "mailto:gexijin@gmail.com?Subject=RTutor"
+            ),
+            " Source code at ",
+            a(
+              "GitHub,",
+              href = "https://github.com/gexijin/RTutor"
+            ),
+            " from where you can also find 
+            instruction to install RTutor as an R package. 
+            The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
+          ),
+          h4("For businesses, RTutor can be customized and locally installed to  
+          easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
+
+          hr(),
+          p("RTutor went viral on ", 
+              a(
+                "LinkedIn, ",
+                href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+              ), 
+              a(
+                "Twitter, ",
+                href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+              ),
+              a(
+                "Twitter(Physacourses),",
+                href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+              ),
+              " and ",
+              a(
+                "Facebook (Carlo Pecoraro).",
+                href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+              )
+          ),
+
+          # hr(),
+
+          # uiOutput("package_list"),
+
+          hr(),
+
+          fluidRow(
             column(
-              width = 6,
-              # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
-              tableOutput("site_updates_table")
+              width = 4,
+              uiOutput("package_list")
+            ),
+            # Site Update Log component
+            column(
+              width = 8,
+              checkboxInput("site_update_log", strong("See Site Updates Log & R Session Info"), FALSE),
+                tags$head(tags$style(
+                  "#site_update_log{font-size: 16px;color: black}"
+              ))
             )
-          )
-        ),
-
-        hr(),
-
-        # Session Info Section
-        fluidRow(
-          column(
-            width = 8,
-            actionButton("session_info_button", strong("R Session Info")),
-              tags$head(tags$style(
-                "#session_info_button{font-size: 16px;color: black}"
-            ))
           ),
-          conditionalPanel(
-            condition = "(input.session_info_button % 2) == 1",
+
+          hr(),
+
+          # Session Info Section
+          fluidRow(
+            conditionalPanel(
+              condition = "input.site_update_log == 1",
               column(
-                width = 12,
+                width = 6,
+                # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
+                tableOutput("site_updates_table")
+              ),
+              column(
+                width = 6,
                 uiOutput("session_info")
               )
+            )
+          ),
+          hr()
+        ),
+        tabPanel(
+          title = "FAQ",
+          fluidRow(
+              column(
+                width = 6,
+                h4(style = "font-weight: bold", "Frequently asked Questions"),
+                uiOutput("faq_list"),
+                tags$style(HTML("
+                  .faq-answer {
+                    display: none;
+                    padding-left: 10px;
+                  }
+                  .faq-question {
+                    cursor: pointer;
+                    padding: 5px;
+                    border: 1px solid #ccc;
+                    background-color: #f1f1f1;
+                  }
+                ")),
+                tags$script(HTML('
+                  $(document).on("click", ".faq-question", function() {
+                    var answer = $(this).next(".faq-answer");
+                    if (answer.is(":visible")) {
+                      answer.hide();
+                    } else {
+                      answer.show();
+                    }
+                  });
+                '))
+              ),
+              column(
+                width = 6,
+                h4(style = "font-weight: bold", "Comments & Questions"),
+                tags$style(type = "text/css", "textarea {width:100%}"),
+                tags$textarea(
+                  id = "user_feedback",
+                  placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+                  rows = 4,
+                  ""
+                ),
+                radioButtons("helpfulness", "How useful is RTutor?",
+                  c(
+                    "Not at all",
+                    "Slightly",
+                    "Helpful",
+                    "Extremely"
+                  ),
+                  selected = "Slightly"
+                ),
+                radioButtons("experience", "Your experience with R:",
+                  c(
+                    "None",
+                    "Beginner",
+                    "Intermediate",
+                    "Advanced"
+                  ),
+                  selected = "Beginner"
+                ),
+                actionButton("save_feedbck", "Save Feedback")
+                  )
           )
         ),
-        hr()
+        tabPanel(
+          title = "Settings",
+          div(id = "settings_window",
+            tagList(
+              fluidRow(
+                column(
+                  width = 2,
+                  "Model:",
+                  align = "center"
+                ),
+                column(
+                  width = 10,
+                  align = "left",
+                  uiOutput("language_model")
+                )
+              ),
+              fluidRow(
+                column(
+                  width = 4,
+                  uiOutput("change_temperature")
+                ),
+                column(
+                  width = 8,
+                  p("This important parameter controls the AI's behavior in choosing 
+                  among possible answers. A higher sampling temperature tells the AI 
+                  to take more risks, producing more diverse and creative 
+                  solutions when the same request is repeated. A lower  temperature
+                  (such as 0) results in more
+                  conservative and well-defined solutions, 
+                  but less variety when repeated.
+                  "),
+                )
+              ),
+              hr(),
+              fluidRow(
+                column(
+                  width = 12,
+                  h4("Use your own API key"),
+                  h5("We pay a small fee to use the AI for every request.
+                    If you use this regularily, 
+                    please take a few minutes to create your own API key: "),
+
+                  tags$ul(
+                      tags$li(
+                        "Create a personal account at",
+                        a(
+                          "OpenAI.",
+                          href = "https://openai.com/api/",
+                          target = "_blank"
+                        )
+                      ),
+                      tags$li("After logging in, click \"Personal\" from top right."),
+                      tags$li(
+                        "Click \"Manage Account\" and then \"Billing\",
+                        where you can add \"Payment methods\" and set \"Usage 
+                        limits\". $5 per month is more than enough."
+                      ),
+                      tags$li(
+                        "Click \"API keys\" to create a new key, 
+                        which can be copied and pasted it below."
+                      ),
+                  ),
+                  uiOutput("valid_key"),
+                  uiOutput("save_api_ui")
+                )
+              ),
+            ),
+            fluidRow(
+              column(
+                width = 4,
+                textInput(
+                  inputId = "api_key",
+                  label = h5("Paste your API key from OpenAI:"),
+                  value = NULL,
+                  placeholder = "sk-..... (51 characters)"
+                )
+              ),
+              column(
+                  width = 8,
+                  h5("Current API Key:"),
+                  verbatimTextOutput("session_api_source")
+              )
+            ),
+
+            hr(),
+            fluidRow(
+              column(
+                width = 4,
+                checkboxInput(
+                  inputId = "use_python",
+                  label = "Python",
+                  value = FALSE)
+              ),
+              column(
+                width = 8,
+                h5("Use Python instead of R when generating")
+              )
+            ),
+
+            hr(),
+            fluidRow(
+              column(
+                width = 4,
+                uiOutput("numeric_as_factor"),
+                tippy::tippy_this(
+                  elementId = "numeric_as_factor",
+                  tooltip = "Treat the columns that looks like a category 
+                  as a category. This applies to columns that contain numbers
+                  but have very few unique values. ",
+                  theme = "light-border"
+                )
+              ),
+              column(
+                width = 4,
+                uiOutput("max_levels_factor"),
+                tippy::tippy_this(
+                  elementId = "max_levels_factor",
+                  tooltip = "To convert a numeric column as category, 
+                  the column must have no more than this number of unique values.",
+                  theme = "light-border"
+                )
+              ),
+              column(
+                width = 4,
+                uiOutput("max_proptortion_factor"),
+                tippy::tippy_this(
+                  elementId = "max_proptortion_factor",
+                  tooltip = "To convert a numeric column as category, 
+                  the number of unique values in a column must not exceed 
+                  more this proportion of the total number of rows.",
+                  theme = "light-border"
+                )
+              )
+            ),
+            h5("Some columns contains numbers but should be treated 
+            as categorical values or factors. For example, we sometimes 
+            use 1 to label success and 0 for failure.
+            If this is selected, using the default setting, a column 
+            is treated as categories when the number of unique values 
+            is less than or equal to 12, and less than 10% of the total rows."
+            ),
+            hr(),
+            fluidRow(
+              column(
+                width = 4,
+                uiOutput("contribute_data")
+              ),
+              column(
+                width = 8,
+                h5("Save your requests and the structure of your data 
+                such as column names and data types, not the data itself. 
+                We can learn from users about creative ways to use AI. 
+                And we can try to improve unsuccessful attempts. ")
+              )
+            )
+          )
+        )
       ),
 
 #      tabPanel(
@@ -770,6 +964,13 @@ app_ui <- function(request) {
 #        tags$head(includeHTML(app_sys("app", "www", "disqus.html")))
 #        )
 #      )
+  # Include custom JavaScript to handle the button click
+    tags$script(HTML("
+      $(document).on('click', '#first_user', function() {
+        // Update the active tab to 'First Time User' within the 'More' navbarMenu
+        $('#tabs a[data-value=\"first-time-user\"]').tab('show');
+      });
+    "))
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
