@@ -356,28 +356,14 @@ app_server <- function(input, output, session) {
     if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq)) {
       return(
         tagList(
-          tags$head(
-            tags$style(HTML("
-              .vertical-padding {padding-top: 10px;padding-bottom: 10px;
-              font-weight: bold;}
-            "))
-          ),
           fluidRow(
             column(
-              width = 4,
-              align = "left",
-              div(
-                "3) Send Request(s)",
-                class = "vertical-padding"
-              )
-            ),
-            column(
-              width = 8,
+              width = 12,
               align = "left",
               selectInput(
                 inputId = "demo_prompt",
                 choices = choices,
-                label = NULL
+                label = "3) Send Request(s)"
               )
             )
           ),
