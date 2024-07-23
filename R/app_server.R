@@ -255,7 +255,7 @@ app_server <- function(input, output, session) {
           txt <- "Dataset: uploaded."
         }
       } else {
-        txt <- paste0("Dataset: ", input$select_data)
+        txt <- paste0("Selected Dataset: ", input$select_data)
       }
 
       return(txt)
@@ -299,6 +299,7 @@ app_server <- function(input, output, session) {
 
   })
 
+
   output$prompt_ui <- renderUI({
     req(input$select_data)
     # hide after data is uploaded
@@ -341,187 +342,248 @@ app_server <- function(input, output, session) {
   #____________________________________________________________________________
   # API key management
   #____________________________________________________________________________
-  # pop up modal for Settings
-  observeEvent(input$api_button, {
-    shiny::showModal(
-      shiny::modalDialog(
-        size = "l",
-        footer = modalButton("Confirm"),
-                # Custom CSS to make the chat area scrollable
-        tags$head(
-            tags$style(HTML("
-                #settings_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
-        ),
-        div( id = "settings_window", 
 
-          tagList(
-            fluidRow(
-              column(
-                width = 2,
-                "Model:",
-                align = "center"
-              ),
-              column(
-                width = 10,
-                align = "left",
-                selectInput(
-                  inputId = "language_model",
-                  choices = language_models,
-                  label = NULL,
-                  selected = selected_model()
-                )
-              ),
-              column(
-                width = 4,
-                sliderInput(
-                  inputId = "temperature",
-                  label = "Sampling temperature",
-                  min = 0,
-                  max = 1,
-                  value = sample_temp(),
-                  step = .1,
-                  round = FALSE,
-                  width = "100%"
-                )
-              ),
-              column(
-                width = 8,
-                p("This important parameter controls the AI's behavior in choosing 
-                among possible answers. A higher sampling temperature tells the AI 
-                to take more risks, producing more diverse and creative 
-                solutions when the same request is repeated. A lower  temperature
-                (such as 0) results in more
-                conservative and well-defined solutions, 
-                but less variety when repeated.
-                "),
-              )
-            ),
-            hr(),
-            h4("Use your own API key"),
-            h5("We pay a small fee to use the AI for every request.
-              If you use this regularily, 
-              please take a few minutes to create your own API key: "),
-
-            tags$ul(
-                tags$li(
-                  "Create a personal account at",
-                  a(
-                    "OpenAI.",
-                    href = "https://openai.com/api/",
-                    target = "_blank"
-                  )
-                ),
-                tags$li("After logging in, click \"Personal\" from top right."),
-                tags$li(
-                  "Click \"Manage Account\" and then \"Billing\",
-                  where you can add \"Payment methods\" and set \"Usage 
-                  limits\". $5 per month is more than enough."
-                ),
-                tags$li(
-                  "Click \"API keys\" to create a new key, 
-                  which can be copied and pasted it below."
-                ),
-            ),
-            textInput(
-              inputId = "api_key",
-              label = h5("Paste your API key from OpenAI:"),
-              value = NULL,
-              placeholder = "sk-..... (51 characters)"
-            ),
-            uiOutput("valid_key"),
-            uiOutput("save_api_ui"),
-            verbatimTextOutput("session_api_source"),
-          ),
-
-          hr(),
-          fluidRow(
-            column(
-              width = 4,
-              checkboxInput(
-                inputId = "numeric_as_factor",
-                label = strong("Treat as factors"),
-                value = convert_to_factor()
-              ),
-              tippy::tippy_this(
-                elementId = "numeric_as_factor",
-                tooltip = "Treat the columns that looks like a category 
-                as a category. This applies to columns that contain numbers
-                but have very few unique values. ",
-                theme = "light-border"
-              )
-            ),
-            column(
-              width = 4,
-              numericInput(
-                inputId = "max_levels_factor",
-                label = "Max levels",
-                value = max_levels_factor(),
-                min = 3,
-                max = 50,
-                step = 1
-              ),
-              tippy::tippy_this(
-                elementId = "max_levels_factor",
-                tooltip = "To convert a numeric column as category, 
-                the column must have no more than this number of unique values.",
-                theme = "light-border"
-              )
-            ),
-            column(
-              width = 4,
-              numericInput(
-                inputId = "max_proptortion_factor",
-                label = "Max proportion",
-                value = max_proptortion_factor(),
-                min = 0.05,
-                max = 0.5,
-                step = 0.1
-              ),
-              tippy::tippy_this(
-                elementId = "max_proptortion_factor",
-                tooltip = "To convert a numeric column as category, 
-                the number of unique values in a column must not exceed 
-                more this proportion of the total number of rows.",
-                theme = "light-border"
-              )
-            )
-          ),
-          h5("Some columns contains numbers but should be treated 
-          as categorical values or factors. For example, we sometimes 
-          use 1 to label success and 0 for failure.
-          If this is selected, using the default setting, a column 
-          is treated as categories when the number of unique values 
-          is less than or equal to 12, and less than 10% of the total rows."
-          ),
-          hr(),
-          fluidRow(
-            column(
-              width = 4,
-              checkboxInput(
-                inputId = "contribute_data",
-                label = "Help us make RTutor better",
-                value = contribute_data()
-              )
-            ),
-            column(
-              width = 8,
-              h5("Save your requests and the structure of your data 
-              such as column names and data types, not the data itself. 
-              We can learn from users about creative ways to use AI. 
-              And we can try to improve unsuccessful attempts. ")
-            )
-          )
-        ), #div
-        easyClose = TRUE
+    output$language_model <- renderUI({
+      selectInput(
+        inputId = "language_model",
+        choices = language_models,
+        label = NULL,
+        selected = selected_model()
       )
-    )
-  })
+    })
+
+    output$change_temperature <- renderUI({
+      sliderInput(
+        inputId = "temperature",
+        label = "Sampling temperature",
+        min = 0,
+        max = 1,
+        value = sample_temp(),
+        step = .1,
+        round = FALSE,
+        width = "100%"
+      )
+    })
+
+    output$numeric_as_factor <- renderUI({
+      checkboxInput(
+        inputId = "numeric_as_factor",
+        label = strong("Treat as factors"),
+        value = convert_to_factor()
+      )
+    })
+
+    output$max_levels_factor <- renderUI({
+      numericInput(
+        inputId = "max_levels_factor",
+        label = "Max levels",
+        value = max_levels_factor(),
+        min = 3,
+        max = 50,
+        step = 1
+      )
+    })
+
+    output$max_proptortion_factor <- renderUI({
+      numericInput(
+        inputId = "max_proptortion_factor",
+        label = "Max proportion",
+        value = max_proptortion_factor(),
+        min = 0.05,
+        max = 0.5,
+        step = 0.1
+      )
+    })
+
+    output$contribute_data <- renderUI({
+      checkboxInput(
+        inputId = "contribute_data",
+        label = "Help us make RTutor better",
+        value = contribute_data()
+      )
+    })
+
+  # pop up modal for Settings
+  # observeEvent(input$api_button, {
+  #   shiny::showModal(
+  #     shiny::modalDialog(
+  #       size = "l",
+  #       footer = modalButton("Confirm"),
+  #               # Custom CSS to make the chat area scrollable
+  #       tags$head(
+  #           tags$style(HTML("
+  #               #settings_window {
+  #                   height: 400px;  /* Adjust the height as needed */
+  #                   overflow-y: auto;  /* Enables vertical scrolling */
+  #                   padding: 10px;
+  #                   border-radius: 5px;
+  #               }
+  #           "))
+  #       ),
+  #       div( id = "settings_window", 
+
+  #         tagList(
+  #           fluidRow(
+  #             column(
+  #               width = 2,
+  #               "Model:",
+  #               align = "center"
+  #             ),
+  #             column(
+  #               width = 10,
+  #               align = "left",
+  #               selectInput(
+  #                 inputId = "language_model",
+  #                 choices = language_models,
+  #                 label = NULL,
+  #                 selected = selected_model()
+  #               )
+  #             ),
+  #             column(
+  #               width = 4,
+  #               sliderInput(
+  #                 inputId = "temperature",
+  #                 label = "Sampling temperature",
+  #                 min = 0,
+  #                 max = 1,
+  #                 value = sample_temp(),
+  #                 step = .1,
+  #                 round = FALSE,
+  #                 width = "100%"
+  #               )
+  #             ),
+  #             column(
+  #               width = 8,
+  #               p("This important parameter controls the AI's behavior in choosing 
+  #               among possible answers. A higher sampling temperature tells the AI 
+  #               to take more risks, producing more diverse and creative 
+  #               solutions when the same request is repeated. A lower  temperature
+  #               (such as 0) results in more
+  #               conservative and well-defined solutions, 
+  #               but less variety when repeated.
+  #               "),
+  #             )
+  #           ),
+  #           hr(),
+  #           h4("Use your own API key"),
+  #           h5("We pay a small fee to use the AI for every request.
+  #             If you use this regularily, 
+  #             please take a few minutes to create your own API key: "),
+
+  #           tags$ul(
+  #               tags$li(
+  #                 "Create a personal account at",
+  #                 a(
+  #                   "OpenAI.",
+  #                   href = "https://openai.com/api/",
+  #                   target = "_blank"
+  #                 )
+  #               ),
+  #               tags$li("After logging in, click \"Personal\" from top right."),
+  #               tags$li(
+  #                 "Click \"Manage Account\" and then \"Billing\",
+  #                 where you can add \"Payment methods\" and set \"Usage 
+  #                 limits\". $5 per month is more than enough."
+  #               ),
+  #               tags$li(
+  #                 "Click \"API keys\" to create a new key, 
+  #                 which can be copied and pasted it below."
+  #               ),
+  #           ),
+  #           textInput(
+  #             inputId = "api_key",
+  #             label = h5("Paste your API key from OpenAI:"),
+  #             value = NULL,
+  #             placeholder = "sk-..... (51 characters)"
+  #           ),
+  #           uiOutput("valid_key"),
+  #           uiOutput("save_api_ui"),
+  #           verbatimTextOutput("session_api_source"),
+  #         ),
+
+  #         hr(),
+  #         fluidRow(
+  #           column(
+  #             width = 4,
+  #             checkboxInput(
+  #               inputId = "numeric_as_factor",
+  #               label = strong("Treat as factors"),
+  #               value = convert_to_factor()
+  #             ),
+  #             tippy::tippy_this(
+  #               elementId = "numeric_as_factor",
+  #               tooltip = "Treat the columns that looks like a category 
+  #               as a category. This applies to columns that contain numbers
+  #               but have very few unique values. ",
+  #               theme = "light-border"
+  #             )
+  #           ),
+  #           column(
+  #             width = 4,
+  #             numericInput(
+  #               inputId = "max_levels_factor",
+  #               label = "Max levels",
+  #               value = max_levels_factor(),
+  #               min = 3,
+  #               max = 50,
+  #               step = 1
+  #             ),
+  #             tippy::tippy_this(
+  #               elementId = "max_levels_factor",
+  #               tooltip = "To convert a numeric column as category, 
+  #               the column must have no more than this number of unique values.",
+  #               theme = "light-border"
+  #             )
+  #           ),
+  #           column(
+  #             width = 4,
+  #             numericInput(
+  #               inputId = "max_proptortion_factor",
+  #               label = "Max proportion",
+  #               value = max_proptortion_factor(),
+  #               min = 0.05,
+  #               max = 0.5,
+  #               step = 0.1
+  #             ),
+  #             tippy::tippy_this(
+  #               elementId = "max_proptortion_factor",
+  #               tooltip = "To convert a numeric column as category, 
+  #               the number of unique values in a column must not exceed 
+  #               more this proportion of the total number of rows.",
+  #               theme = "light-border"
+  #             )
+  #           )
+  #         ),
+  #         h5("Some columns contains numbers but should be treated 
+  #         as categorical values or factors. For example, we sometimes 
+  #         use 1 to label success and 0 for failure.
+  #         If this is selected, using the default setting, a column 
+  #         is treated as categories when the number of unique values 
+  #         is less than or equal to 12, and less than 10% of the total rows."
+  #         ),
+  #         hr(),
+  #         fluidRow(
+  #           column(
+  #             width = 4,
+  #             checkboxInput(
+  #               inputId = "contribute_data",
+  #               label = "Help us make RTutor better",
+  #               value = contribute_data()
+  #             )
+  #           ),
+  #           column(
+  #             width = 8,
+  #             h5("Save your requests and the structure of your data 
+  #             such as column names and data types, not the data itself. 
+  #             We can learn from users about creative ways to use AI. 
+  #             And we can try to improve unsuccessful attempts. ")
+  #           )
+  #         )
+  #       ), #div
+  #       easyClose = TRUE
+  #     )
+  #   )
+  # })
   # api key for the session
   api_key_session <- reactive({
 
@@ -552,7 +614,7 @@ app_server <- function(input, output, session) {
     # environment variable on Linux!!! Don't ask.
     tem <- Sys.getenv("OPEN_API_KEY")
     paste0(
-      "Current API key: ",
+      # "Current API key: ",
       substr(txt, 1, 4),
       ".....",
       substr(txt, nchar(txt) - 4, nchar(txt)),
@@ -1023,7 +1085,7 @@ app_server <- function(input, output, session) {
   output$total_cost <- renderText({
     if(input$submit_button == 0) {
       return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
-      use your own API key (Settings), or help cover the fee via PayPal(gexijin@gmail.com)."
+      use your own API key (Settings), or help cover the fee via PayPal (gexijin@gmail.com)."
       )
     } else {
     #req(openAI_response()$cmd)
@@ -2907,10 +2969,10 @@ output$RTutor_version <- renderUI({
   })
 
   observe({
-    shinyjs::toggle(id = "user_feedback", condition = input$Comments)
-    shinyjs::toggle(id = "save_feedbck", condition = input$Comments)
-    shinyjs::toggle(id = "helpfulness", condition = input$Comments)
-    shinyjs::toggle(id = "experience", condition = input$Comments)
+    shinyjs::toggle(id = "user_feedback", condition = TRUE) #, condition = input$Comments
+    shinyjs::toggle(id = "save_feedbck", condition = TRUE)
+    shinyjs::toggle(id = "helpfulness", condition = TRUE)
+    shinyjs::toggle(id = "experience", condition = TRUE)
 
   })
 

@@ -88,7 +88,7 @@ app_ui <- function(request) {
             fluidRow(
               column(
                 width = 6,
-                tags$label("2) Modify Data Types (Optional)",
+                tags$label("2) Modify Data Fields (Optional)",
                 style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;")
               ),
               br(),
@@ -109,7 +109,7 @@ app_ui <- function(request) {
 
             fluidRow(
               column(
-                width = 4,
+                width = 12,
                 actionButton("submit_button", strong("Submit")),
                 tags$head(tags$style(
                   "#submit_button{font-size: 16px;color: red}"
@@ -119,20 +119,20 @@ app_ui <- function(request) {
                   "ChatGPT can return different results for the same request.",
                   theme = "light-border"
                 )
-              ),
-              column(
-                width = 4,
-                actionButton("api_button", "Settings")
-              ),
-              column(
-                width = 4,
-                checkboxInput("use_python", "Python", value = FALSE)
-              )
+              )#,
+              # column(
+              #   width = 4,
+              #   actionButton("api_button", "Settings")
+              # ),
+              # column(
+              #   width = 4,
+              #   checkboxInput("use_python", "Python", value = FALSE)
+              # )
             ),
             br(),
             textInput(
               inputId = "ask_question",
-              label = "(Optional) Ask about Results",
+              label = "Ask about Results (Optional)",
               placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
               value = ""
             ),
@@ -163,34 +163,7 @@ app_ui <- function(request) {
             textOutput("temperature"),
             #uiOutput("slava_ukraini"),
             #br(),
-            textOutput("retry_on_error"),
-            checkboxInput("Comments", "Comments & questions"),
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-              rows = 4,
-              ""
-            ),
-            radioButtons("helpfulness", "How useful is RTutor?",
-              c(
-                "Not at all",
-                "Slightly",
-                "Helpful",
-                "Extremely"
-              ),
-              selected = "Slightly"
-            ),
-            radioButtons("experience", "Your experience with R:",
-              c(
-                "None",
-                "Beginner",
-                "Intermediate",
-                "Advanced"
-               ),
-              selected = "Beginner"
-            ),
-            actionButton("save_feedbck", "Save Feedback")
+            textOutput("retry_on_error")
           ),
 
       ###############################################################################
@@ -656,29 +629,24 @@ app_ui <- function(request) {
               )
           ),
 
-          hr(),
+          # hr(),
 
-          uiOutput("package_list"),
+          # uiOutput("package_list"),
 
           hr(),
 
           fluidRow(
+            column(
+              width = 4,
+              uiOutput("package_list")
+            ),
             # Site Update Log component
             column(
               width = 8,
-              actionButton("site_update_log", strong("See Site Updates Log")),
+              checkboxInput("site_update_log", strong("See Site Updates Log & R Session Info"), FALSE),
                 tags$head(tags$style(
                   "#site_update_log{font-size: 16px;color: black}"
               ))
-            ),
-
-            conditionalPanel(
-              condition = "(input.site_update_log % 2) == 1",
-              column(
-                width = 6,
-                # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
-                tableOutput("site_updates_table")
-              )
             )
           ),
 
@@ -686,19 +654,17 @@ app_ui <- function(request) {
 
           # Session Info Section
           fluidRow(
-            column(
-              width = 8,
-              actionButton("session_info_button", strong("R Session Info")),
-                tags$head(tags$style(
-                  "#session_info_button{font-size: 16px;color: black}"
-              ))
-            ),
             conditionalPanel(
-              condition = "(input.session_info_button % 2) == 1",
-                column(
-                  width = 12,
-                  uiOutput("session_info")
-                )
+              condition = "input.site_update_log == 1",
+              column(
+                width = 6,
+                # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
+                tableOutput("site_updates_table")
+              ),
+              column(
+                width = 6,
+                uiOutput("session_info")
+              )
             )
           ),
           hr()
@@ -707,9 +673,8 @@ app_ui <- function(request) {
           title = "FAQ",
           fluidRow(
               column(
-                width = 12,
-
-                h4(style = "font-weight: bold", "Frequently asked questions"),
+                width = 6,
+                h4(style = "font-weight: bold", "Frequently asked Questions"),
                 uiOutput("faq_list"),
                 tags$style(HTML("
                   .faq-answer {
@@ -733,11 +698,195 @@ app_ui <- function(request) {
                     }
                   });
                 '))
-              )
+              ),
+              column(
+                width = 6,
+                h4(style = "font-weight: bold", "Comments & Questions"),
+                tags$style(type = "text/css", "textarea {width:100%}"),
+                tags$textarea(
+                  id = "user_feedback",
+                  placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+                  rows = 4,
+                  ""
+                ),
+                radioButtons("helpfulness", "How useful is RTutor?",
+                  c(
+                    "Not at all",
+                    "Slightly",
+                    "Helpful",
+                    "Extremely"
+                  ),
+                  selected = "Slightly"
+                ),
+                radioButtons("experience", "Your experience with R:",
+                  c(
+                    "None",
+                    "Beginner",
+                    "Intermediate",
+                    "Advanced"
+                  ),
+                  selected = "Beginner"
+                ),
+                actionButton("save_feedbck", "Save Feedback")
+                  )
           )
         ),
         tabPanel(
-          title = "Settings"
+          title = "Settings",
+          div(id = "settings_window",
+            tagList(
+              fluidRow(
+                column(
+                  width = 2,
+                  "Model:",
+                  align = "center"
+                ),
+                column(
+                  width = 10,
+                  align = "left",
+                  uiOutput("language_model")
+                )
+              ),
+              fluidRow(
+                column(
+                  width = 4,
+                  uiOutput("change_temperature")
+                ),
+                column(
+                  width = 8,
+                  p("This important parameter controls the AI's behavior in choosing 
+                  among possible answers. A higher sampling temperature tells the AI 
+                  to take more risks, producing more diverse and creative 
+                  solutions when the same request is repeated. A lower  temperature
+                  (such as 0) results in more
+                  conservative and well-defined solutions, 
+                  but less variety when repeated.
+                  "),
+                )
+              ),
+              hr(),
+              fluidRow(
+                column(
+                  width = 12,
+                  h4("Use your own API key"),
+                  h5("We pay a small fee to use the AI for every request.
+                    If you use this regularily, 
+                    please take a few minutes to create your own API key: "),
+
+                  tags$ul(
+                      tags$li(
+                        "Create a personal account at",
+                        a(
+                          "OpenAI.",
+                          href = "https://openai.com/api/",
+                          target = "_blank"
+                        )
+                      ),
+                      tags$li("After logging in, click \"Personal\" from top right."),
+                      tags$li(
+                        "Click \"Manage Account\" and then \"Billing\",
+                        where you can add \"Payment methods\" and set \"Usage 
+                        limits\". $5 per month is more than enough."
+                      ),
+                      tags$li(
+                        "Click \"API keys\" to create a new key, 
+                        which can be copied and pasted it below."
+                      ),
+                  ),
+                  uiOutput("valid_key"),
+                  uiOutput("save_api_ui")
+                )
+              ),
+            ),
+            fluidRow(
+              column(
+                width = 4,
+                textInput(
+                  inputId = "api_key",
+                  label = h5("Paste your API key from OpenAI:"),
+                  value = NULL,
+                  placeholder = "sk-..... (51 characters)"
+                )
+              ),
+              column(
+                  width = 8,
+                  h5("Current API Key:"),
+                  verbatimTextOutput("session_api_source")
+              )
+            ),
+
+            hr(),
+            fluidRow(
+              column(
+                width = 4,
+                checkboxInput(
+                  inputId = "use_python",
+                  label = "Python",
+                  value = FALSE)
+              ),
+              column(
+                width = 8,
+                h5("Use Python instead of R when generating")
+              )
+            ),
+
+            hr(),
+            fluidRow(
+              column(
+                width = 4,
+                uiOutput("numeric_as_factor"),
+                tippy::tippy_this(
+                  elementId = "numeric_as_factor",
+                  tooltip = "Treat the columns that looks like a category 
+                  as a category. This applies to columns that contain numbers
+                  but have very few unique values. ",
+                  theme = "light-border"
+                )
+              ),
+              column(
+                width = 4,
+                uiOutput("max_levels_factor"),
+                tippy::tippy_this(
+                  elementId = "max_levels_factor",
+                  tooltip = "To convert a numeric column as category, 
+                  the column must have no more than this number of unique values.",
+                  theme = "light-border"
+                )
+              ),
+              column(
+                width = 4,
+                uiOutput("max_proptortion_factor"),
+                tippy::tippy_this(
+                  elementId = "max_proptortion_factor",
+                  tooltip = "To convert a numeric column as category, 
+                  the number of unique values in a column must not exceed 
+                  more this proportion of the total number of rows.",
+                  theme = "light-border"
+                )
+              )
+            ),
+            h5("Some columns contains numbers but should be treated 
+            as categorical values or factors. For example, we sometimes 
+            use 1 to label success and 0 for failure.
+            If this is selected, using the default setting, a column 
+            is treated as categories when the number of unique values 
+            is less than or equal to 12, and less than 10% of the total rows."
+            ),
+            hr(),
+            fluidRow(
+              column(
+                width = 4,
+                uiOutput("contribute_data")
+              ),
+              column(
+                width = 8,
+                h5("Save your requests and the structure of your data 
+                such as column names and data types, not the data itself. 
+                We can learn from users about creative ways to use AI. 
+                And we can try to improve unsuccessful attempts. ")
+              )
+            )
+          )
         )
       ),
 
