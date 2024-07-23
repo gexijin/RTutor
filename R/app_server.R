@@ -87,27 +87,27 @@ app_server <- function(input, output, session) {
   # had to use this. Otherwise, the checkbox returns to false
   # when the popup is closed and openned again.
   use_voice <- reactive({
-      use_voice <- FALSE #default
-      tem <- is.null(input$use_voice_button)
-      if(!is.null(input$use_voice)) {
-        use_voice <- input$use_voice
-      }
-      return(use_voice)
+    use_voice <- FALSE #default
+    tem <- is.null(input$use_voice_button)
+    if (!is.null(input$use_voice)) {
+      use_voice <- input$use_voice
+    }
+    return(use_voice)
   })
 
   # Use voice input?
   output$use_heyshiny <- renderUI({
     req(use_voice())
-      tagList(
-        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
-        heyshiny::speechInput(
-          inputId = "hey_cmd",
-          command = paste(wake_word, "*msg")  # hey cox is more sensitive than 'hi tutor'
-        ), # set the input
-      )
+    tagList(
+      heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
+      heyshiny::speechInput(
+        inputId = "hey_cmd",
+        command = paste(wake_word, "*msg")  # hey cox is more sensitive than 'hi tutor'
+      ), # set the input
+    )
   })
 
-   # read the speech input
+  # read the speech input
   observeEvent(input$hey_cmd, {
     speech <- input$hey_cmd
     # message(speech)
@@ -174,10 +174,10 @@ app_server <- function(input, output, session) {
     )
   })
 
-# Show notification when error
+  # Show notification when error
   observeEvent(code_error(), {
-  # show notification message
-    if(code_error()) {
+    # show notification message
+    if (code_error()) {
       showNotification(
         "Resubmit the same request to see if ChatGPT can resolve the error.
         If that fails, change the request.",
@@ -1596,7 +1596,7 @@ app_server <- function(input, output, session) {
       options = list(
         lengthMenu = c(5, 20, 50, 100),
         pageLength = 10,
-        dom = 'ftp',
+        dom = "ftp",
         scrollX = "400px"
       ),
       rownames = FALSE

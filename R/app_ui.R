@@ -44,9 +44,8 @@ app_ui <- function(request) {
     ),
 
     navbarPage(
+      "RTutor",
       HTML('<span style="color: black;">RTutor</span>'),
-    #  windowTitle = "RTutor",
-    # theme = bslib::bs_theme(bootswatch = "darkly"),
       id = "tabs",
       tabPanel(
         title = "Home",
@@ -54,7 +53,6 @@ app_ui <- function(request) {
           id = "load_message",
           h2("Chat with your data via AI ..."),
         ),
-        #uiOutput("use_heyshiny"), # remove it
         # move notifications and progress bar to the center of screen
         tags$head(
           tags$style(
@@ -65,8 +63,8 @@ app_ui <- function(request) {
                   left: calc(10%);
                   }
                   "
-                )
             )
+          )
         ),
         # Embed the CSS directly in the UI
         tags$style("
@@ -78,7 +76,6 @@ app_ui <- function(request) {
         # Sidebar with a slider input for number of bins
         sidebarLayout(
           sidebarPanel(
-            #uiOutput("timer_ui"),
 
             fluidRow(
               column(
@@ -218,8 +215,6 @@ app_ui <- function(request) {
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
-            #uiOutput("slava_ukraini"),
-            #br(),
             textOutput("retry_on_error")
           ),
 
@@ -232,6 +227,24 @@ app_ui <- function(request) {
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
+
+              # tags$head(
+              #   tags$style(HTML("
+              #     .new-user-btn {
+              #       display: inline-block;padding: 12px 24px;font-size: 16px;
+              #       font-weight: bold;color: #fff;background-color: #007bff;
+              #       border: none;border-radius: 5px;text-align: center;
+              #       text-decoration: none;
+              #       transition: background-color 0.3s, box-shadow 0.3s;}
+              #     .new-user-btn:hover {background-color: #0056b3;
+              #       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);}
+              #     .new-user-btn:focus {outline: none;
+              #       box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);}
+              #   "))
+              # ),
+              # div(
+              #   align = "center", a(href = "#", class = "new-user-btn", "New User?")
+              # ),
 
               uiOutput("RTutor_version_main"),
               fluidRow(
@@ -278,7 +291,6 @@ app_ui <- function(request) {
                 condition = "input.use_python == 0",
 
                 uiOutput("error_message"),
-                #uiOutput("send_error_message"),
                 strong("Results:"),
 
                 # shows error message in local machine, but not on the server
@@ -321,6 +333,22 @@ app_ui <- function(request) {
                 # hr(),
                 h4("Selected Dataset"),
                 textOutput("data_size"),
+                tags$head(
+                  tags$style(HTML("
+                    .dataTables_wrapper {
+                      background-color: #f8fcf8;
+                      border-color: #90BD8C;
+                      padding: 10px;
+                      border-radius: 5px;
+                    }
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(odd) {
+                      background-color: #f3faf3;
+                    }
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {
+                      background-color: #ffffff;
+                    }
+                  "))
+                ),
                 DT::dataTableOutput("data_table_DT")
               )
             ),
@@ -334,8 +362,6 @@ app_ui <- function(request) {
 
               )
             )
-            #,tableOutput("data_table"),
-
 
           ) #mainPanel
         ) #sideBarpanel
@@ -350,6 +376,18 @@ app_ui <- function(request) {
           theme = "light-border"
         ),
         tabsetPanel(
+          tags$head(
+            tags$style(HTML("
+              .nav-tabs {background-color: #D9EDD8;                  /* Background color - tab headers */}
+              .nav-tabs > li > a {color: #5b5b5b;                           /* Text color - tab headers */
+                border: 1px solid #D9EDD8;border-radius: 4px;}
+              .nav-tabs > li > a:hover {background-color: #90BD8C;         /* Hover color - tab headers */
+                color: #000;}
+              .nav-tabs > li.active > a {background-color: #f3faf3;    /* Background color - active tab */
+                color: #000;border: 1px solid #D9EDD8;border-bottom-color: transparent;}
+            "))
+          ),
+
           tabPanel(
             title = "Basic",
             h4("Data structure: df"),
@@ -500,7 +538,6 @@ app_ui <- function(request) {
         br(),
         verbatimTextOutput("rmd_chunk_output")
       ),
-
 
       navbarMenu(
         title = "More",
@@ -957,14 +994,6 @@ app_ui <- function(request) {
         )
       ),
 
-#      tabPanel(
-#        title = "Disqus",
-#        value = "Disqus",
-#        div(
-#        tags$head(includeHTML(app_sys("app", "www", "disqus.html")))
-#        )
-#      )
-  # Include custom JavaScript to handle the button click
     tags$script(HTML("
       $(document).on('click', '#first_user', function() {
         // Update the active tab to 'First Time User' within the 'More' navbarMenu
