@@ -288,15 +288,41 @@ app_server <- function(input, output, session) {
     # Hide this input box after the first run.
     req(input$submit_button == 0)
 
-    selectInput(
-      inputId = "select_data",
-      label = "1) Select Dataset",
-      choices = datasets,
-      selected = "mpg",
-      multiple = FALSE,
-      selectize = FALSE
-    )
-
+    return(
+      tagList(
+        tags$head(
+          tags$style(HTML("
+            .vertical-padding {padding-top: 10px;padding-bottom: 10px;
+            font-weight: bold;}
+          "))
+        ),
+        fluidRow(
+          column(
+            width = 12,
+            selectInput(
+              inputId = "select_data",
+              label = "1) Select Dataset",
+              choices = datasets,
+              selected = "mpg",
+              multiple = FALSE
+            )
+          )
+        ),
+        tags$style(
+          HTML("#select_data+div .selectize-input {
+                background-color: #F6FFF5 !important;
+                border-color: #90BD8C !important;
+                color: #000 !important;
+                }
+                #select_data+div .selectize-dropdown {
+                background-color: #F6FFF5 !important;
+                border-color: #90BD8C !important;
+                color: #000 !important;
+                }"
+          )
+        )
+      )
+    ) #return
   })
 
 
@@ -329,14 +355,49 @@ app_server <- function(input, output, session) {
 
     if (input$select_data %in% c("mpg", no_data, "diamonds", rna_seq)) {
       return(
-        selectInput(
-          inputId = "demo_prompt",
-          choices = choices,
-          label = "3) Send Request(s)"
+        tagList(
+          tags$head(
+            tags$style(HTML("
+              .vertical-padding {padding-top: 10px;padding-bottom: 10px;
+              font-weight: bold;}
+            "))
+          ),
+          fluidRow(
+            column(
+              width = 4,
+              align = "left",
+              div(
+                "3) Send Request(s)",
+                class = "vertical-padding"
+              )
+            ),
+            column(
+              width = 8,
+              align = "left",
+              selectInput(
+                inputId = "demo_prompt",
+                choices = choices,
+                label = NULL
+              )
+            )
+          ),
+          tags$style(
+            HTML("#demo_prompt+div .selectize-input {
+                  background-color: #F6FFF5 !important;
+                  border-color: #90BD8C !important;
+                  color: #000 !important;
+                  }
+                  #demo_prompt+div .selectize-dropdown {
+                  background-color: #F6FFF5 !important;
+                  border-color: #90BD8C !important;
+                  color: #000 !important;
+                  }"
+            )
+          )
         )
-      )
-    }
-  })
+      ) #return
+    } #if
+  }) #prompt_ui
 
   #                             4.
   #____________________________________________________________________________
