@@ -331,7 +331,7 @@ app_server <- function(input, output, session) {
         selectInput(
           inputId = "demo_prompt",
           choices = choices,
-          label = "2) Send Request(s)"
+          label = "3) Send Request(s)"
         )
       )
     }

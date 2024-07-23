@@ -72,6 +72,7 @@ app_ui <- function(request) {
                 )
               )
             ),
+            br(),
             fluidRow(
               column(
                 width = 6,
@@ -81,6 +82,20 @@ app_ui <- function(request) {
                 width = 6,
                 uiOutput("data_upload_ui")
                 ,uiOutput("data_upload_ui_2")
+              )
+            ),
+
+            fluidRow(
+              column(
+                width = 6,
+                tags$label("2) Modify Data Types (Optional)",
+                style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;")
+              ),
+              br(),
+              column(
+                width = 6,
+                actionButton("data_edit_modal", "Data Types"),
+                align = 'left'
               )
             ),
 
@@ -131,17 +146,17 @@ app_ui <- function(request) {
               theme = "light-border"
             ),
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
-            br(),
-            fluidRow(
-              column(
-                width = 6,
-                actionButton("data_edit_modal", "Data Types")
-              ),
-              column(
-                width = 6,
-                actionButton("data_desc_modal", "Description")
-              )
-            ),
+            # br(),
+            # fluidRow(
+            #   column(
+            #     width = 6,
+            #     actionButton("data_edit_modal", "Data Types")
+            #   ),
+            #   column(
+            #     width = 6,
+            #     actionButton("data_desc_modal", "Description")
+            #   )
+            # ),
             hr(),
             textOutput("usage"),
             textOutput("total_cost"),
