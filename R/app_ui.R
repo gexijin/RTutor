@@ -18,8 +18,6 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     navbarPage(
       "RTutor",
-    #  windowTitle = "RTutor",
-    # theme = bslib::bs_theme(bootswatch = "darkly"),
       id = "tabs",
       tabPanel(
         title = "Home",
@@ -27,7 +25,6 @@ app_ui <- function(request) {
           id = "load_message",
           h2("Chat with your data via AI ..."),
         ),
-        #uiOutput("use_heyshiny"), # remove it
         # move notifications and progress bar to the center of screen
         tags$head(
           tags$style(
@@ -38,8 +35,8 @@ app_ui <- function(request) {
                   left: calc(10%);
                   }
                   "
-                )
             )
+          )
         ),
         # Embed the CSS directly in the UI
         tags$style("
@@ -51,7 +48,6 @@ app_ui <- function(request) {
         # Sidebar with a slider input for number of bins
         sidebarLayout(
           sidebarPanel(
-            #uiOutput("timer_ui"),
 
             fluidRow(
               column(
@@ -146,8 +142,6 @@ app_ui <- function(request) {
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
-            #uiOutput("slava_ukraini"),
-            #br(),
             textOutput("retry_on_error"),
             checkboxInput("Comments", "Comments & questions"),
             tags$style(type = "text/css", "textarea {width:100%}"),
@@ -188,6 +182,24 @@ app_ui <- function(request) {
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
+              # tags$head(
+              #   tags$style(HTML("
+              #     .new-user-btn {
+              #       display: inline-block;padding: 12px 24px;font-size: 16px;
+              #       font-weight: bold;color: #fff;background-color: #007bff;
+              #       border: none;border-radius: 5px;text-align: center;
+              #       text-decoration: none;
+              #       transition: background-color 0.3s, box-shadow 0.3s;}
+              #     .new-user-btn:hover {background-color: #0056b3;
+              #       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);}
+              #     .new-user-btn:focus {outline: none;
+              #       box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);}
+              #   "))
+              # ),
+              # div(
+              #   align = "center", a(href = "#", class = "new-user-btn", "New User?")
+              # ),
+
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
@@ -196,20 +208,11 @@ app_ui <- function(request) {
                     "Start by watching an 8-min ",
                     a(
                       "YouTube video!",
-                      href="https://youtu.be/a-bZW26nK9k",
+                      href = "https://youtu.be/a-bZW26nK9k",
                       target = "_blank"
-                    ),  
-                    style="color:red"
+                    ),
+                    style = "color:red"
                   ),
-                  # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
-                  #   a(
-                  #     "a comprehensive EDA report.",
-                  #     href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
-                  #     target = "_blank"
-                  #   ),  
-                  #  " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
-                  # Oct 23, 2023 (v0.97): GPT-4 becomes the default.
-                  # Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
                   h5("See",
                     a(
                       "GitHub",
@@ -222,12 +225,11 @@ app_ui <- function(request) {
                   h5("Also try ",
                     a(
                       "Chatlize.ai,",
-                      href="https://chatlize.ai",
+                      href = "https://chatlize.ai",
                       target = "_blank"
                     ),
                     " a more general platform for analyzing data through chats. Multiple files with different formats. Python support."
                   ),
-
                   align = "left"
                 ),
                 column(
@@ -237,7 +239,7 @@ app_ui <- function(request) {
                     width = "155",
                     height = "77"
                   ),
-                  align = 'left'
+                  align = "left"
                 )
               ),
               hr(),
@@ -321,7 +323,6 @@ app_ui <- function(request) {
                 condition = "input.use_python == 0",
 
                 uiOutput("error_message"),
-                #uiOutput("send_error_message"),
                 strong("Results:"),
 
                 # shows error message in local machine, but not on the server
@@ -393,8 +394,6 @@ app_ui <- function(request) {
 
               )
             )
-            #,tableOutput("data_table"),
-
 
           ) #mainPanel
         ) #sideBarpanel
@@ -427,10 +426,10 @@ app_ui <- function(request) {
             shinyjs::hidden(
               div(
                 id = "second_file_summary",
-                br(),hr(),
+                br(), hr(),
                 h4("Data structure: df2"),
                 verbatimTextOutput("data_structure_2"),
-                br(),hr(),
+                br(), hr(),
                 h4("Data summary: df2"),
                 verbatimTextOutput("data_summary_2"),
                 plotly::plotlyOutput("missing_values_2", width = "60%")
@@ -562,8 +561,6 @@ app_ui <- function(request) {
         verbatimTextOutput("rmd_chunk_output")
       ),
 
-
-
       tabPanel(
         title = "About",
         value = "About",
@@ -598,7 +595,7 @@ app_ui <- function(request) {
             "LinkedIn),",
             href = "https://www.linkedin.com/in/steven-ge-ab016947/",
             target = "_blank"
-          ),       
+          ),
           " as part of RTutor LLC. For feedback, please email",
           a(
             "gexijin@gmail.com.",
@@ -617,24 +614,24 @@ app_ui <- function(request) {
         easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
 
         hr(),
-        p("RTutor went viral on ", 
-            a(
-              "LinkedIn, ",
-              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
-            ), 
-            a(
-              "Twitter, ",
-              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
-            ),
-            a(
-              "Twitter(Physacourses),",
-              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
-            ),
-            " and ",
-            a(
-              "Facebook (Carlo Pecoraro).",
-              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
-            )
+        p("RTutor went viral on ",
+          a(
+            "LinkedIn, ",
+            href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+          ),
+          a(
+            "Twitter, ",
+            href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+          ),
+          a(
+            "Twitter(Physacourses),",
+            href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+          ),
+          " and ",
+          a(
+            "Facebook (Carlo Pecoraro).",
+            href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+          )
         ),
 
         hr(),
@@ -644,15 +641,15 @@ app_ui <- function(request) {
         hr(),
 
         fluidRow(
-                    # Site Update Log component
+          # Site Update Log component
           column(
             width = 8,
             actionButton("faq_button", strong("FAQ")),
-              tags$head(tags$style(
-                "#faq_button{font-size: 16px;color: black}"
+            tags$head(tags$style(
+              "#faq_button{font-size: 16px;color: black}"
             ))
           ),
-          
+
           conditionalPanel(
             condition = "(input.faq_button % 2) == 1",
             column(
@@ -692,8 +689,8 @@ app_ui <- function(request) {
           column(
             width = 8,
             actionButton("site_update_log", strong("See Site Updates Log")),
-              tags$head(tags$style(
-                "#site_update_log{font-size: 16px;color: black}"
+            tags$head(tags$style(
+              "#site_update_log{font-size: 16px;color: black}"
             ))
           ),
 
@@ -701,7 +698,6 @@ app_ui <- function(request) {
             condition = "(input.site_update_log % 2) == 1",
             column(
               width = 6,
-              # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
               tableOutput("site_updates_table")
             )
           )
@@ -714,28 +710,21 @@ app_ui <- function(request) {
           column(
             width = 8,
             actionButton("session_info_button", strong("R Session Info")),
-              tags$head(tags$style(
-                "#session_info_button{font-size: 16px;color: black}"
+            tags$head(tags$style(
+              "#session_info_button{font-size: 16px;color: black}"
             ))
           ),
           conditionalPanel(
             condition = "(input.session_info_button % 2) == 1",
-              column(
-                width = 12,
-                uiOutput("session_info")
-              )
+            column(
+              width = 12,
+              uiOutput("session_info")
+            )
           )
         ),
         hr()
       ),
 
-#      tabPanel(
-#        title = "Disqus",
-#        value = "Disqus",
-#        div(
-#        tags$head(includeHTML(app_sys("app", "www", "disqus.html")))
-#        )
-#      )
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
