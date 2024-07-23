@@ -236,12 +236,20 @@ app_ui <- function(request) {
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
-                  width = 9,
-                  actionButton("first_user", strong("Quickstart: First Time User")),
+                  width = 4,
+                  p(
+                    HTML("First Time Users:"), #<span style='font-size: 54px;'>&rarr;</span>
+                    style = "font-size: 46px;"
+                  ),
+                  align = 'right'
+                ),
+                column(
+                  width = 5,
+                  actionButton("first_user", strong("Start Here!")),
                   tags$head(tags$style(
                     "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
                   )),
-                  align = 'center'
+                  align = 'left'
                 ),
                 column(
                   width = 3,
