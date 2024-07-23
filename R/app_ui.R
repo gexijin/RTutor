@@ -364,6 +364,22 @@ app_ui <- function(request) {
                 hr(),
                 h4("Default dataset:  df"),
                 textOutput("data_size"),
+                tags$head(
+                  tags$style(HTML("
+                    .dataTables_wrapper {
+                      background-color: #f8fcf8;
+                      border-color: #90BD8C;
+                      padding: 10px;
+                      border-radius: 5px;
+                    }
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(odd) {
+                      background-color: #f3faf3;
+                    }
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {
+                      background-color: #ffffff;
+                    }
+                  "))
+                ),
                 DT::dataTableOutput("data_table_DT")
               )
             ),
@@ -388,6 +404,18 @@ app_ui <- function(request) {
         title = "EDA",
         value = "EDA",
         tabsetPanel(
+          tags$head(
+            tags$style(HTML("
+              .nav-tabs {background-color: #D9EDD8;                  /* Background color - tab headers */}
+              .nav-tabs > li > a {color: #5b5b5b;                           /* Text color - tab headers */
+                border: 1px solid #D9EDD8;border-radius: 4px;}
+              .nav-tabs > li > a:hover {background-color: #90BD8C;         /* Hover color - tab headers */
+                color: #000;}
+              .nav-tabs > li.active > a {background-color: #f3faf3;    /* Background color - active tab */
+                color: #000;border: 1px solid #D9EDD8;border-bottom-color: transparent;}
+            "))
+          ),
+
           tabPanel(
             title = "Basic",
             h4("Data structure: df"),

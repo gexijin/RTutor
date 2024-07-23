@@ -1473,7 +1473,7 @@ app_server <- function(input, output, session) {
       options = list(
         lengthMenu = c(5, 20, 50, 100),
         pageLength = 10,
-        dom = 'ftp',
+        dom = "ftp",
         scrollX = "400px"
       ),
       rownames = FALSE
