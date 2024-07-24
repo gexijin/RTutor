@@ -31,8 +31,8 @@ app_ui <- function(request) {
         }
 
         /* active tab */
-        .navbar-default .navbar-nav > .active > a, 
-        .navbar-default .navbar-nav > .active > a:focus, 
+        .navbar-default .navbar-nav > .active > a,
+        .navbar-default .navbar-nav > .active > a:focus,
         .navbar-default .navbar-nav > .active > a:hover {
           background-color: #A0BB9E;color: #181818;font-weight: bold;
         }
@@ -84,21 +84,22 @@ app_ui <- function(request) {
               column(
                 width = 6,
                 textOutput("selected_dataset")
-              ),
-              column(
-                width = 6,
-                actionButton("reset_button", strong("Reset")),
-                tags$head(tags$style(
-                  "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
-                )),
-                align = "right",
-                tippy::tippy_this(
-                  "reset_button",
-                  "Reset before uploading a new file. Clears data objects, chat history, and code chunks.",
-                  theme = "light-border"
-                )
-              )
+              )#,
+              # column(
+              #   width = 6,
+              #   actionButton("reset_button", strong("Reset")),
+              #   tags$head(tags$style(
+              #     "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
+              #   )),
+              #   align = "right",
+              #   tippy::tippy_this(
+              #     "reset_button",
+              #     "Reset before uploading a new file. Clears data objects, chat history, and code chunks.",
+              #     theme = "light-border"
+              #   )
+              # )
             ),
+
             br(),
             fluidRow(
               column(
@@ -114,19 +115,25 @@ app_ui <- function(request) {
 
             fluidRow(
               column(
-                width = 6,
+                width = 12,
                 tags$label("2) Modify Data Fields (Optional)",
                 style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;")
               ),
               br(),
               column(
-                width = 6,
+                width = 12,
                 actionButton("data_edit_modal", "Data Types"),
                 align = 'left'
               )
             ),
 
-            uiOutput("prompt_ui"),
+            # Horizontal Line
+            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+            hr(),
+
+            tags$label("3) Send Request(s)",
+                style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;"),
+
             tags$style(HTML("
               textarea {
                 width: 100%;
@@ -140,20 +147,43 @@ app_ui <- function(request) {
               rows = 8, ""
             ),
 
+            # Example Prompts
+            uiOutput("prompt_ui"),
+
+            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+            hr(),
+
             fluidRow(
               column(
                 width = 12,
-                actionButton("submit_button", strong("Submit")),
-                tags$head(tags$style(
-                  "#submit_button{font-size: 16px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
-                )),
-                tippy::tippy_this(
-                  "submit_button",
-                  "ChatGPT can return different results for the same request.",
-                  theme = "light-border"
+                div(
+                  style = "display: flex; justify-content: space-between;",
+                  div(
+                    actionButton("submit_button", strong("Submit")),
+                    tags$head(tags$style(
+                      "#submit_button{font-size: 16px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
+                    )),
+                    tippy::tippy_this(
+                      "submit_button",
+                      "ChatGPT can return different results for the same request.",
+                      theme = "light-border"
+                    )
+                  ),
+                  div(
+                    # Reset Button
+                    actionButton(inputId = "reset_button", label = strong("Reset")),
+                    tags$head(tags$style(
+                      "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
+                    )),
+                    tippy::tippy_this(
+                      "reset_button",
+                      "Reset before asking a new question. Clears data objects, chat history, & code chunks.",
+                      theme = "light-border"
+                    )
+                  )
                 )
 
-                )
+              )
 #               column(
 #                 width = 4,
 #                 actionButton("api_button", "Settings"),
@@ -167,6 +197,13 @@ app_ui <- function(request) {
 #             )
 
 
+            ),
+            fluidRow(
+              column(12,
+                # Horizontal Line
+                tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+                hr()
+              )
             ),
             br(),
             tags$head(
@@ -187,9 +224,9 @@ app_ui <- function(request) {
 
             tippy::tippy_this(
               "ask_question",
-              "Walk me through this code. What does this result mean? 
-              What is this error about? Explain logistic regression. 
-              List R packages for time series analysis. 
+              "Walk me through this code. What does this result mean?
+              What is this error about? Explain logistic regression.
+              List R packages for time series analysis.
               Hit Enter to send the request.",
               theme = "light-border"
             ),
@@ -229,6 +266,7 @@ app_ui <- function(request) {
 
           mainPanel(
             shinyjs::useShinyjs(),
+            # textOutput("showgraphics"),
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
@@ -239,7 +277,7 @@ app_ui <- function(request) {
                   width = 4,
                   p(
                     HTML("First Time Users:"), #<span style='font-size: 54px;'>&rarr;</span>
-                    style = "font-size: 46px;"
+                    style = "font-size: 40px;"
                   ),
                   align = 'right'
                 ),
@@ -525,7 +563,7 @@ app_ui <- function(request) {
                   "YouTube video!",
                   href="https://youtu.be/a-bZW26nK9k",
                   target = "_blank"
-                ),  
+                ),
                 style="color:red"
               ),
               # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
@@ -533,7 +571,7 @@ app_ui <- function(request) {
               #     "a comprehensive EDA report.",
               #     href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
               #     target = "_blank"
-              #   ),  
+              #   ),
               #  " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
               # Oct 23, 2023 (v0.97): GPT-4 becomes the default.
               # Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
@@ -543,7 +581,7 @@ app_ui <- function(request) {
                   href = "https://github.com/gexijin/RTutor"
                 ),
                 " for source code, bug reports, and instructions to install RTutor as an R package.
-                As a small startup, we are open to partnerships with both academia and industry. 
+                As a small startup, we are open to partnerships with both academia and industry.
               We can do demos and seminars via Zoom if time permits."
               ),
               h5("Also try ",
@@ -567,7 +605,7 @@ app_ui <- function(request) {
               align = 'left'
             )
           ),
-          
+
           hr(),
 
           fluidRow(
@@ -576,7 +614,7 @@ app_ui <- function(request) {
               h3("Quick start:"),
               tags$ul(
                 tags$li(
-                  "Explore the data at the EDA tab first.  Then start with simple requests 
+                  "Explore the data at the EDA tab first.  Then start with simple requests
                   such as distributions, basic plots. Gradually add complexity.
                   ", style = "color:red"
                 ),
@@ -588,40 +626,40 @@ app_ui <- function(request) {
                 ),
                 tags$li(
                   "To analyze a new dataset, or to start over, click the Reset button first. "
-                ), 
+                ),
                 tags$li(
-                  "Prepare and clean your data in Excel first. Name columns properly. 
+                  "Prepare and clean your data in Excel first. Name columns properly.
                   ChatGPT tries to guess the meaning of column names, even if they are abbrievated."
                 ),
                 tags$li(
-                  "RTutor can only analyze traditional statistics data, where rows are 
+                  "RTutor can only analyze traditional statistics data, where rows are
                   observations and columns are variables. For complex data, try https://chatlize.ai."
                 ),
                 tags$li(
                   "Once uploaded, your data is automatically loaded into
-                  R as a data frame called df. You do NOT need to ask RTutor to load data. 
+                  R as a data frame called df. You do NOT need to ask RTutor to load data.
                   Check if the data types of the columns are correct.
                   Change if needed, especially when numbers are used to code for categories."
                 ),
                 tags$li(
-                  "An additional file can be uploaded as df2 to be analyze togehter. 
+                  "An additional file can be uploaded as df2 to be analyze togehter.
                   To use it, you must specify 'df2' in your prompts. "
                 ),
                 tags$li(
-                  "Use the Q&A box to ask questions about the code, result, or error messages. 
+                  "Use the Q&A box to ask questions about the code, result, or error messages.
                   You can ask for methods to use or develop a plan. "
                 ),
                 tags$li(
                   "Before sending your request to OpenAI, we do prompt engineering based on the uploaded data.
-                  We add \"Generate R code\" to the beginning, and 
-                  append something like \"Use the df data frame. 
-                  Note that highway is numeric, ...\" afterward. 
+                  We add \"Generate R code\" to the beginning, and
+                  append something like \"Use the df data frame.
+                  Note that highway is numeric, ...\" afterward.
                   If you are not using any data (plot a function or simulations),
                   choose \"No data\" from the Data dropdown."
                 ),
                 tags$li(
-                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session. 
-                  If you explain the background of the data and the meaning of  
+                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session.
+                  If you explain the background of the data and the meaning of
                   the columns, you can ask general questions like asking a clueless statistician."
                 ),
                 tags$li(
@@ -645,12 +683,12 @@ app_ui <- function(request) {
             " to translate natural language into R (or Python) code, which is then excuted.",
             "You can request your analysis,
             just like asking a real person.",
-            "Upload a data file (CSV, TSV/tab-delimited text files, and Excel) 
-            and just analyze it in plain English. 
+            "Upload a data file (CSV, TSV/tab-delimited text files, and Excel)
+            and just analyze it in plain English.
             Your results can be downloaded as an HTML report in minutes!"
           ),
-          p("NO WARRANTY! Some of the scripts run but may yield incorrect result. 
-          Please use the auto-generated code as a starting 
+          p("NO WARRANTY! Some of the scripts run but may yield incorrect result.
+          Please use the auto-generated code as a starting
           point for further refinement and validation."
           ),
 
@@ -665,7 +703,7 @@ app_ui <- function(request) {
               "LinkedIn),",
               href = "https://www.linkedin.com/in/steven-ge-ab016947/",
               target = "_blank"
-            ),       
+            ),
             " as part of RTutor LLC. For feedback, please email",
             a(
               "gexijin@gmail.com.",
@@ -676,19 +714,19 @@ app_ui <- function(request) {
               "GitHub,",
               href = "https://github.com/gexijin/RTutor"
             ),
-            " from where you can also find 
-            instruction to install RTutor as an R package. 
+            " from where you can also find
+            instruction to install RTutor as an R package.
             The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
           ),
-          h4("For businesses, RTutor can be customized and locally installed to  
+          h4("For businesses, RTutor can be customized and locally installed to
           easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
 
           hr(),
-          p("RTutor went viral on ", 
+          p("RTutor went viral on ",
               a(
                 "LinkedIn, ",
                 href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
-              ), 
+              ),
               a(
                 "Twitter, ",
                 href = "https://twitter.com/StevenXGe/status/1604861481526386690"
@@ -829,12 +867,12 @@ app_ui <- function(request) {
                 ),
                 column(
                   width = 8,
-                  p("This important parameter controls the AI's behavior in choosing 
-                  among possible answers. A higher sampling temperature tells the AI 
-                  to take more risks, producing more diverse and creative 
+                  p("This important parameter controls the AI's behavior in choosing
+                  among possible answers. A higher sampling temperature tells the AI
+                  to take more risks, producing more diverse and creative
                   solutions when the same request is repeated. A lower  temperature
                   (such as 0) results in more
-                  conservative and well-defined solutions, 
+                  conservative and well-defined solutions,
                   but less variety when repeated.
                   "),
                 )
@@ -845,7 +883,7 @@ app_ui <- function(request) {
                   width = 12,
                   h4("Use your own API key"),
                   h5("We pay a small fee to use the AI for every request.
-                    If you use this regularily, 
+                    If you use this regularily,
                     please take a few minutes to create your own API key: "),
 
                   tags$ul(
@@ -860,11 +898,11 @@ app_ui <- function(request) {
                       tags$li("After logging in, click \"Personal\" from top right."),
                       tags$li(
                         "Click \"Manage Account\" and then \"Billing\",
-                        where you can add \"Payment methods\" and set \"Usage 
+                        where you can add \"Payment methods\" and set \"Usage
                         limits\". $5 per month is more than enough."
                       ),
                       tags$li(
-                        "Click \"API keys\" to create a new key, 
+                        "Click \"API keys\" to create a new key,
                         which can be copied and pasted it below."
                       ),
                   ),
@@ -912,7 +950,7 @@ app_ui <- function(request) {
                 uiOutput("numeric_as_factor"),
                 tippy::tippy_this(
                   elementId = "numeric_as_factor",
-                  tooltip = "Treat the columns that looks like a category 
+                  tooltip = "Treat the columns that looks like a category
                   as a category. This applies to columns that contain numbers
                   but have very few unique values. ",
                   theme = "light-border"
@@ -923,7 +961,7 @@ app_ui <- function(request) {
                 uiOutput("max_levels_factor"),
                 tippy::tippy_this(
                   elementId = "max_levels_factor",
-                  tooltip = "To convert a numeric column as category, 
+                  tooltip = "To convert a numeric column as category,
                   the column must have no more than this number of unique values.",
                   theme = "light-border"
                 )
@@ -933,18 +971,18 @@ app_ui <- function(request) {
                 uiOutput("max_proptortion_factor"),
                 tippy::tippy_this(
                   elementId = "max_proptortion_factor",
-                  tooltip = "To convert a numeric column as category, 
-                  the number of unique values in a column must not exceed 
+                  tooltip = "To convert a numeric column as category,
+                  the number of unique values in a column must not exceed
                   more this proportion of the total number of rows.",
                   theme = "light-border"
                 )
               )
             ),
-            h5("Some columns contains numbers but should be treated 
-            as categorical values or factors. For example, we sometimes 
+            h5("Some columns contains numbers but should be treated
+            as categorical values or factors. For example, we sometimes
             use 1 to label success and 0 for failure.
-            If this is selected, using the default setting, a column 
-            is treated as categories when the number of unique values 
+            If this is selected, using the default setting, a column
+            is treated as categories when the number of unique values
             is less than or equal to 12, and less than 10% of the total rows."
             ),
             hr(),
@@ -955,9 +993,9 @@ app_ui <- function(request) {
               ),
               column(
                 width = 8,
-                h5("Save your requests and the structure of your data 
-                such as column names and data types, not the data itself. 
-                We can learn from users about creative ways to use AI. 
+                h5("Save your requests and the structure of your data
+                such as column names and data types, not the data itself.
+                We can learn from users about creative ways to use AI.
                 And we can try to improve unsuccessful attempts. ")
               )
             )
