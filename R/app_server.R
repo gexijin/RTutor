@@ -1361,12 +1361,12 @@ app_server <- function(input, output, session) {
     removeNotification("uncheck_canvasXpress")
   })
 
-  # graphics <- reactive({
-  #   dev.list()
-  # })
-  # output$showgraphics <- renderText({
-  #   paste("Current Graphics", graphics())
-  # })
+  graphics <- reactive({
+    dev.list()
+  })
+  output$showgraphics <- renderText({
+    paste("Current Graphics:",names(graphics()), graphics())
+  })
 
 
   output$plot_ui <- renderUI({
