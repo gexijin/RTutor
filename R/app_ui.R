@@ -18,33 +18,31 @@ app_ui <- function(request) {
     golem_add_external_resources(),
 
     # Add color to UI
-    tags$head(
-      tags$style(HTML("
-        /* navbar */
-        .navbar {
-          background-color: #C1E2BE;border-color: #90BD8C; color: #181818;font-weight: bold;
-        }
+    tags$head(tags$style(HTML("
+      /* navbar */
+      .navbar {background-color: #C1E2BE;border-color: #90BD8C; color: #181818;font-weight: bold;}
 
-        /* tabs */
-        .navbar-default .navbar-nav > li > a {
-          background-color: #C1E2BE;border-color: #9AC596;color: #181818;
-        }
+      /* tabs */
+      .navbar-default .navbar-nav > li > a {background-color: #C1E2BE;border-color: #9AC596;color: #181818;}
 
-        /* active tab */
-        .navbar-default .navbar-nav > .active > a, 
-        .navbar-default .navbar-nav > .active > a:focus, 
-        .navbar-default .navbar-nav > .active > a:hover {
-          background-color: #A0BB9E;color: #181818;font-weight: bold;
-        }
+      /* active tab */
+      .navbar-default .navbar-nav > .active > a, 
+      .navbar-default .navbar-nav > .active > a:focus, 
+      .navbar-default .navbar-nav > .active > a:hover {background-color: #A0BB9E;color: #181818;font-weight: bold;}
 
-        /* sidebar panel */
-        .well {
-          background-color: #C1E2BE;border-color: #90BD8C;
-      "))
-    ),
+      /* sidebar panel */
+      .well {background-color: #C1E2BE;border-color: #90BD8C;}
+
+      /* select input & action button */
+      .custom-select-input, .custom-action-button
+      {background-color: #F6FFF5;border-color: #90BD8C;color: #000;}
+
+      /* horizontal line */
+      .custom-hr{border-top: 1px solid #90BD8C;}
+      .custom-hr-thick{border-top: 3px solid #90BD8C;}
+    "))),
 
     navbarPage(
-      "RTutor",
       HTML('<span style="color: black;">RTutor</span>'),
       id = "tabs",
       tabPanel(
@@ -112,14 +110,17 @@ app_ui <- function(request) {
             fluidRow(
               column(
                 width = 6,
-                tags$label("2) Modify Data Fields (Optional)",
-                style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;")
+                tags$label("2. Modify Data Fields (Optional)",
+                style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
               br(),
               column(
                 width = 6,
                 actionButton("data_edit_modal", "Data Types"),
-                align = 'left'
+                align = "left",
+                tags$head(tags$style(
+                  "#data_edit_modal{font-size: 14px;color: #000;background-color: #F6FFF5;border-color: #90BD8C;}"
+                ))
               )
             ),
 
@@ -151,17 +152,17 @@ app_ui <- function(request) {
                 )
 
                 )
-#               column(
-#                 width = 4,
-#                 actionButton("api_button", "Settings"),
-#                 tags$head(tags$style(
-#                       "#api_button{color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-#                 )),
-#               ),
-#               column(
-#                 width = 4,
-#                 checkboxInput("use_python", "Python", value = FALSE)
-#             )
+            #   column(
+            #     width = 4,
+            #     actionButton("api_button", "Settings"),
+            #     tags$head(tags$style(
+            #           "#api_button{color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+            #     )),
+            #   ),
+            #   column(
+            #     width = 4,
+            #     checkboxInput("use_python", "Python", value = FALSE)
+            # )
 
 
             ),
@@ -192,26 +193,24 @@ app_ui <- function(request) {
             ),
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
 
-#             br(),
-#             fluidRow(
-#               tags$head(tags$style(
-#                   "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-#                 )),
-#               column(
-#                 width = 6,
-#                 actionButton("data_edit_modal", "Data Types")
-#               ),
-#               tags$head(tags$style(
-#                   "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-#                 )),
-#               column(
-#                 width = 6,
-#                 actionButton("data_desc_modal", "Description")
-#               )
-#             ),
-#             tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
-
-            hr(),
+            # br(),
+            # fluidRow(
+            #   tags$head(tags$style(
+            #       "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+            #     )),
+            #   column(
+            #     width = 6,
+            #     actionButton("data_edit_modal", "Data Types")
+            #   ),
+            #   tags$head(tags$style(
+            #       "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+            #     )),
+            #   column(
+            #     width = 6,
+            #     actionButton("data_desc_modal", "Description")
+            #   )
+            # ),
+            hr(class = "custom-hr"),
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
@@ -228,33 +227,34 @@ app_ui <- function(request) {
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
-              # tags$head(
-              #   tags$style(HTML("
-              #     .new-user-btn {
-              #       display: inline-block;padding: 12px 24px;font-size: 16px;
-              #       font-weight: bold;color: #fff;background-color: #007bff;
-              #       border: none;border-radius: 5px;text-align: center;
-              #       text-decoration: none;
-              #       transition: background-color 0.3s, box-shadow 0.3s;}
-              #     .new-user-btn:hover {background-color: #0056b3;
-              #       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);}
-              #     .new-user-btn:focus {outline: none;
-              #       box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);}
-              #   "))
-              # ),
-              # div(
-              #   align = "center", a(href = "#", class = "new-user-btn", "New User?")
-              # ),
-
               uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
-                  width = 9,
-                  actionButton("first_user", strong("Quickstart: First Time User")),
-                  tags$head(tags$style(
-                    "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
-                  )),
-                  align = 'center'
+                  width = 4,
+                  p(
+                    HTML("First Time Users:"), #<span style='font-size: 54px;'>&rarr;</span>
+                    style = "font-size: 34px; margin: 0; padding-top: 10px;"
+                  ),
+                  align = "right"
+                ),
+                column(
+                  width = 5,
+                  tags$head(
+                    tags$style(HTML("
+                      .new-user-btn {
+                        display: inline-block;padding: 12px 24px;font-size: 26px;
+                        font-weight: bold;color: #000;background-color: #8fca89;
+                        border: none;border-radius: 5px;text-align: center;
+                        text-decoration: none;
+                        transition: background-color 0.3s, box-shadow 0.3s;}
+                      .new-user-btn:hover {background-color: #557952;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);color: #fff}
+                      .new-user-btn:focus {outline: none;
+                        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);}
+                    "))
+                  ),
+                  div(align = "left",
+                    actionButton("first_user", strong("Start Here!"), class = "new-user-btn")),
                 ),
                 column(
                   width = 3,
@@ -267,7 +267,7 @@ app_ui <- function(request) {
                 )
               )
             ),
-            hr(),
+            hr(class = "custom-hr-thick"),
             conditionalPanel(
               condition = "input.submit_button != 0",
               fluidRow(
@@ -330,7 +330,7 @@ app_ui <- function(request) {
             shinyjs::hidden(
               div(
                 id = "first_file",
-                # hr(),
+                # hr(class = "custom-hr"),
                 h4("Selected Dataset"),
                 textOutput("data_size"),
                 tags$head(
@@ -355,7 +355,7 @@ app_ui <- function(request) {
             shinyjs::hidden(
               div(
                 id = "second_file",
-                hr(),
+                hr(class = "custom-hr"),
                 h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
                 textOutput("data_size_2"),
                 DT::dataTableOutput("data_table_DT_2")
@@ -390,19 +390,20 @@ app_ui <- function(request) {
 
           tabPanel(
             title = "Basic",
-            h4("Data structure: df"),
+            hr(class = "custom-hr-thick"),
+            h4(strong("Data Structure: df")),
             verbatimTextOutput("data_structure"),
-            hr(),
-            h4("Data summary: df"),
+            hr(class = "custom-hr-thick"),
+            h4(strong("Data Summary: df")),
             verbatimTextOutput("data_summary"),
             plotly::plotlyOutput("missing_values", width = "60%"),
             shinyjs::hidden(
               div(
                 id = "second_file_summary",
-                br(), hr(),
+                br(), hr(class = "custom-hr"),
                 h4("Data structure: df2"),
                 verbatimTextOutput("data_structure_2"),
-                br(), hr(),
+                br(), hr(class = "custom-hr"),
                 h4("Data summary: df2"),
                 verbatimTextOutput("data_summary_2"),
                 plotly::plotlyOutput("missing_values_2", width = "60%")
@@ -411,6 +412,7 @@ app_ui <- function(request) {
           ),
           tabPanel(
             title = "Summary",
+            hr(class = "custom-hr-thick"),
             verbatimTextOutput("dfSummary"),
             h4(
               "Generated by the ",
@@ -424,34 +426,38 @@ app_ui <- function(request) {
           ),
           tabPanel(
             title = "Table1",
+            hr(class = "custom-hr-thick"),
             uiOutput("table1_inputs"),
             verbatimTextOutput("table1"),
             h4(
               "Generated by the CreateTableOne() function in the",
-              a(
-                "tableone",
+              a("tableone",
                 href="https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html",
-                target = "_blank"
-              ),
+                target = "_blank"),
               "package."
             )
           ),
 
           tabPanel(
             title = "Categorical",
+            hr(class = "custom-hr-thick"),
+            div(
+              style = "position: relative; padding-bottom: 10px;",
+              plotOutput("distribution_category", width = "1300px", height = "1000px")
+            ),
             h4(
               "Generated by the plot_bar() function in the",
-              a(
-                "DataExplorer",
+              a("DataExplorer",
                 href="https://cran.r-project.org/web/packages/DataExplorer/vignettes/dataexplorer-intro.html",
-                target = "_blank"
-              ),
+                target = "_blank"),
               "package."
-            ),
-            plotOutput("distribution_category")
+            )
           ),
           tabPanel(
             title = "Numerical",
+            hr(class = "custom-hr-thick"),
+            plotOutput("qq_numeric"),
+            plotOutput("distribution_numeric"),
             h4(
               "Generated by the plot_qq() and plot_histogram() functions in the",
               a(
@@ -460,13 +466,12 @@ app_ui <- function(request) {
                 target = "_blank"
               ),
               "package."
-            ),
-            plotOutput("qq_numeric"),
-            plotOutput("distribution_numeric"),
-
+            )
           ),
           tabPanel(
             title = "Correlation",
+            hr(class = "custom-hr-thick"),
+            plotOutput("corr_map"),
             h4(
               "Generated by the corr_plot() functions in the",
               a(
@@ -475,27 +480,30 @@ app_ui <- function(request) {
                 target = "_blank"
               ),
               "package. Blanks indicate no significant correlations."
-            ),
-            plotOutput("corr_map")
+            )
           ),
           tabPanel(
             title = "GGpairs",
+            hr(class = "custom-hr-thick"),
             uiOutput("ggpairs_inputs"),
-            h4(""),
+            div(
+              style = "position: relative; padding-bottom: 10px;",
+              plotOutput("ggpairs", width = "1300px", height = "1300px")
+            ),
             h4(
-              "Please wait 1 minutes for this plot to be generated by the ggpairs() functions in the",
+              "Generated by the ggpairs() functions in the",
               a(
                 "GGally",
                 href="https://cran.r-project.org/web/packages/GGally/index.html",
                 target = "_blank"
               ),
               "package."
-            ),
-            plotOutput("ggpairs")
+            )
           ),
           tabPanel(
             title = "EDA Reports",
-            h4("Comprehensive EDA (exploratory data analysis)"),
+            hr(class = "custom-hr-thick"),
+            h4(strong("Comprehensive EDA (Exploratory Data Analysis)")),
             uiOutput("eda_report_ui")
           )
         )
@@ -510,24 +518,47 @@ app_ui <- function(request) {
           theme = "light-border"
         ),
         br(),
-        selectInput(
-          inputId = "selected_chunk_report",
-          label = "Code chunks to include:",
-          selected = NULL,
-          choices = NULL,
-          multiple = TRUE
+        fluidRow(
+          column(
+            width = 5,
+            tagList(
+              selectInput(
+                inputId = "selected_chunk_report",
+                label = "Code chunks to include:",
+                selected = NULL,
+                choices = NULL,
+                multiple = TRUE
+              ),
+              tags$style(
+                HTML("#selected_chunk_report+div .selectize-input {
+                      background-color: #F6FFF5 !important;
+                      border-color: #90BD8C !important;
+                      color: #000 !important;
+                      }
+                      #selected_chunk_report+div .selectize-dropdown {
+                      background-color: #F6FFF5 !important;
+                      border-color: #90BD8C !important;
+                      color: #000 !important;
+                      }"
+                )
+              )
+            )
+          )
         ),
         fluidRow(
           column(
-            width = 6,
-            uiOutput("html_report")
+            width = 4,
+            uiOutput("html_report"),
           ),
           column(
-            width = 6,
+            width = 8,
             downloadButton(
               outputId = "Rmd_source",
               label = "RMarkdown"
             ),
+            tags$head(tags$style(
+              "#Rmd_source{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+            )),
             tippy::tippy_this(
               "Rmd_source",
               "Download a R Markdown source file.",
@@ -596,8 +627,8 @@ app_ui <- function(request) {
               align = 'left'
             )
           ),
-          
-          hr(),
+
+          hr(class = "custom-hr"),
 
           fluidRow(
             column(
@@ -683,7 +714,7 @@ app_ui <- function(request) {
           point for further refinement and validation."
           ),
 
-          hr(),
+          hr(class = "custom-hr"),
           p(" Written by Dr. Steven Ge",
             a(
               "(Twitter, ",
@@ -712,7 +743,7 @@ app_ui <- function(request) {
           h4("For businesses, RTutor can be customized and locally installed to  
           easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
 
-          hr(),
+          hr(class = "custom-hr"),
           p("RTutor went viral on ", 
               a(
                 "LinkedIn, ",
@@ -733,11 +764,11 @@ app_ui <- function(request) {
               )
           ),
 
-          # hr(),
+          # hr(class = "custom-hr"),
 
           # uiOutput("package_list"),
 
-          hr(),
+          hr(class = "custom-hr"),
 
           fluidRow(
             column(
@@ -754,7 +785,7 @@ app_ui <- function(request) {
             )
           ),
 
-          hr(),
+          hr(class = "custom-hr"),
 
           # Session Info Section
           fluidRow(
@@ -762,8 +793,21 @@ app_ui <- function(request) {
               condition = "input.site_update_log == 1",
               column(
                 width = 6,
-                # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
-                tableOutput("site_updates_table")
+                div(
+                  tagList(
+                    tags$head(
+                      tags$style(HTML(".site-updates-wrapper table {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
+                        .site-updates-wrapper table thead th, .site-updates-wrapper table td {border: 2px solid #90BD8C;}
+                        .site-updates-wrapper table tbody tr:nth-child(odd) {background-color: #f3faf3;}
+                        .site-updates-wrapper table tbody tr:nth-child(even) {background-color: #ffffff;}
+                      "))
+                    ),
+                    div(
+                      class = "site-updates-wrapper",
+                      tableOutput("site_updates_table")
+                    )
+                  )
+                )
               ),
               column(
                 width = 6,
@@ -771,68 +815,71 @@ app_ui <- function(request) {
               )
             )
           ),
-          hr()
+          hr(class = "custom-hr")
         ),
         tabPanel(
           title = "FAQ",
           fluidRow(
-              column(
-                width = 6,
-                h4(style = "font-weight: bold", "Frequently asked Questions"),
-                uiOutput("faq_list"),
-                tags$style(HTML("
-                  .faq-answer {
-                    display: none;
-                    padding-left: 10px;
+            column(
+              width = 6,
+              h4(style = "font-weight: bold", "Frequently asked Questions"),
+              uiOutput("faq_list"),
+              tags$style(HTML("
+                .faq-answer {
+                  display: none;
+                  padding-left: 10px;
+                }
+                .faq-question {
+                  cursor: pointer;
+                  padding: 5px;
+                  border: 1px solid #90BD8C;
+                  background-color: #F6FFF5;
+                }
+              ")),
+              tags$script(HTML('
+                $(document).on("click", ".faq-question", function() {
+                  var answer = $(this).next(".faq-answer");
+                  if (answer.is(":visible")) {
+                    answer.hide();
+                  } else {
+                    answer.show();
                   }
-                  .faq-question {
-                    cursor: pointer;
-                    padding: 5px;
-                    border: 1px solid #ccc;
-                    background-color: #f1f1f1;
-                  }
-                ")),
-                tags$script(HTML('
-                  $(document).on("click", ".faq-question", function() {
-                    var answer = $(this).next(".faq-answer");
-                    if (answer.is(":visible")) {
-                      answer.hide();
-                    } else {
-                      answer.show();
-                    }
-                  });
-                '))
+                });
+              '))
+            ),
+            column(
+              width = 6,
+              h4(style = "font-weight: bold", "Comments & Questions"),
+              tags$style(type = "text/css", "textarea {width:100%}"),
+              tags$textarea(
+                id = "user_feedback",
+                placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+                rows = 4,
+                ""
               ),
-              column(
-                width = 6,
-                h4(style = "font-weight: bold", "Comments & Questions"),
-                tags$style(type = "text/css", "textarea {width:100%}"),
-                tags$textarea(
-                  id = "user_feedback",
-                  placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-                  rows = 4,
-                  ""
+              radioButtons("helpfulness", "How useful is RTutor?",
+                c(
+                  "Not at all",
+                  "Slightly",
+                  "Helpful",
+                  "Extremely"
                 ),
-                radioButtons("helpfulness", "How useful is RTutor?",
-                  c(
-                    "Not at all",
-                    "Slightly",
-                    "Helpful",
-                    "Extremely"
-                  ),
-                  selected = "Slightly"
+                selected = "Slightly"
+              ),
+              radioButtons("experience", "Your experience with R:",
+                c(
+                  "None",
+                  "Beginner",
+                  "Intermediate",
+                  "Advanced"
                 ),
-                radioButtons("experience", "Your experience with R:",
-                  c(
-                    "None",
-                    "Beginner",
-                    "Intermediate",
-                    "Advanced"
-                  ),
-                  selected = "Beginner"
-                ),
-                actionButton("save_feedbck", "Save Feedback")
-                  )
+                selected = "Beginner"
+              ),
+              actionButton("save_feedbck", "Save Feedback"),
+              tags$head(tags$style(
+                "#save_feedbck{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+              )),
+            )
           )
         ),
         tabPanel(
@@ -868,13 +915,13 @@ app_ui <- function(request) {
                   "),
                 )
               ),
-              hr(),
+              hr(class = "custom-hr"),
               fluidRow(
                 column(
                   width = 12,
                   h4("Use your own API key"),
                   h5("We pay a small fee to use the AI for every request.
-                    If you use this regularily, 
+                    If you use this regularly, 
                     please take a few minutes to create your own API key: "),
 
                   tags$ul(
@@ -894,7 +941,7 @@ app_ui <- function(request) {
                       ),
                       tags$li(
                         "Click \"API keys\" to create a new key, 
-                        which can be copied and pasted it below."
+                        which can be copied and pasted below."
                       ),
                   ),
                   uiOutput("valid_key"),
@@ -919,7 +966,7 @@ app_ui <- function(request) {
               )
             ),
 
-            hr(),
+            hr(class = "custom-hr"),
             fluidRow(
               column(
                 width = 4,
@@ -930,11 +977,11 @@ app_ui <- function(request) {
               ),
               column(
                 width = 8,
-                h5("Use Python instead of R when generating")
+                h5("Use Python instead of R for generating code and results.")
               )
             ),
 
-            hr(),
+            hr(class = "custom-hr"),
             fluidRow(
               column(
                 width = 4,
@@ -969,14 +1016,14 @@ app_ui <- function(request) {
                 )
               )
             ),
-            h5("Some columns contains numbers but should be treated 
+            h5("Some columns contains numbers, but should be treated 
             as categorical values or factors. For example, we sometimes 
             use 1 to label success and 0 for failure.
             If this is selected, using the default setting, a column 
             is treated as categories when the number of unique values 
             is less than or equal to 12, and less than 10% of the total rows."
             ),
-            hr(),
+            hr(class = "custom-hr"),
             fluidRow(
               column(
                 width = 4,
