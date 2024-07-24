@@ -18,35 +18,32 @@ app_ui <- function(request) {
     golem_add_external_resources(),
 
     # Add color to UI
-    tags$head(
-      tags$style(HTML("
-        /* navbar */
-        .navbar {
-          background-color: #C1E2BE;border-color: #90BD8C; color: #181818;font-weight: bold;
-        }
+    tags$head(tags$style(HTML("
+      /* navbar */
+      .navbar {background-color: #C1E2BE;border-color: #90BD8C; color: #181818;font-weight: bold;}
 
-        /* tabs */
-        .navbar-default .navbar-nav > li > a {
-          background-color: #C1E2BE;border-color: #9AC596;color: #181818;
-        }
+      /* tabs */
+      .navbar-default .navbar-nav > li > a {background-color: #C1E2BE;border-color: #9AC596;color: #181818;}
 
-        /* active tab */
-        .navbar-default .navbar-nav > .active > a, 
-        .navbar-default .navbar-nav > .active > a:focus, 
-        .navbar-default .navbar-nav > .active > a:hover {
-          background-color: #A0BB9E;color: #181818;font-weight: bold;
-        }
+      /* active tab */
+      .navbar-default .navbar-nav > .active > a, 
+      .navbar-default .navbar-nav > .active > a:focus, 
+      .navbar-default .navbar-nav > .active > a:hover {background-color: #A0BB9E;color: #181818;font-weight: bold;}
 
-        /* sidebar panel */
-        .well {
-          background-color: #C1E2BE;border-color: #90BD8C;
-      "))
-    ),
+      /* sidebar panel */
+      .well {background-color: #C1E2BE;border-color: #90BD8C;}
+
+      /* select input & action button */
+      .custom-select-input, .custom-action-button
+      {background-color: #F6FFF5;border-color: #90BD8C;color: #000;}
+
+      /* horizontal line */
+      .custom-hr{border-top: 1px solid #90BD8C;}
+      .custom-hr-thick{border-top: 3px solid #90BD8C;}
+    "))),
 
     navbarPage(
       HTML('<span style="color: black;">RTutor</span>'),
-    #  windowTitle = "RTutor",
-    # theme = bslib::bs_theme(bootswatch = "darkly"),
       id = "tabs",
       tabPanel(
         title = "Home",
@@ -54,7 +51,6 @@ app_ui <- function(request) {
           id = "load_message",
           h2("Chat with your data via AI ..."),
         ),
-        #uiOutput("use_heyshiny"), # remove it
         # move notifications and progress bar to the center of screen
         tags$head(
           tags$style(
@@ -65,8 +61,8 @@ app_ui <- function(request) {
                   left: calc(10%);
                   }
                   "
-                )
             )
+          )
         ),
         # Embed the CSS directly in the UI
         tags$style("
@@ -78,27 +74,27 @@ app_ui <- function(request) {
         # Sidebar with a slider input for number of bins
         sidebarLayout(
           sidebarPanel(
-            #uiOutput("timer_ui"),
 
             fluidRow(
               column(
                 width = 6,
                 textOutput("selected_dataset")
-              ),
-              column(
-                width = 6,
-                actionButton("reset_button", strong("Reset")),
-                tags$head(tags$style(
-                  "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
-                )),
-                align = "right",
-                tippy::tippy_this(
-                  "reset_button",
-                  "Reset before uploading a new file. Clears data objects, chat history, and code chunks.",
-                  theme = "light-border"
-                )
-              )
+              )#,
+              # column(
+              #   width = 6,
+              #   actionButton("reset_button", strong("Reset")),
+              #   tags$head(tags$style(
+              #     "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
+              #   )),
+              #   align = "right",
+              #   tippy::tippy_this(
+              #     "reset_button",
+              #     "Reset before uploading a new file. Clears data objects, chat history, and code chunks.",
+              #     theme = "light-border"
+              #   )
+              # )
             ),
+
             br(),
             fluidRow(
               column(
@@ -115,18 +111,27 @@ app_ui <- function(request) {
             fluidRow(
               column(
                 width = 6,
-                tags$label("2) Modify Data Fields (Optional)",
-                style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;")
+                tags$label("2. Modify Data Fields (Optional)",
+                style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
               br(),
               column(
-                width = 6,
+                width = 12,
                 actionButton("data_edit_modal", "Data Types"),
-                align = 'left'
+                align = "left",
+                tags$head(tags$style(
+                  "#data_edit_modal{font-size: 14px;color: #000;background-color: #F6FFF5;border-color: #90BD8C;}"
+                ))
               )
             ),
 
-            uiOutput("prompt_ui"),
+            # Horizontal Line
+            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+            hr(),
+
+            tags$label("3) Send Request(s)",
+                style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;"),
+
             tags$style(HTML("
               textarea {
                 width: 100%;
@@ -140,33 +145,63 @@ app_ui <- function(request) {
               rows = 8, ""
             ),
 
+            # Example Prompts
+            uiOutput("prompt_ui"),
+
+            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+            hr(),
+
             fluidRow(
               column(
                 width = 12,
-                actionButton("submit_button", strong("Submit")),
-                tags$head(tags$style(
-                  "#submit_button{font-size: 16px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
-                )),
-                tippy::tippy_this(
-                  "submit_button",
-                  "ChatGPT can return different results for the same request.",
-                  theme = "light-border"
+                div(
+                  style = "display: flex; justify-content: space-between;",
+                  div(
+                    actionButton("submit_button", strong("Submit")),
+                    tags$head(tags$style(
+                      "#submit_button{font-size: 16px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
+                    )),
+                    tippy::tippy_this(
+                      "submit_button",
+                      "ChatGPT can return different results for the same request.",
+                      theme = "light-border"
+                    )
+                  ),
+                  div(
+                    # Reset Button
+                    actionButton(inputId = "reset_button", label = strong("Reset")),
+                    tags$head(tags$style(
+                      "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
+                    )),
+                    tippy::tippy_this(
+                      "reset_button",
+                      "Reset before asking a new question. Clears data objects, chat history, & code chunks.",
+                      theme = "light-border"
+                    )
+                  )
                 )
 
                 )
-#               column(
-#                 width = 4,
-#                 actionButton("api_button", "Settings"),
-#                 tags$head(tags$style(
-#                       "#api_button{color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-#                 )),
-#               ),
-#               column(
-#                 width = 4,
-#                 checkboxInput("use_python", "Python", value = FALSE)
-#             )
+            #   column(
+            #     width = 4,
+            #     actionButton("api_button", "Settings"),
+            #     tags$head(tags$style(
+            #           "#api_button{color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+            #     )),
+            #   ),
+            #   column(
+            #     width = 4,
+            #     checkboxInput("use_python", "Python", value = FALSE)
+            # )
 
 
+            ),
+            fluidRow(
+              column(12,
+                # Horizontal Line
+                tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
+                hr()
+              )
             ),
             br(),
             tags$head(
@@ -187,39 +222,35 @@ app_ui <- function(request) {
 
             tippy::tippy_this(
               "ask_question",
-              "Walk me through this code. What does this result mean? 
-              What is this error about? Explain logistic regression. 
-              List R packages for time series analysis. 
+              "Walk me through this code. What does this result mean?
+              What is this error about? Explain logistic regression.
+              List R packages for time series analysis.
               Hit Enter to send the request.",
               theme = "light-border"
             ),
             shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
 
-#             br(),
-#             fluidRow(
-#               tags$head(tags$style(
-#                   "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-#                 )),
-#               column(
-#                 width = 6,
-#                 actionButton("data_edit_modal", "Data Types")
-#               ),
-#               tags$head(tags$style(
-#                   "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-#                 )),
-#               column(
-#                 width = 6,
-#                 actionButton("data_desc_modal", "Description")
-#               )
-#             ),
-#             tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
-
-            hr(),
+            # br(),
+            # fluidRow(
+            #   tags$head(tags$style(
+            #       "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+            #     )),
+            #   column(
+            #     width = 6,
+            #     actionButton("data_edit_modal", "Data Types")
+            #   ),
+            #   tags$head(tags$style(
+            #       "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
+            #     )),
+            #   column(
+            #     width = 6,
+            #     actionButton("data_desc_modal", "Description")
+            #   )
+            # ),
+            hr(class = "custom-hr"),
             textOutput("usage"),
             textOutput("total_cost"),
             textOutput("temperature"),
-            #uiOutput("slava_ukraini"),
-            #br(),
             textOutput("retry_on_error")
           ),
 
@@ -229,6 +260,7 @@ app_ui <- function(request) {
 
           mainPanel(
             shinyjs::useShinyjs(),
+            textOutput("showgraphics"),
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
@@ -239,7 +271,7 @@ app_ui <- function(request) {
                   width = 4,
                   p(
                     HTML("First Time Users:"), #<span style='font-size: 54px;'>&rarr;</span>
-                    style = "font-size: 46px;"
+                    style = "font-size: 40px;"
                   ),
                   align = 'right'
                 ),
@@ -250,6 +282,28 @@ app_ui <- function(request) {
                     "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
                   )),
                   align = 'left'
+#                     style = "font-size: 34px; margin: 0; padding-top: 10px;"
+#                   ),
+#                   align = "right"
+#                 ),
+#                 column(
+#                   width = 5,
+#                   tags$head(
+#                     tags$style(HTML("
+#                       .new-user-btn {
+#                         display: inline-block;padding: 12px 24px;font-size: 26px;
+#                         font-weight: bold;color: #000;background-color: #8fca89;
+#                         border: none;border-radius: 5px;text-align: center;
+#                         text-decoration: none;
+#                         transition: background-color 0.3s, box-shadow 0.3s;}
+#                       .new-user-btn:hover {background-color: #557952;
+#                         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);color: #fff}
+#                       .new-user-btn:focus {outline: none;
+#                         box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);}
+#                     "))
+#                   ),
+#                   div(align = "left",
+#                     actionButton("first_user", strong("Start Here!"), class = "new-user-btn")),
                 ),
                 column(
                   width = 3,
@@ -262,7 +316,7 @@ app_ui <- function(request) {
                 )
               )
             ),
-            hr(),
+            hr(class = "custom-hr-thick"),
             conditionalPanel(
               condition = "input.submit_button != 0",
               fluidRow(
@@ -286,7 +340,6 @@ app_ui <- function(request) {
                 condition = "input.use_python == 0",
 
                 uiOutput("error_message"),
-                #uiOutput("send_error_message"),
                 strong("Results:"),
 
                 # shows error message in local machine, but not on the server
@@ -326,24 +379,38 @@ app_ui <- function(request) {
             shinyjs::hidden(
               div(
                 id = "first_file",
-                # hr(),
+                # hr(class = "custom-hr"),
                 h4("Selected Dataset"),
                 textOutput("data_size"),
+                tags$head(
+                  tags$style(HTML("
+                    .dataTables_wrapper {
+                      background-color: #f8fcf8;
+                      border-color: #90BD8C;
+                      padding: 10px;
+                      border-radius: 5px;
+                    }
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(odd) {
+                      background-color: #f3faf3;
+                    }
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {
+                      background-color: #ffffff;
+                    }
+                  "))
+                ),
                 DT::dataTableOutput("data_table_DT")
               )
             ),
             shinyjs::hidden(
               div(
                 id = "second_file",
-                hr(),
+                hr(class = "custom-hr"),
                 h4("2nd dataset: df2     (Must specify, e.g. 'create a piechart of X in df2.')"),
                 textOutput("data_size_2"),
                 DT::dataTableOutput("data_table_DT_2")
 
               )
             )
-            #,tableOutput("data_table"),
-
 
           ) #mainPanel
         ) #sideBarpanel
@@ -358,21 +425,34 @@ app_ui <- function(request) {
           theme = "light-border"
         ),
         tabsetPanel(
+          tags$head(
+            tags$style(HTML("
+              .nav-tabs {background-color: #D9EDD8;                  /* Background color - tab headers */}
+              .nav-tabs > li > a {color: #5b5b5b;                           /* Text color - tab headers */
+                border: 1px solid #D9EDD8;border-radius: 4px;}
+              .nav-tabs > li > a:hover {background-color: #90BD8C;         /* Hover color - tab headers */
+                color: #000;}
+              .nav-tabs > li.active > a {background-color: #f3faf3;    /* Background color - active tab */
+                color: #000;border: 1px solid #D9EDD8;border-bottom-color: transparent;}
+            "))
+          ),
+
           tabPanel(
             title = "Basic",
-            h4("Data structure: df"),
+            hr(class = "custom-hr-thick"),
+            h4(strong("Data Structure: df")),
             verbatimTextOutput("data_structure"),
-            hr(),
-            h4("Data summary: df"),
+            hr(class = "custom-hr-thick"),
+            h4(strong("Data Summary: df")),
             verbatimTextOutput("data_summary"),
             plotly::plotlyOutput("missing_values", width = "60%"),
             shinyjs::hidden(
               div(
                 id = "second_file_summary",
-                br(), hr(),
+                br(), hr(class = "custom-hr"),
                 h4("Data structure: df2"),
                 verbatimTextOutput("data_structure_2"),
-                br(), hr(),
+                br(), hr(class = "custom-hr"),
                 h4("Data summary: df2"),
                 verbatimTextOutput("data_summary_2"),
                 plotly::plotlyOutput("missing_values_2", width = "60%")
@@ -381,6 +461,7 @@ app_ui <- function(request) {
           ),
           tabPanel(
             title = "Summary",
+            hr(class = "custom-hr-thick"),
             verbatimTextOutput("dfSummary"),
             h4(
               "Generated by the ",
@@ -394,34 +475,38 @@ app_ui <- function(request) {
           ),
           tabPanel(
             title = "Table1",
+            hr(class = "custom-hr-thick"),
             uiOutput("table1_inputs"),
             verbatimTextOutput("table1"),
             h4(
               "Generated by the CreateTableOne() function in the",
-              a(
-                "tableone",
+              a("tableone",
                 href="https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html",
-                target = "_blank"
-              ),
+                target = "_blank"),
               "package."
             )
           ),
 
           tabPanel(
             title = "Categorical",
+            hr(class = "custom-hr-thick"),
+            div(
+              style = "position: relative; padding-bottom: 10px;",
+              plotOutput("distribution_category", width = "1300px", height = "1000px")
+            ),
             h4(
               "Generated by the plot_bar() function in the",
-              a(
-                "DataExplorer",
+              a("DataExplorer",
                 href="https://cran.r-project.org/web/packages/DataExplorer/vignettes/dataexplorer-intro.html",
-                target = "_blank"
-              ),
+                target = "_blank"),
               "package."
-            ),
-            plotOutput("distribution_category")
+            )
           ),
           tabPanel(
             title = "Numerical",
+            hr(class = "custom-hr-thick"),
+            plotOutput("qq_numeric"),
+            plotOutput("distribution_numeric"),
             h4(
               "Generated by the plot_qq() and plot_histogram() functions in the",
               a(
@@ -430,13 +515,12 @@ app_ui <- function(request) {
                 target = "_blank"
               ),
               "package."
-            ),
-            plotOutput("qq_numeric"),
-            plotOutput("distribution_numeric"),
-
+            )
           ),
           tabPanel(
             title = "Correlation",
+            hr(class = "custom-hr-thick"),
+            plotOutput("corr_map"),
             h4(
               "Generated by the corr_plot() functions in the",
               a(
@@ -445,27 +529,30 @@ app_ui <- function(request) {
                 target = "_blank"
               ),
               "package. Blanks indicate no significant correlations."
-            ),
-            plotOutput("corr_map")
+            )
           ),
           tabPanel(
             title = "GGpairs",
+            hr(class = "custom-hr-thick"),
             uiOutput("ggpairs_inputs"),
-            h4(""),
+            div(
+              style = "position: relative; padding-bottom: 10px;",
+              plotOutput("ggpairs", width = "1300px", height = "1300px")
+            ),
             h4(
-              "Please wait 1 minutes for this plot to be generated by the ggpairs() functions in the",
+              "Generated by the ggpairs() functions in the",
               a(
                 "GGally",
                 href="https://cran.r-project.org/web/packages/GGally/index.html",
                 target = "_blank"
               ),
               "package."
-            ),
-            plotOutput("ggpairs")
+            )
           ),
           tabPanel(
             title = "EDA Reports",
-            h4("Comprehensive EDA (exploratory data analysis)"),
+            hr(class = "custom-hr-thick"),
+            h4(strong("Comprehensive EDA (Exploratory Data Analysis)")),
             uiOutput("eda_report_ui")
           )
         )
@@ -480,24 +567,47 @@ app_ui <- function(request) {
           theme = "light-border"
         ),
         br(),
-        selectInput(
-          inputId = "selected_chunk_report",
-          label = "Code chunks to include:",
-          selected = NULL,
-          choices = NULL,
-          multiple = TRUE
+        fluidRow(
+          column(
+            width = 5,
+            tagList(
+              selectInput(
+                inputId = "selected_chunk_report",
+                label = "Code chunks to include:",
+                selected = NULL,
+                choices = NULL,
+                multiple = TRUE
+              ),
+              tags$style(
+                HTML("#selected_chunk_report+div .selectize-input {
+                      background-color: #F6FFF5 !important;
+                      border-color: #90BD8C !important;
+                      color: #000 !important;
+                      }
+                      #selected_chunk_report+div .selectize-dropdown {
+                      background-color: #F6FFF5 !important;
+                      border-color: #90BD8C !important;
+                      color: #000 !important;
+                      }"
+                )
+              )
+            )
+          )
         ),
         fluidRow(
           column(
-            width = 6,
-            uiOutput("html_report")
+            width = 4,
+            uiOutput("html_report"),
           ),
           column(
-            width = 6,
+            width = 8,
             downloadButton(
               outputId = "Rmd_source",
               label = "RMarkdown"
             ),
+            tags$head(tags$style(
+              "#Rmd_source{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+            )),
             tippy::tippy_this(
               "Rmd_source",
               "Download a R Markdown source file.",
@@ -508,7 +618,6 @@ app_ui <- function(request) {
         br(),
         verbatimTextOutput("rmd_chunk_output")
       ),
-
 
       navbarMenu(
         title = "More",
@@ -525,7 +634,7 @@ app_ui <- function(request) {
                   "YouTube video!",
                   href="https://youtu.be/a-bZW26nK9k",
                   target = "_blank"
-                ),  
+                ),
                 style="color:red"
               ),
               # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
@@ -533,7 +642,7 @@ app_ui <- function(request) {
               #     "a comprehensive EDA report.",
               #     href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
               #     target = "_blank"
-              #   ),  
+              #   ),
               #  " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
               # Oct 23, 2023 (v0.97): GPT-4 becomes the default.
               # Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
@@ -543,7 +652,7 @@ app_ui <- function(request) {
                   href = "https://github.com/gexijin/RTutor"
                 ),
                 " for source code, bug reports, and instructions to install RTutor as an R package.
-                As a small startup, we are open to partnerships with both academia and industry. 
+                As a small startup, we are open to partnerships with both academia and industry.
               We can do demos and seminars via Zoom if time permits."
               ),
               h5("Also try ",
@@ -567,8 +676,8 @@ app_ui <- function(request) {
               align = 'left'
             )
           ),
-          
-          hr(),
+
+          hr(class = "custom-hr"),
 
           fluidRow(
             column(
@@ -576,7 +685,7 @@ app_ui <- function(request) {
               h3("Quick start:"),
               tags$ul(
                 tags$li(
-                  "Explore the data at the EDA tab first.  Then start with simple requests 
+                  "Explore the data at the EDA tab first.  Then start with simple requests
                   such as distributions, basic plots. Gradually add complexity.
                   ", style = "color:red"
                 ),
@@ -588,40 +697,40 @@ app_ui <- function(request) {
                 ),
                 tags$li(
                   "To analyze a new dataset, or to start over, click the Reset button first. "
-                ), 
+                ),
                 tags$li(
-                  "Prepare and clean your data in Excel first. Name columns properly. 
+                  "Prepare and clean your data in Excel first. Name columns properly.
                   ChatGPT tries to guess the meaning of column names, even if they are abbrievated."
                 ),
                 tags$li(
-                  "RTutor can only analyze traditional statistics data, where rows are 
+                  "RTutor can only analyze traditional statistics data, where rows are
                   observations and columns are variables. For complex data, try https://chatlize.ai."
                 ),
                 tags$li(
                   "Once uploaded, your data is automatically loaded into
-                  R as a data frame called df. You do NOT need to ask RTutor to load data. 
+                  R as a data frame called df. You do NOT need to ask RTutor to load data.
                   Check if the data types of the columns are correct.
                   Change if needed, especially when numbers are used to code for categories."
                 ),
                 tags$li(
-                  "An additional file can be uploaded as df2 to be analyze togehter. 
+                  "An additional file can be uploaded as df2 to be analyze togehter.
                   To use it, you must specify 'df2' in your prompts. "
                 ),
                 tags$li(
-                  "Use the Q&A box to ask questions about the code, result, or error messages. 
+                  "Use the Q&A box to ask questions about the code, result, or error messages.
                   You can ask for methods to use or develop a plan. "
                 ),
                 tags$li(
                   "Before sending your request to OpenAI, we do prompt engineering based on the uploaded data.
-                  We add \"Generate R code\" to the beginning, and 
-                  append something like \"Use the df data frame. 
-                  Note that highway is numeric, ...\" afterward. 
+                  We add \"Generate R code\" to the beginning, and
+                  append something like \"Use the df data frame.
+                  Note that highway is numeric, ...\" afterward.
                   If you are not using any data (plot a function or simulations),
                   choose \"No data\" from the Data dropdown."
                 ),
                 tags$li(
-                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session. 
-                  If you explain the background of the data and the meaning of  
+                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session.
+                  If you explain the background of the data and the meaning of
                   the columns, you can ask general questions like asking a clueless statistician."
                 ),
                 tags$li(
@@ -645,16 +754,16 @@ app_ui <- function(request) {
             " to translate natural language into R (or Python) code, which is then excuted.",
             "You can request your analysis,
             just like asking a real person.",
-            "Upload a data file (CSV, TSV/tab-delimited text files, and Excel) 
-            and just analyze it in plain English. 
+            "Upload a data file (CSV, TSV/tab-delimited text files, and Excel)
+            and just analyze it in plain English.
             Your results can be downloaded as an HTML report in minutes!"
           ),
-          p("NO WARRANTY! Some of the scripts run but may yield incorrect result. 
-          Please use the auto-generated code as a starting 
+          p("NO WARRANTY! Some of the scripts run but may yield incorrect result.
+          Please use the auto-generated code as a starting
           point for further refinement and validation."
           ),
 
-          hr(),
+          hr(class = "custom-hr"),
           p(" Written by Dr. Steven Ge",
             a(
               "(Twitter, ",
@@ -665,7 +774,7 @@ app_ui <- function(request) {
               "LinkedIn),",
               href = "https://www.linkedin.com/in/steven-ge-ab016947/",
               target = "_blank"
-            ),       
+            ),
             " as part of RTutor LLC. For feedback, please email",
             a(
               "gexijin@gmail.com.",
@@ -676,19 +785,19 @@ app_ui <- function(request) {
               "GitHub,",
               href = "https://github.com/gexijin/RTutor"
             ),
-            " from where you can also find 
-            instruction to install RTutor as an R package. 
+            " from where you can also find
+            instruction to install RTutor as an R package.
             The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
           ),
-          h4("For businesses, RTutor can be customized and locally installed to  
+          h4("For businesses, RTutor can be customized and locally installed to
           easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
 
-          hr(),
+          hr(class = "custom-hr"),
           p("RTutor went viral on ", 
               a(
                 "LinkedIn, ",
                 href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
-              ), 
+              ),
               a(
                 "Twitter, ",
                 href = "https://twitter.com/StevenXGe/status/1604861481526386690"
@@ -704,11 +813,11 @@ app_ui <- function(request) {
               )
           ),
 
-          # hr(),
+          # hr(class = "custom-hr"),
 
           # uiOutput("package_list"),
 
-          hr(),
+          hr(class = "custom-hr"),
 
           fluidRow(
             column(
@@ -725,7 +834,7 @@ app_ui <- function(request) {
             )
           ),
 
-          hr(),
+          hr(class = "custom-hr"),
 
           # Session Info Section
           fluidRow(
@@ -733,8 +842,21 @@ app_ui <- function(request) {
               condition = "input.site_update_log == 1",
               column(
                 width = 6,
-                # h4(style = "font-weight: bold;", id = "site_updates_log_header", "See Site Updates Log"),
-                tableOutput("site_updates_table")
+                div(
+                  tagList(
+                    tags$head(
+                      tags$style(HTML(".site-updates-wrapper table {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
+                        .site-updates-wrapper table thead th, .site-updates-wrapper table td {border: 2px solid #90BD8C;}
+                        .site-updates-wrapper table tbody tr:nth-child(odd) {background-color: #f3faf3;}
+                        .site-updates-wrapper table tbody tr:nth-child(even) {background-color: #ffffff;}
+                      "))
+                    ),
+                    div(
+                      class = "site-updates-wrapper",
+                      tableOutput("site_updates_table")
+                    )
+                  )
+                )
               ),
               column(
                 width = 6,
@@ -742,68 +864,71 @@ app_ui <- function(request) {
               )
             )
           ),
-          hr()
+          hr(class = "custom-hr")
         ),
         tabPanel(
           title = "FAQ",
           fluidRow(
-              column(
-                width = 6,
-                h4(style = "font-weight: bold", "Frequently asked Questions"),
-                uiOutput("faq_list"),
-                tags$style(HTML("
-                  .faq-answer {
-                    display: none;
-                    padding-left: 10px;
+            column(
+              width = 6,
+              h4(style = "font-weight: bold", "Frequently asked Questions"),
+              uiOutput("faq_list"),
+              tags$style(HTML("
+                .faq-answer {
+                  display: none;
+                  padding-left: 10px;
+                }
+                .faq-question {
+                  cursor: pointer;
+                  padding: 5px;
+                  border: 1px solid #90BD8C;
+                  background-color: #F6FFF5;
+                }
+              ")),
+              tags$script(HTML('
+                $(document).on("click", ".faq-question", function() {
+                  var answer = $(this).next(".faq-answer");
+                  if (answer.is(":visible")) {
+                    answer.hide();
+                  } else {
+                    answer.show();
                   }
-                  .faq-question {
-                    cursor: pointer;
-                    padding: 5px;
-                    border: 1px solid #ccc;
-                    background-color: #f1f1f1;
-                  }
-                ")),
-                tags$script(HTML('
-                  $(document).on("click", ".faq-question", function() {
-                    var answer = $(this).next(".faq-answer");
-                    if (answer.is(":visible")) {
-                      answer.hide();
-                    } else {
-                      answer.show();
-                    }
-                  });
-                '))
+                });
+              '))
+            ),
+            column(
+              width = 6,
+              h4(style = "font-weight: bold", "Comments & Questions"),
+              tags$style(type = "text/css", "textarea {width:100%}"),
+              tags$textarea(
+                id = "user_feedback",
+                placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+                rows = 4,
+                ""
               ),
-              column(
-                width = 6,
-                h4(style = "font-weight: bold", "Comments & Questions"),
-                tags$style(type = "text/css", "textarea {width:100%}"),
-                tags$textarea(
-                  id = "user_feedback",
-                  placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-                  rows = 4,
-                  ""
+              radioButtons("helpfulness", "How useful is RTutor?",
+                c(
+                  "Not at all",
+                  "Slightly",
+                  "Helpful",
+                  "Extremely"
                 ),
-                radioButtons("helpfulness", "How useful is RTutor?",
-                  c(
-                    "Not at all",
-                    "Slightly",
-                    "Helpful",
-                    "Extremely"
-                  ),
-                  selected = "Slightly"
+                selected = "Slightly"
+              ),
+              radioButtons("experience", "Your experience with R:",
+                c(
+                  "None",
+                  "Beginner",
+                  "Intermediate",
+                  "Advanced"
                 ),
-                radioButtons("experience", "Your experience with R:",
-                  c(
-                    "None",
-                    "Beginner",
-                    "Intermediate",
-                    "Advanced"
-                  ),
-                  selected = "Beginner"
-                ),
-                actionButton("save_feedbck", "Save Feedback")
-                  )
+                selected = "Beginner"
+              ),
+              actionButton("save_feedbck", "Save Feedback"),
+              tags$head(tags$style(
+                "#save_feedbck{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+              )),
+            )
           )
         ),
         tabPanel(
@@ -829,23 +954,23 @@ app_ui <- function(request) {
                 ),
                 column(
                   width = 8,
-                  p("This important parameter controls the AI's behavior in choosing 
-                  among possible answers. A higher sampling temperature tells the AI 
-                  to take more risks, producing more diverse and creative 
+                  p("This important parameter controls the AI's behavior in choosing
+                  among possible answers. A higher sampling temperature tells the AI
+                  to take more risks, producing more diverse and creative
                   solutions when the same request is repeated. A lower  temperature
                   (such as 0) results in more
-                  conservative and well-defined solutions, 
+                  conservative and well-defined solutions,
                   but less variety when repeated.
                   "),
                 )
               ),
-              hr(),
+              hr(class = "custom-hr"),
               fluidRow(
                 column(
                   width = 12,
                   h4("Use your own API key"),
                   h5("We pay a small fee to use the AI for every request.
-                    If you use this regularily, 
+                    If you use this regularly,
                     please take a few minutes to create your own API key: "),
 
                   tags$ul(
@@ -860,12 +985,12 @@ app_ui <- function(request) {
                       tags$li("After logging in, click \"Personal\" from top right."),
                       tags$li(
                         "Click \"Manage Account\" and then \"Billing\",
-                        where you can add \"Payment methods\" and set \"Usage 
+                        where you can add \"Payment methods\" and set \"Usage
                         limits\". $5 per month is more than enough."
                       ),
                       tags$li(
                         "Click \"API keys\" to create a new key, 
-                        which can be copied and pasted it below."
+                        which can be copied and pasted below."
                       ),
                   ),
                   uiOutput("valid_key"),
@@ -890,7 +1015,7 @@ app_ui <- function(request) {
               )
             ),
 
-            hr(),
+            hr(class = "custom-hr"),
             fluidRow(
               column(
                 width = 4,
@@ -901,18 +1026,18 @@ app_ui <- function(request) {
               ),
               column(
                 width = 8,
-                h5("Use Python instead of R when generating")
+                h5("Use Python instead of R for generating code and results.")
               )
             ),
 
-            hr(),
+            hr(class = "custom-hr"),
             fluidRow(
               column(
                 width = 4,
                 uiOutput("numeric_as_factor"),
                 tippy::tippy_this(
                   elementId = "numeric_as_factor",
-                  tooltip = "Treat the columns that looks like a category 
+                  tooltip = "Treat the columns that looks like a category
                   as a category. This applies to columns that contain numbers
                   but have very few unique values. ",
                   theme = "light-border"
@@ -923,7 +1048,7 @@ app_ui <- function(request) {
                 uiOutput("max_levels_factor"),
                 tippy::tippy_this(
                   elementId = "max_levels_factor",
-                  tooltip = "To convert a numeric column as category, 
+                  tooltip = "To convert a numeric column as category,
                   the column must have no more than this number of unique values.",
                   theme = "light-border"
                 )
@@ -933,21 +1058,21 @@ app_ui <- function(request) {
                 uiOutput("max_proptortion_factor"),
                 tippy::tippy_this(
                   elementId = "max_proptortion_factor",
-                  tooltip = "To convert a numeric column as category, 
-                  the number of unique values in a column must not exceed 
+                  tooltip = "To convert a numeric column as category,
+                  the number of unique values in a column must not exceed
                   more this proportion of the total number of rows.",
                   theme = "light-border"
                 )
               )
             ),
-            h5("Some columns contains numbers but should be treated 
+            h5("Some columns contain numbers, but should be treated 
             as categorical values or factors. For example, we sometimes 
             use 1 to label success and 0 for failure.
-            If this is selected, using the default setting, a column 
-            is treated as categories when the number of unique values 
+            If this is selected, using the default setting, a column
+            is treated as categories when the number of unique values
             is less than or equal to 12, and less than 10% of the total rows."
             ),
-            hr(),
+            hr(class = "custom-hr"),
             fluidRow(
               column(
                 width = 4,
@@ -955,9 +1080,9 @@ app_ui <- function(request) {
               ),
               column(
                 width = 8,
-                h5("Save your requests and the structure of your data 
-                such as column names and data types, not the data itself. 
-                We can learn from users about creative ways to use AI. 
+                h5("Save your requests and the structure of your data
+                such as column names and data types, not the data itself.
+                We can learn from users about creative ways to use AI.
                 And we can try to improve unsuccessful attempts. ")
               )
             )
@@ -965,14 +1090,6 @@ app_ui <- function(request) {
         )
       ),
 
-#      tabPanel(
-#        title = "Disqus",
-#        value = "Disqus",
-#        div(
-#        tags$head(includeHTML(app_sys("app", "www", "disqus.html")))
-#        )
-#      )
-  # Include custom JavaScript to handle the button click
     tags$script(HTML("
       $(document).on('click', '#first_user', function() {
         // Update the active tab to 'First Time User' within the 'More' navbarMenu
