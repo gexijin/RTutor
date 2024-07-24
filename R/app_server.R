@@ -87,27 +87,27 @@ app_server <- function(input, output, session) {
   # had to use this. Otherwise, the checkbox returns to false
   # when the popup is closed and openned again.
   use_voice <- reactive({
-      use_voice <- FALSE #default
-      tem <- is.null(input$use_voice_button)
-      if(!is.null(input$use_voice)) {
-        use_voice <- input$use_voice
-      }
-      return(use_voice)
+    use_voice <- FALSE #default
+    tem <- is.null(input$use_voice_button)
+    if (!is.null(input$use_voice)) {
+      use_voice <- input$use_voice
+    }
+    return(use_voice)
   })
 
   # Use voice input?
   output$use_heyshiny <- renderUI({
     req(use_voice())
-      tagList(
-        heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
-        heyshiny::speechInput(
-          inputId = "hey_cmd",
-          command = paste(wake_word, "*msg")  # hey cox is more sensitive than 'hi tutor'
-        ), # set the input
-      )
+    tagList(
+      heyshiny::useHeyshiny(language = "en-US"), # configure the heyshiny
+      heyshiny::speechInput(
+        inputId = "hey_cmd",
+        command = paste(wake_word, "*msg")  # hey cox is more sensitive than 'hi tutor'
+      ), # set the input
+    )
   })
 
-   # read the speech input
+  # read the speech input
   observeEvent(input$hey_cmd, {
     speech <- input$hey_cmd
     # message(speech)
@@ -174,10 +174,10 @@ app_server <- function(input, output, session) {
     )
   })
 
-# Show notification when error
+  # Show notification when error
   observeEvent(code_error(), {
-  # show notification message
-    if(code_error()) {
+    # show notification message
+    if (code_error()) {
       showNotification(
         "Resubmit the same request to see if ChatGPT can resolve the error.
         If that fails, change the request.",
@@ -301,7 +301,7 @@ app_server <- function(input, output, session) {
             width = 12,
             selectInput(
               inputId = "select_data",
-              label = "1) Select Dataset",
+              label = "1. Select Dataset",
               choices = datasets,
               selected = "mpg",
               multiple = FALSE
@@ -378,7 +378,7 @@ app_server <- function(input, output, session) {
               selectInput(
                 inputId = "demo_prompt",
                 choices = choices,
-                label = NULL
+                label = "3. Send Request(s)"
               )
             )
           ),
@@ -409,17 +409,22 @@ app_server <- function(input, output, session) {
   # API key management
   #____________________________________________________________________________
 
-    output$language_model <- renderUI({
-      selectInput(
-        inputId = "language_model",
-        choices = language_models,
-        label = NULL,
-        selected = selected_model()
-      )
-    })
+  output$language_model <- renderUI({
+    selectInput(
+      inputId = "language_model",
+      choices = language_models,
+      label = NULL,
+      selected = selected_model()
+    )
+  })
 
-    output$change_temperature <- renderUI({
-      sliderInput(
+  output$change_temperature <- renderUI({
+    tagList(
+      tags$style(HTML("
+      .irs--shiny .irs-bar {border-top: 1px solid #90BD8C;border-bottom: 1px solid #90BD8C;background: #8fca89;}
+      .irs--shiny .irs-single {background-color: #8fca89; color: #000}
+    ")),
+    sliderInput(
         inputId = "temperature",
         label = "Sampling temperature",
         min = 0,
@@ -429,45 +434,46 @@ app_server <- function(input, output, session) {
         round = FALSE,
         width = "100%"
       )
-    })
+    )
+  })
 
-    output$numeric_as_factor <- renderUI({
-      checkboxInput(
-        inputId = "numeric_as_factor",
-        label = strong("Treat as factors"),
-        value = convert_to_factor()
-      )
-    })
+  output$numeric_as_factor <- renderUI({
+    checkboxInput(
+      inputId = "numeric_as_factor",
+      label = strong("Treat as factors"),
+      value = convert_to_factor()
+    )
+  })
 
-    output$max_levels_factor <- renderUI({
-      numericInput(
-        inputId = "max_levels_factor",
-        label = "Max levels",
-        value = max_levels_factor(),
-        min = 3,
-        max = 50,
-        step = 1
-      )
-    })
+  output$max_levels_factor <- renderUI({
+    numericInput(
+      inputId = "max_levels_factor",
+      label = "Max levels",
+      value = max_levels_factor(),
+      min = 3,
+      max = 50,
+      step = 1
+    )
+  })
 
-    output$max_proptortion_factor <- renderUI({
-      numericInput(
-        inputId = "max_proptortion_factor",
-        label = "Max proportion",
-        value = max_proptortion_factor(),
-        min = 0.05,
-        max = 0.5,
-        step = 0.1
-      )
-    })
+  output$max_proptortion_factor <- renderUI({
+    numericInput(
+      inputId = "max_proptortion_factor",
+      label = "Max proportion",
+      value = max_proptortion_factor(),
+      min = 0.05,
+      max = 0.5,
+      step = 0.1
+    )
+  })
 
-    output$contribute_data <- renderUI({
-      checkboxInput(
-        inputId = "contribute_data",
-        label = "Help us make RTutor better",
-        value = contribute_data()
-      )
-    })
+  output$contribute_data <- renderUI({
+    checkboxInput(
+      inputId = "contribute_data",
+      label = "Help us make RTutor better",
+      value = contribute_data()
+    )
+  })
 
   # pop up modal for Settings
   # observeEvent(input$api_button, {
@@ -1608,7 +1614,7 @@ app_server <- function(input, output, session) {
       options = list(
         lengthMenu = c(5, 20, 50, 100),
         pageLength = 10,
-        dom = 'ftp',
+        dom = "ftp",
         scrollX = "400px"
       ),
       rownames = FALSE
@@ -1969,8 +1975,11 @@ app_server <- function(input, output, session) {
     tagList(
       actionButton(
         inputId = "report",
-        label = "Session report"
+        label = "Session Report"
       ),
+      tags$head(tags$style(
+        "#report{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+      )),
       tippy::tippy_this(
         "report",
         "Render a HTML report for this session.",
@@ -1997,7 +2006,10 @@ app_server <- function(input, output, session) {
           actionButton(
             inputId = "render_eda_report_rtutor",
             label = "Render Report"
-          )
+          ),
+          tags$head(tags$style(
+            "#render_eda_report_rtutor{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+          )),
         )
       ),
       br(),
@@ -2007,6 +2019,19 @@ app_server <- function(input, output, session) {
         choices = c("<None>", colnames(df)),
         multiple = FALSE
       ),
+      tags$style(
+        HTML("#eda_target_variable+div .selectize-input {
+              background-color: #F6FFF5 !important;
+              border-color: #90BD8C !important;
+              color: #000 !important;
+              }
+              #eda_target_variable+div .selectize-dropdown {
+              background-color: #F6FFF5 !important;
+              border-color: #90BD8C !important;
+              color: #000 !important;
+              }"
+        )
+      ),
       br(),
       checkboxGroupInput(
         inputId = "eda_variables",
@@ -2015,9 +2040,9 @@ app_server <- function(input, output, session) {
         selected = colnames(df)
       )
     )
-
   })
-   # when user uploads a file and has more than 20 columns, only the first 20 is selected by eda_variables.
+
+  # when user uploads a file and has more than 20 columns, only the first 20 is selected by eda_variables.
   observeEvent(input$user_file, {
     req(!is.null(input$user_file))
     req(input$select_data == uploaded_data)
@@ -2717,11 +2742,26 @@ app_server <- function(input, output, session) {
   output$table1_inputs <- renderUI({
     req(ggpairs_data())
     df <- ggpairs_data()
-    selectInput(
-      inputId = "table1_strata",
-      label = "Select a category for strata",
-      choices = colnames(df)[!sapply(df, is.numeric)],
-      multiple = FALSE
+    tagList(
+      selectInput(
+        inputId = "table1_strata",
+        label = "Select a category for strata",
+        choices = colnames(df)[!sapply(df, is.numeric)],
+        multiple = FALSE
+      ),
+      tags$style(
+        HTML("#table1_strata+div .selectize-input {
+              background-color: #F6FFF5 !important;
+              border-color: #90BD8C !important;
+              color: #000 !important;
+              }
+              #table1_strata+div .selectize-dropdown {
+              background-color: #F6FFF5 !important;
+              border-color: #90BD8C !important;
+              color: #000 !important;
+              }"
+        )
+      )
     )
   })
 
@@ -2755,10 +2795,7 @@ app_server <- function(input, output, session) {
       incProgress(0.3)
       DataExplorer::plot_bar(current_data())
     })
-  },
-  width = 800,
-  height = 800
-  )
+  })
 
   output$distribution_numeric <- renderPlot({
     withProgress(message = "Creating histograms ...", {
@@ -2845,13 +2882,26 @@ app_server <- function(input, output, session) {
     tagList(
       fluidRow(
         column(
-          width = 4,
+          width = 3,
           selectInput(
             inputId = "ggpairs_variables",
             label = "Select variables",
             choices = colnames(df),
             multiple = TRUE,
             selected = selected
+          ),
+          tags$style(
+            HTML("#ggpairs_variables+div .selectize-input {
+                  background-color: #F6FFF5 !important;
+                  border-color: #90BD8C !important;
+                  color: #000 !important;
+                  }
+                  #ggpairs_variables+div .selectize-dropdown {
+                  background-color: #F6FFF5 !important;
+                  border-color: #90BD8C !important;
+                  color: #000 !important;
+                  }"
+            )
           )
         ),
         column(
@@ -2861,16 +2911,36 @@ app_server <- function(input, output, session) {
             label = "Select a category for coloring",
             choices = colnames(df)[!sapply(df, is.numeric)],
             multiple = FALSE
+          ),
+          tags$style(
+            HTML("#ggpairs_variables_color+div .selectize-input {
+                  background-color: #F6FFF5 !important;
+                  border-color: #90BD8C !important;
+                  color: #000 !important;
+                  }
+                  #ggpairs_variables_color+div .selectize-dropdown {
+                  background-color: #F6FFF5 !important;
+                  border-color: #90BD8C !important;
+                  color: #000 !important;
+                  }"
+            )
           )
         ),
-        #add a submit button to refresh the plot
+        # add a submit button to refresh the plot
         column(
-          width = 3,
+          width = 2,
           actionButton(
             inputId = "ggpairs_submit",
             label = strong("Submit"),
             style = "margin-top: 15px;"
-          )
+          ),
+          tags$head(tags$style(
+            "#ggpairs_submit{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+          )),
+        ),
+        column(
+          width = 4,
+          h4("Please wait 1 minute for this plot to be created.")
         )
       )
     )
@@ -2904,9 +2974,7 @@ app_server <- function(input, output, session) {
         }
       })
    })
-  },
-  width = 1200,
-  height = 1200)
+  })
 
 
 
@@ -2929,7 +2997,7 @@ output$RTutor_version <- renderUI({
     )
   })
 
- output$package_list <- renderUI({
+  output$package_list <- renderUI({
     all <- .packages(all.available = TRUE)
     all <- sapply(
       all,
@@ -2938,15 +3006,30 @@ output$RTutor_version <- renderUI({
     all <- unname(all)
     #all <- c("", all)
 
-    selectInput(
-      inputId = "installed_packages",
-      label = paste0(
-        "Search for installed packages ( ",
-        length(all),
-        " total)"
+    tagList(
+      selectInput(
+        inputId = "installed_packages",
+        label = paste0(
+          "Search for installed packages ( ",
+          length(all),
+          " total)"
+        ),
+        choices = all,
+        selected = NULL
       ),
-      choices = all,
-      selected = NULL
+      tags$style(
+        HTML("#installed_packages+div .selectize-input {
+              background-color: #F6FFF5 !important;
+              border-color: #90BD8C !important;
+              color: #000 !important;
+              }
+              #installed_packages+div .selectize-dropdown {
+              background-color: #F6FFF5 !important;
+              border-color: #90BD8C !important;
+              color: #000 !important;
+              }"
+        )
+      )
     )
   })
 
@@ -3049,7 +3132,7 @@ output$RTutor_version <- renderUI({
 
   })
 
-    # 'About' tab FAQ's and answers
+  # 'About' tab FAQ's and answers
   output$faq_list <- renderUI({
     faq_items <- lapply(seq_len(nrow(faqs)), function(i) {
       tags$div(
@@ -3067,10 +3150,10 @@ output$RTutor_version <- renderUI({
     tagList(faq_items)
   })
 
-    # 'About' tab Site Updates table
+  # 'About' tab Site Updates table
   output$site_updates_table <- renderTable({
     site_updates_df
-  }, striped = TRUE)
+  }, striped = FALSE)
 
 
 #
