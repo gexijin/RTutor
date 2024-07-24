@@ -79,23 +79,9 @@ app_ui <- function(request) {
               column(
                 width = 6,
                 textOutput("selected_dataset")
-              )#,
-              # column(
-              #   width = 6,
-              #   actionButton("reset_button", strong("Reset")),
-              #   tags$head(tags$style(
-              #     "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
-              #   )),
-              #   align = "right",
-              #   tippy::tippy_this(
-              #     "reset_button",
-              #     "Reset before uploading a new file. Clears data objects, chat history, and code chunks.",
-              #     theme = "light-border"
-              #   )
-              # )
+              )
             ),
 
-            br(),
             fluidRow(
               column(
                 width = 6,
@@ -110,7 +96,8 @@ app_ui <- function(request) {
 
             fluidRow(
               column(
-                width = 6,
+                width = 12,
+                hr(class = "custom-hr"),
                 tags$label("2. Modify Data Fields (Optional)",
                 style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
@@ -125,11 +112,8 @@ app_ui <- function(request) {
               )
             ),
 
-            # Horizontal Line
-            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
-            hr(),
-
-            tags$label("3) Send Request(s)",
+            hr(class = "custom-hr"),
+            tags$label("3. Send Request(s)",
                 style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;"),
 
             tags$style(HTML("
@@ -148,8 +132,7 @@ app_ui <- function(request) {
             # Example Prompts
             uiOutput("prompt_ui"),
 
-            tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
-            hr(),
+            hr(class = "custom-hr"),
 
             fluidRow(
               column(
@@ -199,11 +182,9 @@ app_ui <- function(request) {
             fluidRow(
               column(12,
                 # Horizontal Line
-                tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
-                hr()
+                hr(class = "custom-hr")
               )
             ),
-            br(),
             tags$head(
               tags$style(HTML("
                 #ask_question {
@@ -271,9 +252,9 @@ app_ui <- function(request) {
                   width = 4,
                   p(
                     HTML("First Time Users:"), #<span style='font-size: 54px;'>&rarr;</span>
-                    style = "font-size: 40px;"
+                    style = "font-size: 34px; margin: 0; padding-top: 10px;"
                   ),
-                  align = 'right'
+                  align = "right"
                 ),
                 column(
                   width = 5,
@@ -281,29 +262,7 @@ app_ui <- function(request) {
                   tags$head(tags$style(
                     "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
                   )),
-                  align = 'left'
-#                     style = "font-size: 34px; margin: 0; padding-top: 10px;"
-#                   ),
-#                   align = "right"
-#                 ),
-#                 column(
-#                   width = 5,
-#                   tags$head(
-#                     tags$style(HTML("
-#                       .new-user-btn {
-#                         display: inline-block;padding: 12px 24px;font-size: 26px;
-#                         font-weight: bold;color: #000;background-color: #8fca89;
-#                         border: none;border-radius: 5px;text-align: center;
-#                         text-decoration: none;
-#                         transition: background-color 0.3s, box-shadow 0.3s;}
-#                       .new-user-btn:hover {background-color: #557952;
-#                         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);color: #fff}
-#                       .new-user-btn:focus {outline: none;
-#                         box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);}
-#                     "))
-#                   ),
-#                   div(align = "left",
-#                     actionButton("first_user", strong("Start Here!"), class = "new-user-btn")),
+                  align = "left"
                 ),
                 column(
                   width = 3,
@@ -312,7 +271,7 @@ app_ui <- function(request) {
                     width = "155",
                     height = "77"
                   ),
-                  align = 'center'
+                  align = "center"
                 )
               )
             ),
@@ -322,11 +281,26 @@ app_ui <- function(request) {
               fluidRow(
                 column(
                   width = 4,
-                  selectInput(
-                    inputId = "selected_chunk",
-                    label = "AI generated code:",
-                    selected = NULL,
-                    choices = NULL
+                  tagList(
+                    selectInput(
+                      inputId = "selected_chunk",
+                      label = "AI generated code:",
+                      selected = NULL,
+                      choices = NULL
+                    ),
+                    tags$style(
+                      HTML("#selected_chunk+div .selectize-input {
+                            background-color: #F6FFF5 !important;
+                            border-color: #90BD8C !important;
+                            color: #000 !important;
+                            }
+                            #selected_chunk+div .selectize-dropdown {
+                            background-color: #F6FFF5 !important;
+                            border-color: #90BD8C !important;
+                            color: #000 !important;
+                            }"
+                      )
+                    )
                   ),
                   tippy::tippy_this(
                     "selected_chunk",
