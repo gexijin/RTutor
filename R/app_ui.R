@@ -129,7 +129,7 @@ app_ui <- function(request) {
             tags$style(HTML("hr{border-top: 1px solid #90BD8C;}")),
             hr(),
 
-            tags$label("3) Send Request(s)",
+            tags$label("3. Send Request(s)",
                 style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;"),
 
             tags$style(HTML("
@@ -265,7 +265,7 @@ app_ui <- function(request) {
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
-              uiOutput("RTutor_version_main"),
+              # uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
                   width = 4,

@@ -378,7 +378,7 @@ app_server <- function(input, output, session) {
               selectInput(
                 inputId = "demo_prompt",
                 choices = choices,
-                label = "3. Send Request(s)"
+                label = NULL
               )
             )
           ),
@@ -1028,6 +1028,16 @@ app_server <- function(input, output, session) {
         )
       )
     }
+  })
+
+  observeEvent(input$submit_button, {
+
+    while (dev.cur() > 1) {
+      dev.off()
+    }
+
+    # Open a new PDF device without creating an output file
+    pdf(NULL)
   })
 
   output$openAI <- renderText({
