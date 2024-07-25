@@ -612,7 +612,40 @@ app_ui <- function(request) {
 
         hr(),
         uiOutput("session_info")
-      )#,
+      ),
+      navbarMenu(
+        title = "More",
+        tabPanel(
+          title = "First Time User",
+          value = "first-time-user",
+          fluidRow(
+            column(
+              width = 9,
+              h4(
+                "Start by watching an 8-min"
+                )
+            ),
+            column(
+              width = 3,
+              img(
+                src = "www/logo.png",
+                width = "155",
+                height = "77"
+              ),
+              align = 'left'
+            )
+          )
+        ),
+        tabPanel(
+          title = "About"
+        ),
+        tabPanel(
+          title = "FAQ"
+        ),
+        tabPanel(
+          title = "Settings"
+        )
+      )
       # navbarMenu(
       #   title = "More",
       #   tabPanel(
