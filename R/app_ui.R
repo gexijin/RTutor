@@ -533,86 +533,86 @@ app_ui <- function(request) {
 
 
 
-      tabPanel(
-        title = "About",
-        value = "About",
-        uiOutput("RTutor_version"),
-        p("RTutor uses ",
-          a(
-            "OpenAI's",
-            href = "https://openai.com/",
-            target = "_blank"
-          ),
-          " powerful large language models",
-          " to translate natural language into R code, which is then excuted.",
-          "You can request your analysis,
-          just like asking a real person.",
-          "Upload a data file (CSV, TSV/tab-delimited text files, and Excel) 
-          and just analyze it in plain English. 
-          Your results can be downloaded as an HTML report in minutes!"
-        ),
-        p("NO WARRANTY! Some of the scripts run but may yield incorrect result. 
-        Please use the auto-generated code as a starting 
-        point for further refinement and validation."
-        ),
+      # tabPanel(
+      #   title = "About",
+      #   value = "About",
+      #   uiOutput("RTutor_version"),
+      #   p("RTutor uses ",
+      #     a(
+      #       "OpenAI's",
+      #       href = "https://openai.com/",
+      #       target = "_blank"
+      #     ),
+      #     " powerful large language models",
+      #     " to translate natural language into R code, which is then excuted.",
+      #     "You can request your analysis,
+      #     just like asking a real person.",
+      #     "Upload a data file (CSV, TSV/tab-delimited text files, and Excel) 
+      #     and just analyze it in plain English. 
+      #     Your results can be downloaded as an HTML report in minutes!"
+      #   ),
+      #   p("NO WARRANTY! Some of the scripts run but may yield incorrect result. 
+      #   Please use the auto-generated code as a starting 
+      #   point for further refinement and validation."
+      #   ),
 
-        hr(),
-        p(" Written by Dr. Steven Ge",
-          a(
-            "(Twitter, ",
-            href = "https://twitter.com/StevenXGe",
-            target = "_blank"
-          ),
-          a(
-            "LinkedIn),",
-            href = "https://www.linkedin.com/in/steven-ge-ab016947/",
-            target = "_blank"
-          ),       
-          " as part of RTutor LLC. For feedback, please email",
-          a(
-            "gexijin@gmail.com.",
-            href = "mailto:gexijin@gmail.com?Subject=RTutor"
-          ),
-          " Source code at ",
-          a(
-            "GitHub,",
-            href = "https://github.com/gexijin/RTutor"
-          ),
-          " from where you can also find 
-          instruction to install RTutor as an R package. 
-          The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
-        ),
-        h4("For businesses, RTutor can be customized and locally installed to  
-        easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
+      #   hr(),
+      #   p(" Written by Dr. Steven Ge",
+      #     a(
+      #       "(Twitter, ",
+      #       href = "https://twitter.com/StevenXGe",
+      #       target = "_blank"
+      #     ),
+      #     a(
+      #       "LinkedIn),",
+      #       href = "https://www.linkedin.com/in/steven-ge-ab016947/",
+      #       target = "_blank"
+      #     ),       
+      #     " as part of RTutor LLC. For feedback, please email",
+      #     a(
+      #       "gexijin@gmail.com.",
+      #       href = "mailto:gexijin@gmail.com?Subject=RTutor"
+      #     ),
+      #     " Source code at ",
+      #     a(
+      #       "GitHub,",
+      #       href = "https://github.com/gexijin/RTutor"
+      #     ),
+      #     " from where you can also find 
+      #     instruction to install RTutor as an R package. 
+      #     The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
+      #   ),
+      #   h4("For businesses, RTutor can be customized and locally installed to  
+      #   easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
 
-        hr(),
-        p("RTutor went viral on ", 
-            a(
-              "LinkedIn, ",
-              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
-            ), 
-            a(
-              "Twitter, ",
-              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
-            ),
-            a(
-              "Twitter(Physacourses),",
-              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
-            ),
-            " and ",
-            a(
-              "Facebook (Carlo Pecoraro).",
-              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
-            )
-        ),
+      #   hr(),
+      #   p("RTutor went viral on ", 
+      #       a(
+      #         "LinkedIn, ",
+      #         href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+      #       ), 
+      #       a(
+      #         "Twitter, ",
+      #         href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+      #       ),
+      #       a(
+      #         "Twitter(Physacourses),",
+      #         href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+      #       ),
+      #       " and ",
+      #       a(
+      #         "Facebook (Carlo Pecoraro).",
+      #         href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+      #       )
+      #   ),
 
-        hr(),
+      #   hr(),
 
-        uiOutput("package_list"),
+      #   uiOutput("package_list"),
 
-        hr(),
-        uiOutput("session_info")
-      ),
+      #   hr(),
+      #   uiOutput("session_info")
+      # ),
       navbarMenu(
         title = "More",
         tabPanel(
@@ -671,71 +671,194 @@ app_ui <- function(request) {
             )
           ),
 
-          hr(class = "custom-hr")#,
+          hr(class = "custom-hr"),
 
-          # fluidRow(
-          #   column(
-          #     width = 12,
-          #     h3("Quick start:"),
-          #     tags$ul(
-          #       tags$li(
-          #         "Explore the data at the EDA tab first.  Then start with simple requests
-          #         such as distributions, basic plots. Gradually add complexity.
-          #         ", style = "color:red"
-          #       ),
-          #       tags$li(
-          #         "The default model is now GPT-4 Turbo, which is slower and expensive, but more accurate.
-          #         In the same session, previous questions and code chunks become the context for your new request.
-          #         For example, you can simply say \"Change background color to white\" to refine the
-          #         plot generated by the previous chunk. You can also clean your data step by step. "
-          #       ),
-          #       tags$li(
-          #         "To analyze a new dataset, or to start over, click the Reset button first. "
-          #       ),
-          #       tags$li(
-          #         "Prepare and clean your data in Excel first. Name columns properly.
-          #         ChatGPT tries to guess the meaning of column names, even if they are abbrievated."
-          #       ),
-          #       tags$li(
-          #         "RTutor can only analyze traditional statistics data, where rows are
-          #         observations and columns are variables. For complex data, try https://chatlize.ai."
-          #       ),
-          #       tags$li(
-          #         "Once uploaded, your data is automatically loaded into
-          #         R as a data frame called df. You do NOT need to ask RTutor to load data.
-          #         Check if the data types of the columns are correct.
-          #         Change if needed, especially when numbers are used to code for categories."
-          #       ),
-          #       tags$li(
-          #         "An additional file can be uploaded as df2 to be analyze togehter.
-          #         To use it, you must specify 'df2' in your prompts. "
-          #       ),
-          #       tags$li(
-          #         "Use the Q&A box to ask questions about the code, result, or error messages.
-          #         You can ask for methods to use or develop a plan. "
-          #       ),
-          #       tags$li(
-          #         "Before sending your request to OpenAI, we do prompt engineering based on the uploaded data.
-          #         We add \"Generate R code\" to the beginning, and
-          #         append something like \"Use the df data frame.
-          #         Note that highway is numeric, ...\" afterward.
-          #         If you are not using any data (plot a function or simulations),
-          #         choose \"No data\" from the Data dropdown."
-          #       ),
-          #       tags$li(
-          #         "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session.
-          #         If you explain the background of the data and the meaning of
-          #         the columns, you can ask general questions like asking a clueless statistician."
-          #       ),
-          #       tags$li(
-          #         "Be skeptical. The generated code can be logically wrong even if it produces results without error."
-          #       )
-          #     )
-          #   )
-          # )
+          fluidRow(
+            column(
+              width = 12,
+              h3("Quick start:"),
+              tags$ul(
+                tags$li(
+                  "Explore the data at the EDA tab first.  Then start with simple requests
+                  such as distributions, basic plots. Gradually add complexity.
+                  ", style = "color:red"
+                ),
+                tags$li(
+                  "The default model is now GPT-4 Turbo, which is slower and expensive, but more accurate.
+                  In the same session, previous questions and code chunks become the context for your new request.
+                  For example, you can simply say \"Change background color to white\" to refine the
+                  plot generated by the previous chunk. You can also clean your data step by step. "
+                ),
+                tags$li(
+                  "To analyze a new dataset, or to start over, click the Reset button first. "
+                ),
+                tags$li(
+                  "Prepare and clean your data in Excel first. Name columns properly.
+                  ChatGPT tries to guess the meaning of column names, even if they are abbrievated."
+                ),
+                tags$li(
+                  "RTutor can only analyze traditional statistics data, where rows are
+                  observations and columns are variables. For complex data, try https://chatlize.ai."
+                ),
+                tags$li(
+                  "Once uploaded, your data is automatically loaded into
+                  R as a data frame called df. You do NOT need to ask RTutor to load data.
+                  Check if the data types of the columns are correct.
+                  Change if needed, especially when numbers are used to code for categories."
+                ),
+                tags$li(
+                  "An additional file can be uploaded as df2 to be analyze togehter.
+                  To use it, you must specify 'df2' in your prompts. "
+                ),
+                tags$li(
+                  "Use the Q&A box to ask questions about the code, result, or error messages.
+                  You can ask for methods to use or develop a plan. "
+                ),
+                tags$li(
+                  "Before sending your request to OpenAI, we do prompt engineering based on the uploaded data.
+                  We add \"Generate R code\" to the beginning, and
+                  append something like \"Use the df data frame.
+                  Note that highway is numeric, ...\" afterward.
+                  If you are not using any data (plot a function or simulations),
+                  choose \"No data\" from the Data dropdown."
+                ),
+                tags$li(
+                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session.
+                  If you explain the background of the data and the meaning of
+                  the columns, you can ask general questions like asking a clueless statistician."
+                ),
+                tags$li(
+                  "Be skeptical. The generated code can be logically wrong even if it produces results without error."
+                )
+              )
+            )
+          )
         ),
         tabPanel(
-          title = "About"
+          title = "About",
+          value = "About",
+          uiOutput("RTutor_version"),
+          p("RTutor uses ",
+            a(
+              "OpenAI's",
+              href = "https://openai.com/",
+              target = "_blank"
+            ),
+            " powerful large language models",
+            " to translate natural language into R (or Python) code, which is then excuted.",
+            "You can request your analysis,
+            just like asking a real person.",
+            "Upload a data file (CSV, TSV/tab-delimited text files, and Excel)
+            and just analyze it in plain English.
+            Your results can be downloaded as an HTML report in minutes!"
+          ),
+          p("NO WARRANTY! Some of the scripts run but may yield incorrect result.
+          Please use the auto-generated code as a starting
+          point for further refinement and validation."
+          ),
+
+          hr(class = "custom-hr"),
+          p(" Written by Dr. Steven Ge",
+            a(
+              "(Twitter, ",
+              href = "https://twitter.com/StevenXGe",
+              target = "_blank"
+            ),
+            a(
+              "LinkedIn),",
+              href = "https://www.linkedin.com/in/steven-ge-ab016947/",
+              target = "_blank"
+            ),
+            " as part of RTutor LLC. For feedback, please email",
+            a(
+              "gexijin@gmail.com.",
+              href = "mailto:gexijin@gmail.com?Subject=RTutor"
+            ),
+            " Source code at ",
+            a(
+              "GitHub,",
+              href = "https://github.com/gexijin/RTutor"
+            ),
+            " from where you can also find
+            instruction to install RTutor as an R package.
+            The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
+          ),
+          h4("For businesses, RTutor can be customized and locally installed to
+          easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
+
+          hr(class = "custom-hr"),
+          p("RTutor went viral on ", 
+              a(
+                "LinkedIn, ",
+                href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+              ),
+              a(
+                "Twitter, ",
+                href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+              ),
+              a(
+                "Twitter(Physacourses),",
+                href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+              ),
+              " and ",
+              a(
+                "Facebook (Carlo Pecoraro).",
+                href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+              )
+          ),
+
+          # hr(class = "custom-hr"),
+
+          # uiOutput("package_list"),
+
+          hr(class = "custom-hr"),
+
+          fluidRow(
+            column(
+              width = 4,
+              uiOutput("package_list")
+            ),
+            # Site Update Log component
+            column(
+              width = 8,
+              checkboxInput("site_update_log", strong("See Site Updates Log & R Session Info"), FALSE),
+                tags$head(tags$style(
+                  "#site_update_log{font-size: 16px;color: black}"
+              ))
+            )
+          ),
+
+          hr(class = "custom-hr"),
+
+          # Session Info Section
+          fluidRow(
+            conditionalPanel(
+              condition = "input.site_update_log == 1", #input.site_update_log == 1
+              column(
+                width = 6,
+                div(
+                  tagList(
+                    tags$head(
+                      tags$style(HTML(".site-updates-wrapper table {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
+                        .site-updates-wrapper table thead th, .site-updates-wrapper table td {border: 2px solid #90BD8C;}
+                        .site-updates-wrapper table tbody tr:nth-child(odd) {background-color: #f3faf3;}
+                        .site-updates-wrapper table tbody tr:nth-child(even) {background-color: #ffffff;}
+                      "))
+                    ),
+                    div(
+                      class = "site-updates-wrapper",
+                      tableOutput("site_updates_table")
+                    )
+                  )
+                )
+              ),
+              column(
+                width = 6,
+                uiOutput("session_info")
+              )
+            )
+          ),
+          hr(class = "custom-hr")
         ),
         tabPanel(
           title = "FAQ"
