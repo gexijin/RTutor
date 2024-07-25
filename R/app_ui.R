@@ -864,7 +864,7 @@ app_ui <- function(request) {
           title = "FAQ",
           fluidRow(
             column(
-              width = 6,
+              width = 12,
               h4(style = "font-weight: bold", "Frequently asked Questions"),
               uiOutput("faq_list"),
               tags$style(HTML("
@@ -889,40 +889,40 @@ app_ui <- function(request) {
                   }
                 });
               '))
-            ),
-            column(
-              width = 6,
-              h4(style = "font-weight: bold", "Comments & Questions"),
-              tags$style(type = "text/css", "textarea {width:100%}"),
-              tags$textarea(
-                id = "user_feedback",
-                placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-                rows = 4,
-                ""
-              ),
-              radioButtons("helpfulness", "How useful is RTutor?",
-                c(
-                  "Not at all",
-                  "Slightly",
-                  "Helpful",
-                  "Extremely"
-                ),
-                selected = "Slightly"
-              ),
-              radioButtons("experience", "Your experience with R:",
-                c(
-                  "None",
-                  "Beginner",
-                  "Intermediate",
-                  "Advanced"
-                ),
-                selected = "Beginner"
-              ),
-              actionButton("save_feedbck", "Save Feedback"),
-              tags$head(tags$style(
-                "#save_feedbck{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
-              )),
-            )
+            )#,
+            # column(
+            #   width = 6,
+            #   h4(style = "font-weight: bold", "Comments & Questions"),
+            #   tags$style(type = "text/css", "textarea {width:100%}"),
+            #   tags$textarea(
+            #     id = "user_feedback",
+            #     placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+            #     rows = 4,
+            #     ""
+            #   ),
+            #   radioButtons("helpfulness", "How useful is RTutor?",
+            #     c(
+            #       "Not at all",
+            #       "Slightly",
+            #       "Helpful",
+            #       "Extremely"
+            #     ),
+            #     selected = "Slightly"
+            #   ),
+            #   radioButtons("experience", "Your experience with R:",
+            #     c(
+            #       "None",
+            #       "Beginner",
+            #       "Intermediate",
+            #       "Advanced"
+            #     ),
+            #     selected = "Beginner"
+            #   ),
+            #   actionButton("save_feedbck", "Save Feedback"),
+            #   tags$head(tags$style(
+            #     "#save_feedbck{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+            #   )),
+            # )
           )
         ),
         tabPanel(

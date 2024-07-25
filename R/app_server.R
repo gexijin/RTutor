@@ -2903,14 +2903,6 @@ app_server <- function(input, output, session) {
 
   })
 
-  observe({
-    shinyjs::toggle(id = "user_feedback", condition = TRUE)
-    shinyjs::toggle(id = "save_feedbck", condition = TRUE)
-    shinyjs::toggle(id = "helpfulness", condition = TRUE)
-    shinyjs::toggle(id = "experience", condition = TRUE)
-
-  })
-
   # 'About' tab FAQ's and answers
   output$faq_list <- renderUI({
     faq_items <- lapply(seq_len(nrow(faqs)), function(i) {
