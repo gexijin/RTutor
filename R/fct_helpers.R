@@ -1130,3 +1130,58 @@ faqs <- data.frame(
   ),
   stringsAsFactors = FALSE
 )
+
+
+# Create a data frame with update versions and descriptions
+# Used in site_updates_table component
+site_updates_df <- data.frame(
+  Version = c(
+    "V0.98.3", "V0.98.2", "V0.98",
+    "V0.97", "V0.96", "V0.95",
+    "V0.94", "V0.93", "V0.92",
+    "V0.91", "V0.90", "V0.8.6",
+    "V0.8.5", "V0.8.4", "V0.8.3",
+    "V0.8.2", "V0.8.1", "V0.8.0",
+    "V0.7.6", "V0.7.5", "V0.7",
+    "V0.6", "V0.5", "V0.4",
+    "V0.3", "V0.2", "V0.1"
+  ),
+  Date = c("11/1/2023","11/1/2023","10/28/2023",
+           "10/23/2023","9/26/2023","6/11/2023",
+           "4/21/2023","3/26/2023","3/8/2023",
+           "2/6/2023","1/15/2023","1/8/2023",
+           "1/6/2023","1/5/2023","1/5/2023",
+           "1/4/2023","1/3/2023","1/3/2023",
+           "12/31/2022","12/31/2022","12/27/2022",
+           "12/27/2022","12/24/2022","12/23/2022",
+           "12/20/2022","12/16/2022","12/11/2022"),
+  Description = c(
+    "Fix issue with EDA report when the target variable is categorical or not specified.",
+    "Comprehensive EDA report!",
+    "Ask questions about code, error. Second data file upload.",
+    "GPT-4 becomes the default. Make ggplot2 a preferred method for plotting. Use R environment to enable successive data manipulation.",
+    "Include column names in all requests. GPT-4 is available.",
+    "ChatGPT(gpt-3.5-turbo) becomes default model.",
+    "Interactive plots using CanvasXpress.",
+    "Change data types. Add data description. Improve voice input.",
+    "Includes description of data structure in prompt.",
+    "Voice input is improved. Just enable microphone and say Tutor...",
+    "Generates and runs Python code in addition to R!",
+    "Add description of the levels in factors.",
+    "Demo in many foreign languages.",
+    "Collect user feedback.",
+    "Collect some user data for improvement.",
+    "Auto-convert first column as row names.",
+    "Option to convert some numeric columns with few unique levels to factors.",
+    "Add description of columns (numeric vs. categorical).",
+    "Add RNA-seq data and example requests.",
+    "Redesigned UI.",
+    "Add EDA tab.",
+    "Keeps record of all code chunks for reuse and report.",
+    "Keep current code and continue.",
+    "Interactive plot. Voice input optional.",
+    "Add voice recognition.",
+    "Add temperature control. Server reboot reminder.",
+    "Initial launch"
+  )
+)

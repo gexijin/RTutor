@@ -2929,6 +2929,11 @@ app_server <- function(input, output, session) {
     tagList(faq_items)
   })
 
+  # 'About' tab Site Updates table
+  output$site_updates_table <- renderTable({
+    site_updates_df
+  }, striped = FALSE)
+
 
 #
 #  Python

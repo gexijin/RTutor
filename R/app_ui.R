@@ -639,238 +639,526 @@ app_ui <- function(request) {
 
         hr(),
 
-        fluidRow(
-          column(
-            width = 12,
-            h4(style = "font-weight: bold", "Frequently asked Questions"),
-            uiOutput("faq_list"),
-            tags$style(HTML("
-              .faq-answer {
-                display: none;
-                padding-left: 10px;
-              }
-              .faq-question {
-                cursor: pointer;
-                padding: 5px;
-                border: 1px solid #90BD8C;
-                background-color: #F6FFF5;
-              }
-            ")),
-            tags$script(HTML('
-              $(document).on("click", ".faq-question", function() {
-                var answer = $(this).next(".faq-answer");
-                if (answer.is(":visible")) {
-                  answer.hide();
-                } else {
-                  answer.show();
-                }
-              });
-            '))
-          )
-        ),
-
-        # h3("Frequently asked questions:"),
-
-        # h5("1.	What is RTutor?"),
-        # p("It is an artificial intelligence (AI)-based app that enables 
-        # users to interact with your data via natural language.
-        # After uploading a 
-        # dataset, users ask questions about or request analyses in 
-        # English. The app generates and runs R code to answer that question 
-        # with plots and numeric results."),
-
-        # h5("2.	How does RTutor work?"),
-        # p("The requests are structured and sent to OpenAI’s AI
-        # system, which returns R code. The R code is cleaned up and 
-        # executed in a Shiny 
-        # environment, showing results or error messages. Multiple 
-        # requests are logged to produce an R Markdown file, which can be
-        #   knitted into an HTML report. This enables record keeping 
-        #   and reproducibility."),
-
-        # h5("3. Is my data uploaded to OpenAI?"),
-        # p("No. The column names of your data, not the data itself, is sent to OpenAI as a prompt to generate R code. Your data is not stored in our server after the session."),
-
-        # h5("4.	Who is it for?"),
-        # p("The primary goal is to help people with some R experience to learn
-        # R or be more productive. RTutor can be used to quickly speed up the 
-        # coding process using R. It gives you a draft code to test and 
-        # refine. Be wary of bugs and errors. "),
-
-        # h5("5.	How do you make sure the results are correct? "),
-        # p("Try to word your question differently. And try 
-        # the same request several time. A higher temperature parameter will give 
-        # diverse choices. Then users can double-check to see 
-        # if you get the same results from different runs."),
-
-        # h5("6.	Can you use RTutor to do R coding homework?"),
-        # p("No. That will defy the purpose. You need to learn
-        # R coding properly to be able to tell if the generated 
-        # R coding is correct.  "),
-
-        # h5("7.	Can private companies use RTutor? "),
-        # p("No. It can be tried as a demo. RTutor website 
-        # dnd source code are freely available for non-profit organizations
-        # only and distributed using the CC NC 3.0 license."),
-
-        # h5("8.	Can you run RTutor locally?"),
-        # p("Yes. Download the R package and install it locally. 
-        # Then you need to obtain an API key from OpenAI."),
-
-        # h5("9.	Why do I get different results with the same request? "),
-        # p("OpenAI’s language model has a certain degree of randomness 
-        # that could be adjusted by parameters called \"temperature\". 
-        # Set this in  Settings"),
-
-        # h5("10.	Can people without R coding experience use RTutor for statistical analysis? "),
-        # p("Not entirely. This is because the generated code can be wrong.
-        # However, it could be used to quickly conduct data 
-        # visualization, and exploratory data analysis (EDA). 
-        # Just be mindful of this experimental technology. "),
-
-        # h5("11.	Can this replace statisticians or data scientists?"),
-        # p("No. But RTutor can make them more efficient."),
-
-        # h5("12.	How do I  write my request effectively?"),
-        # p("Imagine you have a summer intern, 
-        # a collge student 
-        # who took one semester of statistics and R. You send the 
-        # intern emails with instructions and he/she sends 
-        # back code and results. The intern is not experienced, 
-        # thus error-prone, but is hard working. Thanks to AI, this
-        # intern is lightning fast and nearly free."),
-
-        # h5("13. Can I install R package in the AI generated code?"),
-        # p("No. But we are working to pre-install all the R
-        #   packages on the server! Right now we finished the top 5000 most 
-        #   frequently used R packages. Chances are that your favorite package
-        #   is already installed."),
-
-        # h5("14. Can I upload big files to the site?"),
-        # p("Not if it is more than 10MB. Try to get a small portion of your data. 
-        # Upload it to the site to get the code, which can be run locally on your 
-        # laptop. Alternatively, download RTutor R package, and use it from your
-        # own computer."),
-
-
-        # h5("15. Voice input does not work!"),
-        # p("One of the main reason
-        # is that your browser block the website site from accessing the microphone. 
-        # Make sure you access the site using",
-        # a(
-        #   "https://RTutor.ai.",
-        #   href = "https://RTutor.ai"
+        # fluidRow(
+        #   column(
+        #     width = 6,
+        #     h4(style = "font-weight: bold", "Frequently asked Questions"),
+        #     uiOutput("faq_list"),
+        #     tags$style(HTML("
+        #       .faq-answer {
+        #         display: none;
+        #         padding-left: 10px;
+        #       }
+        #       .faq-question {
+        #         cursor: pointer;
+        #         padding: 5px;
+        #         border: 1px solid #90BD8C;
+        #         background-color: #F6FFF5;
+        #       }
+        #     ")),
+        #     tags$script(HTML('
+        #       $(document).on("click", ".faq-question", function() {
+        #         var answer = $(this).next(".faq-answer");
+        #         if (answer.is(":visible")) {
+        #           answer.hide();
+        #         } else {
+        #           answer.show();
+        #         }
+        #       });
+        #     '))
+        #   ),
+        #   column(
+        #     width = 6,
+        #     div(
+        #       tagList(
+        #         tags$head(
+        #           tags$style(HTML(".site-updates-wrapper table {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
+        #             .site-updates-wrapper table thead th, .site-updates-wrapper table td {border: 2px solid #90BD8C;}
+        #             .site-updates-wrapper table tbody tr:nth-child(odd) {background-color: #f3faf3;}
+        #             .site-updates-wrapper table tbody tr:nth-child(even) {background-color: #ffffff;}
+        #           "))
+        #         ),
+        #         div(
+        #           class = "site-updates-wrapper",
+        #           tableOutput("site_updates_table")
+        #         )
+        #       )
+        #     )
+        #   )
         # ),
-        # "With http, mic access is automatically blocked in Chrome.
-        # Speak closer to the mic. Make sure there 
-        # is only one browser tab using the mic. "),
 
-        # h5("16. Is that your photo? "),
-        # p("No. I am an old guy. The photo was synthesized by AI. 
-        # Using prompts \'statistics tutor\', the image was generated by ",
-        # a(
-        #   "Stable Diffusion 2.0.",
-        #   href = "https://stability.ai/"
-        # ),
-        # "If you look carefully, you can see that her fingers are messed up."),
-
-
-        hr(),
-        h4("Update log:"),
-        tags$ul(
-           
-           tags$li(
-            "April 26, 2024: Defaults to the latest GPT-4V model of 4/09."
-          ),
-           tags$li(
-            "v0.98.4  3/2/2024. Add a few rows of data in prompt."
-          ), 
-           tags$li(
-            "v0.98.3  11/1/2023. Fix issue with EDA report when the target variable is categorical or not specified."
-          ),  
-           tags$li(
-            "v0.98.2  11/1/2023. Comprehensive EDA report!"
-          ),           
-          tags$li(
-            "v 0.98  10/28/2023. Ask questions about code, error. Second data file upload."
-          ),          
-          tags$li(
-            "v 0.97  10/23/2023. GPT-4 becomes the default. Make ggplot2 a preferred method for plotting.
-             Use R environment to enable successive data manipulation."
-          ),
-          tags$li(
-            "v 0.96  9/26/2023. Include column names in all requests. GPT-4 is available."
-          ),
-          tags$li(
-            "v 0.95  6/11/2023. ChatGPT(gpt-3.5-turbo) becomes default model."
-          ),
-          tags$li(
-            "v 0.94  4/21/2023. Interactive plots using CanvasXpress."
-          ),
-          tags$li(
-            "v 0.93  3/26/2023. Change data types. Add data description. Improve voice input."
-          ),
-          tags$li(
-            "v 0.92  3/8/2023. Includes description of data structure in prompt."
-          ),
-          tags$li(
-            "v 0.91  2/6/2023. Voice input is improved. 
-            Just enable micphone and say Tutor..."
-          ),
-          tags$li(
-            "v 0.90  1/15/2023. Generates and runs Pyton code in addition to R!"
-          ),
-          tags$li(
-            "v 0.8.6  1/8/2023. Add description of the levels in factors."
-          ),
-          tags$li(
-            "v 0.8.5  1/6/2023. Demo in many foreign languages."
-          ),
-          tags$li(
-            "v 0.8.4  1/5/2023. Collect  user feedback."
-          ),
-          tags$li(
-            "v 0.8.3  1/5/2023. Collect some user data for improvement."
-          ),
-          tags$li(
-            "v 0.8.2  1/4/2023. Auto convert first column as row names."
-          ),
-          tags$li(
-            "v 0.8.1  1/3/2023. Option to convert some numeric columns with few unique levels to factors."
-          ),
-          tags$li(
-            "v 0.8.0  1/3/2023. Add description of columns (numeric vs. categorical)."
-          ),
-          tags$li(
-            "v 0.7.6 12/31/2022. Add RNA-seq data and example requests."
-          ),
-          tags$li(
-            "v 0.7.5 12/31/2022. Redesigned UI."
-          ),
-          tags$li(
-            "v 0.7 12/27/2022. Add EDA tab."
-          ),
-          tags$li(
-            "v 0.6 12/27/2022. Keeps record of all code chunks for resue and report."
-          ),
-          tags$li(
-            "v 0.5 12/24/2022. Keep current code and continue."
-          ),
-          tags$li(
-            "v 0.4 12/23/2022. Interactive plot. Voice input optional."
-          ),
-          tags$li(
-            "v0.3 12/20/2022. Add voice recognition."
-          ),
-          tags$li(
-            "V0.2 12/16/2022. Add temperature control. Server reboot reminder."
-          ),
-          tags$li(
-            "V0.1 12/11/2022. Initial launch"
-          )
-        ),
         hr(),
         uiOutput("session_info")
+      ),
+      navbarMenu(
+        title = "More",
+        tabPanel(
+          title = "First Time User",
+          value = "first-time-user",
+          # uiOutput("RTutor_version_main"),
+          fluidRow(
+            column(
+              width = 9,
+              h4(
+                "Start by watching an 8-min ",
+                a(
+                  "YouTube video!",
+                  href="https://youtu.be/a-bZW26nK9k",
+                  target = "_blank"
+                ),
+                style="color:red"
+              ),
+              # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
+              #   a(
+              #     "a comprehensive EDA report.",
+              #     href="https://htmlpreview.github.io/?https://github.com/gexijin/gEDA/blob/main/example_report.html",
+              #     target = "_blank"
+              #   ),
+              #  " Oct 28, 2023 (v0.98):  Ask questions about the code, result, error, or statistics! Upload a second file.
+              # Oct 23, 2023 (v0.97): GPT-4 becomes the default.
+              # Using ggplot2 is now preferred. Consectitive data manipulation is enabled."),
+              h5("See",
+                a(
+                  "GitHub",
+                  href = "https://github.com/gexijin/RTutor"
+                ),
+                " for source code, bug reports, and instructions to install RTutor as an R package.
+                As a small startup, we are open to partnerships with both academia and industry.
+              We can do demos and seminars via Zoom if time permits."
+              ),
+              h5("Also try ",
+                a(
+                  "Chatlize.ai,",
+                  href="https://chatlize.ai",
+                  target = "_blank"
+                ),
+                " a more general platform for analyzing data through chats. Multiple files with different formats. Python support."
+              ),
+
+              align = "left"
+            ),
+            column(
+              width = 3,
+              img(
+                src = "www/logo.png",
+                width = "155",
+                height = "77"
+              ),
+              align = 'left'
+            )
+          ),
+
+          hr(class = "custom-hr"),
+
+          fluidRow(
+            column(
+              width = 12,
+              h3("Quick start:"),
+              tags$ul(
+                tags$li(
+                  "Explore the data at the EDA tab first.  Then start with simple requests
+                  such as distributions, basic plots. Gradually add complexity.
+                  ", style = "color:red"
+                ),
+                tags$li(
+                  "The default model is now GPT-4 Turbo, which is slower and expensive, but more accurate.
+                  In the same session, previous questions and code chunks become the context for your new request.
+                  For example, you can simply say \"Change background color to white\" to refine the
+                  plot generated by the previous chunk. You can also clean your data step by step. "
+                ),
+                tags$li(
+                  "To analyze a new dataset, or to start over, click the Reset button first. "
+                ),
+                tags$li(
+                  "Prepare and clean your data in Excel first. Name columns properly.
+                  ChatGPT tries to guess the meaning of column names, even if they are abbrievated."
+                ),
+                tags$li(
+                  "RTutor can only analyze traditional statistics data, where rows are
+                  observations and columns are variables. For complex data, try https://chatlize.ai."
+                ),
+                tags$li(
+                  "Once uploaded, your data is automatically loaded into
+                  R as a data frame called df. You do NOT need to ask RTutor to load data.
+                  Check if the data types of the columns are correct.
+                  Change if needed, especially when numbers are used to code for categories."
+                ),
+                tags$li(
+                  "An additional file can be uploaded as df2 to be analyze togehter.
+                  To use it, you must specify 'df2' in your prompts. "
+                ),
+                tags$li(
+                  "Use the Q&A box to ask questions about the code, result, or error messages.
+                  You can ask for methods to use or develop a plan. "
+                ),
+                tags$li(
+                  "Before sending your request to OpenAI, we do prompt engineering based on the uploaded data.
+                  We add \"Generate R code\" to the beginning, and
+                  append something like \"Use the df data frame.
+                  Note that highway is numeric, ...\" afterward.
+                  If you are not using any data (plot a function or simulations),
+                  choose \"No data\" from the Data dropdown."
+                ),
+                tags$li(
+                  "Your data is not sent to OpenAI. Nor is it stored in our webserver after the session.
+                  If you explain the background of the data and the meaning of
+                  the columns, you can ask general questions like asking a clueless statistician."
+                ),
+                tags$li(
+                  "Be skeptical. The generated code can be logically wrong even if it produces results without error."
+                )
+              )
+            )
+          )
+        ),
+        tabPanel(
+          title = "About",
+          value = "About",
+          uiOutput("RTutor_version"),
+          p("RTutor uses ",
+            a(
+              "OpenAI's",
+              href = "https://openai.com/",
+              target = "_blank"
+            ),
+            " powerful large language models",
+            " to translate natural language into R (or Python) code, which is then excuted.",
+            "You can request your analysis,
+            just like asking a real person.",
+            "Upload a data file (CSV, TSV/tab-delimited text files, and Excel)
+            and just analyze it in plain English.
+            Your results can be downloaded as an HTML report in minutes!"
+          ),
+          p("NO WARRANTY! Some of the scripts run but may yield incorrect result.
+          Please use the auto-generated code as a starting
+          point for further refinement and validation."
+          ),
+
+          hr(class = "custom-hr"),
+          p(" Written by Dr. Steven Ge",
+            a(
+              "(Twitter, ",
+              href = "https://twitter.com/StevenXGe",
+              target = "_blank"
+            ),
+            a(
+              "LinkedIn),",
+              href = "https://www.linkedin.com/in/steven-ge-ab016947/",
+              target = "_blank"
+            ),
+            " as part of RTutor LLC. For feedback, please email",
+            a(
+              "gexijin@gmail.com.",
+              href = "mailto:gexijin@gmail.com?Subject=RTutor"
+            ),
+            " Source code at ",
+            a(
+              "GitHub,",
+              href = "https://github.com/gexijin/RTutor"
+            ),
+            " from where you can also find
+            instruction to install RTutor as an R package.
+            The RTutor website and the source code is free for non-profit organizations ONLY. Licensing is required for commercial use."
+          ),
+          h4("For businesses, RTutor can be customized and locally installed to
+          easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
+
+          hr(class = "custom-hr"),
+          p("RTutor went viral on ", 
+              a(
+                "LinkedIn, ",
+                href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+              ),
+              a(
+                "Twitter, ",
+                href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+              ),
+              a(
+                "Twitter(Physacourses),",
+                href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+              ),
+              " and ",
+              a(
+                "Facebook (Carlo Pecoraro).",
+                href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+              )
+          ),
+
+          # hr(class = "custom-hr"),
+
+          # uiOutput("package_list"),
+
+          hr(class = "custom-hr"),
+
+          fluidRow(
+            column(
+              width = 4,
+              uiOutput("package_list")
+            ),
+            # Site Update Log component
+            column(
+              width = 8,
+              checkboxInput("site_update_log", strong("See Site Updates Log & R Session Info"), FALSE),
+                tags$head(tags$style(
+                  "#site_update_log{font-size: 16px;color: black}"
+              ))
+            )
+          ),
+
+          hr(class = "custom-hr"),
+
+          # Session Info Section
+          fluidRow(
+            conditionalPanel(
+              condition = "input.site_update_log == 1",
+              column(
+                width = 6,
+                div(
+                  tagList(
+                    tags$head(
+                      tags$style(HTML(".site-updates-wrapper table {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
+                        .site-updates-wrapper table thead th, .site-updates-wrapper table td {border: 2px solid #90BD8C;}
+                        .site-updates-wrapper table tbody tr:nth-child(odd) {background-color: #f3faf3;}
+                        .site-updates-wrapper table tbody tr:nth-child(even) {background-color: #ffffff;}
+                      "))
+                    ),
+                    div(
+                      class = "site-updates-wrapper",
+                      tableOutput("site_updates_table")
+                    )
+                  )
+                )
+              ),
+              column(
+                width = 6,
+                uiOutput("session_info")
+              )
+            )
+          ),
+          hr(class = "custom-hr")
+        ),
+        tabPanel(
+          title = "FAQ",
+          fluidRow(
+            column(
+              width = 6,
+              h4(style = "font-weight: bold", "Frequently asked Questions"),
+              uiOutput("faq_list"),
+              tags$style(HTML("
+                .faq-answer {
+                  display: none;
+                  padding-left: 10px;
+                }
+                .faq-question {
+                  cursor: pointer;
+                  padding: 5px;
+                  border: 1px solid #90BD8C;
+                  background-color: #F6FFF5;
+                }
+              ")),
+              tags$script(HTML('
+                $(document).on("click", ".faq-question", function() {
+                  var answer = $(this).next(".faq-answer");
+                  if (answer.is(":visible")) {
+                    answer.hide();
+                  } else {
+                    answer.show();
+                  }
+                });
+              '))
+            ),
+            column(
+              width = 6,
+              h4(style = "font-weight: bold", "Comments & Questions"),
+              tags$style(type = "text/css", "textarea {width:100%}"),
+              tags$textarea(
+                id = "user_feedback",
+                placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+                rows = 4,
+                ""
+              ),
+              radioButtons("helpfulness", "How useful is RTutor?",
+                c(
+                  "Not at all",
+                  "Slightly",
+                  "Helpful",
+                  "Extremely"
+                ),
+                selected = "Slightly"
+              ),
+              radioButtons("experience", "Your experience with R:",
+                c(
+                  "None",
+                  "Beginner",
+                  "Intermediate",
+                  "Advanced"
+                ),
+                selected = "Beginner"
+              ),
+              actionButton("save_feedbck", "Save Feedback"),
+              tags$head(tags$style(
+                "#save_feedbck{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
+              )),
+            )
+          )
+        ),
+        tabPanel(
+          title = "Settings",
+          div(id = "settings_window",
+            tagList(
+              fluidRow(
+                column(
+                  width = 2,
+                  "Model:",
+                  align = "center"
+                ),
+                column(
+                  width = 10,
+                  align = "left",
+                  uiOutput("language_model")
+                )
+              ),
+              fluidRow(
+                column(
+                  width = 4,
+                  uiOutput("change_temperature")
+                ),
+                column(
+                  width = 8,
+                  p("This important parameter controls the AI's behavior in choosing
+                  among possible answers. A higher sampling temperature tells the AI
+                  to take more risks, producing more diverse and creative
+                  solutions when the same request is repeated. A lower  temperature
+                  (such as 0) results in more
+                  conservative and well-defined solutions,
+                  but less variety when repeated.
+                  "),
+                )
+              ),
+              hr(class = "custom-hr"),
+              fluidRow(
+                column(
+                  width = 12,
+                  h4("Use your own API key"),
+                  h5("We pay a small fee to use the AI for every request.
+                    If you use this regularly,
+                    please take a few minutes to create your own API key: "),
+
+                  tags$ul(
+                      tags$li(
+                        "Create a personal account at",
+                        a(
+                          "OpenAI.",
+                          href = "https://openai.com/api/",
+                          target = "_blank"
+                        )
+                      ),
+                      tags$li("After logging in, click \"Personal\" from top right."),
+                      tags$li(
+                        "Click \"Manage Account\" and then \"Billing\",
+                        where you can add \"Payment methods\" and set \"Usage
+                        limits\". $5 per month is more than enough."
+                      ),
+                      tags$li(
+                        "Click \"API keys\" to create a new key, 
+                        which can be copied and pasted below."
+                      ),
+                  ),
+                  uiOutput("valid_key"),
+                  uiOutput("save_api_ui")
+                )
+              ),
+            ),
+            fluidRow(
+              column(
+                width = 4,
+                textInput(
+                  inputId = "api_key",
+                  label = h5("Paste your API key from OpenAI:"),
+                  value = NULL,
+                  placeholder = "sk-..... (51 characters)"
+                )
+              ),
+              column(
+                  width = 8,
+                  h5("Current API Key:"),
+                  verbatimTextOutput("session_api_source")
+              )
+            ),
+
+            hr(class = "custom-hr"),
+            fluidRow(
+              column(
+                width = 4,
+                checkboxInput(
+                  inputId = "use_python",
+                  label = "Python",
+                  value = FALSE)
+              ),
+              column(
+                width = 8,
+                h5("Use Python instead of R for generating code and results.")
+              )
+            ),
+
+            hr(class = "custom-hr"),
+            fluidRow(
+              column(
+                width = 4,
+                uiOutput("numeric_as_factor"),
+                tippy::tippy_this(
+                  elementId = "numeric_as_factor",
+                  tooltip = "Treat the columns that looks like a category
+                  as a category. This applies to columns that contain numbers
+                  but have very few unique values. ",
+                  theme = "light-border"
+                )
+              ),
+              column(
+                width = 4,
+                uiOutput("max_levels_factor"),
+                tippy::tippy_this(
+                  elementId = "max_levels_factor",
+                  tooltip = "To convert a numeric column as category,
+                  the column must have no more than this number of unique values.",
+                  theme = "light-border"
+                )
+              ),
+              column(
+                width = 4,
+                uiOutput("max_proptortion_factor"),
+                tippy::tippy_this(
+                  elementId = "max_proptortion_factor",
+                  tooltip = "To convert a numeric column as category,
+                  the number of unique values in a column must not exceed
+                  more this proportion of the total number of rows.",
+                  theme = "light-border"
+                )
+              )
+            ),
+            h5("Some columns contain numbers, but should be treated 
+            as categorical values or factors. For example, we sometimes 
+            use 1 to label success and 0 for failure.
+            If this is selected, using the default setting, a column
+            is treated as categories when the number of unique values
+            is less than or equal to 12, and less than 10% of the total rows."
+            ),
+            hr(class = "custom-hr"),
+            fluidRow(
+              column(
+                width = 4,
+                uiOutput("contribute_data")
+              ),
+              column(
+                width = 8,
+                h5("Save your requests and the structure of your data
+                such as column names and data types, not the data itself.
+                We can learn from users about creative ways to use AI.
+                And we can try to improve unsuccessful attempts. ")
+              )
+            )
+          )
+        )
       ),
 
 #      tabPanel(
