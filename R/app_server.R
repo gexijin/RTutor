@@ -2904,10 +2904,10 @@ app_server <- function(input, output, session) {
   })
 
   observe({
-    shinyjs::toggle(id = "user_feedback", condition = input$Comments)
-    shinyjs::toggle(id = "save_feedbck", condition = input$Comments)
-    shinyjs::toggle(id = "helpfulness", condition = input$Comments)
-    shinyjs::toggle(id = "experience", condition = input$Comments)
+    shinyjs::toggle(id = "user_feedback", condition = TRUE)
+    shinyjs::toggle(id = "save_feedbck", condition = TRUE)
+    shinyjs::toggle(id = "helpfulness", condition = TRUE)
+    shinyjs::toggle(id = "experience", condition = TRUE)
 
   })
 

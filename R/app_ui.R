@@ -172,34 +172,7 @@ app_ui <- function(request) {
             textOutput("temperature"),
             #uiOutput("slava_ukraini"),
             #br(),
-            textOutput("retry_on_error"),
-            checkboxInput("Comments", "Comments & questions"),
-            tags$style(type = "text/css", "textarea {width:100%}"),
-            tags$textarea(
-              id = "user_feedback",
-              placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-              rows = 4,
-              ""
-            ),
-            radioButtons("helpfulness", "How useful is RTutor?",
-              c(
-                "Not at all",
-                "Slightly",
-                "Helpful",
-                "Extremely"
-              ),
-              selected = "Slightly"
-            ),
-            radioButtons("experience", "Your experience with R:",
-              c(
-                "None",
-                "Beginner",
-                "Intermediate",
-                "Advanced"
-               ),
-              selected = "Beginner"
-            ),
-            actionButton("save_feedbck", "Save Feedback")
+            textOutput("retry_on_error")
           ),
 
       ###############################################################################
@@ -638,56 +611,6 @@ app_ui <- function(request) {
         uiOutput("package_list"),
 
         hr(),
-
-        # fluidRow(
-        #   column(
-        #     width = 6,
-        #     h4(style = "font-weight: bold", "Frequently asked Questions"),
-        #     uiOutput("faq_list"),
-        #     tags$style(HTML("
-        #       .faq-answer {
-        #         display: none;
-        #         padding-left: 10px;
-        #       }
-        #       .faq-question {
-        #         cursor: pointer;
-        #         padding: 5px;
-        #         border: 1px solid #90BD8C;
-        #         background-color: #F6FFF5;
-        #       }
-        #     ")),
-        #     tags$script(HTML('
-        #       $(document).on("click", ".faq-question", function() {
-        #         var answer = $(this).next(".faq-answer");
-        #         if (answer.is(":visible")) {
-        #           answer.hide();
-        #         } else {
-        #           answer.show();
-        #         }
-        #       });
-        #     '))
-        #   ),
-        #   column(
-        #     width = 6,
-        #     div(
-        #       tagList(
-        #         tags$head(
-        #           tags$style(HTML(".site-updates-wrapper table {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
-        #             .site-updates-wrapper table thead th, .site-updates-wrapper table td {border: 2px solid #90BD8C;}
-        #             .site-updates-wrapper table tbody tr:nth-child(odd) {background-color: #f3faf3;}
-        #             .site-updates-wrapper table tbody tr:nth-child(even) {background-color: #ffffff;}
-        #           "))
-        #         ),
-        #         div(
-        #           class = "site-updates-wrapper",
-        #           tableOutput("site_updates_table")
-        #         )
-        #       )
-        #     )
-        #   )
-        # ),
-
-        hr(),
         uiOutput("session_info")
       ),
       navbarMenu(
@@ -695,7 +618,7 @@ app_ui <- function(request) {
         tabPanel(
           title = "First Time User",
           value = "first-time-user",
-          # uiOutput("RTutor_version_main"),
+          uiOutput("RTutor_version_main"),
           fluidRow(
             column(
               width = 9,
