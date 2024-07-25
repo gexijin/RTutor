@@ -26,8 +26,8 @@ app_ui <- function(request) {
       .navbar-default .navbar-nav > li > a {background-color: #C1E2BE;border-color: #9AC596;color: #181818;}
 
       /* active tab */
-      .navbar-default .navbar-nav > .active > a, 
-      .navbar-default .navbar-nav > .active > a:focus, 
+      .navbar-default .navbar-nav > .active > a,
+      .navbar-default .navbar-nav > .active > a:focus,
       .navbar-default .navbar-nav > .active > a:hover {background-color: #A0BB9E;color: #181818;font-weight: bold;}
 
       /* sidebar panel */
@@ -624,7 +624,7 @@ app_ui <- function(request) {
         tabPanel(
           title = "First Time User",
           value = "first-time-user",
-          uiOutput("RTutor_version_main"),
+          # uiOutput("RTutor_version_main"),
           fluidRow(
             column(
               width = 9,
@@ -793,7 +793,7 @@ app_ui <- function(request) {
           easily gain insights from your data (files, SQL databases, or APIs) at a low cost. We will be happy to discuss."),
 
           hr(class = "custom-hr"),
-          p("RTutor went viral on ", 
+          p("RTutor went viral on ",
               a(
                 "LinkedIn, ",
                 href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
@@ -989,7 +989,7 @@ app_ui <- function(request) {
                         limits\". $5 per month is more than enough."
                       ),
                       tags$li(
-                        "Click \"API keys\" to create a new key, 
+                        "Click \"API keys\" to create a new key,
                         which can be copied and pasted below."
                       ),
                   ),
@@ -1065,8 +1065,8 @@ app_ui <- function(request) {
                 )
               )
             ),
-            h5("Some columns contain numbers, but should be treated 
-            as categorical values or factors. For example, we sometimes 
+            h5("Some columns contain numbers, but should be treated
+            as categorical values or factors. For example, we sometimes
             use 1 to label success and 0 for failure.
             If this is selected, using the default setting, a column
             is treated as categories when the number of unique values
