@@ -618,7 +618,7 @@ app_ui <- function(request) {
         tabPanel(
           title = "First Time User",
           value = "first-time-user",
-          uiOutput("RTutor_version_main"),
+          # uiOutput("RTutor_version_main"),
           fluidRow(
             column(
               width = 9,
