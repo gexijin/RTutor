@@ -2911,6 +2911,24 @@ app_server <- function(input, output, session) {
 
   })
 
+  # 'About' tab FAQ's and answers
+  output$faq_list <- renderUI({
+    faq_items <- lapply(seq_len(nrow(faqs)), function(i) {
+      tags$div(
+        class = "faq-item",
+        tags$h5(
+          class = "faq-question",
+          faqs$question[i]
+        ),
+        tags$p(
+          class = "faq-answer",
+          faqs$answer[i]
+        )
+      )
+    })
+    tagList(faq_items)
+  })
+
 
 #
 #  Python
