@@ -26,20 +26,27 @@ app_ui <- function(request) {
       .navbar-default .navbar-nav > li > a {background-color: #C1E2BE;border-color: #9AC596;color: #181818;}
 
       /* active tab */
-      .navbar-default .navbar-nav > .active > a, 
-      .navbar-default .navbar-nav > .active > a:focus, 
+      .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus,
       .navbar-default .navbar-nav > .active > a:hover {background-color: #A0BB9E;color: #181818;font-weight: bold;}
 
       /* sidebar panel */
       .well {background-color: #C1E2BE;border-color: #90BD8C;}
 
-      /* select input & action button */
-      .custom-select-input, .custom-action-button
-      {background-color: #F6FFF5;border-color: #90BD8C;color: #000;}
+      /* selectInput & actionButton */
+      .custom-select-input, .custom-action-button, .custom-download-button
+      {font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}
 
-      /* horizontal line */
+      /* selectInput extra customization */
+      .selectize-input, .selectize-dropdown {background-color: #F6FFF5 !important;
+        border-color: #90BD8C !important;color: #000 !important;}
+
+      /* horizontal line (hr()) */
       .custom-hr{border-top: 1px solid #90BD8C;}
       .custom-hr-thick{border-top: 3px solid #90BD8C;}
+
+      /* textarea, textInput, numericInput */
+      textarea, input[type = 'text'], input[type='number']
+      {width: 100%;background-color: #F6FFF5;border-color: #90BD8C;}
     "))),
 
     navbarPage(
@@ -51,26 +58,14 @@ app_ui <- function(request) {
           id = "load_message",
           h2("Chat with your data via AI ..."),
         ),
+
         # move notifications and progress bar to the center of screen
-        tags$head(
-          tags$style(
-            HTML(".shiny-notification {
-                  width: 300px;
-                  position:fixed;
-                  top: calc(90%);
-                  left: calc(10%);
-                  }
-                  "
-            )
-          )
-        ),
+        tags$head(tags$style(HTML(".shiny-notification {width: 300px;
+                                position:fixed;top: calc(90%);left: calc(10%);}
+                                "))),
         # Embed the CSS directly in the UI
-        tags$style("
-          .modal-dialog {
-            position: absolute;
-            bottom: 0;
-          }
-        "),
+        tags$style(".modal-dialog {position: absolute;bottom: 0;}"),
+
         # Sidebar with a slider input for number of bins
         sidebarLayout(
           sidebarPanel(
@@ -99,7 +94,7 @@ app_ui <- function(request) {
                 width = 12,
                 hr(class = "custom-hr"),
                 tags$label("2. Modify Data Fields (Optional)",
-                style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
+                  style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
               br(),
               column(
@@ -107,22 +102,15 @@ app_ui <- function(request) {
                 actionButton("data_edit_modal", "Data Types"),
                 align = "left",
                 tags$head(tags$style(
-                  "#data_edit_modal{font-size: 14px;color: #000;background-color: #F6FFF5;border-color: #90BD8C;}"
+                  "#data_edit_modal{font-size: 14px;color: #000;background-color: #F6FFF5;border-color: #90BD8C}"
                 ))
               )
             ),
 
             hr(class = "custom-hr"),
             tags$label("3. Send Request(s)",
-                style = "font-size: 14px; font-weight: bold; color: #333; display: block; margin-bottom: 5px;"),
+              style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;"),
 
-            tags$style(HTML("
-              textarea {
-                width: 100%;
-                background-color: #F6FFF5;
-                border-color: #90BD8C;
-              }
-            ")),
             tags$textarea(
               id = "input_text",
               placeholder = NULL,
@@ -138,7 +126,7 @@ app_ui <- function(request) {
               column(
                 width = 12,
                 div(
-                  style = "display: flex; justify-content: space-between;",
+                  style = "display: flex;justify-content: space-between;",
                   div(
                     actionButton("submit_button", strong("Submit")),
                     tags$head(tags$style(
@@ -184,15 +172,6 @@ app_ui <- function(request) {
                 # Horizontal Line
                 hr(class = "custom-hr")
               )
-            ),
-            tags$head(
-              tags$style(HTML("
-                #ask_question {
-                  width: 100%;
-                  background-color: #F6FFF5;
-                  border-color: #90BD8C;
-                }
-              "))
             ),
             textInput(
               inputId = "ask_question",
@@ -251,8 +230,8 @@ app_ui <- function(request) {
                 column(
                   width = 4,
                   p(
-                    HTML("First Time Users:"), #<span style='font-size: 54px;'>&rarr;</span>
-                    style = "font-size: 34px; margin: 0; padding-top: 10px;"
+                    HTML("First Time Users:"),
+                    style = "font-size: 34px;margin: 0;padding-top: 10px;"
                   ),
                   align = "right"
                 ),
@@ -260,7 +239,7 @@ app_ui <- function(request) {
                   width = 5,
                   actionButton("first_user", strong("Start Here!")),
                   tags$head(tags$style(
-                    "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
+                    "#first_user{font-size: 36px;color: #000;background-color: #007BFF}"
                   )),
                   align = "left"
                 ),
@@ -281,26 +260,11 @@ app_ui <- function(request) {
               fluidRow(
                 column(
                   width = 4,
-                  tagList(
-                    selectInput(
-                      inputId = "selected_chunk",
-                      label = "AI generated code:",
-                      selected = NULL,
-                      choices = NULL
-                    ),
-                    tags$style(
-                      HTML("#selected_chunk+div .selectize-input {
-                            background-color: #F6FFF5 !important;
-                            border-color: #90BD8C !important;
-                            color: #000 !important;
-                            }
-                            #selected_chunk+div .selectize-dropdown {
-                            background-color: #F6FFF5 !important;
-                            border-color: #90BD8C !important;
-                            color: #000 !important;
-                            }"
-                      )
-                    )
+                  selectInput(
+                    inputId = "selected_chunk",
+                    label = "AI generated code:",
+                    selected = NULL,
+                    choices = NULL
                   ),
                   tippy::tippy_this(
                     "selected_chunk",
@@ -358,18 +322,9 @@ app_ui <- function(request) {
                 textOutput("data_size"),
                 tags$head(
                   tags$style(HTML("
-                    .dataTables_wrapper {
-                      background-color: #f8fcf8;
-                      border-color: #90BD8C;
-                      padding: 10px;
-                      border-radius: 5px;
-                    }
-                    .dataTables_wrapper table.dataTable tbody tr:nth-child(odd) {
-                      background-color: #f3faf3;
-                    }
-                    .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {
-                      background-color: #ffffff;
-                    }
+                    .dataTables_wrapper {background-color: #f8fcf8;border-color: #90BD8C;padding: 10px;border-radius: 5px;}
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(odd) {background-color: #f3faf3;}
+                    .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {background-color: #fff;}
                   "))
                 ),
                 DT::dataTableOutput("data_table_DT")
@@ -544,28 +499,13 @@ app_ui <- function(request) {
         fluidRow(
           column(
             width = 5,
-            tagList(
-              selectInput(
-                inputId = "selected_chunk_report",
-                label = "Code chunks to include:",
-                selected = NULL,
-                choices = NULL,
-                multiple = TRUE
-              ),
-              tags$style(
-                HTML("#selected_chunk_report+div .selectize-input {
-                      background-color: #F6FFF5 !important;
-                      border-color: #90BD8C !important;
-                      color: #000 !important;
-                      }
-                      #selected_chunk_report+div .selectize-dropdown {
-                      background-color: #F6FFF5 !important;
-                      border-color: #90BD8C !important;
-                      color: #000 !important;
-                      }"
-                )
-              )
-            )
+            selectInput(
+              inputId = "selected_chunk_report",
+              label = "Code chunks to include:",
+              selected = NULL,
+              choices = NULL,
+              multiple = TRUE
+            ),
           )
         ),
         fluidRow(
@@ -577,11 +517,9 @@ app_ui <- function(request) {
             width = 8,
             downloadButton(
               outputId = "Rmd_source",
-              label = "RMarkdown"
+              label = strong("RMarkdown"),
+              class = "custom-download-button"
             ),
-            tags$head(tags$style(
-              "#Rmd_source{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
-            )),
             tippy::tippy_this(
               "Rmd_source",
               "Download a R Markdown source file.",
@@ -606,10 +544,10 @@ app_ui <- function(request) {
                 "Start by watching an 8-min ",
                 a(
                   "YouTube video!",
-                  href="https://youtu.be/a-bZW26nK9k",
+                  href = "https://youtu.be/a-bZW26nK9k",
                   target = "_blank"
                 ),
-                style="color:red"
+                style = "color:red"
               ),
               # h5("5/14/2024: GPT-4o becomes default.  Nov. 1, 2023: (v0.98.2): Generate ",
               #   a(
@@ -802,9 +740,7 @@ app_ui <- function(request) {
             column(
               width = 8,
               checkboxInput("site_update_log", strong("See Site Updates Log & R Session Info"), FALSE),
-                tags$head(tags$style(
-                  "#site_update_log{font-size: 16px;color: black}"
-              ))
+              tags$head(tags$style("#site_update_log{font-size: 16px;color: black}"))
             )
           ),
 
@@ -848,16 +784,8 @@ app_ui <- function(request) {
               h4(style = "font-weight: bold", "Frequently asked Questions"),
               uiOutput("faq_list"),
               tags$style(HTML("
-                .faq-answer {
-                  display: none;
-                  padding-left: 10px;
-                }
-                .faq-question {
-                  cursor: pointer;
-                  padding: 5px;
-                  border: 1px solid #90BD8C;
-                  background-color: #F6FFF5;
-                }
+                .faq-answer {display: none;padding-left: 10px;}
+                .faq-question {cursor: pointer;padding: 5px;border: 1px solid #90BD8C;background-color: #F6FFF5;}
               ")),
               tags$script(HTML('
                 $(document).on("click", ".faq-question", function() {
@@ -873,7 +801,6 @@ app_ui <- function(request) {
             column(
               width = 6,
               h4(style = "font-weight: bold", "Comments & Questions"),
-              tags$style(type = "text/css", "textarea {width:100%}"),
               tags$textarea(
                 id = "user_feedback",
                 placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
@@ -898,10 +825,10 @@ app_ui <- function(request) {
                 ),
                 selected = "Beginner"
               ),
-              actionButton("save_feedbck", "Save Feedback"),
-              tags$head(tags$style(
-                "#save_feedbck{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
-              )),
+              actionButton(
+                "save_feedbck",
+                label = strong("Save Feedback"),
+                class = "custom-action-button")
             )
           )
         ),
