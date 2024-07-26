@@ -260,7 +260,6 @@ app_ui <- function(request) {
 
           mainPanel(
             shinyjs::useShinyjs(),
-            textOutput("showgraphics"),
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",

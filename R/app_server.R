@@ -38,6 +38,7 @@ app_server <- function(input, output, session) {
     }
     pdf(NULL)
   })
+
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
@@ -1372,15 +1373,6 @@ app_server <- function(input, output, session) {
   observe({
     req(!input$make_cx_interactive || input$tabs != "Home")
     removeNotification("uncheck_canvasXpress")
-  })
-
-  graphics <- reactive({
-    # dev.list()
-    dev.cur()
-  })
-  output$showgraphics <- renderText({
-    d <- dev.cur()
-    paste("Current Graphics:",names(d),d)
   })
 
 
