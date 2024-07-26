@@ -260,7 +260,7 @@ app_ui <- function(request) {
                   width = 5,
                   actionButton("first_user", strong("Start Here!")),
                   tags$head(tags$style(
-                    "#first_user{font-size: 36px; color: Black; background-color: #007BFF}"
+                    "#first_user{font-size: 36px; color: Black; background-color: #90BD8C}"
                   )),
                   align = "left"
                 ),
