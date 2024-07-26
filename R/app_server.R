@@ -25,14 +25,20 @@ app_server <- function(input, output, session) {
     options(shiny.maxRequestSize = 10000 * 1024^2) # 10 GB
   }
 
-  pdf(NULL) #otherwise, base R plots sometimes do not show.
+  if(dev.cur() == 1){
+    pdf(NULL) #otherwise, base R plots sometimes do not show.
+  }
+
+
 
   # Ensure all devices are closed when the session ends
   session$onSessionEnded(function() {
     while (dev.cur() > 1) {
       dev.off()
     }
+    pdf(NULL)
   })
+
   # load demo data when clicked
   observeEvent(input$demo_prompt, {
     req(input$select_data)
@@ -75,6 +81,7 @@ app_server <- function(input, output, session) {
   outputOptions(output, 'file_uploaded', suspendWhenHidden = FALSE)
 
   observeEvent(input$reset_button, {
+
     # reset session
     session$reload()
   })
@@ -1030,6 +1037,7 @@ app_server <- function(input, output, session) {
     }
   })
 
+
   output$openAI <- renderText({
     req(openAI_response()$cmd)
     res <- logs$raw
@@ -1365,13 +1373,6 @@ app_server <- function(input, output, session) {
   observe({
     req(!input$make_cx_interactive || input$tabs != "Home")
     removeNotification("uncheck_canvasXpress")
-  })
-
-  graphics <- reactive({
-    dev.list()
-  })
-  output$showgraphics <- renderText({
-    paste("Current Graphics:",names(graphics()), graphics())
   })
 
 
