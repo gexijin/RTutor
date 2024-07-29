@@ -393,7 +393,7 @@ app_server <- function(input, output, session) {
     ")),
       sliderInput(
         inputId = "temperature",
-        label = "Sampling temperature",
+        label = h4(strong("Sampling temperature")),
         min = 0,
         max = 1,
         value = sample_temp(),
@@ -437,7 +437,7 @@ app_server <- function(input, output, session) {
   output$contribute_data <- renderUI({
     checkboxInput(
       inputId = "contribute_data",
-      label = "Help us make RTutor better",
+      label = strong("Help us make RTutor better"),
       value = contribute_data()
     )
   })

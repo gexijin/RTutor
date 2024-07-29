@@ -49,8 +49,16 @@ app_ui <- function(request) {
       {width: 100%;background-color: #F6FFF5;border-color: #90BD8C;}
     "))),
 
+    # 'First Time User' tab redirect
+    tags$script(HTML("
+      $(document).on('click', '#first_user', function() {
+        // Update the active tab to 'First Time User' within the 'More' navbarMenu
+        $('#tabs a[data-value=\"first-time-user\"]').tab('show');
+      });
+    ")),
+
     navbarPage(
-      HTML('<span style="color: black;">RTutor</span>'),
+      title = HTML('<span style="color: black;">RTutor</span>'),
       id = "tabs",
       tabPanel(
         title = "Home",
@@ -237,10 +245,12 @@ app_ui <- function(request) {
                 ),
                 column(
                   width = 5,
-                  actionButton("first_user", strong("Start Here!")),
-                  tags$head(tags$style(
-                    "#first_user{font-size: 36px;color: #000;background-color: #007BFF}"
-                  )),
+                  actionButton("first_user", strong("Start Here!"), class = "first-user"),
+                  tags$head(tags$style(HTML("
+                    .first-user{font-size: 36px;color: #000;background-color: #007BFF;
+                    transition: background-color 0.3s, box-shadow 0.3s;}
+                    .first-user:hover {background-color: #66AFFF;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                  "))),
                   align = "left"
                 ),
                 column(
@@ -485,7 +495,7 @@ app_ui <- function(request) {
             uiOutput("eda_report_ui")
           )
         )
-      ),
+      ), #tabPanel
 
       tabPanel(
         title = div(id = "report_tab", "Report"),
@@ -529,7 +539,7 @@ app_ui <- function(request) {
         ),
         br(),
         verbatimTextOutput("rmd_chunk_output")
-      ),
+      ), #tabPanel
 
       navbarMenu(
         title = "More",
@@ -651,7 +661,7 @@ app_ui <- function(request) {
               )
             )
           )
-        ),
+        ), #tabPanel
         tabPanel(
           title = "About",
           value = "About",
@@ -775,7 +785,7 @@ app_ui <- function(request) {
             )
           ),
           hr(class = "custom-hr")
-        ),
+        ), #tabPanel
         tabPanel(
           title = "FAQ",
           fluidRow(
@@ -831,172 +841,205 @@ app_ui <- function(request) {
                 class = "custom-action-button")
             )
           )
-        ),
+        ), #tabPanel
         tabPanel(
           title = "Settings",
           div(id = "settings_window",
             tagList(
-              fluidRow(
-                column(
-                  width = 2,
-                  "Model:",
-                  align = "center"
-                ),
-                column(
-                  width = 10,
-                  align = "left",
-                  uiOutput("language_model")
-                )
-              ),
-              fluidRow(
-                column(
-                  width = 4,
-                  uiOutput("change_temperature")
-                ),
-                column(
-                  width = 8,
-                  p("This important parameter controls the AI's behavior in choosing
-                  among possible answers. A higher sampling temperature tells the AI
-                  to take more risks, producing more diverse and creative
-                  solutions when the same request is repeated. A lower  temperature
-                  (such as 0) results in more
-                  conservative and well-defined solutions,
-                  but less variety when repeated.
-                  "),
-                )
-              ),
-              hr(class = "custom-hr"),
+
               fluidRow(
                 column(
                   width = 12,
-                  h4("Use your own API key"),
-                  h5("We pay a small fee to use the AI for every request.
-                    If you use this regularly,
-                    please take a few minutes to create your own API key: "),
+                  h3(strong("Settings"), style = "padding-left: 25px;"),
+                  hr(class = "custom-hr-thick")
+                ),
 
-                  tags$ul(
-                      tags$li(
-                        "Create a personal account at",
-                        a(
-                          "OpenAI.",
-                          href = "https://openai.com/api/",
-                          target = "_blank"
-                        )
+                # AI model & sampling temperature settings
+                column(
+                  width = 4,
+                  fluidRow(
+                    column(
+                      width = 12,
+                      h4(strong("AI Model:"), style = "padding-left: 20px;"),
+                      div(
+                        uiOutput("language_model"),
+                        style = "padding-left: 20px;"
+                      )
+                    ),
+
+                    column(
+                      width = 12,
+                      div(
+                        uiOutput("change_temperature"),
+                        style = "padding-left: 20px;padding-top: 10px;"
                       ),
-                      tags$li("After logging in, click \"Personal\" from top right."),
-                      tags$li(
-                        "Click \"Manage Account\" and then \"Billing\",
-                        where you can add \"Payment methods\" and set \"Usage
-                        limits\". $5 per month is more than enough."
-                      ),
-                      tags$li(
-                        "Click \"API keys\" to create a new key, 
-                        which can be copied and pasted below."
-                      ),
-                  ),
-                  uiOutput("valid_key"),
-                  uiOutput("save_api_ui")
-                )
-              ),
-            ),
-            fluidRow(
-              column(
-                width = 4,
-                textInput(
-                  inputId = "api_key",
-                  label = h5("Paste your API key from OpenAI:"),
-                  value = NULL,
-                  placeholder = "sk-..... (51 characters)"
-                )
-              ),
-              column(
+                      p("This important parameter controls the AI's behavior in
+                      choosing among possible answers. A higher sampling
+                      temperature tells the AI to take more risks, producing more
+                      diverse and creative solutions when the same request is
+                      repeated. A lower temperature (such as 0) results in more
+                      conservative and well-defined solutions, but there is less
+                      variety when repeated.", style = "padding-left: 20px;"),
+                      br()
+                    )
+                  )
+                ), #column
+
+                # API key settings
+                column(
                   width = 8,
-                  h5("Current API Key:"),
-                  verbatimTextOutput("session_api_source")
-              )
-            ),
+                  fluidRow(
+                    column(
+                      width = 12,
+                      h4(strong("Use your own API key"),
+                         style = "padding-left: 45px;padding-right: 20px;"),
+                      h5("We pay a small fee to use the AI for every request.
+                        If you use this regularly, please take a few minutes
+                        to create your own API key: ",
+                         style = "padding-left: 45px;padding-right: 20px;"),
 
-            hr(class = "custom-hr"),
-            fluidRow(
-              column(
-                width = 4,
-                checkboxInput(
-                  inputId = "use_python",
-                  label = "Python",
-                  value = FALSE)
-              ),
-              column(
-                width = 8,
-                h5("Use Python instead of R for generating code and results.")
-              )
-            ),
+                      div(
+                        tags$ul(
+                          tags$li(
+                            "Create a personal account at",
+                            a(
+                              "OpenAI.",
+                              href = "https://openai.com/api/",
+                              target = "_blank"
+                            )
+                          ),
+                          tags$li("Once logged in, click \"Personal\" from top right."),
+                          tags$li("Click \"Manage Account\", then \"Billing\",
+                                  where you can add \"Payment methods\" and set
+                                  \"Usage limits\". $5 per month is more than
+                                  enough."),
+                          tags$li("Click \"API keys\" to create a new key,
+                                  which can be copied and pasted below."),
+                          uiOutput("valid_key"),
+                          uiOutput("save_api_ui")
+                        ),
+                        style = "padding-left: 45px;padding-right: 20px;"
+                      )
+                    )
+                  ),
 
-            hr(class = "custom-hr"),
-            fluidRow(
-              column(
-                width = 4,
-                uiOutput("numeric_as_factor"),
-                tippy::tippy_this(
-                  elementId = "numeric_as_factor",
-                  tooltip = "Treat the columns that looks like a category
-                  as a category. This applies to columns that contain numbers
-                  but have very few unique values. ",
-                  theme = "light-border"
-                )
-              ),
-              column(
-                width = 4,
-                uiOutput("max_levels_factor"),
-                tippy::tippy_this(
-                  elementId = "max_levels_factor",
-                  tooltip = "To convert a numeric column as category,
-                  the column must have no more than this number of unique values.",
-                  theme = "light-border"
-                )
-              ),
-              column(
-                width = 4,
-                uiOutput("max_proptortion_factor"),
-                tippy::tippy_this(
-                  elementId = "max_proptortion_factor",
-                  tooltip = "To convert a numeric column as category,
-                  the number of unique values in a column must not exceed
-                  more this proportion of the total number of rows.",
-                  theme = "light-border"
-                )
-              )
-            ),
-            h5("Some columns contain numbers, but should be treated 
-            as categorical values or factors. For example, we sometimes 
-            use 1 to label success and 0 for failure.
-            If this is selected, using the default setting, a column
-            is treated as categories when the number of unique values
-            is less than or equal to 12, and less than 10% of the total rows."
-            ),
-            hr(class = "custom-hr"),
-            fluidRow(
-              column(
-                width = 4,
-                uiOutput("contribute_data")
-              ),
-              column(
-                width = 8,
-                h5("Save your requests and the structure of your data
-                such as column names and data types, not the data itself.
-                We can learn from users about creative ways to use AI.
-                And we can try to improve unsuccessful attempts. ")
-              )
+                  fluidRow(
+                    column(
+                      width = 6,
+                      div(
+                        textInput(
+                          inputId = "api_key",
+                          label = h5("Paste your API key from OpenAI:"),
+                          value = NULL,
+                          placeholder = "sk-..... (51 characters)"
+                        ),
+                        style = "padding-left: 45px;"
+                      )
+                    ),
+                    column(
+                      width = 6,
+                      h5("Current API Key:", style = "padding-right: 20px;"),
+                      div(
+                        verbatimTextOutput("session_api_source"),
+                        style = "padding-right: 20px;"
+                      )
+                    )
+                  )
+                ) #column
+              ), #fluidRow
+
+              fluidRow(
+
+                # python & contribute data settings
+                column(
+                  width = 6,
+                  hr(class = "custom-hr-thick"),
+                  fluidRow(
+                    column(
+                      width = 4,
+                      div(
+                        checkboxInput(
+                          inputId = "use_python",
+                          label = strong("Python"),
+                          value = FALSE
+                        ),
+                        style = "padding-left: 75px;"
+                      )
+                    ),
+                    column(
+                      width = 8,
+                      h5("Use Python instead of R for generating code and results.")
+                    )
+                  ),
+                  hr(class = "custom-hr-thick"),
+                  fluidRow(
+                    column(
+                      width = 4,
+                      uiOutput("contribute_data")
+                    ),
+                    column(
+                      width = 8,
+                      h5("Allows us to save your requests and the structure of
+                        your data (like column names and data types, not the data
+                        itself). We can learn from users about creative ways to
+                        use AI and it helps in improving unsuccessful results.")
+                    )
+                  )
+                ), #column
+
+                # treat as factors settings
+                column(
+                  width = 6,
+                  hr(class = "custom-hr-thick"),
+                  fluidRow(
+                    column(
+                      width = 4,
+                      div(
+                        uiOutput("numeric_as_factor"),
+                        style = "padding-left: 30px;padding-top: 15px;"
+                      ),
+                      tippy::tippy_this(
+                        elementId = "numeric_as_factor",
+                        tooltip = "Treat the columns that look like a category
+                          as a category. This applies to columns that contain
+                          numbers but have very few unique values.",
+                        theme = "light-border"
+                      )
+                    ),
+                    column(
+                      width = 4,
+                      uiOutput("max_levels_factor"),
+                      tippy::tippy_this(
+                        elementId = "max_levels_factor",
+                        tooltip = "To convert a numeric column to a category, the
+                          column must have no more than this number of unique values.",
+                        theme = "light-border"
+                      )
+                    ),
+                    column(
+                      width = 4,
+                      uiOutput("max_proptortion_factor"),
+                      tippy::tippy_this(
+                        elementId = "max_proptortion_factor",
+                        tooltip = "To convert a numeric column as a category,
+                          the number of unique values in a column must not be
+                          more than this proportion of the total number of rows.",
+                        theme = "light-border"
+                      )
+                    )
+                  ),
+                  h5("Some columns contain numbers, but should be treated as
+                      categorical values or factors. For example, we sometimes
+                      use 1 to label success and 0 for failure. If this is
+                      selected, using the default setting, a column is treated
+                      as categories when the number of unique values is less than
+                      or equal to 12, and less than 10% of the total rows.")
+                ) #column
+              ) #fluidRow
             )
           )
-        )
-      ),
-
-    tags$script(HTML("
-      $(document).on('click', '#first_user', function() {
-        // Update the active tab to 'First Time User' within the 'More' navbarMenu
-        $('#tabs a[data-value=\"first-time-user\"]').tab('show');
-      });
-    "))
+        ) #tabPanel
+      )
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
