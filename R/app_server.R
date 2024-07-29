@@ -393,7 +393,7 @@ app_server <- function(input, output, session) {
     ")),
       sliderInput(
         inputId = "temperature",
-        label = h4(strong("Sampling temperature")),
+        label = h3(strong("Sampling Temperature")),
         min = 0,
         max = 1,
         value = sample_temp(),
@@ -2912,11 +2912,14 @@ output$RTutor_version <- renderUI({
 
     selectInput(
       inputId = "installed_packages",
-      label = paste0(
-        "Search for installed packages ( ",
-        length(all),
-        " total)"
-      ),
+      label = h4(strong(HTML(
+        paste0(
+          "<span style='white-space: nowrap;'>",
+          "Search for installed packages (",
+          length(all),
+          " total)</span>"
+        )
+      ))),
       choices = all,
       selected = NULL
     )
@@ -2936,7 +2939,7 @@ output$RTutor_version <- renderUI({
   })
 
   output$session_info <- renderUI({
-    i <- c("<br><h4>R session info: </h4>")
+    i <- c("<br><h4><strong>R Session Information: </strong></h4>")
     i <- c(i, capture.output(sessionInfo()))
     HTML(paste(i, collapse = "<br/>"))
   })
