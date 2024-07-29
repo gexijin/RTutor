@@ -48,7 +48,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use the preloaded data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples above."
+"Upload a file or use the preloaded data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples below."
       )
     }
   })
@@ -258,7 +258,7 @@ app_server <- function(input, output, session) {
         txt <- paste0("Selected Dataset: ", input$select_data)
       }
 
-      return(txt)
+      return(HTML(paste0("<span style='font-size: 18px;'>", txt, "</span>")))
   })
 
   output$data_upload_ui <- renderUI({
@@ -268,7 +268,7 @@ app_server <- function(input, output, session) {
     req(is.null(input$user_file))
     fileInput(
       inputId = "user_file",
-      label = "(Upload Your File)",
+      label = "Upload",
       accept = c(
         "text/csv",
         "text/comma-separated-values",
@@ -294,6 +294,7 @@ app_server <- function(input, output, session) {
           tags$style(HTML("
             .vertical-padding {padding-top: 10px;padding-bottom: 10px;
             font-weight: bold;}
+            .control-label {font-size: 18px;}
           "))
         ),
         fluidRow(
@@ -345,7 +346,7 @@ app_server <- function(input, output, session) {
         tagList(
           tags$head(
             tags$style(HTML("
-              .vertical-padding {padding-top: 7px;padding-bottom: 10px;}
+              .vertical-padding {padding-top: 5px;padding-bottom: 10px;padding-left: 12px;}
             "))
           ),
           fluidRow(
@@ -353,7 +354,8 @@ app_server <- function(input, output, session) {
               width = 3,
               div(
                 "Examples:",
-                class = "vertical-padding"
+                class = "vertical-padding",
+                style = "font-size: 18px;"
               )
             ),
             column(
@@ -1123,9 +1125,10 @@ app_server <- function(input, output, session) {
 
   output$total_cost <- renderText({
     if(input$submit_button == 0) {
-      return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
-      use your own API key (Settings), or help cover the fee via PayPal (gexijin@gmail.com)."
-      )
+      # return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
+      # use your own API key (Settings), or help cover the fee via PayPal (gexijin@gmail.com)."
+      # )
+      return()
     } else {
     #req(openAI_response()$cmd)
       paste0(

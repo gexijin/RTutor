@@ -23,7 +23,8 @@ app_ui <- function(request) {
       .navbar {background-color: #C1E2BE;border-color: #90BD8C; color: #181818;font-weight: bold;}
 
       /* tabs */
-      .navbar-default .navbar-nav > li > a {background-color: #C1E2BE;border-color: #9AC596;color: #181818;}
+      .navbar-default .navbar-nav > li > a {background-color: #C1E2BE;
+        border-color: #9AC596;color: #181818;font-size: 16px;}
 
       /* active tab */
       .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus,
@@ -34,11 +35,11 @@ app_ui <- function(request) {
 
       /* selectInput & actionButton */
       .custom-select-input, .custom-action-button, .custom-download-button
-      {font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}
+      {font-size: 24px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}
 
       /* selectInput extra customization */
       .selectize-input, .selectize-dropdown {background-color: #F6FFF5 !important;
-        border-color: #90BD8C !important;color: #000 !important;}
+        border-color: #90BD8C !important;color: #000 !important; font-size: 16px;}
 
       /* horizontal line (hr()) */
       .custom-hr{border-top: 1px solid #90BD8C;}
@@ -46,7 +47,7 @@ app_ui <- function(request) {
 
       /* textarea, textInput, numericInput */
       textarea, input[type = 'text'], input[type='number']
-      {width: 100%;background-color: #F6FFF5;border-color: #90BD8C;}
+      {width: 100%;background-color: #F6FFF5;border-color: #90BD8C;font-size: 16px;}
     "))),
 
     # 'First Time User' tab redirect
@@ -58,10 +59,10 @@ app_ui <- function(request) {
     ")),
 
     navbarPage(
-      title = HTML('<span style="color: black;">RTutor</span>'),
+      title = HTML('<span style="color: black;font-size: 20px;">RTutor</span>'),
       id = "tabs",
       tabPanel(
-        title = "Home",
+        title = HTML('<span style="color: black;font-size: 18px;">Home</span>'),
         div(
           id = "load_message",
           h2("Chat with your data via AI ..."),
@@ -102,7 +103,7 @@ app_ui <- function(request) {
                 width = 12,
                 hr(class = "custom-hr"),
                 tags$label("2. Modify Data Fields (Optional)",
-                  style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
+                  style = "font-size: 18px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
               br(),
               column(
@@ -110,19 +111,19 @@ app_ui <- function(request) {
                 actionButton("data_edit_modal", "Data Types"),
                 align = "left",
                 tags$head(tags$style(
-                  "#data_edit_modal{font-size: 14px;color: #000;background-color: #F6FFF5;border-color: #90BD8C}"
+                  "#data_edit_modal{font-size: 18px;color: #000;background-color: #F6FFF5;border-color: #90BD8C}"
                 ))
               )
             ),
 
             hr(class = "custom-hr"),
-            tags$label("3. Send Request(s)",
-              style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;"),
+            tags$label("3. Send Request",
+              style = "font-size: 18px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;"),
 
             tags$textarea(
               id = "input_text",
               placeholder = NULL,
-              rows = 8, ""
+              rows = 6, ""
             ),
 
             # Example Prompts
@@ -138,7 +139,7 @@ app_ui <- function(request) {
                   div(
                     actionButton("submit_button", strong("Submit")),
                     tags$head(tags$style(
-                      "#submit_button{font-size: 16px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
+                      "#submit_button{font-size: 18px;color: blue;background-color: #F6FFF5;border-color: #90BD8C;}"
                     )),
                     tippy::tippy_this(
                       "submit_button",
@@ -150,7 +151,7 @@ app_ui <- function(request) {
                     # Reset Button
                     actionButton(inputId = "reset_button", label = strong("Reset")),
                     tags$head(tags$style(
-                      "#reset_button{font-size: 16px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
+                      "#reset_button{font-size: 18px;color: red;background-color: #F6FFF5;border-color: #90BD8C;}"
                     )),
                     tippy::tippy_this(
                       "reset_button",
@@ -183,8 +184,8 @@ app_ui <- function(request) {
             ),
             textInput(
               inputId = "ask_question",
-              label = "Ask about Results (Optional)",
-              placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
+              label = "Q&A (Optional)",
+              placeholder = "Ask about the code, result, error, general statistics, etc.",
               value = ""
             ),
 
@@ -356,7 +357,7 @@ app_ui <- function(request) {
       ), #tabPanel
 
       tabPanel(
-        title = div(id = "eda_tab", "EDA"),
+        title = div(id = "eda_tab", HTML('<span style="color: black;font-size: 18px;">EDA</span>')),
         value = "EDA",
         tippy::tippy_this(
           "eda_tab",
@@ -367,7 +368,7 @@ app_ui <- function(request) {
           tags$head(
             tags$style(HTML("
               .nav-tabs {background-color: #D9EDD8;                  /* Background color - tab headers */}
-              .nav-tabs > li > a {color: #5b5b5b;                           /* Text color - tab headers */
+              .nav-tabs > li > a {color: #5b5b5b;font-size: 16px;           /* Text color - tab headers */
                 border: 1px solid #D9EDD8;border-radius: 4px;}
               .nav-tabs > li > a:hover {background-color: #90BD8C;         /* Hover color - tab headers */
                 color: #000;}
@@ -389,10 +390,10 @@ app_ui <- function(request) {
               div(
                 id = "second_file_summary",
                 br(), hr(class = "custom-hr"),
-                h4("Data structure: df2"),
+                h4(strong("Data Structure: df2")),
                 verbatimTextOutput("data_structure_2"),
                 br(), hr(class = "custom-hr"),
-                h4("Data summary: df2"),
+                h4(strong("Data Summary: df2")),
                 verbatimTextOutput("data_summary_2"),
                 plotly::plotlyOutput("missing_values_2", width = "60%")
               )
@@ -491,14 +492,14 @@ app_ui <- function(request) {
           tabPanel(
             title = "EDA Reports",
             hr(class = "custom-hr-thick"),
-            h4(strong("Comprehensive EDA (Exploratory Data Analysis)")),
+            h4(strong("Comprehensive EDA (Exploratory Data Analysis)"), style = "font-size: 24px;"),
             uiOutput("eda_report_ui")
           )
         )
       ), #tabPanel
 
       tabPanel(
-        title = div(id = "report_tab", "Report"),
+        title = div(id = "report_tab", HTML('<span style="color: black;font-size: 18px;">Report</span>')),
         value = "Report",
         tippy::tippy_this(
           "report_tab",
@@ -542,7 +543,7 @@ app_ui <- function(request) {
       ), #tabPanel
 
       navbarMenu(
-        title = "More",
+        title = HTML('<span style="color: black;font-size: 18px;">More</span>'),
         tabPanel(
           title = "First Time User",
           value = "first-time-user",
