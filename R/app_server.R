@@ -48,7 +48,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use the preloaded data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples below."
+"Ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples below."
       )
     }
   })
@@ -244,21 +244,22 @@ app_server <- function(input, output, session) {
 
 
   # showing the current dataset. Warning if no is uploaded.
-  output$selected_dataset <- renderText({
-      req(input$submit_button)
-      # when submit is clicked, but no data is uploaded.
+  output$selected_dataset <- renderUI({
+    req(input$submit_button)
+    # when submit is clicked, but no data is uploaded.
 
-      if(input$select_data == uploaded_data) {
-        if(is.null(input$user_file)) {
-          txt <- "No file uploaded! Please Reset and upload your data first."
-        } else {
-          txt <- "Dataset: uploaded."
-        }
+    if (input$select_data == uploaded_data) {
+      if (is.null(input$user_file)) {
+        txt <- "No file uploaded! Please Reset and upload your data first."
       } else {
-        txt <- paste0("Selected Dataset: ", input$select_data)
+        txt <- "Dataset: Uploaded."
       }
+    } else {
+      txt <- paste0("Selected Dataset: ", input$select_data)
+    }
 
-      return(HTML(paste0("<span style='font-size: 18px;'>", txt, "</span>")))
+    return(HTML(paste0("<span style='font-size: 18px;font-weight: bold;
+                       white-space: nowrap;'>", txt, "</span>")))
   })
 
   output$data_upload_ui <- renderUI({
@@ -268,7 +269,7 @@ app_server <- function(input, output, session) {
     req(is.null(input$user_file))
     fileInput(
       inputId = "user_file",
-      label = "Upload",
+      label = "or Upload",
       accept = c(
         "text/csv",
         "text/comma-separated-values",
@@ -2649,16 +2650,13 @@ app_server <- function(input, output, session) {
   observeEvent(answer_one(), {
     showModal(
       modalDialog(
-        title = "Chat with your tutor",
+        title = strong("Chat with your tutor"),
         # Custom CSS to make the chat area scrollable
         tags$head(
           tags$style(HTML("
-              #chat_window {
-                  height: 400px;  /* Adjust the height as needed */
-                  overflow-y: auto;  /* Enables vertical scrolling */
-                  padding: 10px;
-                  border-radius: 5px;
-              }
+              .modal-dialog {width: 30%;max-width: 30%;margin: 20px;}
+              #chat_window {height: 500px;width: 100%;overflow-y: auto;padding:
+                10px;border-radius: 5px;}
           "))
         ),
         div( id = "chat_window", htmlOutput("answer")),
@@ -2666,7 +2664,7 @@ app_server <- function(input, output, session) {
           tags$style(
             "#answer{
               color: purple;
-              font-size: 14px
+              font-size: 16px
             }"
           )
         ),

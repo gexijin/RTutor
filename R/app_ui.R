@@ -48,6 +48,9 @@ app_ui <- function(request) {
       /* textarea, textInput, numericInput */
       textarea, input[type = 'text'], input[type='number']
       {width: 100%;background-color: #F6FFF5;border-color: #90BD8C;font-size: 16px;}
+
+      /* tippy this pop-ups */
+      .tippy-content {font-size: 15px !important;}
     "))),
 
     # 'First Time User' tab redirect
@@ -65,7 +68,7 @@ app_ui <- function(request) {
         title = HTML('<span style="color: black;font-size: 18px;">Home</span>'),
         div(
           id = "load_message",
-          h2("Chat with your data via AI ..."),
+          #h2("Chat with your data via AI ..."),
         ),
 
         # move notifications and progress bar to the center of screen
@@ -82,7 +85,7 @@ app_ui <- function(request) {
             fluidRow(
               column(
                 width = 6,
-                textOutput("selected_dataset")
+                uiOutput("selected_dataset")
               )
             ),
 
@@ -229,7 +232,7 @@ app_ui <- function(request) {
 
           mainPanel(
             shinyjs::useShinyjs(),
-            textOutput("showgraphics"),
+            #textOutput("showgraphics"),
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
@@ -506,23 +509,37 @@ app_ui <- function(request) {
           "Download a Results Report",
           theme = "light-border"
         ),
-        br(),
+
+        fluidRow(
+          column(
+            width = 12,
+            h2(strong("Report"), style = "padding-left: 25px;color: black;"),
+            hr(class = "custom-hr-thick")
+          )
+        ),
+
         fluidRow(
           column(
             width = 5,
-            selectInput(
-              inputId = "selected_chunk_report",
-              label = "Code chunks to include:",
-              selected = NULL,
-              choices = NULL,
-              multiple = TRUE
+            div(
+              selectInput(
+                inputId = "selected_chunk_report",
+                label = "Code chunks to include:",
+                selected = NULL,
+                choices = NULL,
+                multiple = TRUE
+              ),
+              style = "padding-left: 20px;white-space: nowrap;"
             ),
           )
         ),
         fluidRow(
           column(
             width = 4,
-            uiOutput("html_report"),
+            div(
+              uiOutput("html_report"),
+              style = "padding-left: 20px;"
+            )
           ),
           column(
             width = 8,
@@ -539,13 +556,17 @@ app_ui <- function(request) {
           )
         ),
         br(),
-        verbatimTextOutput("rmd_chunk_output")
+        div(
+          verbatimTextOutput("rmd_chunk_output"),
+          style = "padding-left: 20px;padding-right: 20px;"
+        ),
+        br()
       ), #tabPanel
 
       navbarMenu(
         title = HTML('<span style="color: black;font-size: 18px;">More</span>'),
         tabPanel(
-          title = "First Time User",
+          title = HTML('<span style="color: black;font-size: 18px;">First Time User</span>'),
           value = "first-time-user",
           fluidRow(
             column(
@@ -677,7 +698,7 @@ app_ui <- function(request) {
           )
         ), #tabPanel
         tabPanel(
-          title = "About",
+          title = HTML('<span style="color: black;font-size: 18px;">About</span>'),
           value = "About",
           fluidRow(
             column(
@@ -834,7 +855,7 @@ app_ui <- function(request) {
           br(), br()
         ), #tabPanel
         tabPanel(
-          title = "FAQ",
+          title = HTML('<span style="color: black;font-size: 18px;">FAQ</span>'),
           fluidRow(
             column(
               width = 6,
@@ -842,10 +863,14 @@ app_ui <- function(request) {
                  style = "font-weight: bold;padding-left: 25px;color: black;"),
               hr(class = "custom-hr-thick"),
 
-              uiOutput("faq_list"),
+              div(
+                uiOutput("faq_list"),
+                style = "padding-left: 20px;padding-right: 20px;"
+              ),
               tags$style(HTML("
                 .faq-answer {display: none;padding-left: 10px;font-size: 18px;}
-                .faq-question {cursor: pointer;padding: 5px;border: 1px solid #90BD8C;background-color: #F6FFF5;font-size: 18px;}
+                .faq-question {cursor: pointer;padding: 7px;border: 1px solid
+                  #90BD8C;background-color: #F6FFF5;font-size: 18px;}
               ")),
               tags$script(HTML('
                 $(document).on("click", ".faq-question", function() {
@@ -861,15 +886,18 @@ app_ui <- function(request) {
             column(
               width = 6,
               h2("Comments & Questions",
-                 style = "font-weight: bold;padding-left: 25px;color: black;"),
+                 style = "font-weight: bold;padding-left: 20px;color: black;"),
               hr(class = "custom-hr-thick"),
 
-              tags$textarea(
-                id = "user_feedback",
-                placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
-                rows = 4,
-                "",
-                style = "font-size: 18px;"
+              div(
+                tags$textarea(
+                  id = "user_feedback",
+                  placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
+                  rows = 4,
+                  "",
+                  style = "font-size: 18px;padding: 7px;"
+                ),
+                style = "padding-left: 20px;padding-right: 20px;"
               ),
 
               div(
@@ -891,19 +919,22 @@ app_ui <- function(request) {
                   ),
                   selected = "Beginner"
                 ),
-                style = "font-size: 18px;"
+                style = "font-size: 18px;padding-left: 20px;"
               ),
 
-              actionButton(
-                "save_feedbck",
-                label = strong("Save Feedback"),
-                class = "custom-action-button",
-                style = "font-size: 20px;")
+              div(
+                actionButton(
+                  "save_feedbck",
+                  label = strong("Save Feedback"),
+                  class = "custom-action-button",
+                  style = "font-size: 20px;"),
+                style = "padding-left: 20px;"
+              )
             )
           )
         ), #tabPanel
         tabPanel(
-          title = "Settings",
+          title = HTML('<span style="color: black;font-size: 18px;">Settings</span>'),
           div(id = "settings_window",
             tagList(
 
@@ -1021,12 +1052,20 @@ app_ui <- function(request) {
                     column(
                       width = 4,
                       div(
-                        checkboxInput(
-                          inputId = "use_python",
-                          label = strong("Python"),
-                          value = FALSE
+                        tippy::tippy_this(
+                          "use_python_wrapper",
+                          "Beta Version",
+                          theme = "light-border"
                         ),
-                        style = "padding-left: 75px;font-size: 18px;"
+                        div(
+                          id = "use_python_wrapper",
+                          checkboxInput(
+                            inputId = "use_python",
+                            label = strong("Python"),
+                            value = FALSE
+                          ),
+                          style = "padding-left: 75px;font-size: 18px;"
+                        )
                       )
                     ),
                     column(
