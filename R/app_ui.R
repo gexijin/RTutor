@@ -105,7 +105,7 @@ app_ui <- function(request) {
               column(
                 width = 12,
                 tags$label("2. Modify Data Fields",
-                style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
+                style = "font-size: 18px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
               br(),
               column(
@@ -809,8 +809,13 @@ app_ui <- function(request) {
               width = 6,
               checkboxInput(
                 "site_update_log",
-                h4(strong(HTML("<span style='white-space: nowrap;'>See Site
+                # h4(strong(HTML("<span style='white-space: nowrap;'>See Site
+                #   Updates Log & R Session Info</span>"))),
+                div(
+                  style = "display: inline-flex; align-items: center; vertical-align: middle;",
+                  tags$h4(style = "margin: 0;", tags$strong(HTML("<span style='white-space: nowrap;'>See Site
                   Updates Log & R Session Info</span>"))),
+                ),
                 FALSE)
             )
           ),

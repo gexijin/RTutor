@@ -361,7 +361,7 @@ app_server <- function(input, output, session) {
             column(
               width = 5,
               div(
-                "Examples:",
+                "",
                 class = "vertical-padding",
                 style = "font-size: 18px;"
               )
