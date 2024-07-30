@@ -81,7 +81,6 @@ app_ui <- function(request) {
                 textOutput("selected_dataset")
               )
             ),
-
             fluidRow(
               column(
                 width = 6,
@@ -93,12 +92,12 @@ app_ui <- function(request) {
                 uiOutput("data_upload_ui_2")
               )
             ),
+            hr(class = "custom-hr"),
 
             fluidRow(
               column(
                 width = 12,
-                hr(class = "custom-hr"),
-                tags$label("2. Modify Data Fields (Optional)",
+                tags$label("2. Modify Data Fields",
                 style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
               br(),
@@ -186,53 +185,44 @@ app_ui <- function(request) {
                 hr(class = "custom-hr")
               )
             ),
-            tags$head(
-              tags$style(HTML("
-                #ask_question {
-                  width: 100%;
-                  background-color: #F6FFF5;
-                  border-color: #90BD8C;
-                }
-              "))
-            ),
-            textInput(
-              inputId = "ask_question",
-              label = "Ask about Results (Optional)",
-              placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
-              value = ""
+            conditionalPanel(
+              condition = "input.submit_button >= 1",
+              fluidRow(
+                column(12,
+                  tags$head(
+                    tags$style(HTML("
+                      #ask_question {
+                        width: 100%;
+                        background-color: #F6FFF5;
+                        border-color: #90BD8C;
+                      }
+                    "))
+                  ),
+                  textInput(
+                    inputId = "ask_question",
+                    label = "Ask about Results",
+                    placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
+                    value = ""
+                  ),
+
+                  tippy::tippy_this(
+                    "ask_question",
+                    "Walk me through this code. What does this result mean?
+                    What is this error about? Explain logistic regression.
+                    List R packages for time series analysis.
+                    Hit Enter to send the request.",
+                    theme = "light-border"
+                  ),
+                  shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
+                  hr(class = "custom-hr")
+                  )
+              )
             ),
 
-            tippy::tippy_this(
-              "ask_question",
-              "Walk me through this code. What does this result mean?
-              What is this error about? Explain logistic regression.
-              List R packages for time series analysis.
-              Hit Enter to send the request.",
-              theme = "light-border"
-            ),
-            shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
-
-            # br(),
-            # fluidRow(
-            #   tags$head(tags$style(
-            #       "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-            #     )),
-            #   column(
-            #     width = 6,
-            #     actionButton("data_edit_modal", "Data Types")
-            #   ),
-            #   tags$head(tags$style(
-            #       "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-            #     )),
-            #   column(
-            #     width = 6,
-            #     actionButton("data_desc_modal", "Description")
-            #   )
-            # ),
-            hr(class = "custom-hr"),
-            textOutput("usage"),
-            textOutput("total_cost"),
-            textOutput("temperature"),
+            # hr(class = "custom-hr"),
+            # textOutput("usage"),
+            # textOutput("total_cost"),
+            # textOutput("temperature"),
             textOutput("retry_on_error")
           ),
 

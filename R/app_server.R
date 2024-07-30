@@ -275,7 +275,7 @@ app_server <- function(input, output, session) {
     req(is.null(input$user_file))
     fileInput(
       inputId = "user_file",
-      label = "(Upload Your File)",
+      label = "Upload",
       accept = c(
         "text/csv",
         "text/comma-separated-values",
@@ -373,14 +373,14 @@ app_server <- function(input, output, session) {
           ),
           fluidRow(
             column(
-              width = 3,
+              width = 5,
               div(
-                "Examples:",
+                "",
                 class = "vertical-padding"
              )
             ),
             column(
-              width = 9,
+              width = 7,
               align = "left",
               selectInput(
                 inputId = "demo_prompt",
