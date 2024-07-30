@@ -88,7 +88,6 @@ app_ui <- function(request) {
                 uiOutput("selected_dataset")
               )
             ),
-
             fluidRow(
               column(
                 width = 6,
@@ -100,13 +99,13 @@ app_ui <- function(request) {
                 uiOutput("data_upload_ui_2")
               )
             ),
+            hr(class = "custom-hr"),
 
             fluidRow(
               column(
                 width = 12,
-                hr(class = "custom-hr"),
-                tags$label("2. Modify Data Fields (Optional)",
-                  style = "font-size: 18px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
+                tags$label("2. Modify Data Fields",
+                style = "font-size: 14px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;")
               ),
               br(),
               column(
@@ -185,44 +184,45 @@ app_ui <- function(request) {
                 hr(class = "custom-hr")
               )
             ),
-            textInput(
-              inputId = "ask_question",
-              label = "Q&A (Optional)",
-              placeholder = "Ask about the code, result, error, general statistics, etc.",
-              value = ""
+
+            conditionalPanel(
+              condition = "input.submit_button >= 1",
+              fluidRow(
+                column(12,
+                  tags$head(
+                    tags$style(HTML("
+                      #ask_question {
+                        width: 100%;
+                        background-color: #F6FFF5;
+                        border-color: #90BD8C;
+                      }
+                    "))
+                  ),
+                  textInput(
+                    inputId = "ask_question",
+                    label = "Ask about Results",
+                    placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
+                    value = ""
+                  ),
+
+                  tippy::tippy_this(
+                    "ask_question",
+                    "Walk me through this code. What does this result mean?
+                    What is this error about? Explain logistic regression.
+                    List R packages for time series analysis.
+                    Hit Enter to send the request.",
+                    theme = "light-border"
+                  ),
+                  shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
+                  hr(class = "custom-hr")
+                  )
+              )
             ),
 
-            tippy::tippy_this(
-              "ask_question",
-              "Walk me through this code. What does this result mean?
-              What is this error about? Explain logistic regression.
-              List R packages for time series analysis.
-              Hit Enter to send the request.",
-              theme = "light-border"
-            ),
-            shinyjs::hidden(actionButton("ask_button", strong("Ask RTutor"))),
-
-            # br(),
-            # fluidRow(
-            #   tags$head(tags$style(
-            #       "#data_edit_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-            #     )),
-            #   column(
-            #     width = 6,
-            #     actionButton("data_edit_modal", "Data Types")
-            #   ),
-            #   tags$head(tags$style(
-            #       "#data_desc_modal{font-size: 14px;color: black;background-color: #F6FFF5;border-color: #90BD8C;}"
-            #     )),
-            #   column(
-            #     width = 6,
-            #     actionButton("data_desc_modal", "Description")
-            #   )
-            # ),
-            hr(class = "custom-hr"),
-            textOutput("usage"),
-            textOutput("total_cost"),
-            textOutput("temperature"),
+            # hr(class = "custom-hr"),
+            # textOutput("usage"),
+            # textOutput("total_cost"),
+            # textOutput("temperature"),
             textOutput("retry_on_error")
           ),
 
@@ -232,12 +232,11 @@ app_ui <- function(request) {
 
           mainPanel(
             shinyjs::useShinyjs(),
-            #textOutput("showgraphics"),
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
 
-              uiOutput("RTutor_version_main"),
+              # uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
                   width = 4,
@@ -787,6 +786,7 @@ app_ui <- function(request) {
           br(),
 
           hr(class = "custom-hr"),
+
           h3("The RTutor website and the source code is free for non-profit
             organizations ONLY. Licensing is required for commercial use.",
             style = "padding-left: 20px;padding-right: 20px;margin-top: 10px;"),
