@@ -54,7 +54,7 @@ app_server <- function(input, output, session) {
         "input_text",
         value = "",
         placeholder =
-"Upload a file or use the preloaded data. Then just ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples above."
+"Ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples below."
       )
     }
   })
@@ -251,21 +251,22 @@ app_server <- function(input, output, session) {
 
 
   # showing the current dataset. Warning if no is uploaded.
-  output$selected_dataset <- renderText({
-      req(input$submit_button)
-      # when submit is clicked, but no data is uploaded.
+  output$selected_dataset <- renderUI({
+    req(input$submit_button)
+    # when submit is clicked, but no data is uploaded.
 
-      if(input$select_data == uploaded_data) {
-        if(is.null(input$user_file)) {
-          txt <- "No file uploaded! Please Reset and upload your data first."
-        } else {
-          txt <- "Dataset: uploaded."
-        }
+    if (input$select_data == uploaded_data) {
+      if (is.null(input$user_file)) {
+        txt <- "No file uploaded! Please Reset and upload your data first."
       } else {
-        txt <- paste0("Selected Dataset: ", input$select_data)
+        txt <- "Dataset: Uploaded."
       }
+    } else {
+      txt <- paste0("Selected Dataset: ", input$select_data)
+    }
 
-      return(txt)
+    return(HTML(paste0("<span style='font-size: 18px;font-weight: bold;
+                       white-space: nowrap;'>", txt, "</span>")))
   })
 
   output$data_upload_ui <- renderUI({
@@ -301,6 +302,7 @@ app_server <- function(input, output, session) {
           tags$style(HTML("
             .vertical-padding {padding-top: 10px;padding-bottom: 10px;
             font-weight: bold;}
+            .control-label {font-size: 18px;}
           "))
         ),
         fluidRow(
@@ -313,19 +315,6 @@ app_server <- function(input, output, session) {
               selected = "mpg",
               multiple = FALSE
             )
-          )
-        ),
-        tags$style(
-          HTML("#select_data+div .selectize-input {
-                background-color: #F6FFF5 !important;
-                border-color: #90BD8C !important;
-                color: #000 !important;
-                }
-                #select_data+div .selectize-dropdown {
-                background-color: #F6FFF5 !important;
-                border-color: #90BD8C !important;
-                color: #000 !important;
-                }"
           )
         )
       )
@@ -365,19 +354,17 @@ app_server <- function(input, output, session) {
         tagList(
           tags$head(
             tags$style(HTML("
-              .vertical-padding {
-                padding-top: 10px;  /* Adjust this value based on your specific UI */
-                padding-bottom: 10px;  /* Adjust this value based on your specific UI */
-              }
+              .vertical-padding {padding-top: 5px;padding-bottom: 10px;padding-left: 12px;}
             "))
           ),
           fluidRow(
             column(
               width = 5,
               div(
-                "",
-                class = "vertical-padding"
-             )
+                "Examples:",
+                class = "vertical-padding",
+                style = "font-size: 18px;"
+              )
             ),
             column(
               width = 7,
@@ -387,23 +374,6 @@ app_server <- function(input, output, session) {
                 choices = choices,
                 label = NULL
               )
-            )
-          ),
-
-          tags$style(
-            HTML(
-              "
-              #demo_prompt+div .selectize-input {
-                background-color: #F6FFF5 !important;
-                border-color: #90BD8C !important;
-                color: #000 !important;
-              }
-              #demo_prompt+div .selectize-dropdown {
-                background-color: #F6FFF5 !important;
-                border-color: #90BD8C !important;
-                color: #000 !important;
-              }
-              "
             )
           )
         )
@@ -431,9 +401,9 @@ app_server <- function(input, output, session) {
       .irs--shiny .irs-bar {border-top: 1px solid #90BD8C;border-bottom: 1px solid #90BD8C;background: #8fca89;}
       .irs--shiny .irs-single {background-color: #8fca89; color: #000}
     ")),
-    sliderInput(
+      sliderInput(
         inputId = "temperature",
-        label = "Sampling temperature",
+        label = h3(strong("Sampling Temperature")),
         min = 0,
         max = 1,
         value = sample_temp(),
@@ -455,7 +425,7 @@ app_server <- function(input, output, session) {
   output$max_levels_factor <- renderUI({
     numericInput(
       inputId = "max_levels_factor",
-      label = "Max levels",
+      label = "Maximum Levels",
       value = max_levels_factor(),
       min = 3,
       max = 50,
@@ -466,7 +436,7 @@ app_server <- function(input, output, session) {
   output$max_proptortion_factor <- renderUI({
     numericInput(
       inputId = "max_proptortion_factor",
-      label = "Max proportion",
+      label = "Maximum Proportion",
       value = max_proptortion_factor(),
       min = 0.05,
       max = 0.5,
@@ -477,7 +447,7 @@ app_server <- function(input, output, session) {
   output$contribute_data <- renderUI({
     checkboxInput(
       inputId = "contribute_data",
-      label = "Help us make RTutor better",
+      label = strong("Help us make RTutor better"),
       value = contribute_data()
     )
   })
@@ -1001,8 +971,8 @@ app_server <- function(input, output, session) {
   api_error_modal <- shiny::modalDialog(
     title = "API connection error!",
     tags$h4("Is the API key is correct?", style = "color:red"),
-      tags$h4("How about the WiFi?", style = "color:red"),
-      tags$h4("Maybe the openAI.com website is taking forever to respond.", style = "color:red"),
+    tags$h4("How about the WiFi?", style = "color:red"),
+    tags$h4("Maybe the openAI.com website is taking forever to respond.", style = "color:red"),
     tags$h5("If you keep having trouble, send us an email.", style = "color:red"),
     tags$h4(
       "Auto-reset ...",
@@ -1164,9 +1134,10 @@ app_server <- function(input, output, session) {
 
   output$total_cost <- renderText({
     if(input$submit_button == 0) {
-      return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
-      use your own API key (Settings), or help cover the fee via PayPal (gexijin@gmail.com)."
-      )
+      # return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
+      # use your own API key (Settings), or help cover the fee via PayPal (gexijin@gmail.com)."
+      # )
+      return()
     } else {
     #req(openAI_response()$cmd)
       paste0(
@@ -1976,17 +1947,15 @@ app_server <- function(input, output, session) {
     tagList(
       actionButton(
         inputId = "report",
-        label = "Session Report"
+        label = strong("Session Report"),
+        class = "custom-action-button"
       ),
-      tags$head(tags$style(
-        "#report{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
-      )),
       tippy::tippy_this(
         "report",
         "Render a HTML report for this session.",
         theme = "light-border"
       )
-   )
+    )
   })
 
   output$rmd_chunk_output <- renderText({
@@ -2006,11 +1975,9 @@ app_server <- function(input, output, session) {
           width = 3,
           actionButton(
             inputId = "render_eda_report_rtutor",
-            label = "Render Report"
-          ),
-          tags$head(tags$style(
-            "#render_eda_report_rtutor{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
-          )),
+            label = strong("Render Report"),
+            class = "custom-action-button"
+          )
         )
       ),
       br(),
@@ -2019,19 +1986,6 @@ app_server <- function(input, output, session) {
         label = "Select a target variable (optional):",
         choices = c("<None>", colnames(df)),
         multiple = FALSE
-      ),
-      tags$style(
-        HTML("#eda_target_variable+div .selectize-input {
-              background-color: #F6FFF5 !important;
-              border-color: #90BD8C !important;
-              color: #000 !important;
-              }
-              #eda_target_variable+div .selectize-dropdown {
-              background-color: #F6FFF5 !important;
-              border-color: #90BD8C !important;
-              color: #000 !important;
-              }"
-        )
       ),
       br(),
       checkboxGroupInput(
@@ -2697,24 +2651,21 @@ app_server <- function(input, output, session) {
   observeEvent(answer_one(), {
     showModal(
       modalDialog(
-        title = "Chat with your tutor",
+        title = strong("Chat with your tutor"),
         # Custom CSS to make the chat area scrollable
         tags$head(
-            tags$style(HTML("
-                #chat_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
+          tags$style(HTML("
+              .modal-dialog {width: 30%;max-width: 30%;margin: 20px;}
+              #chat_window {height: 500px;width: 100%;overflow-y: auto;padding:
+                10px;border-radius: 5px;}
+          "))
         ),
         div( id = "chat_window", htmlOutput("answer")),
         tags$head(
           tags$style(
             "#answer{
               color: purple;
-              font-size: 14px
+              font-size: 16px
             }"
           )
         ),
@@ -2743,26 +2694,11 @@ app_server <- function(input, output, session) {
   output$table1_inputs <- renderUI({
     req(ggpairs_data())
     df <- ggpairs_data()
-    tagList(
-      selectInput(
-        inputId = "table1_strata",
-        label = "Select a category for strata",
-        choices = colnames(df)[!sapply(df, is.numeric)],
-        multiple = FALSE
-      ),
-      tags$style(
-        HTML("#table1_strata+div .selectize-input {
-              background-color: #F6FFF5 !important;
-              border-color: #90BD8C !important;
-              color: #000 !important;
-              }
-              #table1_strata+div .selectize-dropdown {
-              background-color: #F6FFF5 !important;
-              border-color: #90BD8C !important;
-              color: #000 !important;
-              }"
-        )
-      )
+    selectInput(
+      inputId = "table1_strata",
+      label = "Select a category for strata",
+      choices = colnames(df)[!sapply(df, is.numeric)],
+      multiple = FALSE
     )
   })
 
@@ -2880,72 +2816,41 @@ app_server <- function(input, output, session) {
     if(length(selected) > 3) {
       selected <- sample(selected, 3)
     }
-    tagList(
-      fluidRow(
-        column(
-          width = 3,
-          selectInput(
-            inputId = "ggpairs_variables",
-            label = "Select variables",
-            choices = colnames(df),
-            multiple = TRUE,
-            selected = selected
-          ),
-          tags$style(
-            HTML("#ggpairs_variables+div .selectize-input {
-                  background-color: #F6FFF5 !important;
-                  border-color: #90BD8C !important;
-                  color: #000 !important;
-                  }
-                  #ggpairs_variables+div .selectize-dropdown {
-                  background-color: #F6FFF5 !important;
-                  border-color: #90BD8C !important;
-                  color: #000 !important;
-                  }"
-            )
-          )
-        ),
-        column(
-          width = 3,
-          selectInput(
-            inputId = "ggpairs_variables_color",
-            label = "Select a category for coloring",
-            choices = colnames(df)[!sapply(df, is.numeric)],
-            multiple = FALSE
-          ),
-          tags$style(
-            HTML("#ggpairs_variables_color+div .selectize-input {
-                  background-color: #F6FFF5 !important;
-                  border-color: #90BD8C !important;
-                  color: #000 !important;
-                  }
-                  #ggpairs_variables_color+div .selectize-dropdown {
-                  background-color: #F6FFF5 !important;
-                  border-color: #90BD8C !important;
-                  color: #000 !important;
-                  }"
-            )
-          )
-        ),
-        # add a submit button to refresh the plot
-        column(
-          width = 2,
-          actionButton(
-            inputId = "ggpairs_submit",
-            label = strong("Submit"),
-            style = "margin-top: 15px;"
-          ),
-          tags$head(tags$style(
-            "#ggpairs_submit{font-size: 16px;color: #000;background-color: #C1E2BE;border-color: #90BD8C;}"
-          )),
-        ),
-        column(
-          width = 4,
-          h4("Please wait 1 minute for this plot to be created.")
+    fluidRow(
+      column(
+        width = 3,
+        selectInput(
+          inputId = "ggpairs_variables",
+          label = "Select variables",
+          choices = colnames(df),
+          multiple = TRUE,
+          selected = selected
         )
+      ),
+      column(
+        width = 3,
+        selectInput(
+          inputId = "ggpairs_variables_color",
+          label = "Select a category for coloring",
+          choices = colnames(df)[!sapply(df, is.numeric)],
+          multiple = FALSE
+        )
+      ),
+      # add a submit button to refresh the plot
+      column(
+        width = 2,
+        actionButton(
+          inputId = "ggpairs_submit",
+          label = strong("Submit"),
+          style = "margin-top: 15px;",
+          class = "custom-action-button"
+        )
+      ),
+      column(
+        width = 4,
+        h4("Please wait 1 minute for this plot to be created.")
       )
     )
-
   })
 
   output$ggpairs <- renderPlot({
@@ -3007,30 +2912,18 @@ output$RTutor_version <- renderUI({
     all <- unname(all)
     #all <- c("", all)
 
-    tagList(
-      selectInput(
-        inputId = "installed_packages",
-        label = paste0(
-          "Search for installed packages ( ",
+    selectInput(
+      inputId = "installed_packages",
+      label = h4(strong(HTML(
+        paste0(
+          "<span style='white-space: nowrap;'>",
+          "Search for installed packages (",
           length(all),
-          " total)"
-        ),
-        choices = all,
-        selected = NULL
-      ),
-      tags$style(
-        HTML("#installed_packages+div .selectize-input {
-              background-color: #F6FFF5 !important;
-              border-color: #90BD8C !important;
-              color: #000 !important;
-              }
-              #installed_packages+div .selectize-dropdown {
-              background-color: #F6FFF5 !important;
-              border-color: #90BD8C !important;
-              color: #000 !important;
-              }"
+          " total)</span>"
         )
-      )
+      ))),
+      choices = all,
+      selected = NULL
     )
   })
 
@@ -3048,7 +2941,7 @@ output$RTutor_version <- renderUI({
   })
 
   output$session_info <- renderUI({
-    i <- c("<br><h4>R session info: </h4>")
+    i <- c("<br><h4><strong>R Session Information: </strong></h4>")
     i <- c(i, capture.output(sessionInfo()))
     HTML(paste(i, collapse = "<br/>"))
   })
@@ -3202,16 +3095,16 @@ output$RTutor_version <- renderUI({
         title = "Verify data types (important!)",
         # Custom CSS to make the chat area scrollable
         tags$head(
-            tags$style(HTML("
-                #data_type_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
+          tags$style(HTML("
+              #data_type_window {
+                  height: 400px;  /* Adjust the height as needed */
+                  overflow-y: auto;  /* Enables vertical scrolling */
+                  padding: 10px;
+                  border-radius: 5px;
+              }
+          "))
         ),
-        div( id = "data_type_window", uiOutput("column_type_ui")),
+        div(id = "data_type_window", uiOutput("column_type_ui")),
         h4("If a column represents categories, choose 'Factor', even if
         it contains numbers. For columns that are numbers, but with few unique values, RTutor
         automatically convert them to factors. See Settings.",
@@ -3322,14 +3215,14 @@ output$RTutor_version <- renderUI({
         title = "Data description",
         # Custom CSS to make the chat area scrollable
         tags$head(
-            tags$style(HTML("
-                #description_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
+          tags$style(HTML("
+              #description_window {
+                  height: 400px;  /* Adjust the height as needed */
+                  overflow-y: auto;  /* Enables vertical scrolling */
+                  padding: 10px;
+                  border-radius: 5px;
+              }
+          "))
         ),
         div( id = "description_window", textOutput("data_description")),
         tags$style(type="text/css", "#data_description {white-space: pre-wrap;}"),
@@ -3428,22 +3321,22 @@ output$RTutor_version <- renderUI({
     })
   })
 
-show_pop_up_2 <- function() {
+  show_pop_up_2 <- function() {
     showModal(
       modalDialog(
         title = "Verify data types (important!)  2",
         # Custom CSS to make the chat area scrollable
         tags$head(
-            tags$style(HTML("
-                #data_type_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
+          tags$style(HTML("
+              #data_type_window {
+                  height: 400px;  /* Adjust the height as needed */
+                  overflow-y: auto;  /* Enables vertical scrolling */
+                  padding: 10px;
+                  border-radius: 5px;
+              }
+          "))
         ),
-        div( id = "data_type_window", uiOutput("column_type_ui_2")),
+        div(id = "data_type_window", uiOutput("column_type_ui_2")),
         h4("If a column represents categories, choose 'Factor', even if
         it is coded as numbers. Some columns are
         automatically converted. For columns that are numbers, but with few unique values, RTutor
