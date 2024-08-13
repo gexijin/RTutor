@@ -86,6 +86,29 @@ app_server <- function(input, output, session) {
     session$reload()
   })
 
+  # pop-up to warn users under age 13 & those with a for-profit org. NOT to use
+  observe({
+    commercial_use_modal <- shiny::modalDialog(
+        title = "RTutor Usage Policy",
+
+        tags$br(),
+        tags$h4("RTutor is available to the public strictly for education and
+          non-profit organizations. If you are affiliated with a company or intend
+          to use iDEP for commercial activities, you must obtain a license from us.
+          Please contact us at ",
+          a("gexijin@gmail.com", href = "mailto:gexijin@gmail.com")
+        ),
+        tags$br(),
+        tags$h4("Additionally, users under the age of 13 are not permitted to use
+          RTutor. If you are under 13 years old, please do not use this service."
+        ),
+        easyClose = TRUE,
+        size = "l"
+      )
+
+      shiny::showModal(commercial_use_modal)
+    })
+
 #                                    2.
 #____________________________________________________________________________
 #  Voice naration
