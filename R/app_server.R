@@ -918,7 +918,6 @@ app_server <- function(input, output, session) {
             temperature = sample_temp(),
               messages = prompt_total
           )
-          browser()
 
           # to make the returned code at the same spot, as davinci model.
           response$choices[1, 1] <- response$choices$message.content
