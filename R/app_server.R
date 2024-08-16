@@ -99,9 +99,10 @@ app_server <- function(input, output, session) {
           a("gexijin@gmail.com", href = "mailto:gexijin@gmail.com")
         ),
         tags$br(),
-        tags$h4("Additionally, users under the age of 13 are not permitted to use
-          RTutor. If you are under 13 years old, please do not use this service."
-        ),
+        # tags$h4("See updated",
+        #   a("Privacy Policy", href = "", target = "_blank")),
+        tags$h4("We've updated our Privacy Policy and Terms & Conditions. By continuing
+          to RTutor.ai, you acknowledge and agree to these changes."),
         easyClose = TRUE,
         size = "l"
       )
