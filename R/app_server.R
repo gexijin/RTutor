@@ -94,7 +94,7 @@ app_server <- function(input, output, session) {
         tags$br(),
         tags$h4("RTutor is available to the public strictly for education and
           non-profit organizations. If you are affiliated with a company or intend
-          to use iDEP for commercial activities, you must obtain a license from us.
+          to use RTutor for commercial activities, you must obtain a license from us.
           Please contact us at ",
           a("gexijin@gmail.com", href = "mailto:gexijin@gmail.com")
         ),
@@ -475,6 +475,14 @@ app_server <- function(input, output, session) {
     )
   })
 
+  output$send_head <- renderUI({
+    checkboxInput(
+      inputId = "send_head",
+      label = strong("Help make code generation better"),
+      value = send_head()
+    )
+  })
+
   # pop up modal for Settings
   # observeEvent(input$api_button, {
   #   shiny::showModal(
@@ -794,7 +802,7 @@ app_server <- function(input, output, session) {
     req(input$select_data)
     req(input$input_text)
     isolate({ # so that it does not do it twice with each submit
-      prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model(), df2 = current_data_2())
+      prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model(), send_head(), df2 = current_data_2())
     })
 
   })
@@ -910,6 +918,7 @@ app_server <- function(input, output, session) {
             temperature = sample_temp(),
               messages = prompt_total
           )
+          browser()
 
           # to make the returned code at the same spot, as davinci model.
           response$choices[1, 1] <- response$choices$message.content
@@ -2976,6 +2985,14 @@ output$RTutor_version <- renderUI({
         save_info <- input$contribute_data
       }
       return(save_info)
+  })
+
+  send_head <- reactive({
+      send_info <- FALSE #default
+      if(!is.null(input$send_head)) {
+        send_info <- input$send_head
+      }
+      return(send_info)
   })
 
   # save user data when allowed

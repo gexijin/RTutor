@@ -11,6 +11,7 @@ prep_input(
   use_python,
   chunk_id,
   selected_model,
+  send_head,
   df2 = NULL,
   df2_name = NULL
 )

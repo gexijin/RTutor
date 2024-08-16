@@ -4,7 +4,7 @@
 \alias{describe_df}
 \title{Describe data frame}
 \usage{
-describe_df(df, list_levels = FALSE, relevant_var = NULL, head = TRUE)
+describe_df(df, list_levels = FALSE, relevant_var = NULL, send_head = TRUE)
 }
 \arguments{
 \item{df}{a data frame}

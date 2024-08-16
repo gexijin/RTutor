@@ -116,7 +116,7 @@ move_front <- function(v, e){
 #' @param chunk_id  first or not? First chunk add data description
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, df2 = NULL, df2_name = NULL) {
+prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, send_head, df2 = NULL, df2_name = NULL) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -160,7 +160,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         df, 
         list_levels = TRUE, 
         relevant_var = relevant_var,
-        head = TRUE
+        send_head = send_head
       )
       # Always add 'use the df data frame.'
       txt <- paste(txt, after_text)
@@ -189,7 +189,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
             df2, 
             list_levels = TRUE, 
             relevant_var = relevant_var,
-            head = TRUE
+            send_head = send_head
           )
           data_info_2 <- gsub("df data frame", paste0(df2_name, " data frame"), data_info_2)
 
@@ -229,7 +229,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 #' @param list_levels whether to list levels for factors
 #' @param relevant_var  a list of variables mentioned by the user
 #' @return Returns a cleaned up version, so that it could be executed as R command.
-describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRUE) {
+describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, send_head = TRUE) {
 
   data_info <- ""
   numeric_index <- sapply(
@@ -342,7 +342,7 @@ describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRU
     }
   }
   
-  if(head) {
+  if(send_head) {
     #randomly select 5 rows, print out, convert to string
     sample_rows <- paste0(
       capture.output(as.data.frame(df[sample(nrow(df), 5),])), 
@@ -1134,6 +1134,7 @@ faqs <- data.frame(
 # Used in site_updates_table component
 site_updates_df <- data.frame(
   Version = c(
+    "V1.0", "V0.99",
     "V0.98.3", "V0.98.2", "V0.98",
     "V0.97", "V0.96", "V0.95",
     "V0.94", "V0.93", "V0.92",
@@ -1144,7 +1145,8 @@ site_updates_df <- data.frame(
     "V0.6", "V0.5", "V0.4",
     "V0.3", "V0.2", "V0.1"
   ),
-  Date = c("11/1/2023","11/1/2023","10/28/2023",
+  Date = c("7/30/2024", "7/30/2024",
+    "11/1/2023","11/1/2023","10/28/2023",
            "10/23/2023","9/26/2023","6/11/2023",
            "4/21/2023","3/26/2023","3/8/2023",
            "2/6/2023","1/15/2023","1/8/2023",
@@ -1154,6 +1156,7 @@ site_updates_df <- data.frame(
            "12/27/2022","12/24/2022","12/23/2022",
            "12/20/2022","12/16/2022","12/11/2022"),
   Description = c(
+    "Redesign UI", "Fix Rplots.pdf error",
     "Fix issue with EDA report when the target variable is categorical or not specified.",
     "Comprehensive EDA report!",
     "Ask questions about code, error. Second data file upload.",
