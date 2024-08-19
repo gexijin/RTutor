@@ -1534,11 +1534,13 @@ app_server <- function(input, output, session) {
   # The current data
   current_data <- reactiveVal(NULL)
 
+
   observeEvent(input$select_data, {
     req(input$select_data)
 
     if(input$select_data == uploaded_data) {
       eval(parse(text = paste0("df <- user_data()$df")))
+      # orig_data = df
     } else if(input$select_data == no_data){
       df <- NULL #as.data.frame("No data selected or uploaded.")
     } else if(input$select_data == rna_seq){
@@ -1590,12 +1592,14 @@ app_server <- function(input, output, session) {
       return(current_data())
     }
 
-    df <- current_data()
-    # This updates the data by running hte entire code one more time.
+    # df <- current_data() #I moved this line to inside innermost if statement
+    # This updates the data by running the entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
         if(!input$use_python && logs$language == "R") { # not python
-          df <- run_env()$df
+          # df <- run_env()$df #This isn't actually updating the df dataframe.
+          df <- current_data() #This isn't actually updating the df dataframe. I personally think this nested if statemet
+          # is pointless and not doing anything, but I'm leaving it for posterity sake. "Don't fix it if it's not broken..."
         }
       }
     }
@@ -3235,10 +3239,16 @@ output$RTutor_version <- renderUI({
             orders = c("mdy", "dmy", "ymd")
           )
           updated_data[[i]] <- as.Date(updated_data[[i]])
+        } else if(col_type == "numeric" & class(updated_data[[i]]) == "factor"){
+          updated_data[[i]] <- as(as.character(updated_data[[i]]), col_type)
         } else {
           updated_data[[i]] <- as(updated_data[[i]], col_type)
         }
         current_data(updated_data)
+        isolate({
+          run_env(rlang::env(run_env(), df = current_data()))
+          run_env_start(as.list(run_env()))
+        })
       }
     }
   })
