@@ -1533,6 +1533,7 @@ app_server <- function(input, output, session) {
 
   # The current data
   current_data <- reactiveVal(NULL)
+  original_data <- reactiveVal(NULL)
 
   observeEvent(input$select_data, {
     req(input$select_data)
@@ -1579,6 +1580,7 @@ app_server <- function(input, output, session) {
     run_env(rlang::env(run_env(), df = current_data()))
     run_env_start(as.list(run_env()))
   })
+
 
 
   # The data, after running the chunk
@@ -3132,7 +3134,7 @@ output$RTutor_version <- renderUI({
   show_pop_up <- function() {
     showModal(
       modalDialog(
-        title = "Verify data types (important!)",
+        title = "Verify Data Types (Important!)",
         # Custom CSS to make the chat area scrollable
         tags$head(
           tags$style(HTML("
@@ -3142,6 +3144,13 @@ output$RTutor_version <- renderUI({
                   padding: 10px;
                   border-radius: 5px;
               }
+              .modal-footer {
+                display: flex;
+                justify-content: space-between;
+              }
+              .left-align {
+                margin-right: auto;
+              }
           "))
         ),
         div(id = "data_type_window", uiOutput("column_type_ui")),
@@ -3150,7 +3159,10 @@ output$RTutor_version <- renderUI({
         automatically convert them to factors. See Settings.",
         style = "color: blue"),
         br(),
-        footer = actionButton("dismiss_modal",label = "Dismiss"),
+        footer = tagList(
+          div(class = "left-align", actionButton("revert_data",label = "Revert to Original Data")),
+          actionButton("dismiss_modal", label = "Dismiss")
+        ),
         size = "l",
         easyClose = TRUE
       )
