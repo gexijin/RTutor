@@ -51,6 +51,15 @@ app_ui <- function(request) {
 
       /* tippy this pop-ups */
       .tippy-content {font-size: 15px !important;}
+
+      /* policy styles */
+      .policy {background-color: #ededed;background-size: cover;background-position: center;
+      min-height: 500px;margin: 0 !important;padding-top: 0px;display: flex;justify-content: center;
+      border: 50px solid #bedbb7;color: #262626;text-align: left;flex-direction: column;}
+      .policy h1 {font-size: 40px;padding-top: 90px;margin-left: 125px;font-weight: bold;}
+      .policy h2 {font-size: 25px;padding-top: 40px;margin-left: 125px;font-weight: bold;}
+      .policy h3 {font-size: 20px;padding-top: 20px;margin-left: 125px;font-weight: bold;}
+      .policy p {font-size: 17px;margin-top: 20px;margin-right: 125px;margin-left: 125px;}
     "))),
 
     # 'First Time User' tab redirect
@@ -64,6 +73,7 @@ app_ui <- function(request) {
     navbarPage(
       title = HTML('<span style="color: black;font-size: 20px;">RTutor</span>'),
       id = "tabs",
+      shinyjs::useShinyjs(),
       tabPanel(
         title = HTML('<span style="color: black;font-size: 18px;">Home</span>'),
         div(
@@ -223,7 +233,21 @@ app_ui <- function(request) {
             # textOutput("usage"),
             # textOutput("total_cost"),
             # textOutput("temperature"),
-            textOutput("retry_on_error")
+            textOutput("retry_on_error"),
+
+            # policies
+            fluidRow(
+              column(
+                width = 12,
+                div(
+                  style = "display: flex;justify-content: space-between;",
+                  # privacy policy
+                  actionLink("ppolicy", "Privacy Policy"),
+                  # terms of use
+                  actionLink("tofu", "Terms of Use")
+                )
+              )
+            )
           ),
 
       ###############################################################################
@@ -777,8 +801,8 @@ app_ui <- function(request) {
             ),
             " as part of RTutor LLC. For feedback, please email",
             a(
-              "gexijin@gmail.com.",
-              href = "mailto:gexijin@gmail.com?Subject=RTutor"
+              "ge@orditus.com",
+              href = "mailto:ge@orditus.com?Subject=RTutor"
             ),
             style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
           ),
@@ -1175,7 +1199,10 @@ app_ui <- function(request) {
             )
           )
         ) #tabPanel
-      )
+      ), #tabPanel
+
+      tabPanel(title = "Privacy Policy", value = "privacy_policy", privacy_policy_content()),
+      tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content())
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
