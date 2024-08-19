@@ -70,6 +70,18 @@ app_server <- function(input, output, session) {
 
   observe({
     shinyjs::hideElement(id = "load_message")
+    shinyjs::hideElement(selector = "#tabs li a[data-value=privacy_policy]")
+    shinyjs::hideElement(selector = "#tabs li a[data-value=terms_of_use]")
+  })
+
+  # privacy policy
+  observeEvent(input$ppolicy, {
+    updateNavbarPage(session, inputId = "tabs", selected = "privacy_policy")
+  })
+
+  # terms of use
+  observeEvent(input$tofu, {
+    updateNavbarPage(session, inputId = "tabs", selected = "terms_of_use")
   })
 
   # after file is uploaded, hide some UI elements.
@@ -96,7 +108,7 @@ app_server <- function(input, output, session) {
           non-profit organizations. If you are affiliated with a company or intend
           to use RTutor for commercial activities, you must obtain a license from us.
           Please contact us at ",
-          a("gexijin@gmail.com", href = "mailto:gexijin@gmail.com")
+          a("ge@orditus.com", href = "mailto:ge@orditus.com")
         ),
         tags$br(),
         # tags$h4("See updated",
