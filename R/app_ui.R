@@ -60,6 +60,8 @@ app_ui <- function(request) {
       .policy h2 {font-size: 25px;padding-top: 40px;margin-left: 125px;font-weight: bold;}
       .policy h3 {font-size: 20px;padding-top: 20px;margin-left: 125px;font-weight: bold;}
       .policy p {font-size: 17px;margin-top: 20px;margin-right: 125px;margin-left: 125px;}
+
+      body {padding-bottom: 50px;}
     "))),
 
     # 'First Time User' tab redirect
@@ -73,7 +75,7 @@ app_ui <- function(request) {
     navbarPage(
       title = HTML('<span style="color: black;font-size: 20px;">RTutor</span>'),
       id = "tabs",
-      shinyjs::useShinyjs(),
+
       tabPanel(
         title = HTML('<span style="color: black;font-size: 18px;">Home</span>'),
         div(
@@ -233,21 +235,7 @@ app_ui <- function(request) {
             # textOutput("usage"),
             # textOutput("total_cost"),
             # textOutput("temperature"),
-            textOutput("retry_on_error"),
-
-            # policies
-            fluidRow(
-              column(
-                width = 12,
-                div(
-                  style = "display: flex;justify-content: space-between;",
-                  # privacy policy
-                  actionLink("ppolicy", "Privacy Policy"),
-                  # terms of use
-                  actionLink("tofu", "Terms of Use")
-                )
-              )
-            )
+            textOutput("retry_on_error")
           ),
 
       ###############################################################################
@@ -1213,11 +1201,21 @@ app_ui <- function(request) {
             )
           )
         ) #tabPanel
-      ), #tabPanel
+      ), #navbarMenu
 
       tabPanel(title = "Privacy Policy", value = "privacy_policy", privacy_policy_content()),
-      tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content())
-    ),
+      tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content()),
+
+      footer = div(
+        style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;padding: 10px;text-align: center;",
+        span("© 2024 Orditus LLC | "),
+        actionLink("ppolicy", "Privacy Policy"),
+        span(" | "),
+        actionLink("tofu", "Terms of Use"),
+        span(" | "),
+        a("Orditus.com", href = "https://orditus.com/", target = "_blank")
+      ) #footer
+    ), #navbarPage
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
   )
