@@ -1132,9 +1132,9 @@ app_ui <- function(request) {
                     ),
                     column(
                       width = 8,
-                      h4("Allows us to send a random sample of 5
-                        observations along with prompts to OpenAI for
-                        higher performance of code output.",
+                      h4("Allows us to optimize code output from OpenAI by
+                        sending with your prompt a random sample of 5
+                        observations from your data",
                          style = "padding-right: 15px;"),
                       br(), br()
                     )

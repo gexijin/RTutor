@@ -1549,6 +1549,7 @@ app_server <- function(input, output, session) {
 
   # The current data
   current_data <- reactiveVal(NULL)
+  original_data <- reactiveVal(NULL)
 
 
   observeEvent(input$select_data, {
@@ -1592,12 +1593,55 @@ app_server <- function(input, output, session) {
     } else { # there are data in the dataframe
 
       current_data(df)
+      original_data(df)
     }
     # add the data to the current environment
     run_env(rlang::env(run_env(), df = current_data()))
     run_env_start(as.list(run_env()))
   })
 
+  # run_data_process <- reactiveVal(TRUE)
+
+  observeEvent(input$revert_data,{
+
+      # run_data_process(FALSE)
+      current_data(original_data()) #Update current_data() to be the original_data()
+      column_names <- names(current_data())
+      # browser()
+      lapply(seq_along(column_names), function(i) {
+        column_name <- column_names[i]
+        updateSelectInput(
+          session = session,
+          inputId = paste0("column_type_", i),
+          label = NULL,
+          choices = c("Character" = "character",
+                      "Numeric" = "numeric",
+                      "Integer" = "integer",
+                      "Date" = "Date",
+                      "Factor" = "factor"),
+          selected = class(current_data()[[i]])
+        )
+
+      })
+
+      run_env(rlang::env(run_env(), df = current_data()))
+      run_env_start(as.list(run_env()))
+
+    # Close modal
+    modal_closed(TRUE)
+    shiny::removeModal()
+
+    # Show message modal..or something
+
+      shiny::showModal(
+        shiny::modalDialog(
+          size = "s",
+          easyClose	= TRUE,
+          h5("Successfully Reverted to Original Data")
+        )
+      )
+
+  })
 
   # The data, after running the chunk
   data_afterwards <- reactive({
@@ -3152,7 +3196,7 @@ output$RTutor_version <- renderUI({
   show_pop_up <- function() {
     showModal(
       modalDialog(
-        title = "Verify data types (important!)",
+        title = "Verify Data Types (Important!)",
         # Custom CSS to make the chat area scrollable
         tags$head(
           tags$style(HTML("
@@ -3162,6 +3206,13 @@ output$RTutor_version <- renderUI({
                   padding: 10px;
                   border-radius: 5px;
               }
+              .modal-footer {
+                display: flex;
+                justify-content: space-between;
+              }
+              .left-align {
+                margin-right: auto;
+              }
           "))
         ),
         div(id = "data_type_window", uiOutput("column_type_ui")),
@@ -3170,7 +3221,10 @@ output$RTutor_version <- renderUI({
         automatically converts them to factors. See Settings.",
         style = "color: blue"),
         br(),
-        footer = actionButton("dismiss_modal",label = "Dismiss"),
+        footer = tagList(
+          div(class = "left-align", actionButton("revert_data",label = "Revert to Original Data")),
+          actionButton("dismiss_modal", label = "Dismiss")
+        ),
         size = "l",
         easyClose = TRUE
       )
@@ -3241,6 +3295,9 @@ output$RTutor_version <- renderUI({
 
   observe({
     req(current_data())
+    req(input$revert_data == 0) #If we revert data, we don't want to run all this junk
+    # req(run_data_process())
+
     for (i in seq_along(current_data())) {
       col_type <- input[[paste0("column_type_", i)]]
       if (!is.null(col_type)) {
@@ -3267,6 +3324,7 @@ output$RTutor_version <- renderUI({
         })
       }
     }
+
   })
 
 

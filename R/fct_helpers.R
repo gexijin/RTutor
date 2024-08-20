@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.99" # RTutor
+release <- "1.0" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -1145,7 +1145,7 @@ site_updates_df <- data.frame(
     "V0.6", "V0.5", "V0.4",
     "V0.3", "V0.2", "V0.1"
   ),
-  Date = c("7/30/2024", "7/30/2024",
+  Date = c("8/20/2024", "7/30/2024",
     "11/1/2023","11/1/2023","10/28/2023",
            "10/23/2023","9/26/2023","6/11/2023",
            "4/21/2023","3/26/2023","3/8/2023",
@@ -1156,7 +1156,8 @@ site_updates_df <- data.frame(
            "12/27/2022","12/24/2022","12/23/2022",
            "12/20/2022","12/16/2022","12/11/2022"),
   Description = c(
-    "Redesign UI", "Fix Rplots.pdf error",
+    "Redesign UI; Create Privacy Policy, Terms & Conditions; Fix Data Types Error",
+    "Fix Rplots.pdf error",
     "Fix issue with EDA report when the target variable is categorical or not specified.",
     "Comprehensive EDA report!",
     "Ask questions about code, error. Second data file upload.",
