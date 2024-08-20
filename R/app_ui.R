@@ -60,6 +60,8 @@ app_ui <- function(request) {
       .policy h2 {font-size: 25px;padding-top: 40px;margin-left: 125px;font-weight: bold;}
       .policy h3 {font-size: 20px;padding-top: 20px;margin-left: 125px;font-weight: bold;}
       .policy p {font-size: 17px;margin-top: 20px;margin-right: 125px;margin-left: 125px;}
+
+      body {padding-bottom: 50px;}
     "))),
 
     # 'First Time User' tab redirect
@@ -73,7 +75,7 @@ app_ui <- function(request) {
     navbarPage(
       title = HTML('<span style="color: black;font-size: 20px;">RTutor</span>'),
       id = "tabs",
-      shinyjs::useShinyjs(),
+
       tabPanel(
         title = HTML('<span style="color: black;font-size: 18px;">Home</span>'),
         div(
@@ -233,21 +235,7 @@ app_ui <- function(request) {
             # textOutput("usage"),
             # textOutput("total_cost"),
             # textOutput("temperature"),
-            textOutput("retry_on_error"),
-
-            # policies
-            fluidRow(
-              column(
-                width = 12,
-                div(
-                  style = "display: flex;justify-content: space-between;",
-                  # privacy policy
-                  actionLink("ppolicy", "Privacy Policy"),
-                  # terms of use
-                  actionLink("tofu", "Terms of Use")
-                )
-              )
-            )
+            textOutput("retry_on_error")
           ),
 
       ###############################################################################
@@ -613,7 +601,8 @@ app_ui <- function(request) {
               h4("See",
                 a(
                   "GitHub",
-                  href = "https://github.com/gexijin/RTutor"
+                  href = "https://github.com/gexijin/RTutor",
+                  target = "_blank"
                 ),
                 " for source code, bug reports, and instructions to install
                 RTutor as an R package. As a small startup, we are open to
@@ -761,7 +750,8 @@ app_ui <- function(request) {
             " Source code at ",
             a(
               "GitHub,",
-              href = "https://github.com/gexijin/RTutor"
+              href = "https://github.com/gexijin/RTutor",
+              target = "_blank"
             ),
             " from where you can also find
             instruction to install RTutor as an R package.",
@@ -770,24 +760,28 @@ app_ui <- function(request) {
           p("RTutor went viral on ",
             a(
               "LinkedIn, ",
-              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/",
+              target = "_blank"
             ),
             a(
               "Twitter, ",
-              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+              href = "https://twitter.com/StevenXGe/status/1604861481526386690",
+              target = "_blank"
             ),
             a(
               "Twitter(Physacourses),",
-              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A",
+              target = "_blank"
             ),
             " and ",
             a(
               "Facebook (Carlo Pecoraro).",
-              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330",
+              target = "_blank"
             ),
             style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
           ),
-          br(),
+          br(), br(),
           p(" Written by Dr. Steven Ge",
             a(
               "(Twitter, ",
@@ -799,12 +793,20 @@ app_ui <- function(request) {
               href = "https://www.linkedin.com/in/steven-ge-ab016947/",
               target = "_blank"
             ),
-            " as part of RTutor LLC. For feedback, please email",
+            " as part of Orditus LLC. For feedback, please email",
             a(
-              "ge@orditus.com",
+              "ge@orditus.com.",
               href = "mailto:ge@orditus.com?Subject=RTutor"
             ),
             style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
+          ),
+          p(
+            "Explore our other AI tools at ",
+            a("Orditus.com!",
+              href = "https://orditus.com/",
+              target = "_blank"
+            ),
+            style = "font-size: 23px;padding-left: 20px;padding-right: 20px;"
           ),
           br(),
 
@@ -1199,11 +1201,21 @@ app_ui <- function(request) {
             )
           )
         ) #tabPanel
-      ), #tabPanel
+      ), #navbarMenu
 
       tabPanel(title = "Privacy Policy", value = "privacy_policy", privacy_policy_content()),
-      tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content())
-    ),
+      tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content()),
+
+      footer = div(
+        style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;padding: 10px;text-align: center;",
+        span("© 2024 Orditus LLC | "),
+        actionLink("ppolicy", "Privacy Policy"),
+        span(" | "),
+        actionLink("tofu", "Terms of Use"),
+        span(" | "),
+        a("Orditus.com", href = "https://orditus.com/", target = "_blank")
+      ) #footer
+    ), #navbarPage
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
   )
@@ -1231,7 +1243,7 @@ golem_add_external_resources <- function() {
     ),
     bundle_resources(
       path = app_sys("app/www"),
-      app_title = "RTutor 0.98"
+      app_title = "RTutor 0.99"
     )
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
