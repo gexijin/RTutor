@@ -108,13 +108,17 @@ app_server <- function(input, output, session) {
           non-profit organizations. If you are affiliated with a company or intend
           to use RTutor for commercial activities, you must obtain a license from us.
           Please contact us at ",
-          a("ge@orditus.com", href = "mailto:ge@orditus.com")
+          a("ge@orditus.com.", href = "mailto:ge@orditus.com")
         ),
+
         tags$br(),
-        # tags$h4("See updated",
-        #   a("Privacy Policy", href = "", target = "_blank")),
-        tags$h4("We've updated our Privacy Policy and Terms & Conditions. By continuing
-          to RTutor.ai, you acknowledge and agree to these changes."),
+        tags$h4("We've updated our ",
+          actionLink("ppolicy", "Privacy Policy"),
+          "and ",
+          actionLink("tofu", "Terms of Use."), 
+          " By continuing to RTutor.ai, you acknowledge and agree to these changes."
+        ),
+
         easyClose = TRUE,
         size = "l"
       )
@@ -3163,7 +3167,7 @@ output$RTutor_version <- renderUI({
         div(id = "data_type_window", uiOutput("column_type_ui")),
         h4("If a column represents categories, choose 'Factor', even if
         it contains numbers. For columns that are numbers, but with few unique values, RTutor
-        automatically convert them to factors. See Settings.",
+        automatically converts them to factors. See Settings.",
         style = "color: blue"),
         br(),
         footer = actionButton("dismiss_modal",label = "Dismiss"),
@@ -3402,7 +3406,7 @@ output$RTutor_version <- renderUI({
         h4("If a column represents categories, choose 'Factor', even if
         it is coded as numbers. Some columns are
         automatically converted. For columns that are numbers, but with few unique values, RTutor
-        automatically convert them to factors. See Settings.",
+        automatically converts them to factors. See Settings.",
         style = "color: blue"),
         br(),
         footer = tagList(

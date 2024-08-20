@@ -613,7 +613,8 @@ app_ui <- function(request) {
               h4("See",
                 a(
                   "GitHub",
-                  href = "https://github.com/gexijin/RTutor"
+                  href = "https://github.com/gexijin/RTutor",
+                  target = "_blank"
                 ),
                 " for source code, bug reports, and instructions to install
                 RTutor as an R package. As a small startup, we are open to
@@ -761,7 +762,8 @@ app_ui <- function(request) {
             " Source code at ",
             a(
               "GitHub,",
-              href = "https://github.com/gexijin/RTutor"
+              href = "https://github.com/gexijin/RTutor",
+              target = "_blank"
             ),
             " from where you can also find
             instruction to install RTutor as an R package.",
@@ -770,24 +772,28 @@ app_ui <- function(request) {
           p("RTutor went viral on ",
             a(
               "LinkedIn, ",
-              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/"
+              href = "https://www.linkedin.com/feed/update/urn:li:activity:7008179918844956672/",
+              target = "_blank"
             ),
             a(
               "Twitter, ",
-              href = "https://twitter.com/StevenXGe/status/1604861481526386690"
+              href = "https://twitter.com/StevenXGe/status/1604861481526386690",
+              target = "_blank"
             ),
             a(
               "Twitter(Physacourses),",
-              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A"
+              href = "https://twitter.com/Physacourses/status/1602730176688832513?s=20&t=z4fA3IPNuXylm3Vj8NJM1A",
+              target = "_blank"
             ),
             " and ",
             a(
               "Facebook (Carlo Pecoraro).",
-              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330"
+              href = "https://www.facebook.com/physalia.courses.7/posts/1510757046071330",
+              target = "_blank"
             ),
             style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
           ),
-          br(),
+          br(), br(),
           p(" Written by Dr. Steven Ge",
             a(
               "(Twitter, ",
@@ -799,12 +805,20 @@ app_ui <- function(request) {
               href = "https://www.linkedin.com/in/steven-ge-ab016947/",
               target = "_blank"
             ),
-            " as part of RTutor LLC. For feedback, please email",
+            " as part of Orditus LLC. For feedback, please email",
             a(
-              "ge@orditus.com",
+              "ge@orditus.com.",
               href = "mailto:ge@orditus.com?Subject=RTutor"
             ),
             style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
+          ),
+          p(
+            "Explore our other AI tools at ",
+            a("Orditus.com!",
+              href = "https://orditus.com/",
+              target = "_blank"
+            ),
+            style = "font-size: 23px;padding-left: 20px;padding-right: 20px;"
           ),
           br(),
 
@@ -1231,7 +1245,7 @@ golem_add_external_resources <- function() {
     ),
     bundle_resources(
       path = app_sys("app/www"),
-      app_title = "RTutor 0.98"
+      app_title = "RTutor 0.99"
     )
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
