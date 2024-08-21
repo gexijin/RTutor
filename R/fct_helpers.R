@@ -1156,7 +1156,7 @@ site_updates_df <- data.frame(
            "12/27/2022","12/24/2022","12/23/2022",
            "12/20/2022","12/16/2022","12/11/2022"),
   Description = c(
-    "Redesign UI; Create Privacy Policy, Terms & Conditions; Fix Data Types Error",
+    "Redesign UI; Create Privacy Policy, Terms & Conditions; Fix Data Types Bug; Add Data Revert Option",
     "Fix Rplots.pdf error",
     "Fix issue with EDA report when the target variable is categorical or not specified.",
     "Comprehensive EDA report!",

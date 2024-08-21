@@ -119,6 +119,8 @@ app_server <- function(input, output, session) {
           " By continuing to RTutor.ai, you acknowledge and agree to these changes."
         ),
 
+        footer = tagList(modalButton("Agree")),
+
         easyClose = TRUE,
         size = "l"
       )
@@ -1123,7 +1125,7 @@ app_server <- function(input, output, session) {
     )
   })
 
-  # change code when past code is selected.
+  # change code when past code is selected...runs automatically when new code is executed (submit button is hit)
   observeEvent(input$selected_chunk, {
     #req(run_result())
     req(input$selected_chunk)
@@ -1137,9 +1139,12 @@ app_server <- function(input, output, session) {
       # update the run_env reactive value.
       # restore the environment to the before  running the ith chunk
       run_env(list2env(logs$code_history[[id]]$env))
+      current_data(run_env()$df) #Update current_data() with the df added on 8/21/2024. Alternative logs$code_history[[id]]$env$df
+      browser()
 
       # enable re-calculation of the code
       reverted(reverted() + 1)
+      
 
       showNotification(
         ui = paste("Switched back to chunk #", id,
@@ -1607,7 +1612,6 @@ app_server <- function(input, output, session) {
       # run_data_process(FALSE)
       current_data(original_data()) #Update current_data() to be the original_data()
       column_names <- names(current_data())
-      # browser()
       lapply(seq_along(column_names), function(i) {
         column_name <- column_names[i]
         updateSelectInput(
@@ -1805,6 +1809,7 @@ app_server <- function(input, output, session) {
       if (code_error() == FALSE && !is.null(logs$code)) {
         if(!input$use_python && logs$language == "R") { # not python
           df <- run_env()$df2
+          # df <- current_data()
         }
       }
     }
@@ -3254,6 +3259,11 @@ output$RTutor_version <- renderUI({
   # Trigger the pop-up when a file is uploaded
   observeEvent(input$data_edit_modal, {
     show_pop_up()
+
+    # if(!is.null(current_data_2())){ #Defective code. Must find a work around. Shiny only allows one modal open at a time. Tabs is a solution.
+    #   show_pop_up_2()
+    # }
+
   })
 
   output$column_type_ui <- renderUI({
@@ -3295,7 +3305,8 @@ output$RTutor_version <- renderUI({
 
   observe({
     req(current_data())
-    req(input$revert_data == 0) #If we revert data, we don't want to run all this junk
+    req(input$revert_data == 0) #If we hit revert data button, we don't want to run all this junk
+    req(as.integer(input$selected_chunk) == length(logs$code_history)) #If we revert a chunk we don't want to run all this junk
     # req(run_data_process())
 
     for (i in seq_along(current_data())) {
@@ -3484,6 +3495,7 @@ output$RTutor_version <- renderUI({
 
   # The current data
   current_data_2 <- reactiveVal(NULL)
+  original_data_2 <- reactiveVal(NULL)
 
   observeEvent(input$user_file_2, {
     req(input$select_data)
@@ -3516,6 +3528,7 @@ output$RTutor_version <- renderUI({
     } else { # there are data in the dataframe
 
       current_data_2(df)
+      original_data_2(df)
     }
 
     run_env(list2env(append(as.list(run_env()), list(df2 = current_data_2()))))
