@@ -1140,7 +1140,7 @@ app_server <- function(input, output, session) {
       # restore the environment to the before  running the ith chunk
       run_env(list2env(logs$code_history[[id]]$env))
       current_data(run_env()$df) #Update current_data() with the df added on 8/21/2024. Alternative logs$code_history[[id]]$env$df
-      browser()
+      current_data_2(run_env()$df2)
 
       # enable re-calculation of the code
       reverted(reverted() + 1)
@@ -1265,7 +1265,6 @@ app_server <- function(input, output, session) {
       incProgress(0.4)
 
       run_env_start(as.list(run_env())) # keep a copy of the crime scene
-
       result <- tryCatch({
         eval_result <- eval(
           #parse(text = "log('error')"),
@@ -1627,8 +1626,12 @@ app_server <- function(input, output, session) {
         )
 
       })
+      # run_env(rlang::env(run_env(), df = current_data()))
+      # run_env_start(as.list(run_env()))
 
-      run_env(rlang::env(run_env(), df = current_data()))
+      existing_vars <- as.list(run_env())
+      existing_vars$df <- current_data()
+      run_env(list2env(existing_vars))
       run_env_start(as.list(run_env()))
 
     # Close modal
@@ -1647,6 +1650,52 @@ app_server <- function(input, output, session) {
 
   })
 
+  observeEvent(input$revert_data2,{
+
+      # run_data_process(FALSE)
+      current_data_2(original_data_2()) #Update current_data() to be the original_data()
+      column_names <- names(current_data_2())
+      lapply(seq_along(column_names), function(i) {
+        column_name <- column_names[i]
+        updateSelectInput(
+          session = session,
+          inputId = paste0("column_type_2_", i),
+          label = NULL,
+          choices = c("Character" = "character",
+                      "Numeric" = "numeric",
+                      "Integer" = "integer",
+                      "Date" = "Date",
+                      "Factor" = "factor"),
+          selected = class(current_data_2()[[i]])
+        )
+
+      })
+
+      # run_env(rlang::env(run_env(), df2 = current_data_2()))
+      # run_env_start(as.list(run_env()))
+
+      existing_vars <- as.list(run_env())
+      existing_vars$df2 <- current_data_2()
+      run_env(list2env(existing_vars))
+      run_env_start(as.list(run_env()))
+
+
+    # Close modal
+    modal_closed(TRUE)
+    shiny::removeModal()
+
+    # Show message modal..or something
+
+      shiny::showModal(
+        shiny::modalDialog(
+          size = "s",
+          easyClose	= TRUE,
+          h5("Successfully Reverted df2 to Original Data2")
+        )
+      )
+
+  })
+
   # The data, after running the chunk
   data_afterwards <- reactive({
     req(input$select_data)
@@ -1656,13 +1705,13 @@ app_server <- function(input, output, session) {
       return(current_data())
     }
 
-    # df <- current_data() #I moved this line to inside innermost if statement
+    df <- current_data() #I moved this line to inside innermost if statement
     # This updates the data by running the entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
         if(!input$use_python && logs$language == "R") { # not python
-          # df <- run_env()$df #This isn't actually updating the df dataframe.
-          df <- current_data() #This isn't actually updating the df dataframe. I personally think this nested if statemet
+          df <- run_env()$df #This isn't actually updating the df dataframe.
+          # df <- current_data() #This isn't actually updating the df dataframe. I personally think this nested if statemet
           # is pointless and not doing anything, but I'm leaving it for posterity sake. "Don't fix it if it's not broken..."
         }
       }
@@ -1803,7 +1852,7 @@ app_server <- function(input, output, session) {
       return(current_data_2())
     }
 
-    df <- current_data()
+    df <- current_data_2()
     # This updates the data by running hte entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
@@ -3202,7 +3251,6 @@ output$RTutor_version <- renderUI({
     showModal(
       modalDialog(
         title = "Verify Data Types (Important!)",
-        # Custom CSS to make the chat area scrollable
         tags$head(
           tags$style(HTML("
               #data_type_window {
@@ -3214,23 +3262,47 @@ output$RTutor_version <- renderUI({
               .modal-footer {
                 display: flex;
                 justify-content: space-between;
+                align-items: center;
               }
-              .left-align {
-                margin-right: auto;
+              .button-group {
+                display: flex;
+                gap: 10px;  /* Adjusts the space between the buttons */
+                justify-content: flex-start;
+                flex-grow: 1;
               }
           "))
         ),
-        div(id = "data_type_window", uiOutput("column_type_ui")),
-        h4("If a column represents categories, choose 'Factor', even if
-        it contains numbers. For columns that are numbers, but with few unique values, RTutor
-        automatically converts them to factors. See Settings.",
-        style = "color: blue"),
+        # Custom CSS to make the chat area scrollable
+        tabsetPanel(
+          tabPanel("Dataset 1",
+            div(id = "data_type_window", uiOutput("column_type_ui")),
+            h4("If a column represents categories, choose 'Factor', even if
+            it contains numbers. For columns that are numbers, but with few unique values, RTutor
+            automatically converts them to factors. See Settings.",
+            style = "color: blue")
+          ),
+          tabPanel("Dataset 2",
+            condition = "1",
+            div(id = "data_type_window", uiOutput("column_type_ui_2")),
+            h4("If a column represents categories, choose 'Factor', even if
+            it contains numbers. For columns that are numbers, but with few unique values, RTutor
+            automatically converts them to factors. See Settings.",
+            style = "color: blue")
+          )
+        ),
         br(),
+        size = 'l',
         footer = tagList(
-          div(class = "left-align", actionButton("revert_data",label = "Revert to Original Data")),
+          div(class = "button-group",
+            actionButton("revert_data", label = "Revert to Original Data"),
+            conditionalPanel(
+              condition = "output.column_type_ui_2 != null",  # Replace with your actual condition
+              actionButton("revert_data2", label = "Revert to Original Data2")
+            )
+          ),
           actionButton("dismiss_modal", label = "Dismiss")
         ),
-        size = "l",
+        # footer = actionButton("dismiss_modal", label = "Dismiss"),
         easyClose = TRUE
       )
     )
@@ -3259,10 +3331,6 @@ output$RTutor_version <- renderUI({
   # Trigger the pop-up when a file is uploaded
   observeEvent(input$data_edit_modal, {
     show_pop_up()
-
-    # if(!is.null(current_data_2())){ #Defective code. Must find a work around. Shiny only allows one modal open at a time. Tabs is a solution.
-    #   show_pop_up_2()
-    # }
 
   })
 
@@ -3305,8 +3373,12 @@ output$RTutor_version <- renderUI({
 
   observe({
     req(current_data())
-    req(input$revert_data == 0) #If we hit revert data button, we don't want to run all this junk
-    req(as.integer(input$selected_chunk) == length(logs$code_history)) #If we revert a chunk we don't want to run all this junk
+    req(input$revert_data == 0) #Negative: If we hit revert data button, we don't want to run all this junk
+                                #Positive: Run as long as we don't hit revert_data button
+    req(input$submit_button == 0 || as.integer(input$selected_chunk) == length(logs$code_history))
+      #Negative: If we revert a chunk we don't want to run all this junk
+      #Positive: Run as long as our selected chunk is the current maximum code chunk.
+        #(i.e. If submit_button == 0 then selected chunk would be NULL and maximum code chunk is 0\NULL)
     # req(run_data_process())
 
     for (i in seq_along(current_data())) {
@@ -3330,7 +3402,13 @@ output$RTutor_version <- renderUI({
         }
         current_data(updated_data)
         isolate({
-          run_env(rlang::env(run_env(), df = current_data()))
+          # run_env(rlang::env(run_env(), df = current_data()))
+          # run_env_start(as.list(run_env()))
+
+          #Code to update environment and not overwrite
+          existing_vars <- as.list(run_env())
+          existing_vars$df <- current_data()
+          run_env(list2env(existing_vars))
           run_env_start(as.list(run_env()))
         })
       }
@@ -3456,40 +3534,40 @@ output$RTutor_version <- renderUI({
     })
   })
 
-  show_pop_up_2 <- function() {
-    showModal(
-      modalDialog(
-        title = "Verify data types (important!)  2",
-        # Custom CSS to make the chat area scrollable
-        tags$head(
-          tags$style(HTML("
-              #data_type_window {
-                  height: 400px;  /* Adjust the height as needed */
-                  overflow-y: auto;  /* Enables vertical scrolling */
-                  padding: 10px;
-                  border-radius: 5px;
-              }
-          "))
-        ),
-        div(id = "data_type_window", uiOutput("column_type_ui_2")),
-        h4("If a column represents categories, choose 'Factor', even if
-        it is coded as numbers. Some columns are
-        automatically converted. For columns that are numbers, but with few unique values, RTutor
-        automatically converts them to factors. See Settings.",
-        style = "color: blue"),
-        br(),
-        footer = tagList(
-          modalButton("Close")
-        ),
-        size = "l",
-        easyClose = TRUE
-      )
-    )
-  }
+  # show_pop_up_2 <- function() {
+  #   showModal(
+  #     modalDialog(
+  #       title = "Verify data types (important!)  2",
+  #       # Custom CSS to make the chat area scrollable
+  #       tags$head(
+  #         tags$style(HTML("
+  #             #data_type_window {
+  #                 height: 400px;  /* Adjust the height as needed */
+  #                 overflow-y: auto;  /* Enables vertical scrolling */
+  #                 padding: 10px;
+  #                 border-radius: 5px;
+  #             }
+  #         "))
+  #       ),
+  #       div(id = "data_type_window", uiOutput("column_type_ui_2")),
+  #       h4("If a column represents categories, choose 'Factor', even if
+  #       it is coded as numbers. Some columns are
+  #       automatically converted. For columns that are numbers, but with few unique values, RTutor
+  #       automatically converts them to factors. See Settings.",
+  #       style = "color: blue"),
+  #       br(),
+  #       footer = tagList(
+  #         modalButton("Close")
+  #       ),
+  #       size = "l",
+  #       easyClose = TRUE
+  #     )
+  #   )
+  # }
 
   observeEvent(input$user_file_2, {
      showNotification("2nd file uploaded! To use it, specify with its name df2.")
-     show_pop_up_2()
+     show_pop_up()
   })
 
 
@@ -3574,6 +3652,8 @@ output$RTutor_version <- renderUI({
   # convert data types
   observe({
     req(current_data_2())
+    req(input$revert_data2 == 0) #Negative: If we hit revert data button, we don't want to run all this junk
+    req(input$submit_button == 0 || as.integer(input$selected_chunk) == length(logs$code_history))
     for (i in seq_along(current_data_2())) {
       col_type <- input[[paste0("column_type_2_", i)]]
       if (!is.null(col_type)) {
@@ -3588,10 +3668,22 @@ output$RTutor_version <- renderUI({
             orders = c("mdy", "dmy", "ymd")
           )
           updated_data[[i]] <- as.Date(updated_data[[i]])
+        } else if(col_type == "numeric" & class(updated_data[[i]]) == "factor"){
+          updated_data[[i]] <- as(as.character(updated_data[[i]]), col_type)
         } else {
           updated_data[[i]] <- as(updated_data[[i]], col_type)
         }
         current_data_2(updated_data)
+        isolate({
+          # run_env(rlang::env(run_env(), df2 = current_data_2()))
+          # run_env_start(as.list(run_env()))
+
+          #Code to update environment and not overwrite
+          existing_vars <- as.list(run_env())
+          existing_vars$df2 <- current_data_2()
+          run_env(list2env(existing_vars))
+          run_env_start(as.list(run_env()))
+        })
       }
     }
   })
