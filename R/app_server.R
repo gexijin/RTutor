@@ -3138,7 +3138,7 @@ output$RTutor_version <- renderUI({
   })
 
   send_head <- reactive({
-      send_info <- FALSE #default
+      send_info <- TRUE #default
       if(!is.null(input$send_head)) {
         send_info <- input$send_head
       }
