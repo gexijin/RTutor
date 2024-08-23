@@ -76,11 +76,13 @@ app_server <- function(input, output, session) {
 
   # privacy policy
   observeEvent(input$ppolicy, {
+    shiny::removeModal()
     updateNavbarPage(session, inputId = "tabs", selected = "privacy_policy")
   })
 
   # terms of use
   observeEvent(input$tofu, {
+    shiny::removeModal()
     updateNavbarPage(session, inputId = "tabs", selected = "terms_of_use")
   })
 
