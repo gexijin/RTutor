@@ -74,15 +74,27 @@ app_server <- function(input, output, session) {
     shinyjs::hideElement(selector = "#tabs li a[data-value=terms_of_use]")
   })
 
+    # privacy policy
+  observeEvent(input$ppolicy_modal, {
+    shiny::removeModal()
+    updateNavbarPage(session, inputId = "tabs", selected = "privacy_policy")
+  })
+
+  # terms of use
+  observeEvent(input$tofu_modal, {
+    shiny::removeModal()
+    updateNavbarPage(session, inputId = "tabs", selected = "terms_of_use")
+  })
+
   # privacy policy
   observeEvent(input$ppolicy, {
-    # shiny::removeModal()
+    shiny::removeModal()
     updateNavbarPage(session, inputId = "tabs", selected = "privacy_policy")
   })
 
   # terms of use
   observeEvent(input$tofu, {
-    # shiny::removeModal()
+    shiny::removeModal()
     updateNavbarPage(session, inputId = "tabs", selected = "terms_of_use")
   })
 
@@ -115,9 +127,9 @@ app_server <- function(input, output, session) {
 
         tags$br(),
         tags$h4("We've updated our ",
-          actionLink("ppolicy", "Privacy Policy"),
+          actionLink("ppolicy_modal", "Privacy Policy"),
           "and ",
-          actionLink("tofu", "Terms of Use."), 
+          actionLink("tofu_modal", "Terms of Use."), 
           " By continuing to RTutor.ai, you acknowledge and agree to these changes."
         ),
 
