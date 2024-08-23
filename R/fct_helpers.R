@@ -1258,7 +1258,7 @@ privacy_policy_content <- function() {
   HTML('
     <div class="policy">
       <h1>Privacy Policy</h1>
-      <p style="font-weight: bold;">Updated Aug. 19th, 2024</p>
+      <p style="font-weight: bold;">Updated Aug. 23rd, 2024</p>
 
       <p>We are committed to protecting your privacy. This Privacy Policy explains how ("we", "us", or "our"), Orditus LLC, collects, uses, discloses, and safeguards your information when you use our website RTutor.ai and our services (collectively, the "Services"). By accessing or using the Services, you agree to the terms of this Privacy Policy. If you do not agree with the terms of this Privacy Policy, please do not access or use the Services.</p>
 
@@ -1280,8 +1280,8 @@ privacy_policy_content <- function() {
       We do not collect IP addresses or demographic data.</p>
       <h3>1.3 Upload Information and Prompts</h3>
       <p>When you upload data to our Services, it is stored temporarily for the duration of your session. Once your session ends or you close your browser, all uploaded data is automatically deleted. We do not track or store any of the data you upload.
-      <br>By default, none of your uploaded data is sent to the selected language learning model. However, if you choose, there is a settings option that allows our Services to randomly select at most five rows from your data to send to the selected Large Language Model (LLM) to enhance coding results.
-      <br>We do collect data structure information and the prompts you send while using our Services. If you prefer not to share this information, you can opt out through the settings.
+      <br>By default, 5 randomly selected rows from your uploaded data is sent to the selected language learning model to increase results accuracy. However, you may opt out of this using the bottom leftmost settings option in the "Settings" tab. We do not store or track this data, it is deleted when you reset your session. It is solely used to send to the selected LLM.
+      <br>We do collect data structure information and the prompts you send while using our Services. If you prefer not to share this information, you can opt out through the settings in the "Settings" tab.
       <br>Additionally, column names and data type information from your uploaded data are sent to the selected language learning model to improve the functionality of the Services. This includes category names of all factor variables within your uploaded data.</p>
 
       <h2>2. How We Collect This Data</h2>
