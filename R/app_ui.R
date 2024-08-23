@@ -1209,9 +1209,9 @@ app_ui <- function(request) {
       footer = div(
         style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;padding: 10px;text-align: center;",
         span("© 2024 Orditus LLC | "),
-        actionLink("ppolicy", "Privacy Policy"),
+        actionLink(inputId = "ppolicy", "Privacy Policy"),
         span(" | "),
-        actionLink("tofu", "Terms of Use"),
+        actionLink(inputId = "tofu", "Terms of Use"),
         span(" | "),
         a("Orditus.com", href = "https://orditus.com/", target = "_blank")
       ) #footer

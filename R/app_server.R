@@ -929,6 +929,7 @@ app_server <- function(input, output, session) {
             prompt_total,
             list(list(role = "user", content = prepared_request))
           )
+          # browser()
 
           response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
             model = selected_model(),
@@ -1289,6 +1290,32 @@ app_server <- function(input, output, session) {
         run_env(list2env(run_env_start())) # revert the environment
       }
 
+      #Check to see if df changed from running the AI Code.
+      row_check <- nrow(current_data()) == nrow(run_env()$df) #Check if # of rows are same
+      col_check <- ncol(current_data()) == ncol(run_env()$df) #Check if # of columns are same
+      if(row_check && col_check){
+        val_check <- length(which(current_data() != run_env()$df)) #Check if values are the same
+        if(val_check > 0){
+          current_data(run_env()$df)
+        }
+      }else{
+          current_data(run_env()$df)
+      }
+
+      if(!is.null(current_data_2())) {
+        #Check to see if df2 changed from running the AI Code.
+        row_check <- nrow(current_data_2()) == nrow(run_env()$df2) #Check if # of rows are same
+        col_check <- ncol(current_data_2()) == ncol(run_env()$df2) #Check if # of columns are same
+        if(row_check && col_check){
+          val_check <- length(which(current_data_2() != run_env()$df2)) #Check if values are the same
+          if(val_check > 0){
+            current_data_2(run_env()$df2)
+          }
+        }else{
+            current_data_2(run_env()$df2)
+        }
+      }
+
       run_result(list(
         result = result,
         console_output = console_output,
@@ -1333,7 +1360,7 @@ app_server <- function(input, output, session) {
     } else {
       # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string,
       #under the parent environment of the run_env()
-      tmp_env <- list2env(run_env_start())
+      tmp_env <- list2env(run_env_start()) #At this point df & df2 have already been changed by AI (If AI code manipulates them)
       tryCatch({
         eval_result <- eval(
           parse(text = clean_cmd(logs$code, input$select_data, file.exists(on_server))),
@@ -1690,7 +1717,7 @@ app_server <- function(input, output, session) {
         shiny::modalDialog(
           size = "s",
           easyClose	= TRUE,
-          h5("Successfully Reverted df2 to Original Data2")
+          h5("Successfully Reverted df2 to Original Data")
         )
       )
 
@@ -1705,7 +1732,8 @@ app_server <- function(input, output, session) {
       return(current_data())
     }
 
-    df <- current_data() #I moved this line to inside innermost if statement
+    # df <- current_data() #I moved this line to inside innermost if statement
+    df <- run_env()$df
     # This updates the data by running the entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
@@ -1742,6 +1770,7 @@ app_server <- function(input, output, session) {
     )
   })
 
+  #I think this code is not used.
   output$data_table <- renderTable({
     req(data_afterwards())
 
@@ -1852,7 +1881,8 @@ app_server <- function(input, output, session) {
       return(current_data_2())
     }
 
-    df <- current_data_2()
+    # df <- current_data_2()
+    df <- run_env()$df2
     # This updates the data by running hte entire code one more time.
     if(input$submit_button != 0) {
       if (code_error() == FALSE && !is.null(logs$code)) {
