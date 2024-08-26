@@ -1316,15 +1316,17 @@ app_server <- function(input, output, session) {
       }
 
       #Check to see if df changed from running the AI Code.
-      row_check <- nrow(current_data()) == nrow(run_env()$df) #Check if # of rows are same
-      col_check <- ncol(current_data()) == ncol(run_env()$df) #Check if # of columns are same
-      if(row_check && col_check){
-        val_check <- length(which(current_data() != run_env()$df)) #Check if values are the same
-        if(val_check > 0){
-          current_data(run_env()$df)
+      if(!is.null(current_data())) {
+        row_check <- nrow(current_data()) == nrow(run_env()$df) #Check if # of rows are same
+        col_check <- ncol(current_data()) == ncol(run_env()$df) #Check if # of columns are same
+        if(row_check && col_check){
+          val_check <- length(which(current_data() != run_env()$df)) #Check if values are the same
+          if(val_check > 0){
+            current_data(run_env()$df)
+          }
+        }else{
+            current_data(run_env()$df)
         }
-      }else{
-          current_data(run_env()$df)
       }
 
       if(!is.null(current_data_2())) {
