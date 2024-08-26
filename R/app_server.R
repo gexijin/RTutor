@@ -38,6 +38,17 @@ app_server <- function(input, output, session) {
     }
     pdf(NULL)
   })
+  
+  graphics <- reactiveVal(dev.cur())
+  observe({
+    invalidateLater(1000)  # Check every 1000 ms (1 second)
+    graphics(dev.cur())  # Update the reactiveVal
+  })
+  output$pdfnull <- renderText({
+    graphics()
+    paste("Current Graphics:",names(graphics())[1], max(graphics()))
+  })
+
 
   # load demo data when clicked
   observeEvent(input$demo_prompt, {

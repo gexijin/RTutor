@@ -244,6 +244,7 @@ app_ui <- function(request) {
 
           mainPanel(
             shinyjs::useShinyjs(),
+            textOutput(outputId = "pdfnull"),
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
