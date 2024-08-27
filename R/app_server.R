@@ -38,16 +38,6 @@ app_server <- function(input, output, session) {
     }
     pdf(NULL)
   })
-  
-  graphics <- reactiveVal(dev.cur())
-  observe({
-    invalidateLater(1000)  # Check every 1000 ms (1 second)
-    graphics(dev.cur())  # Update the reactiveVal
-  })
-  output$pdfnull <- renderText({
-    graphics()
-    paste("Current Graphics:",names(graphics())[1], max(graphics()))
-  })
 
 
   # load demo data when clicked
@@ -992,7 +982,7 @@ app_server <- function(input, output, session) {
           return(TRUE)
         }
       )
-
+      
       error_message <- NULL
       if(error_api) {
         cmd <- NULL
@@ -1316,7 +1306,8 @@ app_server <- function(input, output, session) {
       }
 
       #Check to see if df changed from running the AI Code.
-      if(!is.null(current_data())) {
+
+      if(!is.null(current_data())){
         row_check <- nrow(current_data()) == nrow(run_env()$df) #Check if # of rows are same
         col_check <- ncol(current_data()) == ncol(run_env()$df) #Check if # of columns are same
         if(row_check && col_check){
