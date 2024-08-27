@@ -796,7 +796,7 @@ app_ui <- function(request) {
             " as part of Orditus LLC. For feedback, please email",
             a(
               "ge@orditus.com.",
-              href = "mailto:ge@orditus.com?Subject=RTutor"
+              href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com"
             ),
             style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
           ),

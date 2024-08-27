@@ -123,7 +123,7 @@ app_server <- function(input, output, session) {
           non-profit organizations. If you are affiliated with a company or intend
           to use RTutor for commercial activities, you must obtain a license from us.
           Please contact us at ",
-          a("ge@orditus.com.", href = "mailto:ge@orditus.com")
+          a("ge@orditus.com.", href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com")
         ),
 
         tags$br(),
