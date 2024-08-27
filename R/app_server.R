@@ -1306,6 +1306,7 @@ app_server <- function(input, output, session) {
       }
 
       #Check to see if df changed from running the AI Code.
+
       if(!is.null(current_data())){
         row_check <- nrow(current_data()) == nrow(run_env()$df) #Check if # of rows are same
         col_check <- ncol(current_data()) == ncol(run_env()$df) #Check if # of columns are same
