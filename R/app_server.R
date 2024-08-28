@@ -704,14 +704,15 @@ app_server <- function(input, output, session) {
     api_key <- api_key_global
     session_key_source <- key_source
 
-    if(!is.null(input$api_key)) {
-      key1 <- input$api_key
-      key1 <- clean_api_key(key1)
+    if(nzchar(input$api_key)) {   # check for a character vector of non-zero length
+      cleaned_key <- clean_api_key(input$api_key)
 
-      if (validate_api_key(key1)) {
-        api_key <- key1
-        session_key_source <- "pasted!"
-      }
+      # if (validate_api_key(cleaned_key)) {
+      #   api_key <- cleaned_key
+      #   session_key_source <- "pasted!"
+      # }
+      api_key <- cleaned_key
+      session_key_source <- "pasted!"
     }
     return(
       list(
@@ -740,10 +741,8 @@ app_server <- function(input, output, session) {
 
   output$save_api_ui <- renderUI({
     req(input$api_key)
-
-    # only show this when running locally.
-    req(!file.exists(on_server))
-    req(validate_api_key(input$api_key))
+    #req(validate_api_key(input$api_key))
+    req(!file.exists(on_server))  # only show this when running locally.
 
     tagList(
       actionButton(
@@ -758,21 +757,20 @@ app_server <- function(input, output, session) {
     )
   })
 
-  output$valid_key <- renderUI({
-    req(input$api_key)
-
-    if(validate_api_key(input$api_key)) {
-      h4(
-        "Key looks good. Just close this window.",
-        style = "color:blue"
-      )
-    } else {
-      h4(
-        "That does not look like a valid key!",
-        style = "color:red"
-      )
-    }
-  })
+  # output$valid_key <- renderUI({
+  #   req(input$api_key)
+  #   if(validate_api_key(input$api_key)) {
+  #     h4(
+  #       "Key looks good. Just close this window.",
+  #       style = "color:blue"
+  #     )
+  #   } else {
+  #     h4(
+  #       "That does not look like a valid key!",
+  #       style = "color:red"
+  #     )
+  #   }
+  # })
 
   # only save key, if app is running locally.
   observeEvent(input$save_api_button, {

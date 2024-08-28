@@ -1038,7 +1038,7 @@ app_ui <- function(request) {
                                   enough."),
                           tags$li("Click \"API keys\" to create a new key,
                                   which can be copied and pasted below."),
-                          uiOutput("valid_key"),
+                          #uiOutput("valid_key"),
                           uiOutput("save_api_ui")
                         ),
                         style = "padding-left: 85px;padding-right: 20px;font-size: 18px;"
@@ -1055,7 +1055,7 @@ app_ui <- function(request) {
                           inputId = "api_key",
                           label = h4("Paste your API key from OpenAI:"),
                           value = NULL,
-                          placeholder = "sk-..... (51 characters)"
+                          placeholder = "sk-......"
                         ),
                         style = "padding-left: 85px;font-size: 18px;"
                       )
