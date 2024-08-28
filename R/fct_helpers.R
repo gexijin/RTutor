@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "0.98" # RTutor
+release <- "1.0" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -116,7 +116,7 @@ move_front <- function(v, e){
 #' @param chunk_id  first or not? First chunk add data description
 #'
 #' @return Returns a cleaned up version, so that it could be sent to GPT.
-prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, df2 = NULL, df2_name = NULL) {
+prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_model, send_head, df2 = NULL, df2_name = NULL) {
 
   if(is.null(txt) || is.null(selected_data)) {
     return(NULL)
@@ -160,7 +160,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
         df, 
         list_levels = TRUE, 
         relevant_var = relevant_var,
-        head = TRUE
+        send_head = send_head
       )
       # Always add 'use the df data frame.'
       txt <- paste(txt, after_text)
@@ -189,7 +189,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
             df2, 
             list_levels = TRUE, 
             relevant_var = relevant_var,
-            head = TRUE
+            send_head = send_head
           )
           data_info_2 <- gsub("df data frame", paste0(df2_name, " data frame"), data_info_2)
 
@@ -229,7 +229,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, selected_mo
 #' @param list_levels whether to list levels for factors
 #' @param relevant_var  a list of variables mentioned by the user
 #' @return Returns a cleaned up version, so that it could be executed as R command.
-describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRUE) {
+describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, send_head = TRUE) {
 
   data_info <- ""
   numeric_index <- sapply(
@@ -342,7 +342,7 @@ describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, head = TRU
     }
   }
   
-  if(head) {
+  if(send_head) {
     #randomly select 5 rows, print out, convert to string
     sample_rows <- paste0(
       capture.output(as.data.frame(df[sample(nrow(df), 5),])), 
@@ -1087,4 +1087,252 @@ missing_values_plot <- function(df) {
       theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
       scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits by 10%
   }
+}
+
+
+
+faqs <- data.frame(
+  question = c(
+    "What is RTutor.ai?",
+    "How does RTutor.ai work?",
+    "Is my data uploaded to OpenAI?",
+    "Who is it for?",
+    "How do you make sure the results are correct?",
+    "Can you use RTutor to do R coding homework?",
+    "Can private companies use RTutor?",
+    "Can you run RTutor locally?",
+    "Why do I get different results with the same request?",
+    "Can people without R coding experience use RTutor for statistical analysis?",
+    "Can this replace statisticians or data scientists?",
+    "How do I write my request effectively?",
+    "Can I install R packages in the AI generated code?",
+    "Can I upload big files to the site?",
+    "Voice input does not work!"
+  ),
+  answer = c(
+    "RTutor.ai is an artificial intelligence (AI)-based app that enables users to interact with their data via natural language. Users ask questions about or request analyses in English. The app generates and runs R code to answer that question with plots and numeric results.",  #After uploading a dataset, users ask questions about or request analyses in English. The app generates and runs R code to answer that question with plots and numeric results.",
+    "The requests are structured and sent to OpenAI’s AI system, which returns R code. The R code is cleaned up and executed in a Shiny environment, showing results or error messages. Multiple requests are logged to produce an R Markdown file, which can be knitted into an HTML report. This enables record keeping and reproducibility.",
+    "By default, 5 randomly selected rows are sent to OpenAI to provide precise code results. You may opt out of this in the settings tab. All of the column names of your data are sent to OpenAI as a prompt to generate R code as well. Your data is not stored on our server after the session.",
+    "The primary goal is to help people with some R experience to learn R or be more productive. RTutor can be used to quickly speed up the coding process using R. It gives you a draft code to test and refine. Be wary of bugs and errors.",
+    "Try to word your question differently and try the same request several times. Then users can double-check to see if they get the same results from different runs.",  #A higher temperature parameter will give diverse choices. Then users can double-check to see if they get the same results from different runs.",
+    "No. That would defeat the purpose. You need to learn R coding properly to be able to tell if the generated R coding is correct.",
+    "No. It can be tried as a demo. RTutor website and source code are freely available for non-profit organizations only and distributed using the CC NC 3.0 license.",
+    "Yes. Download the R package and install it locally. Then you need to obtain an API key from OpenAI.",
+    "OpenAI’s language model has a certain degree of randomness when giving results, controlled by a 'temperature' parameter. Though this is set low, the app still may produce varying results.", #"OpenAI’s language model has a certain degree of randomness that could be adjusted by parameters called 'temperature'. Set this in Settings.",
+    "Not entirely. This is because the generated code can be wrong. However, it could be used to quickly conduct data visualization and exploratory data analysis (EDA). Just be mindful of this experimental technology.",
+    "No. But RTutor can make them more efficient.",
+    "Imagine you have a summer intern, a college student who took one semester of statistics and R. You send the intern emails with instructions, and he/she sends back code and results. The intern is not experienced, thus error-prone, but is hard-working. Thanks to AI, this intern is lightning-fast and nearly free.",
+    "No. But we are working to pre-install all the top 5000 most frequently used R packages on the server. Chances are that your favorite package is already installed.",
+    "Not if it is more than 10MB. Try to get a small portion of your data. Upload it to the site to get the code, which can be run locally on your laptop. Alternatively, download the RTutor R package and use it from your computer.",
+    "One of the main reasons is that your browser blocks the website from accessing the microphone. Make sure you access the site using https://RTutor.ai. With http, microphone access is automatically blocked in Chrome. Speak closer to the mic. Make sure there is only one browser tab using the mic."
+  ),
+  stringsAsFactors = FALSE
+)
+
+
+# Create a data frame with update versions and descriptions
+# Used in site_updates_table component
+site_updates_df <- data.frame(
+  Version = c(
+    "V1.0", "V0.99",
+    "V0.98.3", "V0.98.2", "V0.98",
+    "V0.97", "V0.96", "V0.95",
+    "V0.94", "V0.93", "V0.92",
+    "V0.91", "V0.90", "V0.8.6",
+    "V0.8.5", "V0.8.4", "V0.8.3",
+    "V0.8.2", "V0.8.1", "V0.8.0",
+    "V0.7.6", "V0.7.5", "V0.7",
+    "V0.6", "V0.5", "V0.4",
+    "V0.3", "V0.2", "V0.1"
+  ),
+  Date = c("8/20/2024", "7/30/2024",
+    "11/1/2023","11/1/2023","10/28/2023",
+           "10/23/2023","9/26/2023","6/11/2023",
+           "4/21/2023","3/26/2023","3/8/2023",
+           "2/6/2023","1/15/2023","1/8/2023",
+           "1/6/2023","1/5/2023","1/5/2023",
+           "1/4/2023","1/3/2023","1/3/2023",
+           "12/31/2022","12/31/2022","12/27/2022",
+           "12/27/2022","12/24/2022","12/23/2022",
+           "12/20/2022","12/16/2022","12/11/2022"),
+  Description = c(
+    "Redesign UI; Create Privacy Policy, Terms & Conditions; Fix Data Types Bug; Add Data Revert Option",
+    "Fix Rplots.pdf error",
+    "Fix issue with EDA report when the target variable is categorical or not specified.",
+    "Comprehensive EDA report!",
+    "Ask questions about code, error. Second data file upload.",
+    "GPT-4 becomes the default. Make ggplot2 a preferred method for plotting. Use R environment to enable successive data manipulation.",
+    "Include column names in all requests. GPT-4 is available.",
+    "ChatGPT(gpt-3.5-turbo) becomes default model.",
+    "Interactive plots using CanvasXpress.",
+    "Change data types. Add data description. Improve voice input.",
+    "Includes description of data structure in prompt.",
+    "Voice input is improved. Just enable microphone and say Tutor...",
+    "Generates and runs Python code in addition to R!",
+    "Add description of the levels in factors.",
+    "Demo in many foreign languages.",
+    "Collect user feedback.",
+    "Collect some user data for improvement.",
+    "Auto-convert first column as row names.",
+    "Option to convert some numeric columns with few unique levels to factors.",
+    "Add description of columns (numeric vs. categorical).",
+    "Add RNA-seq data and example requests.",
+    "Redesigned UI.",
+    "Add EDA tab.",
+    "Keeps record of all code chunks for reuse and report.",
+    "Keep current code and continue.",
+    "Interactive plot. Voice input optional.",
+    "Add voice recognition.",
+    "Add temperature control. Server reboot reminder.",
+    "Initial launch"
+  )
+)
+
+terms_of_use_content <- function() {
+  HTML('
+    <div class="policy">
+      <h1>Terms of Service</h1>
+      <p style="font-weight: bold;">Updated Aug. 19th, 2024</p>
+
+      <p>Welcome to Orditus LLC ("we", "us", or "our"). These Terms of Use ("Terms") govern your use of our website RTutor.ai and any services, content, or features provided by us (collectively, the "Services"). By accessing or using our Services, you agree to be bound by these Terms. If you do not agree to these Terms, you may not use our Services.</p>
+
+      <h2>1. Description of Services</h2>
+      <p>RTutor is designed to generate and run R and Python code. Using the power of ChatGPT, RTutor translates your natural language into scripts to analyze and interpret data.</p>
+
+      <h2>2. Acceptance of Terms</h2>
+      <p>By accessing and using our Services, you accept and agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you should not use our Services.</p>
+
+      <h2>3. Changes to Terms</h2>
+      <p>We reserve the right to modify these Terms at any time. Any changes will be effective immediately upon posting of the revised Terms. Your continued use of the Services after the posting of any changes constitutes your acceptance of the revised Terms.</p>
+
+      <h2>4. User Obligations and Restrictions</h2>
+      <p>You agree to use the Services only for lawful purposes and in a manner that does not infringe the rights of, restrict, or inhibit anyone else\'s use and enjoyment of the Services. Prohibited behavior and use includes but is not limited to:</p>
+      <p>You must be at least 13 years old to use this Service.<br>
+      You must not use this Service commercially in any form without our written consent.<br>
+      You agree not to transmit obscene or offensive content.<br>
+      You agree not to use this Service to generate content that is misleading, harmful, or illegal.<br>
+      You must not overuse the Services in a manner that adversely impacts the performance or availability of the Services for other users.<br>
+      You must not upload data that is confidential or personally identifiable without proper anonymization.<br>
+      You agree not to attempt to reverse-engineer or otherwise tamper with the AI models and algorithms.<br>
+      You must not copy or scrape the content of the Service in any form without our written consent.</p>
+
+      <h2>5. User Content</h2>
+      <p>By submitting, posting, or displaying content, you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, adapt, modify, publish, and distribute such content in any and all media. You are responsible for any data you submit to our Services. By submitting data, you agree that:<br><br>
+      You have the necessary rights and permissions to share the data.<br>
+      You will not submit any data that violates the rights of others or any applicable laws.<br>
+      We may use, store, and process basic information about your data as described in our Privacy Policy.</p>
+
+      <h2>6. Intellectual Property</h2>
+      <p>All content, trademarks, and data on this website, including but not limited to software, databases, text, graphics, icons, hyperlinks, private information, designs, and agreements, are the property of or licensed to Orditus LLC and as such are protected from infringement by local and international legislation and treaties. All content, AI models, algorithms, and data used or generated by our Services are the property of Orditus LLC or its licensors and are protected by intellectual property laws. By using our Services, you agree that:
+      <br>You retain ownership of the data you submit to the AI assistant.
+      <br>You grant us a license to use, reproduce, adapt, and modify your inputs as necessary to provide and improve our Services.
+      <br>We retain ownership of all models, algorithms, and enhancements made to the Services based on aggregated and anonymized user data.</p>
+
+      <h2>7. Limitation of Liability</h2>
+      <p>To the fullest extent permitted by law, Orditus LLC shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from or related to your use of the Services, including but not limited to:<br><br>
+      <br>Inaccuracies or errors in AI-generated results.
+      <br>Loss or corruption of data.
+      <br>Misuse of AI-generated insights for decision-making.
+      <br>Unauthorized access to or use of your account or data.<br>
+      In no event shall Orditus LLC nor its directors, employees, partners, or affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from:<br>
+      Your use or inability to use the Services.<br>
+      Any unauthorized access to or use of our servers and/or any personal information stored therein.<br>
+      Any breaks or stoppages in our service that affect the sending or receiving of data to or from the Services.</p>
+
+      <h2>8. Termination</h2>
+      <p>We may terminate or suspend your access to our Services immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the Services will immediately cease.</p>
+
+      <h2>9. Privacy Policy</h2>
+      <p>Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and protect your information. We may use this information to improve the Service. By using our Services, you consent to the data practices described in our Privacy Policy.</p>
+
+      <h2>10. Governing Law</h2>
+      <p>These Terms shall be governed and construed in accordance with the laws of South Dakota, USA without regard to its conflict of law provisions.</p>
+
+      <h2>11. Contact Us</h2>
+      <p style="padding-bottom: 90px;">If you have any questions about these Terms, please contact us at ge@orditus.com.</p>
+    </div>
+  ')
+}
+
+privacy_policy_content <- function() {
+  HTML('
+    <div class="policy">
+      <h1>Privacy Policy</h1>
+      <p style="font-weight: bold;">Updated Aug. 23rd, 2024</p>
+
+      <p>We are committed to protecting your privacy. This Privacy Policy explains how ("we", "us", or "our"), Orditus LLC, collects, uses, discloses, and safeguards your information when you use our website RTutor.ai and our services (collectively, the "Services"). By accessing or using the Services, you agree to the terms of this Privacy Policy. If you do not agree with the terms of this Privacy Policy, please do not access or use the Services.</p>
+
+      <h2>1. Information We Collect</h2>
+      <h3>1.1 Personal Information</h3>
+      <p>We may collect personal information that you provide directly to us when you use our Services or communicate with us. This information may include:<br><br>
+      Name<br>
+      Email address<br>
+      Company name<br><br></p>
+      <h3>1.2 Usage Information</h3>
+      <p>We may collect information from third parties that your browser sends whenever you visit our website or use our Services. This data may include:<br><br>
+      Browser type,<br>
+      Browser version,<br>
+      Pages of our Service that you visit,<br>
+      City of user,<br>
+      Time and date of your visit,<br>
+      Time spent on those pages,<br>
+      Other diagnostic data.<br><br>
+      We do not collect IP addresses or demographic data.</p>
+      <h3>1.3 Upload Information and Prompts</h3>
+      <p>When you upload data to our Services, it is stored temporarily for the duration of your session. Once your session ends or you close your browser, all uploaded data is automatically deleted. We do not track or store any of the data you upload.
+      <br>By default, 5 randomly selected rows from your uploaded data is sent to the selected language learning model to increase results accuracy. However, you may opt out of this using the bottom leftmost settings option in the "Settings" tab. We do not store or track this data, it is deleted when you reset your session. It is solely used to send to the selected LLM.
+      <br>We do collect data structure information and the prompts you send while using our Services. If you prefer not to share this information, you can opt out through the settings in the "Settings" tab.
+      <br>Additionally, column names and data type information from your uploaded data are sent to the selected language learning model to improve the functionality of the Services. This includes category names of all factor variables within your uploaded data.</p>
+
+      <h2>2. How We Collect This Data</h2>
+      <p>To collect data structure information and prompts, we utilize Google Analytics and an SQL database. Google Analytics helps us track and analyze user interactions with our Services, providing insights into how data is structured, and which prompts are most commonly used. This information is collected in real-time and stored securely in our SQLite database. The SQLite database allows us to manage and retrieve this data efficiently, ensuring that it is used to improve the quality and functionality of our Services.</p>
+
+      <h2>3. Why We Collect This Data</h2>
+      <p>We may use information from users for the following purposes:<br><br>
+      To operate and improve the Services by providing you with more effective customer service.<br>
+      To perform research and analysis aimed at improving the Services, or other products and technologies of Orditus LLC.<br>
+      To diagnose or fix problems with the Services.<br>
+      To communicate with you, especially through the sending of emails, information on technical Service issues, security announcements, information on new Services available, legal notices, response to your requests, or other information that we think might be relevant to you.<br>
+      To protect against harm to the rights, property or safety of Orditus LLC, our users, yourself, or the public.<br>
+      To enforce any terms of use, including investigations of potential violations of the terms.<br>
+      To comply with any law, regulation, legal process, or governmental requests.</p>
+
+      <h2>4. How We Use This Data</h2>
+      <p>Orditus LLC will use the information collected from you to pursue legitimate interests such as legal or regulatory compliance, security control, business operations, scientific research, or any other interest reasonably held as legitimate.</p>
+
+      <h2>5. Sharing This Data</h2>
+      <p>We will not lease, sell, or rent your personal, usage, or upload information except in the following instances described in this policy.<br></p>
+      <h3>5.1 Third Party Service Providers</h3>
+      <p>We may occasionally hire other companies to provide limited services on our behalf, such as providing customer support, hosting websites, or performing statistical analysis of our Services. Those companies will be allowed to obtain only the information they need to deliver the relevant service. They will be required to maintain the confidentiality of the information and are prohibited from using it for any other purpose.<br><br>
+      Third Party Service Providers:<br>
+      Google Analytics<br>
+      SQLite<br>
+      AWS<br></p>
+      <h3>5.2 With your Consent</h3>
+      <p>At any time during your use of our Services, or upon explicit request from us, you may consent to the disclosure of your information.<br></p>
+      <h3>5.3 For Security and Safety Purposes</h3>
+      <p>In the event of any fraud, security threats, or incidents, we reserve the right to disclose your information without your consent for the purposes of maintaining security on our website and for our users and addressing fraud or security issues. We reserve the right to disclose your information without your consent for the purpose of protecting against harm to the rights, property, or safety of Orditus LLC, our users, yourself, or the public.<br></p>
+      <h3>5.4 For Legal or Regulatory Purposes</h3>
+      <p>We reserve the right to disclose your information without your consent to comply with any applicable law, regulation, legal process, or governmental requests.</p>
+
+      <h2>6. Opting Out of Sharing Your Data</h2>
+      <h3>6.1 Access your Information</h3>
+      <p>You may be entitled under data protection laws to access and review personal information that Orditus LLC holds related to you. You may access, modify, or delete the information we collected by controlling the content that you share or upload at any time.<br><br>
+      Any other request should be addressed to: ge@orditus.com. Such inquiries should be clearly marked as data protection queries, and you should indicate if the request is time sensitive.<br></p>
+      <h3>6.2 Data Retention</h3>
+      <p>We retain your Information for as long as necessary to deliver our Services, to comply with any applicable legal requirements, to maintain security and prevent incidents, and, in general, to pursue our legitimate interests. If you wish to request the erasure of all your personal information that we process, you may do so by sending a written request to ge@orditus.com.</p>
+      <h3>6.3 Opting Out</h3>
+      <p>You may opt out of sending information relevant to your data uploads and prompt requests at any time by switching off the checkbox in the RTutor.ai settings.</p>
+
+      <h2>7. Data Security</h2>
+      <p>All interactions with our Services occur over HTTPS which ensures that data transmitted between your device and our servers is encrypted and secure.</p>
+
+      <h2>8. Children’s Privacy</h2>
+      <p>Orditus.com is neither directed to nor structured to attract children under the age of 13 years. Accordingly, Orditus LLC does not intend to collect personal information from anyone it knows to be under 13 years of age. Orditus LLC will direct potential users under 13 years of age not to use the Services. If the Company learns that personal information of persons less than 13 years of age has been collected without verifiable parental consent, Orditus LLC will take the appropriate steps to delete this information.<br><br>
+      To make such a request, please contact Orditus LLC at: ge@orditus.com.</p>
+
+      <h2>9. Contact Us</h2>
+      <p style="padding-bottom: 90px;">If you have questions about this policy, please email us at: ge@orditus.com.</p>
+  </div>
+  ')
 }
