@@ -534,21 +534,21 @@ clean_api_key <- function(api_key) {
 }
 
 
-#' Validate API key character
-#'
-#' The response from GPT3 sometimes contains strings that are not R commands.
-#'
-#' @param api_key is a character string
-#'
-#' @return Returns TRUE or FALSE
-validate_api_key <- function(api_key) {
-  valid <- TRUE
-  # if 51 characters, use the one in the file
-  if (nchar(api_key) != 51) {
-    valid <- FALSE
-  }
-  return(valid)
-}
+# #' Validate API key character
+# #'
+# #' The response from GPT3 sometimes contains strings that are not R commands.
+# #'
+# #' @param api_key is a character string
+# #'
+# #' @return Returns TRUE or FALSE
+# validate_api_key <- function(api_key) {
+#   valid <- TRUE
+#   # if 51 characters, use the one in the file
+#   if (nchar(api_key) != 51) {
+#     valid <- FALSE
+#   }
+#   return(valid)
+# }
 
 
 # get API key from environment variable.
@@ -560,11 +560,13 @@ if (file.exists(file.path(getwd(), "api_key.txt"))) {
   api_key_file <- readLines(file.path(getwd(), "api_key.txt"))
   api_key <- clean_api_key(api_key_file)
 
-  # if valid, replace with file
-  if(validate_api_key(api_key_file)) {
-    api_key_global <- api_key_file
-    key_source <- "from file."
-  }
+  # # if valid, replace with file
+  # if(validate_api_key(api_key_file)) {
+  #   api_key_global <- api_key_file
+  #   key_source <- "from file."
+  # }
+  api_key_global <- api_key_file
+  key_source <- "from file."
 }
 
 
