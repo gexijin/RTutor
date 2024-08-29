@@ -247,7 +247,7 @@ app_ui <- function(request) {
 
             conditionalPanel(
               condition = "output.file_uploaded == 0 && input.submit_button == 0",
-
+              h4("UIUC STAT 100"),
               # uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
@@ -1209,7 +1209,8 @@ app_ui <- function(request) {
       ) #footer
     ), #navbarPage
 
-    tags$head(includeHTML(app_sys("app", "www", "ga.html")))
+    tags$head(includeHTML(app_sys("app", "www", "ga.html"))),
+    tags$head(includeHTML(app_sys("app", "www", "ga_uiuc.html")))
   )
 }
 
