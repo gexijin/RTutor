@@ -251,31 +251,23 @@ app_ui <- function(request) {
               # uiOutput("RTutor_version_main"),
               fluidRow(
                 column(
-                  width = 4,
-                  p(
-                    HTML("First Time Users:"),
-                    style = "font-size: 34px;margin: 0;padding-top: 10px;"
-                  ),
-                  align = "right"
-                ),
-                column(
                   width = 5,
-                  actionButton("first_user", strong("Start Here!"), class = "first-user"),
+                  actionButton("first_user", strong("Quick start"), class = "first-user"),
                   tags$head(tags$style(HTML("
-                    .first-user{font-size: 36px;color: #000;background-color: #90BD8C;
+                    .first-user{font-size: 16px;color: #000;background-color: #90BD8C;
                     transition: background-color 0.3s, box-shadow 0.3s;}
                     .first-user:hover {background-color: #66AFFF;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
                   "))),
                   align = "left"
                 ),
                 column(
-                  width = 3,
+                  width = 7,
                   img(
                     src = "www/logo.png",
                     width = "155",
                     height = "77"
                   ),
-                  align = "center"
+                  align = "left"
                 )
               )
             ),
