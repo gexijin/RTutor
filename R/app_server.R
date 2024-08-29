@@ -140,7 +140,7 @@ app_server <- function(input, output, session) {
         size = "l"
       )
 
-      shiny::showModal(commercial_use_modal)
+      #shiny::showModal(commercial_use_modal)
     })
 
 #                                    2.
