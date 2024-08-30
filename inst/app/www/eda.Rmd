@@ -191,10 +191,19 @@ detect_outliers_mad <- function(df, accuracy = 0.99) {
 }
 
 # Detect outliers using the previously defined function
-outliers_info <- detect_outliers_mad(df)
+numeric_vars <- names(df)[sapply(df, is.numeric)]
+
+outliers_info <- NULL
+
+if (length(numeric_vars) > 0) {
+  outliers_info <- detect_outliers_mad(df)
+} else {
+  print("Not applicable.")
+  outliers_info <- integer()
+}
 
 # Check if there are any outliers
-if (all(outliers_info == 0)) {
+if (is.null(outliers_info) || all(outliers_info == 0)) {
   print("There are no outliers in any columns.")
 } else {
   # Create a data frame for plotting
@@ -274,7 +283,11 @@ create_plots <- function(df, var) {
   }
 
 # Apply the function to each numeric variable in the dataframe
-lapply(names(df_reduced)[sapply(df_reduced, is.numeric)], function(var) create_plots(df, var))
+if (length(numeric_vars) > 0) {
+    lapply(numeric_vars, function(var) create_plots(df, var))
+} else {
+    print("Not applicable.")
+}
 ```
 
 
@@ -437,16 +450,23 @@ if (sum(numeric_cols) > 1) {
 ## Correlation matrix (Blank indicates not significant, P > 0.05)
 ```{r correlation-map, height = 10, width =10}
 library(corrplot)
+
 df2 <- df[sapply(df, is.numeric)]
 df2 <- na.omit(df2)
-M <- cor(df2)
-testRes <- cor.mtest(df2, conf.level = 0.95)
-## leave blank on non-significant coefficient
-## add significant correlation coefficients
-corrplot(M,
-  p.mat = testRes$p, method = "circle", type = "lower", insig = "blank",
-  addCoef.col = "black", number.cex = 0.8, order = "AOE", diag = FALSE
-)
+
+if (ncol(df2) > 1) {
+  M <- cor(df2)
+  testRes <- cor.mtest(df2, conf.level = 0.95)
+  ## leave blank on non-significant coefficient
+  ## add significant correlation coefficients
+  corrplot(M,
+    p.mat = testRes$p, method = "circle", type = "lower", insig = "blank",
+    addCoef.col = "black", number.cex = 0.8, order = "AOE", diag = FALSE
+  )
+} else {
+  print("Not applicable.")
+}
+
 ```
 
 ## Correlation between numeric variables
