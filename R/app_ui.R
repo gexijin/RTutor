@@ -686,10 +686,12 @@ app_ui <- function(request) {
                   simulations), choose \"No data\" from the Data dropdown."
                 ),
                 tags$li(
-                  "Your data is not sent to OpenAI. Nor is it stored in our
-                  webserver after the session. If you explain the background of
-                  the data and the meaning of the columns, you can ask general
-                  questions like asking a clueless statistician."
+                  "By default, we randomly select 5 rows of data and send to
+                  OpenAI for enhanced coding results, you can opt out in Settings.
+                  Your data is not stored on our web server after the session.
+                  If you explain the background of the data and the meaning of
+                  the columns, you can ask general questions as if you were
+                  asking a clueless statistician."
                 ),
                 tags$li(
                   "Be skeptical. The generated code can be logically wrong even
@@ -788,7 +790,7 @@ app_ui <- function(request) {
             " as part of Orditus LLC. For feedback, please email",
             a(
               "ge@orditus.com.",
-              href = "mailto:ge@orditus.com?Subject=RTutor"
+              href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com"
             ),
             style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
           ),
@@ -1030,7 +1032,7 @@ app_ui <- function(request) {
                                   enough."),
                           tags$li("Click \"API keys\" to create a new key,
                                   which can be copied and pasted below."),
-                          uiOutput("valid_key"),
+                          #uiOutput("valid_key"),
                           uiOutput("save_api_ui")
                         ),
                         style = "padding-left: 85px;padding-right: 20px;font-size: 18px;"
@@ -1047,7 +1049,7 @@ app_ui <- function(request) {
                           inputId = "api_key",
                           label = h4("Paste your API key from OpenAI:"),
                           value = NULL,
-                          placeholder = "sk-..... (51 characters)"
+                          placeholder = "sk-......"
                         ),
                         style = "padding-left: 85px;font-size: 18px;"
                       )
