@@ -694,10 +694,12 @@ app_ui <- function(request) {
                   simulations), choose \"No data\" from the Data dropdown."
                 ),
                 tags$li(
-                  "Your data is not sent to OpenAI. Nor is it stored in our
-                  webserver after the session. If you explain the background of
-                  the data and the meaning of the columns, you can ask general
-                  questions like asking a clueless statistician."
+                  "By default, we randomly select 5 rows of data and send to
+                  OpenAI for enhanced coding results, you can opt out in Settings.
+                  Your data is not stored on our web server after the session.
+                  If you explain the background of the data and the meaning of
+                  the columns, you can ask general questions as if you were
+                  asking a clueless statistician."
                 ),
                 tags$li(
                   "Be skeptical. The generated code can be logically wrong even
