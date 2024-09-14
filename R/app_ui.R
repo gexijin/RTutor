@@ -62,6 +62,21 @@ app_ui <- function(request) {
       .policy p {font-size: 17px;margin-top: 20px;margin-right: 125px;margin-left: 125px;}
 
       body {padding-bottom: 50px;}
+
+      /* Responsive styles, for mobile browsing */
+      @media (max-width: 1000px) {
+        .productIntro h2{margin: 25px;font-size: 40px;}
+        .productIntro p {margin: 25px;}
+        .twocol .column.left {margin: 25px !important;padding: 20px !important;align-items: flex-start;}
+        .twocol .column.right {margin: 25px !important;padding: 0px;}
+        .twocol .column.left h1 {font-size: 40px !important;}
+        .twocol .column.left h2 {font-size: 25px !important;}
+        .policy h1, .policy h2, .policy h3 {margin: 25px !important;padding: 10px !important;}
+        .policy h1 {font-size: 35px;}
+        .policy h2 {font-size: 28px;}
+        .policy h3 {font-size: 21px;}
+        .policy p{margin: 25px !important;}
+      }
     "))),
 
     # 'First Time User' tab redirect
