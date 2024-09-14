@@ -20,9 +20,9 @@ names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
-language_models <- c("gpt-4o", "gpt-4-turbo",  "gpt-3.5-turbo")
-names(language_models) <- c("GPT-4o", "GPT-4 Turbo",  "GPT-3.5 Turbo" )
-default_model <- "GPT-4o" #"GPT-4 Turbo"   #"GPT-4 Turbo (11/23)"   # "ChatGPT" #   "GPT-4 (03/23)"
+language_models <- c("gpt-4o-2024-08-06",  "gpt-4o-mini", "gpt-3.5-turbo")
+names(language_models) <- c("GPT-4o", "GPT-4o mini", "GPT-3.5 Turbo" )
+default_model <- "GPT-4o" #"GPT-4 Turbo"    # "ChatGPT" #   "GPT-4 (03/23)"
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
