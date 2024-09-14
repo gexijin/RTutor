@@ -11,7 +11,7 @@
 # Global variables
 ###################################################
 
-release <- "1.0" # RTutor
+release <- "1.01" # RTutor
 uploaded_data <- "User Upload" # used for drop down
 no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
@@ -20,9 +20,9 @@ names(rna_seq) <- "RNA-Seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
-language_models <- c("gpt-4o", "gpt-4-turbo",  "gpt-3.5-turbo")
-names(language_models) <- c("GPT-4o", "GPT-4 Turbo",  "GPT-3.5 Turbo" )
-default_model <- "GPT-4o" #"GPT-4 Turbo"   #"GPT-4 Turbo (11/23)"   # "ChatGPT" #   "GPT-4 (03/23)"
+language_models <- c("gpt-4o-2024-08-06",  "gpt-4o-mini", "gpt-3.5-turbo")
+names(language_models) <- c("GPT-4o", "GPT-4o mini", "GPT-3.5 Turbo" )
+default_model <- "GPT-4o" #"GPT-4 Turbo"    # "ChatGPT" #   "GPT-4 (03/23)"
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
@@ -534,21 +534,21 @@ clean_api_key <- function(api_key) {
 }
 
 
-#' Validate API key character
-#'
-#' The response from GPT3 sometimes contains strings that are not R commands.
-#'
-#' @param api_key is a character string
-#'
-#' @return Returns TRUE or FALSE
-validate_api_key <- function(api_key) {
-  valid <- TRUE
-  # if 51 characters, use the one in the file
-  if (nchar(api_key) != 51) {
-    valid <- FALSE
-  }
-  return(valid)
-}
+# #' Validate API key character
+# #'
+# #' The response from GPT3 sometimes contains strings that are not R commands.
+# #'
+# #' @param api_key is a character string
+# #'
+# #' @return Returns TRUE or FALSE
+# validate_api_key <- function(api_key) {
+#   valid <- TRUE
+#   # if 51 characters, use the one in the file
+#   if (nchar(api_key) != 51) {
+#     valid <- FALSE
+#   }
+#   return(valid)
+# }
 
 
 # get API key from environment variable.
@@ -560,11 +560,13 @@ if (file.exists(file.path(getwd(), "api_key.txt"))) {
   api_key_file <- readLines(file.path(getwd(), "api_key.txt"))
   api_key <- clean_api_key(api_key_file)
 
-  # if valid, replace with file
-  if(validate_api_key(api_key_file)) {
-    api_key_global <- api_key_file
-    key_source <- "from file."
-  }
+  # # if valid, replace with file
+  # if(validate_api_key(api_key_file)) {
+  #   api_key_global <- api_key_file
+  #   key_source <- "from file."
+  # }
+  api_key_global <- api_key_file
+  key_source <- "from file."
 }
 
 
@@ -1134,7 +1136,7 @@ faqs <- data.frame(
 # Used in site_updates_table component
 site_updates_df <- data.frame(
   Version = c(
-    "V1.0", "V0.99",
+    "V1.01", "V1.0", "V0.99",
     "V0.98.3", "V0.98.2", "V0.98",
     "V0.97", "V0.96", "V0.95",
     "V0.94", "V0.93", "V0.92",
@@ -1145,7 +1147,7 @@ site_updates_df <- data.frame(
     "V0.6", "V0.5", "V0.4",
     "V0.3", "V0.2", "V0.1"
   ),
-  Date = c("8/20/2024", "7/30/2024",
+  Date = c("8/30/2024","8/20/2024", "7/30/2024",
     "11/1/2023","11/1/2023","10/28/2023",
            "10/23/2023","9/26/2023","6/11/2023",
            "4/21/2023","3/26/2023","3/8/2023",
@@ -1156,6 +1158,7 @@ site_updates_df <- data.frame(
            "12/27/2022","12/24/2022","12/23/2022",
            "12/20/2022","12/16/2022","12/11/2022"),
   Description = c(
+    "Bug Fixes: API Key Validation, EDA Report Download",
     "Redesign UI; Create Privacy Policy, Terms & Conditions; Fix Data Types Bug; Add Data Revert Option",
     "Fix Rplots.pdf error",
     "Fix issue with EDA report when the target variable is categorical or not specified.",
