@@ -291,16 +291,28 @@ app_ui <- function(request) {
               condition = "input.submit_button != 0",
               fluidRow(
                 column(
-                  width = 4,
-                  selectInput(
-                    inputId = "selected_chunk",
-                    label = "AI generated code:",
-                    selected = NULL,
-                    choices = NULL
+                  width = 5,  # Adjust the width as needed
+                  div(
+                    style = "display: inline-block; vertical-align: top; margin-right: 10px;",  # Adjust margin as needed
+                    selectInput(
+                      inputId = "selected_chunk",
+                      label = "AI generated code:",
+                      selected = NULL,
+                      choices = NULL
+                    )
+                  ),
+                  div(
+                    style = "display: inline-block; vertical-align: top; margin-top: 30px;",  # Align button next to dropdown
+                    actionButton("delete_chunk", "Delete Chunk")
                   ),
                   tippy::tippy_this(
                     "selected_chunk",
                     "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
+                    theme = "light-border"
+                  ),
+                  tippy::tippy_this(
+                    "delete_chunk",
+                    "Don't like this code chunk? Click to remove.",
                     theme = "light-border"
                   )
                 )
