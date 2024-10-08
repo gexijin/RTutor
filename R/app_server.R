@@ -1190,70 +1190,103 @@ app_server <- function(input, output, session) {
   })
 
   observeEvent(input$delete_chunk, {
+
     req(input$selected_chunk)
-    #What current chunk is selected??
-    id_pre <- as.integer(input$selected_chunk)
-    logs$code_history[[id_pre]] <- NULL #R Automatically shifts list down
+    shinyalert::shinyalert(
+      title = paste0("Delete Code Chunk ", input$selected_chunk,"?"),
+      text = NULL,
+      type = "warning",
+      showCancelButton = TRUE,
+      confirmButtonText = "Yes",
+      cancelButtonText = "No",
+      callbackR = function(isConfirmed) {
+        if (isConfirmed) {
+          #What current chunk is selected??
+          id_pre <- as.integer(input$selected_chunk)
+          logs$code_history[[id_pre]] <- NULL #R Automatically shifts list down
 
-    max_id <- length(logs$code_history)
+          max_id <- length(logs$code_history)
 
-    if(max_id > 0){ #Order Operation MATTERS!!!!
-      #Oder Operation 1 (Reorder Code History ID's & rmd chunk numbering)
-      logs$code_history <- lapply(1:max_id, function(i) {
-        logs$code_history[[i]]$id = i
-        substr(logs$code_history[[i]]$rmd,6,6) = as.character(i)
-        logs$code_history[[i]]
-      })
+          if(max_id > 0){ #Order Operation MATTERS!!!!
+            #Oder Operation 1 (Reorder Code History ID's & rmd chunk numbering)
+            logs$code_history <- lapply(1:max_id, function(i) {
+              logs$code_history[[i]]$id = i
+              substr(logs$code_history[[i]]$rmd,6,6) = as.character(i)
+              logs$code_history[[i]]
+            })
 
-      #Oder Operation 2 (Update current code info)
-      logs$id <- logs$code_history[[max_id]]$id
-      logs$code <- logs$code_history[[max_id]]$code
-      logs$raw <- logs$code_history[[max_id]]$raw
-      logs$last_code <- logs$code_history[[max_id]]$last_code
-      logs$language <- logs$code_history[[max_id]]$language
+            #Oder Operation 2 (Update current code info)
+            logs$id <- logs$code_history[[max_id]]$id
+            logs$code <- logs$code_history[[max_id]]$code
+            logs$raw <- logs$code_history[[max_id]]$raw
+            logs$last_code <- logs$code_history[[max_id]]$last_code
+            logs$language <- logs$code_history[[max_id]]$language
 
-      choices <- 1:length(logs$code_history)
-      names(choices) <- paste0("Chunk #", choices)
-      # update chunk choices
-      updateSelectInput(
-        session = session,
-        inputId = "selected_chunk",
-        label = "AI generated code:",
-        choices = choices,
-        selected = logs$id
-      )
-    }else{
-       # Defining & initializing the reactiveValues object
-      # logs <- reactiveValues(
-      #   id = 0, # 1, 2, 3, id for code chunk
-      #   code = "", # cumulative code
-      #   raw = "",  # cumulative orginal code for print out
-      #   last_code = "", # last code for Rmarkdown
-      #   language = "", # Python or R
-      #   code_history = list(), # keep all code chunks
+            choices <- 1:length(logs$code_history)
+            names(choices) <- paste0("Chunk #", choices)
+            # update chunk choices
+            updateSelectInput(
+              session = session,
+              inputId = "selected_chunk",
+              label = "AI generated code:",
+              choices = choices,
+              selected = logs$id
+            )
 
-      # )
+            updateSelectInput(
+              inputId = "selected_chunk_report",
+              label = "Chunks to include (Use backspace to delete):",
+              selected = "All chunks without errors",
+              choices = c(
+                "All chunks",
+                "All chunks without errors",
+                choices
+              )
+            )
 
-      logs$id <- 0
-      logs$code = ""
-      logs$raw = ""
-      logs$last_code = ""
-      logs$language = ""
-      logs$code_history <- list()
+          }else{
+            # Defining & initializing the reactiveValues object
+            # logs <- reactiveValues(
+            #   id = 0, # 1, 2, 3, id for code chunk
+            #   code = "", # cumulative code
+            #   raw = "",  # cumulative orginal code for print out
+            #   last_code = "", # last code for Rmarkdown
+            #   language = "", # Python or R
+            #   code_history = list(), # keep all code chunks
 
-      # choices <- 0
-      # names(choices) <- paste0("Chunk #", choices)
-      # update chunk choices
-      updateSelectInput(
-        session = session,
-        inputId = "selected_chunk",
-        label = "AI generated code:",
-        choices = "",
-        selected = NULL
-      )
-      # browser()
-    }
-    
+            # )
+
+            logs$id <- 0
+            logs$code = ""
+            logs$raw = ""
+            logs$last_code = ""
+            logs$language = ""
+            logs$code_history <- list()
+
+            # choices <- 0
+            # names(choices) <- paste0("Chunk #", choices)
+            # update chunk choices
+            updateSelectInput(
+              session = session,
+              inputId = "selected_chunk",
+              label = "AI generated code:",
+              choices = "",
+              selected = NULL
+            )
+
+            updateSelectInput(
+              inputId = "selected_chunk_report",
+              label = "Chunks to include (Use backspace to delete):",
+              selected = NULL,
+              choices = ""
+            )
+            # browser()
+          }
+
+        }
+      }
+    )
+  
 
   })
 
