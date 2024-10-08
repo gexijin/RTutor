@@ -1150,7 +1150,6 @@ app_server <- function(input, output, session) {
 
     #Switch to previous chunks
     if(id < length(logs$code_history)) {
-      print("Reverted")
       # convert list to environment;
       # update the run_env reactive value.
       # restore the environment to the before  running the ith chunk
