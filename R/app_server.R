@@ -1127,7 +1127,6 @@ app_server <- function(input, output, session) {
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
-    # browser()
     choices <- 1:length(logs$code_history)
     names(choices) <- paste0("Chunk #", choices)
     # update chunk choices
