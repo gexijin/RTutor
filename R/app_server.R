@@ -1095,6 +1095,7 @@ app_server <- function(input, output, session) {
   )
 
   observeEvent(input$submit_button, {
+    print("Browser from Submit")
     logs$id <- logs$id + 1
 
     logs$code <-  openAI_response()$cmd
@@ -1127,11 +1128,12 @@ app_server <- function(input, output, session) {
     )
 
     logs$code_history <- append(logs$code_history, list(current_code))
-
+    # browser()
     choices <- 1:length(logs$code_history)
     names(choices) <- paste0("Chunk #", choices)
     # update chunk choices
     updateSelectInput(
+      session = session,
       inputId = "selected_chunk",
       label = "AI generated code:",
       choices = choices,
@@ -1149,6 +1151,7 @@ app_server <- function(input, output, session) {
 
     #Switch to previous chunks
     if(id < length(logs$code_history)) {
+      print("Reverted")
       # convert list to environment;
       # update the run_env reactive value.
       # restore the environment to the before  running the ith chunk
@@ -1183,6 +1186,74 @@ app_server <- function(input, output, session) {
         value = (logs$code_history[[id]]$language == "Python")
       )
     }
+
+  })
+
+  observeEvent(input$delete_chunk, {
+    req(input$selected_chunk)
+    #What current chunk is selected??
+    id_pre <- as.integer(input$selected_chunk)
+    logs$code_history[[id_pre]] <- NULL #R Automatically shifts list down
+
+    max_id <- length(logs$code_history)
+
+    if(max_id > 0){ #Order Operation MATTERS!!!!
+      #Oder Operation 1 (Reorder Code History ID's & rmd chunk numbering)
+      logs$code_history <- lapply(1:max_id, function(i) {
+        logs$code_history[[i]]$id = i
+        substr(logs$code_history[[i]]$rmd,6,6) = as.character(i)
+        logs$code_history[[i]]
+      })
+
+      #Oder Operation 2 (Update current code info)
+      logs$id <- logs$code_history[[max_id]]$id
+      logs$code <- logs$code_history[[max_id]]$code
+      logs$raw <- logs$code_history[[max_id]]$raw
+      logs$last_code <- logs$code_history[[max_id]]$last_code
+      logs$language <- logs$code_history[[max_id]]$language
+
+      choices <- 1:length(logs$code_history)
+      names(choices) <- paste0("Chunk #", choices)
+      # update chunk choices
+      updateSelectInput(
+        session = session,
+        inputId = "selected_chunk",
+        label = "AI generated code:",
+        choices = choices,
+        selected = logs$id
+      )
+    }else{
+       # Defining & initializing the reactiveValues object
+      # logs <- reactiveValues(
+      #   id = 0, # 1, 2, 3, id for code chunk
+      #   code = "", # cumulative code
+      #   raw = "",  # cumulative orginal code for print out
+      #   last_code = "", # last code for Rmarkdown
+      #   language = "", # Python or R
+      #   code_history = list(), # keep all code chunks
+
+      # )
+
+      logs$id <- 0
+      logs$code = ""
+      logs$raw = ""
+      logs$last_code = ""
+      logs$language = ""
+      logs$code_history <- list()
+
+      # choices <- 0
+      # names(choices) <- paste0("Chunk #", choices)
+      # update chunk choices
+      updateSelectInput(
+        session = session,
+        inputId = "selected_chunk",
+        label = "AI generated code:",
+        choices = "",
+        selected = NULL
+      )
+      # browser()
+    }
+    
 
   })
 
@@ -2056,7 +2127,7 @@ app_server <- function(input, output, session) {
     Rmd_script  <- paste0(
       Rmd_script,
       "\n### ",
-      counter$requests,
+      logs$id, #Change from counter$requests to length(logs$code_history)
       ". ",
       paste(
         #remove pre-inserted commands
