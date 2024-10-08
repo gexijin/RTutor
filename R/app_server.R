@@ -1095,7 +1095,6 @@ app_server <- function(input, output, session) {
   )
 
   observeEvent(input$submit_button, {
-    print("Browser from Submit")
     logs$id <- logs$id + 1
 
     logs$code <-  openAI_response()$cmd
