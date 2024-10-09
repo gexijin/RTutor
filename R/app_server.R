@@ -13,6 +13,8 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
+  # Call polished server to enforce authentication
+  # polished::secure_server()
 #                            1.
 #____________________________________________________________________________
 #  General UI, observers, etc.
@@ -37,6 +39,13 @@ app_server <- function(input, output, session) {
       dev.off()
     }
     pdf(NULL)
+  })
+
+  observeEvent(input$sign_out, {
+
+    polished::sign_out_from_shiny(session)
+    session$reload()
+    
   })
 
 

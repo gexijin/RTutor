@@ -16,7 +16,8 @@
 app_ui <- function(request) {
   tagList(
     golem_add_external_resources(),
-
+    # polished::sign_in_ui_default(), # Adds the polished sign-in UI
+    # polished::secure_ui(
     # Add color to UI
     tags$head(tags$style(HTML("
       /* navbar */
@@ -1209,11 +1210,18 @@ app_ui <- function(request) {
               ) #fluidRow
             )
           )
-        ) #tabPanel
+        ), #tabPanel
+        tabPanel(actionButton(
+          "sign_out", 
+          "Sign Out", 
+          icon = icon("sign-out-alt"),
+          class = "btn btn-default navbar-btn"
+        ))
       ), #navbarMenu
 
       tabPanel(title = "Privacy Policy", value = "privacy_policy", privacy_policy_content()),
       tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content()),
+
 
       footer = div(
         style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;padding: 10px;text-align: center;",
@@ -1228,6 +1236,7 @@ app_ui <- function(request) {
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))
   )
+# )
 }
 
 #' Add external Resources to the Application
