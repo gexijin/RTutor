@@ -17,6 +17,8 @@ no_data <- "no_data" # no data is uploaded or selected
 names(no_data) <- "No data (examples)"
 rna_seq <- "rna_seq"  # RNA-Seq read counts
 names(rna_seq) <- "RNA-Seq"
+uiuc1 <- "UIUC Data 1"
+names(uiuc1) <- "UIUC Data 1"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 #language_model <- "code-davinci-002	"# "text-davinci-003"
@@ -508,6 +510,12 @@ datasets <- c(datasets, no_data)
 datasets <- move_front(datasets, no_data)
 
 datasets <- move_front(datasets, "diamonds")
+
+# append a dummy value, used when user do not use any data
+datasets <- c(datasets, uiuc1)
+# move it to 2nd place
+datasets <- move_front(datasets, uiuc1)
+
 # default
 datasets <- move_front(datasets, "mpg")
 

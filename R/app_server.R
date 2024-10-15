@@ -1554,6 +1554,12 @@ app_server <- function(input, output, session) {
     return(df)
   })
 
+  uiuc1_data <- reactive({
+    req(input$select_data == uiuc1)
+
+    df <- read.csv(app_sys("app", "www", "UIUC1.csv"))
+    return(df)
+  })
 
   # had to use this. Otherwise, the checkbox returns to false
   # when the popup is closed and openned again.
@@ -1609,6 +1615,8 @@ app_server <- function(input, output, session) {
       df <- NULL #as.data.frame("No data selected or uploaded.")
     } else if(input$select_data == rna_seq){
       df <- rna_seq_data()
+    } else if(input$select_data == uiuc1){
+      df <- uiuc1_data()
     } else {
       # otherwise built-in data is unavailable when running from R package.
       library(tidyverse)
