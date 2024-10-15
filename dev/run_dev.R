@@ -22,7 +22,7 @@ remove.packages("RTutor")
 remotes::install_github("gexijin/RTutor", upgrade = "never")
 
 .rs.restartR()
-
+ 
 RTutor::run_app()
 
 }
