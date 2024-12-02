@@ -1,0 +1,14 @@
+data/Dispatch_Masked_Rtutor.csv
+data/Sales_Masked_Rtutor.csv
+data/Vahan_Share_Masked_Rtutor.csv
+
+# History files
+.Rhistory
+
+# Session Data files
+.RData
+.RDataTmp
+
+# RStudio files
+.Rproj.user
+.Ruserdata

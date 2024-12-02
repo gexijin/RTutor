@@ -1,0 +1,40 @@
+Package: RTutor
+Title: An Amazing Shiny App
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Steven",
+           family = "Ge",
+           role = c("aut", "cre"),
+           email = "gexijin@email.com")
+Description: This package generates and tests R code from requests in English.
+License: MIT + file LICENSE
+Imports: 
+    config,
+    golem,
+    tippy,
+    gridExtra,
+    openai,
+    DT,
+    shinybusy,
+    shinyjs,
+    plotly,
+    summarytools,
+    DataExplorer,
+    corrplot,
+    tableone,
+    GGally,
+    janitor,
+    RSQLite,
+    canvasXpress,
+    moments
+Depends:
+    tidyverse
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

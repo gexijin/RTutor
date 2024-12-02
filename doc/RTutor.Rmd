@@ -1,0 +1,19 @@
+---
+title: "RTutor"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{RTutor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(RTutor)
+```
