@@ -12,26 +12,26 @@ mod_01_styles <- function(id) {
 
     /* navbar */
     .navbar {
-        background-color: #C1E2BE;
-        border-color: #90BD8C;
-        color: #181818;
-        font-weight: bold;
+      background-color: #C1E2BE;
+      border-color: #90BD8C;
+      color: #181818;
+      font-weight: bold;
     }
 
     /* tabs */
     .navbar-default .navbar-nav > li > a {
-        background-color: #C1E2BE;
-        border-color: #9AC596;
-        color: #181818;
+      background-color: #C1E2BE;
+      border-color: #9AC596;
+      color: #181818;
     }
 
     /* active tab */
     .navbar-default .navbar-nav > .active > a, 
     .navbar-default .navbar-nav > .active > a:focus, 
     .navbar-default .navbar-nav > .active > a:hover {
-        background-color: #A0BB9E;
-        color: #181818;
-        font-weight: bold;
+      background-color: #A0BB9E;
+      color: #181818;
+      font-weight: bold;
     }
 
     /* sidebar panel */
@@ -53,7 +53,10 @@ mod_01_styles <- function(id) {
 
     /* textarea, textInput, numericInput */
     textarea, input[type = 'text'], input[type='number']
-    { width: 100%;background-color: #F6FFF5;border-color: #90BD8C;
+    {
+      width: 100%;
+      background-color: #F6FFF5;
+      border-color: #90BD8C;
       font-size: 18px;
     }
 
@@ -65,13 +68,44 @@ mod_01_styles <- function(id) {
     .tippy-content {font-size: 15px !important;}
 
     /* policy styles */
-    .policy {background-color: #ededed;background-size: cover;background-position: center;
-      min-height: 500px;margin: 0 !important;padding-top: 0px;display: flex;justify-content: center;
-      border: 50px solid #bedbb7;color: #262626;text-align: left;flex-direction: column;}
-    .policy h1 {font-size: 40px;padding-top: 90px;margin-left: 125px;font-weight: bold;}
-    .policy h2 {font-size: 25px;padding-top: 40px;margin-left: 125px;font-weight: bold;}
-    .policy h3 {font-size: 20px;padding-top: 20px;margin-left: 125px;font-weight: bold;}
-    .policy p {font-size: 17px;margin-top: 20px;margin-right: 125px;margin-left: 125px;}
+    .policy {
+      background-color: #ededed;
+      background-size: cover;
+      background-position: center;
+      min-height: 500px;
+      margin: 0 !important;
+      padding-top: 0px;
+      display: flex;
+      justify-content: center;
+      border: 50px solid #bedbb7;
+      color: #262626;
+      text-align: left;
+      flex-direction: column;
+    }
+    .policy h1 {
+      font-size: 40px;
+      padding-top: 90px;
+      margin-left: 125px;
+      font-weight: bold;
+    }
+    .policy h2 {
+      font-size: 25px;
+      padding-top: 40px;
+      margin-left: 125px;
+      font-weight: bold;
+    }
+    .policy h3 {
+      font-size: 20px;
+      padding-top: 20px;
+      margin-left: 125px;
+      font-weight: bold;
+    }
+    .policy p {
+      font-size: 17px;
+      margin-top: 20px;
+      margin-right: 125px;
+      margin-left: 125px;
+    }
 
     /* Responsive styles, for mobile browsing */
     @media (max-width: 1000px) {
@@ -146,7 +180,9 @@ mod_01_styles <- function(id) {
     /* Module 4 */
     [class*=first-user]{font-size: 16px;color: #000;background-color: #90BD8C;
     transition: background-color 0.3s, box-shadow 0.3s;}
-    [class*=first-user]:hover {background-color: #66AFFF;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    [class*=first-user]:hover {
+      background-color: #66AFFF;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
     /* Module 12 */
     [class*=site-updates-wrapper] table
@@ -158,15 +194,6 @@ mod_01_styles <- function(id) {
       {background-color: #f3faf3;}
     [class*=site-updates-wrapper] table tbody tr:nth-child(even)
       {background-color: #ffffff;}
-
-    /* Module 16 */
-    [id*=ask_question] {
-      width: 100%;
-      background-color: #F6FFF5;
-      border-color: #90BD8C;
-      font-size: 18px;
-      font-weight: bold;
-    }
 
   ")))
 }

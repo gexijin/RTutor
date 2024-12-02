@@ -333,11 +333,12 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
       } else if (input$user_selected_dataset == "Select a dataset:") {
         txt <- NULL
       } else {
-        txt <- paste0("Selected Dataset: ", input$user_selected_dataset)
+        txt <- paste0("Selected Dataset:\n", input$user_selected_dataset)
       }
 
       # Create a line break if dataset name is too long
-      if (!is.null(txt) && nchar(txt) > 25) {
+      if (!is.null(input$user_selected_dataset) &&
+        nchar(input$user_selected_dataset) > 25) {
         txt <- paste0(substr(txt, 1, 25), "<br>", substr(txt, 26, nchar(txt)))
       }
 

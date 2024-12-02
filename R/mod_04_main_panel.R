@@ -43,33 +43,28 @@ mod_04_main_panel_ui <- function(id) {
           width = 5,
           # Chunk select dropdown
           div(
-            style = "display: inline-block; vertical-align: top; margin-right: 10px;",
+            style = "display: flex; align-items: center; gap: 35px;
+              margin-top: 10px; margin-bottom: 7px;",
             selectInput(
               inputId = ns("selected_chunk"),
-              label = div("AI Generated Code:", style = "font-size: 18px;"),
+              label = div("Request Results (Chunks):", style = "font-size: 18px;"),
               selected = NULL,
               choices = NULL
-            )
-          ),
-          div(      # Align button next to dropdown
-            style = "display: inline-block; vertical-align: top;
-              padding-top: 30px; padding-bottom: 5px;",
+            ),
             actionButton(
               ns("delete_chunk"),
-              "Delete Chunk"
+              "Delete Chunk",
+              style = "font-size: 14px; color: #000; background-color: #F6FFF5;
+                border-color: #90BD8C; margin-top: 15px;"
             )
           ),
-          tags$head(tags$style(  # Button styling
-            sprintf(
-              "#%s {font-size: 14px; color: #000; background-color: #F6FFF5; border-color: #90BD8C;}",
-              ns("delete_chunk")
-            )
-          )),
+          # Tooltip for dropdown
           tippy::tippy_this(
             ns("selected_chunk"),
             "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
             theme = "light-border"
           ),
+          # Tooltip for button
           tippy::tippy_this(
             ns("delete_chunk"),
             "Don't like this code chunk? Click to remove.",
@@ -95,7 +90,7 @@ mod_04_main_panel_ui <- function(id) {
       conditionalPanel(
         condition = "input.show_code == true",
         ns = ns,
-        verbatimTextOutput(ns("openAI"))
+        verbatimTextOutput(ns("code_results"))
       ),
 
       conditionalPanel(
@@ -188,7 +183,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
     ###  Print Results or Error  ###
 
     # Print code chunk
-    output$openAI <- renderPrint({
+    output$code_results <- renderPrint({
       req(llm_response()$cmd)
       res <- logs$raw
       res <- gsub("```", "", res)

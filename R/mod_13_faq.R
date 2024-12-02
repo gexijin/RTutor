@@ -42,7 +42,7 @@ mod_13_faq_ui <- function(id) {
             placeholder = "Any questions? Suggestions? Things you like, don't like? Leave your email if you want to hear back from us.",
             rows = 4,
             "",
-            style = "font-size: 18px;padding: 7px;"
+            style = "font-size: 18px;padding: 7px;resize: vertical;"
           ),
           style = "padding-left: 20px;padding-right: 20px;"
         ),
