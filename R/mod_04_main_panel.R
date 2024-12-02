@@ -164,37 +164,6 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # pop-up to warn users under age 13 & those with a for-profit org. NOT to use
-    observe({
-      commercial_use_modal <- shiny::modalDialog(
-        title = "RTutor Usage Policy",
-
-        tags$br(),
-        tags$h4("RTutor is available to the public strictly for education and
-          non-profit organizations. If you are affiliated with a company or intend
-          to use RTutor for commercial activities, you must obtain a license from us.
-          Please contact us at ",
-          a("ge@orditus.com.", href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com")
-        ),
-
-        tags$br(),
-        tags$h4("We've updated our ",
-          a("Privacy Policy", href = "www/privacypolicyRTutor.pdf", target = "_blank"),
-          "and ",
-          a("Terms of Use.", href = "www/termsofuseRTutor.pdf", target = "_blank"),
-          " By continuing to RTutor.ai, you acknowledge and agree to these changes."
-        ),
-
-        footer = tagList(modalButton("Agree")),
-
-        easyClose = TRUE,
-        size = "l"
-      )
-
-      shiny::showModal(commercial_use_modal)
-    })
-
-
     ###  Selecting Chunk  ###
 
     # Update the selectInput choices when number of chunks changes

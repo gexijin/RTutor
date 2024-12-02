@@ -26,9 +26,9 @@ app_ui <- function(request) {
       style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;
         padding: 10px;text-align: center;z-index: 99;",
       span("© 2024 Orditus LLC | "),
-      a("Privacy Policy", href = "www/privacypolicyRTutor.pdf", target = "_blank"),
+      actionLink(inputId = "ppolicy", "Privacy Policy"),
       span(" | "),
-      a("Terms of Use", href = "www/termsofuseRTutor.pdf", target = "_blank"),
+      actionLink(inputId = "tofu", "Terms of Use"),
       span(" | "),
       a("Orditus.com", href = "https://orditus.com/", target = "_blank")
     ), # footer
@@ -47,7 +47,8 @@ app_ui <- function(request) {
             mod_02_load_data_ui("load_data"),
             mod_15_data_types_ui("data_edit_modal"),
             mod_03_send_request_ui("send_request"),
-            mod_16_qa_ui("qa")
+            mod_16_qa_ui("qa"),
+            mod_17_policies_ui("policies")
           ),
 
           ### Main Panel ###
@@ -114,7 +115,11 @@ app_ui <- function(request) {
           ### Settings Module ###
           mod_11_settings_ui("sett")
         )
-      )
+      ),
+
+      ### Hidden Policies Tabs ###
+      tabPanel(title = "Privacy Policy", value = "privacy_policy", privacy_policy_content()),
+      tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content())
     ),
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html")))

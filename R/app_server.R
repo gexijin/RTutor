@@ -327,6 +327,12 @@ app_server <- function(input, output, session) {
   )
 
 
+  #       Module 17 - 'Policies Tabs'
+  # __________________________________
+  mod_17 <- mod_17_policies_serv(
+    id = "policies"
+  )
+
 
 
   #                    Miscellaneous Functions
