@@ -59,12 +59,12 @@ mod_04_main_panel_ui <- function(id) {
               "Delete Chunk"
             )
           ),
-          tags$head(tags$style(  # Button styling
+          tags$head(tags$style(HTML(  # Button styling
             sprintf(
               "#%s {font-size: 14px; color: #000; background-color: #F6FFF5; border-color: #90BD8C;}",
               ns("delete_chunk")
             )
-          )),
+          ))),
           tippy::tippy_this(
             ns("selected_chunk"),
             "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
@@ -542,7 +542,6 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
               updateSelectInput(
                 session = session,
                 inputId = "selected_chunk",
-                label = div("AI Generated Code:", style = "font-size: 18px;"),
                 choices = choices,
                 selected = logs$id
               )
@@ -559,7 +558,6 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
               updateSelectInput(
                 session = session,
                 inputId = "selected_chunk",
-                label = div("AI Generated Code:", style = "font-size: 18px;"),
                 choices = "",
                 selected = NULL
               )
