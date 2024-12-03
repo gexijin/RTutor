@@ -370,10 +370,11 @@ mod_16_qa_serv <- function(id, submit_button, logs, code_error, run_result, api_
         }
 
         # Replace double newlines with HTML paragraph tags
-        cmd <- gsub("\n\n", "</p><p>", cmd)
-        cmd <- paste0("<p><strong>", input$ask_question, "</strong></p>", "<p>", cmd, "</p>")
+        cmd2 <- polish_cmd(cmd)
+        cmd2 <- gsub("\n\n", "</p><p>", cmd2)
+        cmd2 <- paste0("<p><strong>", input$ask_question, "</strong></p>", "<p>", cmd2, "</p>")
 
-        return(cmd)
+        return(cmd2)
 
 
 

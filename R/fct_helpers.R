@@ -693,47 +693,47 @@ python_html <- function(python_code, select_data, current_data) {
 #' @param filesize size
 #'
 #' @return nothing
-# save_data <- function(
-#   date, time, request, code, error_status,
-#   data_str, dataset, session, filename,
-#   filesize, chunk, api_time, tokens, language
-# ) {
-#   # if db does not exist, create one
-#   if (file.exists(sqlitePath)) {
-#     # Connect to the database
-#     db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RW)
-#     # Construct the update query by looping over the data fields
-#     txt <- sprintf(
-#       "INSERT INTO %s (%s) VALUES ('%s')",
-#       sqltable,
-#       "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language",
-#       paste(
-#         c(
-#           as.character(date),
-#           as.character(time),
-#           clean_txt(request),
-#           clean_txt(code),
-#           as.integer(error_status),
-#           clean_txt(data_str),
-#           dataset,
-#           session,
-#           filename,
-#           filesize,
-#           chunk,
-#           api_time,
-#           tokens,
-#           language
-#         ),
-#         collapse = "', '"
-#       )
-#     )
-#     # Submit the update query and disconnect
-#     try(
-#       RSQLite::dbExecute(db, txt)
-#     )
-#     RSQLite::dbDisconnect(db)
-#   }
-# }
+save_data <- function(
+  date, time, request, code, error_status,
+  data_str, dataset, session, filename,
+  filesize, chunk, api_time, tokens, language
+) {
+  # if db does not exist, create one
+  if (file.exists(sqlitePath)) {
+    # Connect to the database
+    db <- RSQLite::dbConnect(RSQLite::SQLite(), sqlitePath, flags = RSQLite::SQLITE_RW)
+    # Construct the update query by looping over the data fields
+    txt <- sprintf(
+      "INSERT INTO %s (%s) VALUES ('%s')",
+      sqltable,
+      "date, time, request, code, error, data_str, dataset, session, filename, filesize, chunk, api_time, tokens, language",
+      paste(
+        c(
+          as.character(date),
+          as.character(time),
+          clean_txt(request),
+          clean_txt(code),
+          as.integer(error_status),
+          clean_txt(data_str),
+          dataset,
+          session,
+          filename,
+          filesize,
+          chunk,
+          api_time,
+          tokens,
+          language
+        ),
+        collapse = "', '"
+      )
+    )
+    # Submit the update query and disconnect
+    try(
+      RSQLite::dbExecute(db, txt)
+    )
+    RSQLite::dbDisconnect(db)
+  }
+}
 # SQLite command to create feedback table
 # "CREATE TABLE feedback (
 #        date DATE NOT NULL,
@@ -741,6 +741,17 @@ python_html <- function(python_code, select_data, current_data) {
 #        helpfulness varchar(50),
 #        experience varchar(50),
 #        comments varchar(5000)); "
+
+
+#' Clean up text strings for inserting into SQL
+#' 
+#'
+#' @param x a string that can contain ' or "
+#'
+#' @return nothing
+  clean_txt <- function(x) {
+    return(gsub("\'|\"", "", x))
+  }
 
 
 #' Save user feedback
@@ -830,7 +841,7 @@ faqs <- data.frame(
 # Used in site_updates_table component
 site_updates_df <- data.frame(
   Version = c(
-    "V1.02",
+    "V2.00", "V1.02",
     "V1.01", "V1.0", "V0.99",
     "V0.98.3", "V0.98.2", "V0.98",
     "V0.97", "V0.96", "V0.95",
@@ -842,7 +853,8 @@ site_updates_df <- data.frame(
     "V0.6", "V0.5", "V0.4",
     "V0.3", "V0.2", "V0.1"
   ),
-  Date = c("10/8/2024",
+  Date = c(
+    "12/10/2024", "10/8/2024",
     "8/30/2024","8/20/2024", "7/30/2024",
     "11/1/2023","11/1/2023","10/28/2023",
            "10/23/2023","9/26/2023","6/11/2023",
@@ -854,6 +866,7 @@ site_updates_df <- data.frame(
            "12/27/2022","12/24/2022","12/23/2022",
            "12/20/2022","12/16/2022","12/11/2022"),
   Description = c(
+    "Backend Changes",
     "Add option to delete code chunks",
     "Bug Fixes: API Key Validation, EDA Report Download",
     "Redesign UI; Create Privacy Policy, Terms & Conditions; Fix Data Types Bug; Add Data Revert Option",
