@@ -470,7 +470,8 @@ mod_11_settings_serv <- function(id, submit_button, logs, llm_prompt,
         convert_to_factor = convert_to_factor,
         max_proportion_factor = max_proportion_factor,
         max_levels_factor = max_levels_factor,
-        send_head = send_head
+        send_head = send_head,
+        contribute_data = contribute_data
       )
     )
   })

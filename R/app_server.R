@@ -13,7 +13,28 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
-  pdf(NULL) # otherwise, base R plots sometimes do not show
+  #                   House Keeping
+  #_____________________________________________________________
+
+
+  if(file.exists(on_server)){ #server
+    options(shiny.maxRequestSize = 50 * 1024^2) # 50 MB
+    output$on_server <- renderText({"File Exists on Server"})
+  } else { # local
+    options(shiny.maxRequestSize = 10000 * 1024^2) # 10 GB
+  }
+
+  if(dev.cur() == 1){
+    pdf(NULL) #otherwise, base R plots sometimes do not show.
+  }
+
+  # Ensure all devices are closed when the session ends
+  session$onSessionEnded(function() {
+    while (dev.cur() > 1) {
+      dev.off()
+    }
+    pdf(NULL)
+  })
 
 
   #                    Initialize Reactives
@@ -186,7 +207,10 @@ app_server <- function(input, output, session) {
     chunk_selection = chunk_selection,
     Rmd_chunk = Rmd_chunk,
     current_data = current_data,
-    current_data_2 = current_data_2
+    current_data_2 = current_data_2,
+    contribute_data = contribute_data,
+    selected_dataset_name = selected_dataset_name,
+    user_file = user_file
   )
 
   # Module 06 - Outputs
@@ -273,6 +297,7 @@ app_server <- function(input, output, session) {
   max_proportion_factor <- mod_11$max_proportion_factor
   max_levels_factor <- mod_11$max_levels_factor
   send_head <- mod_11$send_head
+  contribute_data <- mod_11$contribute_data
 
 
 

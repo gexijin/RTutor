@@ -20,7 +20,7 @@ app_ui <- function(request) {
     shinyjs::useShinyjs(),
 
     ### Style Module ###
-    mod_01_styles("styles"),#NS("")
+    mod_01_styles_ui("styles"),#NS("")
 
     tags$footer(
       style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;
@@ -53,7 +53,14 @@ app_ui <- function(request) {
 
           ### Main Panel ###
           mainPanel(
-            mod_04_main_panel_ui("main_panel")
+            mod_04_main_panel_ui("main_panel"),
+            fluidRow(
+              column(
+                width = 12,
+                textOutput(outputId = "on_server"),
+                align = "center"
+              )
+            )
           )
         )
       ), #tabPanel

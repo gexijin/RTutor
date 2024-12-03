@@ -10,7 +10,8 @@
                                      reverted, use_python, run_result, python_to_html,
                                      code_error, input_text, llm_prompt, run_env,
                                      run_env_start, chunk_selection, Rmd_chunk,
-                                     current_data, current_data_2
+                                     current_data, current_data_2, contribute_data,
+                                     selected_dataset_name, user_file
                                      ) {
 
   moduleServer(id, function(input, output, session) {
@@ -157,6 +158,35 @@
       # Directly update prompt display based on chunk selection
       chunk_selection$past_prompt <- logs$code_history[[id]]$prompt
 
+    })
+
+    observeEvent(submit_button(), {
+      req(llm_prompt())
+      req(logs$code)
+
+      if(contribute_data()) {
+        # remove user data, only keep column names and data type
+        txt <- capture.output(str(current_data(), vec.len = 0))
+        txt <- gsub(" levels .*$", " levels", txt)
+        try(
+          save_data(
+            date = Sys.Date(),
+            time = format(Sys.time(), "%H:%M:%S"),
+            request = llm_prompt(),
+            code = logs$code,
+            error_status = code_error(),  # 1 --> error!  0 --> no error, success!!
+            data_str = paste(txt, collapse = "\n"),
+            dataset = selected_dataset_name(),
+            session = session$token,
+            filename = ifelse(is.null(user_file()[1, 1]), " ", user_file()[1, 1]),
+            filesize = ifelse(is.null(user_file()[1, 2]), " ", user_file()[1, 2]),
+            chunk = counter$requests,
+            api_time = counter$time,
+            tokens = counter$tokens_current,
+            language = logs$language
+          )
+        )
+      }
     })
 
 

@@ -58,6 +58,7 @@ mod_04_main_panel_ui <- function(id) {
                 border-color: #90BD8C; margin-top: 15px;"
             )
           ),
+
           # Tooltip for dropdown
           tippy::tippy_this(
             ns("selected_chunk"),
@@ -506,7 +507,6 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
               updateSelectInput(
                 session = session,
                 inputId = "selected_chunk",
-                label = div("AI Generated Code:", style = "font-size: 18px;"),
                 choices = choices,
                 selected = logs$id
               )
@@ -523,7 +523,6 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
               updateSelectInput(
                 session = session,
                 inputId = "selected_chunk",
-                label = div("AI Generated Code:", style = "font-size: 18px;"),
                 choices = "",
                 selected = NULL
               )

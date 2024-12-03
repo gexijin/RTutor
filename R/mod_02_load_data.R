@@ -50,13 +50,6 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    ## limit max file size to 10MB, if it is running on server
-    # if (file.exists(on_server)) { # server
-    #   options(shiny.maxRequestSize = 50 * 1024^2) # 50 MB
-    # } else { # local
-    #   options(shiny.maxRequestSize = 10000 * 1024^2) # 10 GB
-    # }
-
     # First Dataset Upload ----------------------
     output$data_upload_ui <- renderUI({
 
@@ -184,9 +177,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
       }
 
       # sometimes no row is left after processing.
-      if (is.null(df)) { # no_data
-        current_data(NULL)
-      } else if (nrow(df) == 0) {
+      if (is.null(df) || nrow(df) == 0) { # no_data
         current_data(NULL)
       } else { # there are data in the dataframe
         current_data(df)

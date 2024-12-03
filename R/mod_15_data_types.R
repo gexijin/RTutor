@@ -7,30 +7,39 @@ mod_15_data_types_ui <- function(id) {
 
   ns <- NS(id)
 
-  fluidRow(
-    column(
-      width = 12,
-      tags$label(
-        "2. Modify Data Fields",
-        style = "font-size: 18px;font-weight: bold;color: #333;
-          display: block;margin-bottom: 5px;"
+  tagList(
+    fluidRow(
+      column(
+        width = 12,
+        tags$label(
+          "2. Modify Data Fields",
+          style = "font-size: 18px;font-weight: bold;color: #333;
+            display: block;margin-bottom: 5px;"
+        )
       )
     ),
-    br(),
-    column(
-      width = 12,
-      div(
-        actionButton(ns("data_edit_modal"), "Data Types"),
-        align = "left"
-      ),
-      tags$head(tags$style(
-        sprintf(
-          "#%s {font-size: 17px;color: #000;background-color: #F6FFF5;
-          border-color: #90BD8C;}",
-          ns("data_edit_modal")
-        )
-      ))
-    )
+    fluidRow(
+      column(
+        width = 12,
+        div(
+          actionButton(ns("data_edit_modal"), "Data Types"),
+          align = "left"
+        ),
+        tags$head(tags$style(
+          sprintf(
+            "#%s {
+              font-size: 16px;
+              color: #000;
+              background-color: #F6FFF5;
+              border-color: #90BD8C;
+              margin-top: 5px;
+              }",
+            ns("data_edit_modal")
+          )
+        )),
+      )
+    ),
+    hr(class = "custom-hr")
   )
 }
 

@@ -9,7 +9,6 @@ mod_03_send_request_ui <- function(id) {
 
   tagList(
 
-    hr(class = "custom-hr"),
     tags$label("3. Send Request",
       style = "font-size: 18px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;"),
 
@@ -113,14 +112,6 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
       names(choices) <- demo$name[match(choices, demo$requests)]
 
       tagList(
-        # CSS Styles
-        tags$head(tags$style(HTML(paste0("
-          .padding {padding-top: 10px;padding-left: 10px;padding-bottom: 10px;}
-
-          #", ns("demo_prompt"), "+div .selectize-input {background-color: #F6FFF5 !important;border-color: #90BD8C !important;color: #000 !important;}
-          #", ns("demo_prompt"), "+div .selectize-dropdown {background-color: #F6FFF5 !important;border-color: #90BD8C !important;color: #000 !important;}            
-        ")))),
-
         fluidRow(
           column(
             width = 5,
