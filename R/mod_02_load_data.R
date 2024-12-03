@@ -18,7 +18,7 @@ mod_02_load_data_ui <- function(id) {
             inputId = ns("user_selected_dataset"),
             label = HTML("<span style='font-size: 18px; font-weight: bold;'>1. Select Dataset</span>"),
             choices = available_datasets,
-            selected = "Select a dataset:",
+            selected = "Select a Dataset:",
             multiple = FALSE
           )
         ),
@@ -154,7 +154,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
 
       if (input$user_selected_dataset == user_upload) {
         eval(parse(text = paste0("df <- user_data()$df")))
-      } else if (input$user_selected_dataset %in% c(no_data, "Select a dataset:")) {
+      } else if (input$user_selected_dataset %in% c(no_data, "Select a Dataset:")) {
         df <- NULL
       } else if (input$user_selected_dataset == rna_seq) {
         df <- rna_seq_data()
@@ -330,7 +330,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
         } else {
           txt <- "Dataset: User Upload"
         }
-      } else if (input$user_selected_dataset == "Select a dataset:") {
+      } else if (input$user_selected_dataset == "Select a Dataset:") {
         txt <- NULL
       } else {
         txt <- paste0("Selected Dataset:\n", input$user_selected_dataset)
@@ -350,7 +350,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
     # Condition based on input from mod_03 for UI conditional panel
     output$show_option1 <- renderText({
       # Check both conditions: submit_button() from mod_03 and user_selected_dataset from this module
-      if (submit_button() == 0 || input$user_selected_dataset == "Select a dataset:") {
+      if (submit_button() == 0 || input$user_selected_dataset == "Select a Dataset:") {
         return("show")  # Show dataset dropdown
       } else {
         return("hide")  # Show selected dataset

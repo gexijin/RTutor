@@ -24,7 +24,7 @@ mod_04_main_panel_ui <- function(id) {
       fluidRow(
         column(
           width = 5,
-          actionButton("first_user", strong("Quick start"), class = "first-user"),
+          actionButton("first_user", strong("Quick Start"), class = "first-user"),
           align = "left"
         ),
         column(

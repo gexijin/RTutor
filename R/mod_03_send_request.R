@@ -107,7 +107,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         "pressure" = demo$requests[demo$data == "Pressure (examples)"],
         "ChickWeight" = demo$requests[demo$data == "Chick Weights (examples)"],
         "rna_seq" = demo$requests[demo$data == "RNA Seq (examples)"],
-        demo$requests[demo$data == "Select a dataset:"]
+        demo$requests[demo$data == "Select a Dataset:"]
       )
 
       names(choices) <- demo$name[match(choices, demo$requests)]
@@ -166,7 +166,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
       }
 
       # if no file is selected, do not send
-      if (selected_dataset_name() == "Select a dataset:") {
+      if (selected_dataset_name() == "Select a Dataset:") {
         showNotification(
           paste("No file found. Please select a dataset and try again."),
           duration = 10

@@ -151,7 +151,7 @@ terms_of_use_content <- function() {
       <h2>10. Governing Law</h2>
       <p>These Terms shall be governed and construed in accordance with the laws of South Dakota, USA without regard to its conflict of law provisions.</p>
       <h2>11. Contact Us</h2>
-      <p style="padding-bottom: 90px;">If you have any questions about these Terms, please contact us at ge@orditus.com.</p>
+      <p style="padding-bottom: 90px;">If you have any questions about these Terms, please contact us at <a href="mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com">ge@orditus.com</a>.</p>
     </div>
   ')
 }
@@ -213,18 +213,18 @@ privacy_policy_content <- function() {
       <h2>6. Opting Out of Sharing Your Data</h2>
       <h3>6.1 Access your Information</h3>
       <p>You may be entitled under data protection laws to access and review personal information that Orditus LLC holds related to you. You may access, modify, or delete the information we collected by controlling the content that you share or upload at any time.<br><br>
-      Any other request should be addressed to: ge@orditus.com. Such inquiries should be clearly marked as data protection queries, and you should indicate if the request is time sensitive.<br></p>
+      Any other request should be addressed to: <a href="mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com">ge@orditus.com</a>. Such inquiries should be clearly marked as data protection queries, and you should indicate if the request is time sensitive.<br></p>
       <h3>6.2 Data Retention</h3>
-      <p>We retain your Information for as long as necessary to deliver our Services, to comply with any applicable legal requirements, to maintain security and prevent incidents, and, in general, to pursue our legitimate interests. If you wish to request the erasure of all your personal information that we process, you may do so by sending a written request to ge@orditus.com.</p>
+      <p>We retain your Information for as long as necessary to deliver our Services, to comply with any applicable legal requirements, to maintain security and prevent incidents, and, in general, to pursue our legitimate interests. If you wish to request the erasure of all your personal information that we process, you may do so by sending a written request to <a href="mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com">ge@orditus.com</a>.</p>
       <h3>6.3 Opting Out</h3>
       <p>You may opt out of sending information relevant to your data uploads and prompt requests at any time by switching off the checkbox in the RTutor.ai settings.</p>
       <h2>7. Data Security</h2>
       <p>All interactions with our Services occur over HTTPS which ensures that data transmitted between your device and our servers is encrypted and secure.</p>
       <h2>8. Children’s Privacy</h2>
       <p>Orditus.com is neither directed to nor structured to attract children under the age of 13 years. Accordingly, Orditus LLC does not intend to collect personal information from anyone it knows to be under 13 years of age. Orditus LLC will direct potential users under 13 years of age not to use the Services. If the Company learns that personal information of persons less than 13 years of age has been collected without verifiable parental consent, Orditus LLC will take the appropriate steps to delete this information.<br><br>
-      To make such a request, please contact Orditus LLC at: ge@orditus.com.</p>
+      To make such a request, please contact Orditus LLC at: <a href="mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com">ge@orditus.com</a>.</p>
       <h2>9. Contact Us</h2>
-      <p style="padding-bottom: 90px;">If you have questions about this policy, please email us at: ge@orditus.com.</p>
+      <p style="padding-bottom: 90px;">If you have questions about this policy, please email us at: <a href="mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com">ge@orditus.com</a>.</p>
   </div>
   ')
 }

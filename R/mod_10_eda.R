@@ -237,10 +237,10 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     # plot missing values
     output$missing_values <- plotly::renderPlotly({
       req(!is.null(current_data()))
-      
+
       # Check for missing values
       missing_count <- sum(is.na(current_data()))
-      
+
       if (missing_count == 0) {
         # Create a plotly text plot when no missing values exist
         plotly::plot_ly() %>%
@@ -313,10 +313,10 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     # plot missing values
     output$missing_values_2 <- plotly::renderPlotly({
       req(!is.null(current_data_2()))
-      
+
       # Check for missing values
       missing_count <- sum(is.na(current_data_2()))
-      
+
       if (missing_count == 0) {
         # Create a plotly text plot when no missing values exist
         plotly::plot_ly() %>%
@@ -351,6 +351,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
     ## Categorical Panel ##
     output$distribution_category <- renderPlot({
+      req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
       withProgress(message = "Barplots of categorical variables ...", {
         incProgress(0.3)
@@ -361,6 +362,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
     ## Numerical Panel ##
     output$distribution_numeric <- renderPlot({
+      req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
       withProgress(message = "Creating histograms ...", {
         incProgress(0.3)
@@ -369,6 +371,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     })
 
     output$qq_numeric <- renderPlot({
+      req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
       withProgress(message = "Generating QQ plots ...", {
         incProgress(0.3)
@@ -379,6 +382,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
     ## Summary Panel ##
     output$dfSummary <- renderText({
+      req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
       req(current_data())
       res <- capture.output(summarytools::dfSummary(current_data()))
@@ -389,6 +393,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
     ## Table1 Panel ##
     output$table1_inputs <- renderUI({
+      req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
       req(ggpairs_data())
       df <- ggpairs_data()
@@ -405,6 +410,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     })
 
     output$table1 <- renderText({
+      req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
       req(ggpairs_data())
       df <- ggpairs_data()
@@ -433,6 +439,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
     ## Correlation Panel ##
     output$corr_map <- renderPlot({
+      req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
       withProgress(message = "Generating correlation map ...", {
         incProgress(0.3)
