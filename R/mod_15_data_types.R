@@ -140,7 +140,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
     observeEvent(modal_closed(), {
       req(modal_closed())
       shiny::showNotification(
-        "Know thy enemy. Exploratory your data at the EDA tab first.",
+        "Know thy enemy. Explore your data at the EDA tab first.",
         duration = 10
       )
       modal_closed(FALSE)

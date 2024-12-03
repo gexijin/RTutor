@@ -24,7 +24,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     # LLM response
     llm_response <- reactive({
-      req(selected_dataset_name() != "Select a dataset:")
+      req(selected_dataset_name() != "Select a Dataset:")
       req(submit_button())
 
       isolate({
@@ -126,7 +126,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
       isolate({
         # Extract existing variables
         existing_vars <- as.list(run_env())
-        
+
         # Add new variables to the list
         existing_vars$df <- current_data()
         existing_vars$df_name <- selected_dataset_name()
@@ -139,7 +139,11 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
       # Display selected data
       if (length(logs$code_history) == 0) {
-        showNotification(paste("Selected dataset:", selected_dataset_name()), duration = 10)
+        showNotification(
+          HTML(paste("<span style='font-size: 17px;'>Selected Dataset:",
+                     selected_dataset_name(), "</span>")),
+          duration = 10
+        )
       }
     }
 

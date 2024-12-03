@@ -6,28 +6,29 @@
 mod_16_qa_ui <- function(id) {
 
   ns <- NS(id)
+
   tagList(
     conditionalPanel(
       condition = paste0("output['", ns("show_qa"), "'] === 'show'"),
       fluidRow(
         column(12,
-            textInput(
-              inputId = ns("ask_question"),
-              label = HTML("<span style='font-size: 18px; font-weight: bold;'>Ask About Results</span>"),
-              placeholder = "Q&A: Ask about the code, result, error, or statistics in general.",
-              value = ""
-            ),
+          textInput(
+            inputId = ns("ask_question"),
+            label = HTML("<span style='font-size: 18px;'>Ask About Results</span>"),
+            placeholder = "Q&A on code, results, error, or statistics in general",
+            value = ""
+          ),
           tippy::tippy_this(
             ns("ask_question"),
-            "Walk me through this code. What does this result mean?
-            What is this error about? Explain logistic regression.
-            List R packages for time series analysis.
-            Hit Enter to send the request.",
+            "'Walk me through this code', 'What does this result mean?',
+            'What is this error about?', 'Explain logistic regression',
+            'List R packages for time series analysis'.
+            Hit Enter to send your request.",
             theme = "light-border"
           ),
           shinyjs::hidden(actionButton(ns("ask_button"), strong("Ask RTutor"))),
           hr(class = "custom-hr")
-          )
+        )
       )
     )
   )

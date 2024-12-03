@@ -37,8 +37,6 @@ sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, gen
 sqltable <- "usage"
 
 # additional prompts to send to ChatGPT
-# system_role <- "Act as an experienced data scientist and statistician. You will write R code following instructions. Do not provide explanation.
-# Try to produce a plot when possible. ggplot2 is preferred. Make the plot visually appealing. If multiple plots are generated, try to combine them into one."
 system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
 If the goal can be achieved by showing quantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. 
 If multiple plots are generated, try to combine them into one."
@@ -78,12 +76,12 @@ move_front <- function(v, elements) {
 available_datasets <- c(available_datasets, "diamonds", "mpg", rna_seq)
 
 # Move important datasets to the front in order & add custom entries
-available_datasets <- move_front(available_datasets, c("iris", "mpg",
- "diamonds", "airquality", "CO2", "ToothGrowth", "pressure", "ChickWeight", rna_seq)
+available_datasets <- move_front(available_datasets, c("mpg", "iris",
+ "diamonds", rna_seq, "airquality", "CO2", "ToothGrowth", "pressure", "ChickWeight")
 )
 
 # Append dummy values for user-uploaded data & no data
-available_datasets <- c("Select a dataset:", no_data, available_datasets,
+available_datasets <- c("Select a Dataset:", no_data, available_datasets,
   user_upload
 )
 
@@ -833,8 +831,6 @@ faqs <- data.frame(
   ),
   stringsAsFactors = FALSE
 )
-
-
 
 
 # Create a data frame with update versions and descriptions

@@ -24,7 +24,7 @@ mod_04_main_panel_ui <- function(id) {
       fluidRow(
         column(
           width = 5,
-          actionButton("first_user", strong("Quick start"), class = "first-user"),
+          actionButton("first_user", strong("Quick Start"), class = "first-user"),
           align = "left"
         ),
         column(
@@ -43,33 +43,29 @@ mod_04_main_panel_ui <- function(id) {
           width = 5,
           # Chunk select dropdown
           div(
-            style = "display: inline-block; vertical-align: top; margin-right: 10px;",
+            style = "display: flex; align-items: center; gap: 35px;
+              margin-top: 10px; margin-bottom: 7px;",
             selectInput(
               inputId = ns("selected_chunk"),
-              label = div("AI Generated Code:", style = "font-size: 18px;"),
+              label = div("Request Results (Chunks):", style = "font-size: 18px;"),
               selected = NULL,
               choices = NULL
-            )
-          ),
-          div(      # Align button next to dropdown
-            style = "display: inline-block; vertical-align: top;
-              padding-top: 30px; padding-bottom: 5px;",
+            ),
             actionButton(
               ns("delete_chunk"),
-              "Delete Chunk"
+              "Delete Chunk",
+              style = "font-size: 14px; color: #000; background-color: #F6FFF5;
+                border-color: #90BD8C; margin-top: 15px;"
             )
           ),
-          tags$head(tags$style(HTML(  # Button styling
-            sprintf(
-              "#%s {font-size: 14px; color: #000; background-color: #F6FFF5; border-color: #90BD8C;}",
-              ns("delete_chunk")
-            )
-          ))),
+
+          # Tooltip for dropdown
           tippy::tippy_this(
             ns("selected_chunk"),
             "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
             theme = "light-border"
           ),
+          # Tooltip for button
           tippy::tippy_this(
             ns("delete_chunk"),
             "Don't like this code chunk? Click to remove.",
@@ -95,7 +91,7 @@ mod_04_main_panel_ui <- function(id) {
       conditionalPanel(
         condition = "input.show_code == true",
         ns = ns,
-        verbatimTextOutput(ns("openAI"))
+        verbatimTextOutput(ns("code_results"))
       ),
 
       conditionalPanel(
@@ -164,37 +160,6 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # pop-up to warn users under age 13 & those with a for-profit org. NOT to use
-    observe({
-      commercial_use_modal <- shiny::modalDialog(
-        title = "RTutor Usage Policy",
-
-        tags$br(),
-        tags$h4("RTutor is available to the public strictly for education and
-          non-profit organizations. If you are affiliated with a company or intend
-          to use RTutor for commercial activities, you must obtain a license from us.
-          Please contact us at ",
-          a("ge@orditus.com.", href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com")
-        ),
-
-        tags$br(),
-        tags$h4("We've updated our ",
-          a("Privacy Policy", href = "www/privacypolicyRTutor.pdf", target = "_blank"),
-          "and ",
-          a("Terms of Use.", href = "www/termsofuseRTutor.pdf", target = "_blank"),
-          " By continuing to RTutor.ai, you acknowledge and agree to these changes."
-        ),
-
-        footer = tagList(modalButton("Agree")),
-
-        easyClose = TRUE,
-        size = "l"
-      )
-
-      shiny::showModal(commercial_use_modal)
-    })
-
-
     ###  Selecting Chunk  ###
 
     # Update the selectInput choices when number of chunks changes
@@ -219,7 +184,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
     ###  Print Results or Error  ###
 
     # Print code chunk
-    output$openAI <- renderPrint({
+    output$code_results <- renderPrint({
       req(llm_response()$cmd)
       res <- logs$raw
       res <- gsub("```", "", res)
