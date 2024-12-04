@@ -219,8 +219,6 @@ mod_01_styles_ui <- function(id) {
       background-color: #66AFFF;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-        /* Delete Chunk */
-
     /* Module 12 */
     [class*=site-updates-wrapper] table
       {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
