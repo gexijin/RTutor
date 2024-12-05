@@ -54,7 +54,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
     output$data_upload_ui <- renderUI({
 
       # LHS: Hide after first run; RHS: For when submitted accidentally
-      req(submit_button() == 0 || !is.null(input$user_selected_dataset))
+      req(submit_button() == 0 || input$user_selected_dataset == "Select a Dataset:")
       req(is.null(input$user_file)) # Hide after user inputs data
 
       fileInput(

@@ -36,7 +36,8 @@ mod_10_eda_ui <- function(id) {
               ),
               "package."
             ),
-            plotOutput(ns("distribution_category"))
+            # plotOutput(ns("distribution_category"))
+            uiOutput(ns("distribution_category"))
           )
         ),
         tabPanel(
@@ -52,8 +53,10 @@ mod_10_eda_ui <- function(id) {
               ),
               "package."
             ),
-            plotOutput(ns("qq_numeric")),
-            plotOutput(ns("distribution_numeric"))
+            # plotOutput(ns("qq_numeric")),
+            # plotOutput(ns("distribution_numeric"))
+            uiOutput(ns("qq_numeric")),
+            uiOutput(ns("distribution_numeric"))
           )
         ),
 
@@ -202,16 +205,30 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
       tagList(
         hr(class = "custom-hr-thick"),
-        h4(strong("Data Structure: df")),
+        fluidRow(
+          column(width = 12,
+            h4(strong("Data Summary: df")),
+            div(
+              style = "border: 1px solid #ccc; padding: 10px;",
+              verbatimTextOutput(ns("data_summary"))
+            )
+          )
+        ),
+        br(),
         fluidRow(
           column(width = 6,
-            verbatimTextOutput(ns("data_structure")),
-            h4(strong("Data Summary: df")),
-            verbatimTextOutput(ns("data_summary"))
+            h4(strong("Data Structure: df")),
+            div(
+              style = "border: 1px solid #ccc; padding: 10px;",
+              verbatimTextOutput(ns("data_structure"))
+            )
           ),
           column(width = 6,
-            plotly::plotlyOutput(ns("missing_values"),
-            width = "100%")
+            div(
+              style = "border: 1px solid #ccc; padding: 10px;",
+              plotly::plotlyOutput(ns("missing_values"),
+                width = "100%")
+            )
           )
         )
       )
@@ -281,19 +298,34 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       tagList(
         br(),
         hr(class = "custom-hr-thick"),
-        h4(strong("Data Structure: df2")),
+        fluidRow(
+          column(width = 12,
+            h4(strong("Data Summary: df2")),
+            div(
+              verbatimTextOutput(ns("data_summary_2"))
+            )
+          )
+        ),
+        br(),
         fluidRow(
           column(width = 6,
-            verbatimTextOutput(ns("data_structure_2")),
-            h4(strong("Data Summary: df2")),
-            verbatimTextOutput(ns("data_summary_2"))
+            h4(strong("Data Structure: df2")),
+            div(
+              style = "border: 1px solid #ccc; padding: 10px;",
+                verbatimTextOutput(ns("data_structure_2"))
+              )
           ),
           column(width = 6,
-            plotly::plotlyOutput(ns("missing_values_2"), width = "100%")
+            div(
+              style = "border: 1px solid #ccc; padding: 10px;",
+              plotly::plotlyOutput(ns("missing_values_2"),
+                width = "100%")
+            )
           )
         )
       )
     })
+
 
     output$data_structure_2 <- renderPrint({
       req(!is.null(current_data_2()))
@@ -350,32 +382,89 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     })
 
     ## Categorical Panel ##
-    output$distribution_category <- renderPlot({
+    output$dynamic_categorical_plot <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
+        DataExplorer::plot_bar(current_data())
+    })
+    output$distribution_category <- renderUI({
+      req(!is.null(current_data()))
+      req(selected_dataset_name() != no_data)
+
       withProgress(message = "Barplots of categorical variables ...", {
         incProgress(0.3)
-        DataExplorer::plot_bar(current_data())
+
+        # Calculate the number of categorical variables
+        categorical_vars <- names(Filter(is.factor, current_data()))
+        num_vars <- length(categorical_vars)
+        
+        # Set a base height, e.g., 400px, and add 100px per variable
+        rows_needed <- ceiling(num_vars / 3)
+        plot_height <- paste0(rows_needed * 400, "px")
+        
+        plotOutput(
+          ns("dynamic_categorical_plot"), 
+          width = "100%", 
+          height = plot_height
+        )
       })
     })
 
 
     ## Numerical Panel ##
-    output$distribution_numeric <- renderPlot({
+    output$dynamic_numeric_plot <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
+        DataExplorer::plot_histogram(current_data())
+    })
+    output$distribution_numeric <- renderUI({
+      req(!is.null(current_data()))
+      req(selected_dataset_name() != no_data)
+
       withProgress(message = "Creating histograms ...", {
         incProgress(0.3)
-        DataExplorer::plot_histogram(current_data())
+
+        # Calculate the number of categorical variables
+        numeric_vars <- names(Filter(is.numeric, current_data()))
+        num_vars <- length(numeric_vars)
+        
+        # Set a base height, e.g., 400px, and add 100px per variable
+        rows_needed <- ceiling(num_vars / 4)
+        plot_height <- paste0(rows_needed * 400, "px")
+        
+        plotOutput(
+          ns("dynamic_numeric_plot"), 
+          width = "100%", 
+          height = plot_height
+        )
       })
     })
 
-    output$qq_numeric <- renderPlot({
+    output$dynamic_qq_numeric <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
+        DataExplorer::plot_qq(current_data())
+    })
+    output$qq_numeric  <- renderUI({
+      req(!is.null(current_data()))
+      req(selected_dataset_name() != no_data)
+
       withProgress(message = "Generating QQ plots ...", {
         incProgress(0.3)
-        DataExplorer::plot_qq(current_data())
+
+        # Calculate the number of categorical variables
+        numeric_vars <- names(Filter(is.numeric, current_data()))
+        num_vars <- length(numeric_vars)
+        
+        # Set a base height, e.g., 400px, and add 100px per variable
+        rows_needed <- ceiling(num_vars / 3)
+        plot_height <- paste0(rows_needed * 400, "px")
+        
+        plotOutput(
+          ns("dynamic_qq_numeric"), 
+          width = "100%", 
+          height = plot_height
+        )
       })
     })
 
