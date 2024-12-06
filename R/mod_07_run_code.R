@@ -7,7 +7,7 @@
 
 mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_button,
                                  reverted, logs, use_python, selected_dataset_name,
-                                 current_data, current_data_2) {
+                                 current_data, current_data_2, code_error) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -24,12 +24,14 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
         submit_button(),  # when submit is clicked
         reverted(),       # or when a previous code chunk is selected
         logs$code
-      ), {
+      ),{
       req(logs$code != "")
       req(!use_python())
+      print("Run Code")
+      # browser()
       result <- NULL
       console_output <- NULL
-      error_message <- NULL
+      error_message <- ""
 
       withProgress(message = "Running the code ...", {
         incProgress(0.4)
@@ -54,9 +56,17 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
           }
         }
 
-        # Run with error
-        if (!is.null(error_message)) {
+        # Code was Run with error
+        if (error_message != "") {
           run_env(list2env(run_env_start()))  # revert the environment
+          showNotification(
+            "Resubmit the same request to see if ChatGPT can resolve the error.
+            If that fails, change the request.",
+            duration = 10
+          )
+          code_error(TRUE)
+        } else{
+          code_error(FALSE)
         }
 
         # Check to see if df changed from running the code

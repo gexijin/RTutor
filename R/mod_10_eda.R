@@ -149,7 +149,7 @@ mod_10_eda_ui <- function(id) {
 
 
 mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
-                            current_data, current_data_2, logs) {
+                            current_data, current_data_2, ch) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -159,8 +159,8 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
       df <- current_data()
       # if analyses are run, use the original data
-      if (length(logs$code_history) > 0) {
-        df <- logs$code_history[[1]]$env$df
+      if (length(ch$code_history) > 0) {
+        df <- ch$code_history[[1]]$env$df
       }
       #df <- na.omit(df) # remove missing values
       cat_variables <- colnames(df)[!sapply(df, is.numeric)]

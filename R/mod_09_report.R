@@ -68,7 +68,7 @@ mod_09_report_ui <- function(id) {
 
 }
 
-mod_09_report_serv <- function(id, submit_button, logs, selected_model,
+mod_09_report_serv <- function(id, submit_button, ch, selected_model,
                                llm_response, input_text, use_python, counter,
                                sample_temp, code_error, python_to_html,
                                current_data, current_data_2, selected_dataset_name,
@@ -79,13 +79,13 @@ mod_09_report_serv <- function(id, submit_button, logs, selected_model,
 
     # Dropdown to pick what chunks to include in report
     observe({
-      choices <- seq_along(logs$code_history)
+      choices <- seq_along(ch$code_history)
 
       if (length(choices) == 0) {
         updateSelectInput(
           session = session,
           inputId = "selected_chunk_report",
-          label = "Chunks to include (Use backspace to delete):",
+          # label = "Chunks to include (Use backspace to delete):",
           selected = "All chunks without errors",
           choices = c(
             "All chunks",
@@ -99,7 +99,7 @@ mod_09_report_serv <- function(id, submit_button, logs, selected_model,
         updateSelectInput(
           session = session,
           inputId = "selected_chunk_report",
-          label = "Chunks to include (Use backspace to delete):",
+          # label = "Chunks to include (Use backspace to delete):",
           selected = "All chunks without errors",
           choices = c(
             "All chunks",
@@ -181,9 +181,9 @@ mod_09_report_serv <- function(id, submit_button, logs, selected_model,
 
       # save chunks in 'ix' based on user's selected chunks
       if ("All chunks" %in% input$selected_chunk_report) {
-        ix <- seq_along(logs$code_history)
+        ix <- seq_along(ch$code_history)
       } else if ("All chunks without errors" %in% input$selected_chunk_report) {
-        ix <- which(!sapply(logs$code_history, `[[`, "error"))
+        ix <- which(!sapply(ch$code_history, `[[`, "error"))
       } else {
         ix <- as.integer(input$selected_chunk_report)
       }
@@ -192,7 +192,7 @@ mod_09_report_serv <- function(id, submit_button, logs, selected_model,
       Rmd_script <- paste0(
         Rmd_script,
         paste0(
-          sapply(ix, function(i) logs$code_history[[i]]$rmd),
+          sapply(ix, function(i) ch$code_history[[i]]$rmd),
           collapse = "\n"
         )
       )
@@ -448,7 +448,7 @@ mod_09_report_serv <- function(id, submit_button, logs, selected_model,
     #   req(llm_response()$cmd)
     #   req(use_python())
     #   id <- as.integer(chunk_selection$selected_chunk)
-    #   rendered <- logs$code_history[[id]]$html_file
+    #   rendered <- ch$code_history[[id]]$html_file
     #   req(rendered)
     #   if (rendered == -1) {
     #     p("Error!")

@@ -6,12 +6,12 @@
   #____________________________________________________________________________
 
 
-  mod_06_error_hist_serv <- function(id, submit_button, llm_response, logs, counter,
+  mod_06_error_hist_serv <- function(id, submit_button, llm_response, logs, ch, counter,
                                      reverted, use_python, run_result, python_to_html,
-                                     code_error, input_text, llm_prompt, run_env,
+                                     input_text, llm_prompt, run_env,
                                      run_env_start, chunk_selection, Rmd_chunk,
                                      current_data, current_data_2, contribute_data,
-                                     selected_dataset_name, user_file
+                                     selected_dataset_name, user_file, code_error
                                      ) {
 
   moduleServer(id, function(input, output, session) {
@@ -56,41 +56,25 @@
       }
     })
 
-    # Capture error when running the generated code
-    code_error <- reactive({
-      error_status <- FALSE
-      req(submit_button()) # Require the submit button to be pushed
-      if (use_python()) { # Python
-        return(python_to_html() == -1)
-      } else { # R
-        return(!is.null(run_result()$error_message) && run_result()$error_message != "")
-      }
-    })
-
-    # Show Error Notification
-    observeEvent(code_error(), {
-      if (code_error()) { # if there's an error
-        showNotification(
-          "Resubmit the same request to see if ChatGPT can resolve the error.
-          If that fails, change the request.",
-          duration = 10
-        )
-      }
-    })
-
-    # Update Logs when Submitted
-    observeEvent(submit_button(), {
-      req(llm_response())   # necessary for sequence of app's events
+    observeEvent(llm_response(), {
+      req(llm_response())
+      print("Save Logs")
+      # browser()
 
       logs$id <- logs$id + 1
-
       logs$code <-  llm_response()$cmd
-
       logs$raw <- llm_response()$cmd
       # remove one or more blank lines in the beginning.
       logs$raw <- gsub("^\n+", "", logs$raw)
-      logs$last_code <- ""
+      logs$last_code <- "" #NEVER USED! hahaha
       logs$language <- ifelse(use_python(), "Python", "R")
+
+    })
+
+    # Update Logs when Submitted
+    observeEvent(run_result(), {
+      req(run_result())
+      req(logs$id > length(ch$code_history)) #Ensure to not save data when reverting
 
       # A list holds current request
       current_code <- list(
@@ -113,58 +97,13 @@
         env = run_env_start() # it is a list;
       )
 
-      logs$code_history <- append(logs$code_history, list(current_code))
-
-      choices <- seq_along(logs$code_history)
-      names(choices) <- paste0("Chunk #", choices)
-
-      # Directly update chunk selection
-      chunk_selection$chunk_choices <- choices
-      chunk_selection$selected_chunk <- logs$id
-
-    })
-
-    # Change code when past code is selected
-    observeEvent(chunk_selection$selected_chunk, {
-      req(chunk_selection$selected_chunk)
-
-      id <- chunk_selection$selected_chunk
-      id <- as.integer(id)
-
-      logs$code <- logs$code_history[[id]]$code
-      logs$raw <- logs$code_history[[id]]$raw
-
-
-      # Switch to previous chunks
-      if (id < length(logs$code_history)) {
-        # convert list to environment;
-        # update the run_env reactive value.
-        # restore the environment to the before running the ith chunk
-        run_env(list2env(logs$code_history[[id]]$env))
-        current_data(run_env()$df)
-        current_data_2(run_env()$df2)
-
-        # enable re-calculation of the code
-        reverted(reverted() + 1)
-
-        showNotification(
-          ui = paste("Switched back to chunk #", id, "."),
-          id = "revert_chunk",
-          duration = 5,
-          type = "warning"
-        )
-      }
-
-      # Directly update prompt display based on chunk selection
-      chunk_selection$past_prompt <- logs$code_history[[id]]$prompt
-
-    })
-
-    observeEvent(submit_button(), {
-      req(llm_prompt())
-      req(logs$code)
+      print("Saving Code History")
+      ch$code_history <- append(ch$code_history, list(current_code))
+      # browser()
 
       if(contribute_data()) {
+        print("Saving Data")
+        # browser()
         # remove user data, only keep column names and data type
         txt <- capture.output(str(current_data(), vec.len = 0))
         txt <- gsub(" levels .*$", " levels", txt)
@@ -187,14 +126,59 @@
           )
         )
       }
+
+      choices <- seq_along(ch$code_history)
+      names(choices) <- paste0("Chunk #", choices)
+
+      # Directly update chunk selection
+      chunk_selection$chunk_choices <- choices
+      chunk_selection$selected_chunk <- logs$id
+
     })
+
+    # Change code when past code is selected
+    observeEvent(chunk_selection$selected_chunk, {
+      req(chunk_selection$selected_chunk)
+
+      id <- chunk_selection$selected_chunk
+      id <- as.integer(id)
+
+      logs$code <- ch$code_history[[id]]$code
+      logs$raw <- ch$code_history[[id]]$raw
+
+
+      # Switched to previous chunks
+      if (id < length(ch$code_history)) {
+        # convert list to environment;
+        # update the run_env reactive value.
+        # restore the environment to the before running the ith chunk
+        run_env(list2env(ch$code_history[[id]]$env))
+        current_data(run_env()$df)
+        current_data_2(run_env()$df2)
+
+        # enable re-calculation of the code
+        reverted(reverted() + 1)
+
+        showNotification(
+          ui = paste("Switched back to chunk #", id, "."),
+          id = "revert_chunk",
+          duration = 5,
+          type = "warning"
+        )
+      }
+
+      # Directly update prompt display based on chunk selection
+      chunk_selection$past_prompt <- ch$code_history[[id]]$prompt
+
+    })
+
 
 
     # Return reactive values so they can be used outside the module
     return(
       list(
-        api_error_modal = api_error_modal,
-        code_error = code_error
+        api_error_modal = api_error_modal#,
+        # code_error = code_error
       )
     )
   })

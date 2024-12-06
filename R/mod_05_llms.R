@@ -2,7 +2,7 @@
 
 
 mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_name,
-                             api_key, sample_temp, selected_model, logs,
+                             api_key, sample_temp, selected_model, logs, ch,
                              counter, api_error_modal, code_error, current_data,
                              current_data_2, run_env, run_env_start, run_result,
                              use_python, send_head) {
@@ -77,21 +77,20 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     # History/Record Keeping
     build_history <- function(prepared_request) {
       prompt_total <- list()
-
       # Add system role
       if (!is.null(system_role) && nchar(system_role) > 10) {
         prompt_total <- append(prompt_total, list(list(role = "system", content = system_role)))
       }
 
       # If there's history
-      if (length(logs$code_history) > 0) {
+      if (length(ch$code_history) > 0) {
         # Calculate token usage from previous interactions, adjusted for overlap
-        history_tokens <- sapply(seq_along(logs$code_history), function(i) {
+        history_tokens <- sapply(seq_along(ch$code_history), function(i) {
           if (i == 1) {
-            logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens
+            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens
           } else {
-            logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens - 
-              logs$code_history[[i - 1]]$prompt_tokens - logs$code_history[[i - 1]]$output_tokens
+            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens - 
+              ch$code_history[[i - 1]]$prompt_tokens - ch$code_history[[i - 1]]$output_tokens
           }
         })
 
@@ -100,13 +99,13 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
         # Build prompt history with included items
         for (i in included) {
-          code_plus_error <- logs$code_history[[i]]$raw
-          if (i == length(logs$code_history) && code_error()) {
+          code_plus_error <- ch$code_history[[i]]$raw
+          if (i == length(ch$code_history) && code_error()) {
             code_plus_error <- paste0(code_plus_error, "\n\nError: ", run_result()$error_message)
           }
 
           prompt_total <- append(prompt_total, list(
-            list(role = "user", content = logs$code_history[[i]]$prompt_all),
+            list(role = "user", content = ch$code_history[[i]]$prompt_all),
             list(role = "assistant", content = code_plus_error)
           ))
         }
@@ -138,7 +137,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
       })
 
       # Display selected data
-      if (length(logs$code_history) == 0) {
+      if (length(ch$code_history) == 0) {
         showNotification(
           HTML(paste("<span style='font-size: 17px;'>Selected Dataset:",
                      selected_dataset_name(), "</span>")),
@@ -178,7 +177,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
           dataset_details
         )
 
-        if (length(logs$code_history) == 0) {
+        if (length(ch$code_history) == 0) {
           relevancy_prompt <- list(
             list(
               role = "system",
