@@ -10,7 +10,7 @@ mod_03_send_request_ui <- function(id) {
   tagList(
 
     tags$label("3. Send Request",
-      style = "font-size: 18px;font-weight: bold;color: #333;display: block;margin-bottom: 5px;"),
+      style = "font-size: 18px;font-weight: bold;color: #000;display: block;margin-bottom: 5px;"),
 
     textAreaInput(
       inputId = ns("input_text"),

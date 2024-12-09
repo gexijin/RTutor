@@ -13,7 +13,7 @@ mod_15_data_types_ui <- function(id) {
         width = 12,
         tags$label(
           "2. Modify Data Fields",
-          style = "font-size: 18px;font-weight: bold;color: #333;
+          style = "font-size: 18px;font-weight: bold;color: #000;
             display: block;margin-bottom: 5px;"
         )
       )
@@ -71,7 +71,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
                 label = HTML('
                   <span style="font-weight:bold;font-size:16px;">What are Data Types?</span>
                 '),
-                style = "margin-right:10px;background-color:#90BD8C;"
+                style = "margin-right:10px;background-color:#afd0ac;"
               )
             )
           ),
@@ -122,11 +122,20 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
             div(class = "button-group",
               actionButton(
                 ns("revert_data"),
-                label = "Revert to Original Data"
+                label = HTML('
+                  <span style="font-size:16px;">Revert to Original Data</span>
+                '),
+                style = "margin-right:10px;background-color:#F6FFF5;"
               ),
               uiOutput(ns("revert_data2_button"))
             ),
-            actionButton(ns("dismiss_modal"), label = "Dismiss")
+            actionButton(
+              ns("dismiss_modal"),
+              label = HTML('
+                  <span style="font-size:16px;">Dismiss</span>
+                '),
+              style = "margin-right:10px;background-color:#F6FFF5;"
+            )
           ),
           easyClose = TRUE
         )
@@ -396,7 +405,13 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
     # 2nd Dataset Revert Button
     output$revert_data2_button <- renderUI({
       req(current_data_2())  # Only display if second dataset exists
-      actionButton(ns("revert_data2"), label = "Revert to Original Data2")
+      actionButton(
+        ns("revert_data2"),
+        label = HTML('
+          <span style="font-size:16px;">Revert to Original Data2</span>
+        '),
+        style = "margin-right:10px;background-color:#F6FFF5;"
+      )
     })
 
     # Revert to Original Col Types - 2nd Dataset
