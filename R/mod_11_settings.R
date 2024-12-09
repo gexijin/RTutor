@@ -21,8 +21,8 @@ mod_11_settings_ui <- function(id) {
   }
 
   tagList(
-    tabPanel(
-      title = HTML('<span style="color: black;font-size: 18px;">Settings</span>'),
+    # tabPanel(
+    #   title = HTML('<span style="color: black;font-size: 18px;">Settings</span>'),
       div(
         id = "settings_window",
         # Header
@@ -219,7 +219,7 @@ mod_11_settings_ui <- function(id) {
           )
         )
       )
-    )
+    # )
   )
 }
 

@@ -9,9 +9,6 @@ mod_10_eda_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    tabPanel(
-      title = div(id = "eda_tab", "EDA"),
-      value = "EDA",
       tabsetPanel(
         tabPanel(
           title = "Basic",
@@ -142,7 +139,6 @@ mod_10_eda_ui <- function(id) {
           )
         )
       )
-    )
   )
 
 }

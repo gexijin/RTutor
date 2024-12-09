@@ -67,7 +67,7 @@ app_ui <- function(request) {
 
       ### 'EDA' Tab Panel ###
       tabPanel(
-        title = HTML('<span style="color: black;font-size: 18px;">EDA</span>'),
+        title = div(id = "eda_tab", HTML('<span style="color: black;font-size: 18px;">EDA</span>')),
         value = "EDA",
         tippy::tippy_this(
           "eda_tab",
@@ -81,7 +81,7 @@ app_ui <- function(request) {
 
       ### 'Report' Tab Panel ###
       tabPanel(
-        title = HTML('<span style="color: black;font-size: 18px;">Report</span>'),
+        title = div(id = "report_tab", HTML('<span style="color: black;font-size: 18px;">Report</span>')),
         value = "Report",
         tippy::tippy_this(
           "report_tab",
