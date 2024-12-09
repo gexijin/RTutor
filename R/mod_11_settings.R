@@ -21,8 +21,8 @@ mod_11_settings_ui <- function(id) {
   }
 
   tagList(
-    tabPanel(
-      title = HTML('<span style="color: black;font-size: 18px;">Settings</span>'),
+    # tabPanel(
+    #   title = HTML('<span style="color: black;font-size: 18px;">Settings</span>'),
       div(
         id = "settings_window",
         # Header
@@ -219,12 +219,12 @@ mod_11_settings_ui <- function(id) {
           )
         )
       )
-    )
+    # )
   )
 }
 
 
-mod_11_settings_serv <- function(id, submit_button, logs, llm_prompt,
+mod_11_settings_serv <- function(id, submit_button, llm_prompt,
                                  code_error, sample_temp) {
 
   moduleServer(id, function(input, output, session) {

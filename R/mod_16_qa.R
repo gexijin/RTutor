@@ -36,7 +36,7 @@ mod_16_qa_ui <- function(id) {
 
 
 
-mod_16_qa_serv <- function(id, submit_button, logs, code_error, run_result, api_error_modal, counter,
+mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_error_modal, counter,
   selected_model, api_key, sample_temp, selected_dataset_name) {
 
   moduleServer(id, function(input, output, session) {
@@ -189,14 +189,14 @@ mod_16_qa_serv <- function(id, submit_button, logs, code_error, run_result, api_
       }
 
       # If there's history
-      if (length(logs$code_history) > 0) {
+      if (length(ch$code_history) > 0) {
         # Calculate token usage from previous interactions, adjusted for overlap
-        history_tokens <- sapply(seq_along(logs$code_history), function(i) {
+        history_tokens <- sapply(seq_along(ch$code_history), function(i) {
           if (i == 1) {
-            logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens
+            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens
           } else {
-            logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens - 
-              logs$code_history[[i - 1]]$prompt_tokens - logs$code_history[[i - 1]]$output_tokens
+            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens - 
+              ch$code_history[[i - 1]]$prompt_tokens - ch$code_history[[i - 1]]$output_tokens
           }
         })
 
@@ -205,9 +205,9 @@ mod_16_qa_serv <- function(id, submit_button, logs, code_error, run_result, api_
 
         # Build prompt history with included items
         for (i in included) {
-          code_plus_console <- logs$code_history[[i]]$raw
+          code_plus_console <- ch$code_history[[i]]$raw
 
-          if (i == length(logs$code_history)) {
+          if (i == length(ch$code_history)) {
             if(code_error()){
               code_plus_console <- paste0(code_plus_console, "\n\nError: ", run_result()$error_message)
             } else{
@@ -217,7 +217,7 @@ mod_16_qa_serv <- function(id, submit_button, logs, code_error, run_result, api_
           }
 
           prompt_total <- append(prompt_total, list(
-            list(role = "user", content = logs$code_history[[i]]$prompt_all),
+            list(role = "user", content = ch$code_history[[i]]$prompt_all),
             list(role = "assistant", content = code_plus_console)
           ))
         }
@@ -238,7 +238,7 @@ mod_16_qa_serv <- function(id, submit_button, logs, code_error, run_result, api_
         # run_env_start(as.list(run_env()))
 
         # Display selected data
-        if (length(logs$code_history) == 0) {
+        if (length(ch$code_history) == 0) {
           showNotification(paste("Selected dataset:", selected_dataset_name()), duration = 10)
         }
       }
@@ -281,7 +281,7 @@ mod_16_qa_serv <- function(id, submit_button, logs, code_error, run_result, api_
             dataset_details
           )
 
-          if (length(logs$code_history) == 0) {
+          if (length(ch$code_history) == 0) {
             relevancy_prompt <- list(
               list(role = "system", content = paste("Act as an experienced data analyst.",
                 "Determine if the following prompts are relevant to the current dataset:",

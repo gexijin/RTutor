@@ -56,9 +56,11 @@ app_server <- function(input, output, session) {
     code = "", # cumulative code
     raw = "",  # cumulative orginal code for print out
     last_code = "", # last code for Rmarkdown
-    language = "", # Python or R
-    code_history = list(), # keep all code chunks
+    language = ""#, # Python or R
+    # code_history = list(), # keep all code chunks
   )
+
+  ch <- reactiveValues(code_history = list())
 
   counter <- reactiveValues(
     costs_total = 0, # cummulative cost
@@ -77,6 +79,7 @@ app_server <- function(input, output, session) {
   current_data_2 <- reactiveVal(NULL)
   original_data <- reactiveVal(NULL)
   original_data_2 <- reactiveVal(NULL)
+  code_error <- reactiveVal(FALSE)
 
   # define a reactive variable that holds an R environment
   # This is needed for the Rmd chunk
@@ -146,6 +149,7 @@ app_server <- function(input, output, session) {
     id = "main_panel",
     llm_response = llm_response,
     logs = logs,
+    ch = ch,
     code_error = code_error,
     run_result = run_result,
     run_env_start = run_env_start,
@@ -171,6 +175,7 @@ app_server <- function(input, output, session) {
     sample_temp = sample_temp,
     selected_model = selected_model,
     logs = logs,
+    ch = ch,
     counter = counter,
     api_error_modal = api_error_modal,
     code_error = code_error,
@@ -196,6 +201,7 @@ app_server <- function(input, output, session) {
     submit_button = submit_button,
     llm_response = llm_response,
     logs = logs,
+    ch = ch,
     counter = counter,
     reverted = reverted,
     use_python = use_python,
@@ -211,12 +217,13 @@ app_server <- function(input, output, session) {
     current_data_2 = current_data_2,
     contribute_data = contribute_data,
     selected_dataset_name = selected_dataset_name,
-    user_file = user_file
+    user_file = user_file,
+    code_error = code_error
   )
 
   # Module 06 - Outputs
   api_error_modal <- mod_06$api_error_modal
-  code_error <- mod_06$code_error
+  # code_error <- mod_06$code_error
 
 
 
@@ -233,7 +240,8 @@ app_server <- function(input, output, session) {
     use_python = use_python,
     selected_dataset_name = selected_dataset_name,
     current_data = current_data,
-    current_data_2 = current_data_2
+    current_data_2 = current_data_2,
+    code_error = code_error
   )
 
 
@@ -243,7 +251,7 @@ app_server <- function(input, output, session) {
   mod_09 <- mod_09_report_serv(
     id = "report",
     submit_button = submit_button,
-    logs = logs,
+    ch = ch,
     selected_model = selected_model,
     llm_response = llm_response,
     input_text = input_text,
@@ -274,7 +282,7 @@ app_server <- function(input, output, session) {
     use_python = use_python,
     current_data = current_data,
     current_data_2 = current_data_2,
-    logs = logs
+    ch = ch
   )
 
 
@@ -284,7 +292,6 @@ app_server <- function(input, output, session) {
   mod_11 <- mod_11_settings_serv(
     id = "sett",
     submit_button = submit_button,
-    logs = logs,
     llm_prompt = llm_prompt,
     code_error = code_error
   )
@@ -329,7 +336,7 @@ app_server <- function(input, output, session) {
     current_data_2 = current_data_2,
     original_data = original_data,
     original_data_2 = original_data_2,
-    logs = logs,
+    ch = ch,
     user_file = user_file,
     user_file_2 = user_file_2
   )
@@ -341,7 +348,7 @@ app_server <- function(input, output, session) {
   mod_16 <- mod_16_qa_serv(
     id = "qa",
     submit_button = submit_button,
-    logs = logs,
+    ch = ch,
     code_error = code_error,
     run_result = run_result,
     api_error_modal = api_error_modal,
@@ -364,7 +371,7 @@ app_server <- function(input, output, session) {
   #                    Miscellaneous Functions
   #________________________________________________________________
 
-  # File is rendered and stored in the html_file variable in logs$code_history
+  # File is rendered and stored in the html_file variable in code_history
   python_to_html <- reactive({
     req(submit_button())
     req(logs$language == "Python")

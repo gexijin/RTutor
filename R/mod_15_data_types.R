@@ -51,7 +51,7 @@ mod_15_data_types_ui <- function(id) {
 
 mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
                                    current_data, current_data_2, original_data,
-                                   original_data_2, logs, user_file,
+                                   original_data_2, ch, user_file,
                                    user_file_2) {
 
   moduleServer(id, function(input, output, session) {
@@ -284,7 +284,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
       req(current_data())
       req(input$revert_data == 0) #Negative: If we hit revert data button, we don't want to run all this junk
                                   #Positive: Run as long as we don't hit revert_data button
-      req(is.null(input$submit_button) || input$submit_button == 0 || as.integer(input$selected_chunk) == length(logs$code_history))
+      req(is.null(input$submit_button) || input$submit_button == 0 || as.integer(input$selected_chunk) == length(ch$code_history))
       #Negative: If we revert a chunk we don't want to run all this junk
       #Positive: Run as long as our selected chunk is the current maximum code chunk.
         #(i.e. If submit_button == 0 then selected chunk would be NULL and maximum code chunk is 0\NULL)
@@ -327,7 +327,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
     observe({
       req(current_data_2())
       req(input$revert_data2 == 0) #Negative: If we hit revert data button, we don't want to run all this junk
-      req(is.null(input$submit_button) || input$submit_button == 0 || as.integer(input$selected_chunk) == length(logs$code_history))
+      req(is.null(input$submit_button) || input$submit_button == 0 || as.integer(input$selected_chunk) == length(ch$code_history))
       for (i in seq_along(current_data_2())) {
         col_type <- input[[paste0("column_type_2_", i)]]
         if (!is.null(col_type)) {

@@ -152,7 +152,7 @@ mod_04_main_panel_ui <- function(id) {
   )
 }
 
-mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
+mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
                                    run_result, run_env_start, submit_button,
                                    use_python, tabs, current_data, current_data_2,
                                    selected_dataset_name, chunk_selection) {
@@ -479,27 +479,27 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
           if (isConfirmed) {
             # What current chunk is selected??
             id_pre <- as.integer(input$selected_chunk)
-            logs$code_history[[id_pre]] <- NULL # R Automatically shifts list down
+            ch$code_history[[id_pre]] <- NULL # R Automatically shifts list down
 
-            max_id <- length(logs$code_history)
+            max_id <- length(ch$code_history)
 
             if (max_id > 0){ # Order Operation MATTERS!!!!
               # Order Operation 1 (Reorder Code History ID's & rmd chunk numbering)
-              logs$code_history <- lapply(1:max_id, function(i) {
-                logs$code_history[[i]]$id = i
-                substr(logs$code_history[[i]]$rmd,6,6) = as.character(i)
-                logs$code_history[[i]]
+              ch$code_history <- lapply(1:max_id, function(i) {
+                ch$code_history[[i]]$id = i #Reasign the id's
+                substr(ch$code_history[[i]]$rmd,6,6) = as.character(i)
+                ch$code_history[[i]]
               })
 
               # Order Operation 2 (Update current code info)
-              logs$id <- logs$code_history[[max_id]]$id
-              logs$code <- logs$code_history[[max_id]]$code
-              logs$raw <- logs$code_history[[max_id]]$raw
-              logs$last_code <- logs$code_history[[max_id]]$last_code
-              logs$language <- logs$code_history[[max_id]]$language
+              logs$id <- ch$code_history[[max_id]]$id
+              logs$code <- ch$code_history[[max_id]]$code
+              logs$raw <- ch$code_history[[max_id]]$raw
+              logs$last_code <- ch$code_history[[max_id]]$last_code
+              logs$language <- ch$code_history[[max_id]]$language
 
 
-              choices <- 1:length(logs$code_history)
+              choices <- 1:length(ch$code_history)
               names(choices) <- paste0("Chunk #", choices)
               chunk_selection$chunk_choices <- choices
 
@@ -517,7 +517,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
               logs$raw = ""
               logs$last_code = ""
               logs$language = ""
-              logs$code_history <- list()
+              ch$code_history = list()
 
               # update chunk choices
               updateSelectInput(
@@ -526,6 +526,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, code_error,
                 choices = "",
                 selected = NULL
               )
+              
             }
           }
         }
