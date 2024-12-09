@@ -64,7 +64,7 @@ mod_03_send_request_ui <- function(id) {
 
 
 mod_03_send_request_serv <- function(id, chunk_selection, user_file,
-                                     selected_dataset_name) {
+                                     selected_dataset_name, use_python) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -95,6 +95,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
     output$prompt_ui <- renderUI({
       req(is.null(user_file()))
 
+      # Filter examples based on selected dataset
       choices <- switch(selected_dataset_name(),
         "no_data" = demo$requests[demo$data == "No Data"],
         "iris" = demo$requests[demo$data == "Iris (examples)"],
@@ -108,6 +109,13 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         "rna_seq" = demo$requests[demo$data == "RNA Seq (examples)"],
         demo$requests[demo$data == "Select a Dataset:"]
       )
+
+      # Additional filtering based on use_python()
+      if (!use_python()) {
+        choices <- choices[demo$R[match(choices, demo$requests)] == 1]
+      } else {
+        choices <- choices[demo$Python[match(choices, demo$requests)] == 1]
+      }
 
       names(choices) <- demo$name[match(choices, demo$requests)]
 
