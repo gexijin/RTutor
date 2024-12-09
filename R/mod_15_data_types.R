@@ -13,7 +13,7 @@ mod_15_data_types_ui <- function(id) {
         width = 12,
         tags$label(
           "2. Modify Data Fields",
-          style = "font-size: 18px;font-weight: bold;color: #333;
+          style = "font-size: 18px;font-weight: bold;color: #000;
             display: block;margin-bottom: 5px;"
         )
       )
@@ -22,6 +22,11 @@ mod_15_data_types_ui <- function(id) {
       column(
         width = 12,
         div(
+          tippy::tippy_this(
+            ns("data_edit_modal"),
+            "Numbers, Categories, etc.",
+            theme = "light-border"
+          ),
           actionButton(ns("data_edit_modal"), "Data Types"),
           align = "left"
         ),
@@ -52,10 +57,24 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    ### Modals ###
+    # Data Types Modal
     show_pop_up <- function() {
       showModal(
         modalDialog(
-          title = "Verify Data Types (Important!)",
+          title = div(
+            style = "display: flex; justify-content: space-between; align-items: center;",
+            div("Verify Data Types (Important!)"),
+            div(
+              actionButton(
+                ns("learn_more"),
+                label = HTML('
+                  <span style="font-weight:bold;font-size:16px;">What are Data Types?</span>
+                '),
+                style = "margin-right:10px;background-color:#afd0ac;"
+              )
+            )
+          ),
           tags$head(
             tags$style(HTML("
                 #data_type_window {
@@ -81,20 +100,18 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
           tabsetPanel(
             tabPanel("Dataset 1",
               div(id = "data_type_window", uiOutput(ns("column_type_ui"))),
-              h4("If a column represents categories, choose 'Factor', even if
-                it contains numbers. For columns that are numbers, but with few
-                unique values, RTutor automatically converts them to factors.
-                See Settings.",
+              h4("For columns that are numbers, but with few unique values,
+                 RTutor automatically converts them to factors (categories),
+                 see Settings for more info.",
                 style = "color: blue"
               )
             ),
             tabPanel("Dataset 2",
               condition = "1",
               div(id = "data_type_window", uiOutput(ns("column_type_ui_2"))),
-              h4("If a column represents categories, choose 'Factor', even if
-                it contains numbers. For columns that are numbers, but with few
-                unique values, RTutor automatically converts them to factors.
-                See Settings.",
+              h4("For columns that are numbers, but with few unique values,
+                 RTutor automatically converts them to factors (categories),
+                 see Settings for more info.",
                 style = "color: blue"
               )
             )
@@ -105,11 +122,20 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
             div(class = "button-group",
               actionButton(
                 ns("revert_data"),
-                label = "Revert to Original Data"
+                label = HTML('
+                  <span style="font-size:16px;">Revert to Original Data</span>
+                '),
+                style = "margin-right:10px;background-color:#F6FFF5;"
               ),
               uiOutput(ns("revert_data2_button"))
             ),
-            actionButton(ns("dismiss_modal"), label = "Dismiss")
+            actionButton(
+              ns("dismiss_modal"),
+              label = HTML('
+                  <span style="font-size:16px;">Dismiss</span>
+                '),
+              style = "margin-right:10px;background-color:#F6FFF5;"
+            )
           ),
           easyClose = TRUE
         )
@@ -124,7 +150,6 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
     observeEvent(user_file(), {
       show_pop_up()
     })
-
     observeEvent(user_file_2(), {
       showNotification(
         "2nd file uploaded! To use it, specify with its name 'df2'."
@@ -134,7 +159,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
 
     observeEvent(input$dismiss_modal, {
       modal_closed(TRUE)
-      shiny::removeModal()
+      removeModal()
     })
 
     observeEvent(modal_closed(), {
@@ -146,6 +171,41 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
       modal_closed(FALSE)
     })
 
+
+    # Learn More Modal (within Data Types Modal)
+    learn_more_modal <- function() {
+      showModal(
+        modalDialog(
+          title = "Understanding Data Types",
+          easyClose = FALSE,
+          size = "m",
+          p("Data types determine how information is stored, processed, and displayed. Here's a breakdown of common types:"),
+          tags$ul(
+            tags$li(strong("Character (Text):"), " Words or letters with many unique values. Like names, labels, or phrases."),
+            tags$li(strong("Numbers:"), " Decimal numbers."),
+            tags$li(strong("Integers:"), " Whole numbers."),
+            tags$li(strong("Categories (Factors):"), " Data with specific groups and few unique values. Like 'A/B/C/D', 'Small/Medium/Large', '1999/2000/2001'."),
+            tags$li(strong("Dates:"), " Calendar dates.")
+          ),
+          p("Choosing the right data type ensures accurate analysis and avoids errors."),
+          footer = actionButton(ns("close_learn_more_modal"), label = "Close")
+        )
+      )
+    }
+
+    # Handle Learn More buttons
+    observeEvent(input$learn_more, {
+      learn_more_modal()
+    })
+
+    # Close the Learn More modal
+    observeEvent(input$close_learn_more_modal, {
+      removeModal()
+      show_pop_up()  # Reopen the Data Types Modal
+    })
+
+
+    ### Data Type Modifications ###
 
     # Column Type Dropdown - 1st Dataset
     output$column_type_ui <- renderUI({
@@ -168,8 +228,8 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
                 choices = c("Character" = "character",
                             "Numeric" = "numeric",
                             "Integer" = "integer",
-                            "Date" = "Date",
-                            "Factor" = "factor"),
+                            "Category" = "factor",
+                            "Date" = "Date"),
                 selected = class(current_data()[[i]])
               )
             ),
@@ -203,8 +263,8 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
               choices = c("Character" = "character",
                           "Numeric" = "numeric",
                           "Integer" = "integer",
-                          "Date" = "Date",
-                          "Factor" = "factor"),
+                          "Category" = "factor",
+                          "Date" = "Date"),
               selected = class(current_data_2()[[i]])
             )
           ),
@@ -318,8 +378,8 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
           choices = c("Character" = "character",
                       "Numeric" = "numeric",
                       "Integer" = "integer",
-                      "Date" = "Date",
-                      "Factor" = "factor"),
+                      "Category" = "factor",
+                      "Date" = "Date"),
           selected = class(current_data()[[i]])
         )
       })
@@ -345,7 +405,13 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
     # 2nd Dataset Revert Button
     output$revert_data2_button <- renderUI({
       req(current_data_2())  # Only display if second dataset exists
-      actionButton(ns("revert_data2"), label = "Revert to Original Data2")
+      actionButton(
+        ns("revert_data2"),
+        label = HTML('
+          <span style="font-size:16px;">Revert to Original Data2</span>
+        '),
+        style = "margin-right:10px;background-color:#F6FFF5;"
+      )
     })
 
     # Revert to Original Col Types - 2nd Dataset
@@ -363,8 +429,8 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
           choices = c("Character" = "character",
                       "Numeric" = "numeric",
                       "Integer" = "integer",
-                      "Date" = "Date",
-                      "Factor" = "factor"),
+                      "Category" = "factor",
+                      "Date" = "Date"),
           selected = class(current_data_2()[[i]])
         )
       })

@@ -132,7 +132,8 @@ app_server <- function(input, output, session) {
     id = "send_request",
     chunk_selection = chunk_selection,
     user_file = user_file,
-    selected_dataset_name = selected_dataset_name
+    selected_dataset_name = selected_dataset_name,
+    use_python = use_python
   )
 
   # Module 03 - Outputs
