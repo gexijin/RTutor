@@ -205,29 +205,38 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
       tagList(
         hr(class = "custom-hr-thick"),
-        fluidRow(
-          column(width = 12,
-            h4(strong("Data Summary: df")),
-            div(
-              style = "border: 1px solid #ccc; padding: 10px;",
-              verbatimTextOutput(ns("data_summary"))
+        div(
+          fluidRow(
+            column(
+              width = 6,
+              h4(strong("Data Structure: df")),
+              div(
+                style = "border: 1px solid #ccc; padding: 10px; height: 100%;",
+                verbatimTextOutput(ns("data_structure"))
+              )
+            ),
+            column(
+              width = 6,
+              div(
+                style = "border: 1px solid #ccc; padding: 10px; height: 100%;",
+                plotly::plotlyOutput(
+                  ns("missing_values"),
+                  width = "100%"
+                )
+              )
             )
           )
         ),
         br(),
-        fluidRow(
-          column(width = 6,
-            h4(strong("Data Structure: df")),
-            div(
-              style = "border: 1px solid #ccc; padding: 10px;",
-              verbatimTextOutput(ns("data_structure"))
-            )
-          ),
-          column(width = 6,
-            div(
-              style = "border: 1px solid #ccc; padding: 10px;",
-              plotly::plotlyOutput(ns("missing_values"),
-                width = "100%")
+        div(
+          fluidRow(
+            column(
+              width = 12,
+              h4(strong("Data Summary: df")),
+              div(
+                style = "border: 1px solid #ccc; padding: 10px;",
+                verbatimTextOutput(ns("data_summary"))
+              )
             )
           )
         )
@@ -243,12 +252,15 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     output$data_summary <- renderText({
       req(selected_dataset_name() != no_data)
       req(!is.null(current_data()))
-      paste(
+      options(width = 200) #Allow for wider visualization of summary()
+      a <- paste(
         capture.output(
           summary(current_data())
         ),
         collapse = "\n"
       )
+      options(width = 80) #Return to default visualization
+      a
     })
 
     # plot missing values
@@ -298,28 +310,35 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       tagList(
         br(),
         hr(class = "custom-hr-thick"),
-        fluidRow(
-          column(width = 12,
-            h4(strong("Data Summary: df2")),
-            div(
-              verbatimTextOutput(ns("data_summary_2"))
+        div(
+          fluidRow(
+            column(width = 6,
+              h4(strong("Data Structure: df2")),
+              div(
+                style = "border: 1px solid #ccc; padding: 10px;  height: 100%;",
+                  verbatimTextOutput(ns("data_structure_2"))
+                )
+            ),
+            column(width = 6,
+              div(
+                style = "border: 1px solid #ccc; padding: 10px; height: 100%;",
+                plotly::plotlyOutput(
+                  ns("missing_values_2"),
+                  width = "100%"
+                )
+              )
             )
           )
         ),
         br(),
-        fluidRow(
-          column(width = 6,
-            h4(strong("Data Structure: df2")),
-            div(
-              style = "border: 1px solid #ccc; padding: 10px;",
-                verbatimTextOutput(ns("data_structure_2"))
+        div(
+          fluidRow(
+            column(width = 12,
+              h4(strong("Data Summary: df2")),
+              div(
+                style = "border: 1px solid #ccc; padding: 10px;",
+                verbatimTextOutput(ns("data_summary_2"))
               )
-          ),
-          column(width = 6,
-            div(
-              style = "border: 1px solid #ccc; padding: 10px;",
-              plotly::plotlyOutput(ns("missing_values_2"),
-                width = "100%")
             )
           )
         )
@@ -334,12 +353,15 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
 
     output$data_summary_2 <- renderText({
       req(!is.null(current_data_2()))
-      paste(
+      options(width = 200) #Allow for wider visualization of summary()
+      a <- paste(
         capture.output(
           summary(current_data_2())
         ),
         collapse = "\n"
       )
+      options(width = 80) #Return to default visualization
+      a
     })
 
     # plot missing values
