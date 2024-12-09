@@ -530,17 +530,23 @@ missing_values_plot <- function(df) {
       Column = c(names(missing_values), "At Least One Missing"),
       MissingValues = c(missing_values, cases_with_missing)
     )
-    # Calculate the percentage of missing values per column
-    # missing_percentage <- (missing_values / nrow(df)) * 100
+
     # Plot the number of missing values for all columns with labels
     ggplot(missing_data_df, aes(x = Column, y = MissingValues, fill = Column)) +
       geom_bar(stat = "identity") +
-      geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)), hjust = -5) + # Add labels to the bars
-      # geom_text(aes(label = sprintf("%.2f%%", MissingPercentage)), hjust = -0.3) +
+      geom_text(aes(label = sprintf("%.0f%%", MissingValues / nrow(df) * 100)),
+                hjust = -5) + # Bar labels
       coord_flip() + # Makes the bars horizontal
-      labs(title = "Number of Missing Values by Column", x = "Column", y = "Number of Missing Values") +
-      scale_fill_brewer(palette = "Set3") + # Use a color palette for different bars
-      theme(legend.position = "none", axis.title.y = element_blank()) + # Remove the legend
+      labs(
+        title = "Number of Missing Values by Column",
+        x = "Column",
+        y = "Number of Missing Values"
+      ) +
+      scale_fill_brewer(palette = "Set3") + # Color palette for different bars
+      theme(
+        legend.position = "none",
+        axis.title.y = element_blank()
+      ) + # No legend
       scale_y_continuous(expand = expansion(mult = c(0, 0.2))) # Extend the y-axis limits by 10%
   }
 }
@@ -631,6 +637,8 @@ python_html <- function(python_code, select_data, current_data) {
   }
 }
 
+
+### Save User Data and Feedback ###
 
 # #' Creates a SQLite database file for collecting user data
 # #'
@@ -742,14 +750,14 @@ save_data <- function(
 
 
 #' Clean up text strings for inserting into SQL
-#' 
+#'
 #'
 #' @param x a string that can contain ' or "
 #'
 #' @return nothing
-  clean_txt <- function(x) {
-    return(gsub("\'|\"", "", x))
-  }
+clean_txt <- function(x) {
+  return(gsub("\'|\"", "", x))
+}
 
 
 #' Save user feedback
@@ -791,6 +799,8 @@ save_comments <- function(date, time, comments, helpfulness, experience) {
   }
 }
 
+
+### Lists - FAQ & Updates ###
 
 # Create a data frame with questions and answers for FAQ section
 # Used in faq_list component
