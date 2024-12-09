@@ -230,9 +230,9 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         )))
       }
 
-      # Send request
+      # Send request depending on selection if OpenAI then openAI_agent, if Anthropic then anthropic_agent
       response <- openAI_agent(prompt_total)
-      response$choices[1, 1] <- response$choices$message.content
+      response$choices[1, 1] <- response$choices$message.content #Get rid of this bad code. Overwriting is not good.
 
       return(response)
     }
@@ -240,6 +240,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     # Process response & return all response info
     process_response <- function(response, start_time) {
+      #Process based on model API used
 
       # Handle if error/no error
       error_api <- !is.null(response$error_status)
