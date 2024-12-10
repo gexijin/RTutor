@@ -487,7 +487,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
               # Order Operation 1 (Reorder Code History ID's & rmd chunk numbering)
               ch$code_history <- lapply(1:max_id, function(i) {
                 ch$code_history[[i]]$id = i #Reasign the id's
-                substr(ch$code_history[[i]]$rmd,6,6) = as.character(i)
+                substr(ch$code_history[[i]]$rmd,6,6) = as.character(i) #Updating the RMD number as well.
                 ch$code_history[[i]]
               })
 

@@ -256,7 +256,7 @@ app_server <- function(input, output, session) {
     llm_response = llm_response,
     input_text = input_text,
     use_python = use_python,
-    counter = counter,
+    logs = logs,
     sample_temp = sample_temp,
     code_error = code_error,
     python_to_html = python_to_html,

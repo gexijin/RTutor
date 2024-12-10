@@ -69,7 +69,7 @@ mod_09_report_ui <- function(id) {
 }
 
 mod_09_report_serv <- function(id, submit_button, ch, selected_model,
-                               llm_response, input_text, use_python, counter,
+                               llm_response, input_text, use_python, logs,
                                sample_temp, code_error, python_to_html,
                                current_data, current_data_2, selected_dataset_name,
                                user_data, user_data_2, user_file, user_file_2) {
@@ -216,7 +216,7 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model,
       # Append user's request & model info to RMarkdown script
       Rmd_script <- paste0(
         Rmd_script,
-        "\n### ", counter$requests, ". ", input_text(),
+        "\n### ", logs$id, ". ", input_text(), #counter$requests
         "\n", names(language_models)[language_models == selected_model()],
         " (Temperature = ", sample_temp(), ")\n"
       )
