@@ -28,7 +28,7 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
       req(logs$code != "")
       req(!use_python())
       print("Run Code")
-      # browser()
+
       result <- NULL
       console_output <- NULL
       error_message <- ""
