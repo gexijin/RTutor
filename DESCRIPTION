@@ -23,6 +23,7 @@ Imports:
     DataExplorer,
     corrplot,
     tableone,
+    ggplot2,
     GGally,
     janitor,
     RSQLite,
