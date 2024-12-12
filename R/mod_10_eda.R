@@ -222,7 +222,14 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
             column(
               width = 6,
               div(
-                style = "border: 1px solid #ccc; padding: 10px; height: 100%;",
+                style = "margin-top: 40px;border: 1px solid #ccc;padding: 10px;",
+                # Text output for when there are NO missing values
+                div(
+                  style = "font-size: 24px;color: green;text-align: center;padding-top: 10px;",
+                  textOutput(
+                    ns("no_missings_text")
+                  )
+                ),
                 plotly::plotlyOutput(
                   ns("missing_values"),
                   width = "100%"
@@ -274,28 +281,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       # Check for missing values
       missing_count <- sum(is.na(current_data()))
 
-      if (missing_count == 0) {
-        # Create a plotly text plot when no missing values exist
-        plotly::plot_ly() %>%
-          plotly::add_text(
-            x = 0.5,
-            y = 0.5,
-            text = "No Missing Values Detected",
-            textfont = list(size = 20, color = "green")
-          ) %>%
-          plotly::layout(
-            xaxis = list(
-              showticklabels = FALSE,
-              showgrid = FALSE,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              showticklabels = FALSE,
-              showgrid = FALSE,
-              zeroline = FALSE
-            )
-          )
-      } else {
+      if (missing_count > 0) {
         # Your existing missing values plot
         p <- missing_values_plot(current_data())
         if (!is.null(p)) {
@@ -303,6 +289,23 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
         } else {
           return(NULL)
         }
+      } else {
+        return(NULL)
+      }
+    })
+
+    # Render the no missing values text
+    output$no_missings_text <- renderText({
+      req(!is.null(current_data()))
+
+      # Check for missing values
+      missing_count <- sum(is.na(current_data()))
+
+      # Show text only when there are no missing values
+      if (missing_count == 0) {
+        "No Missing Values Detected"
+      } else {
+        ""
       }
     })
 
@@ -323,9 +326,17 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
                   verbatimTextOutput(ns("data_structure_2"))
                 )
             ),
-            column(width = 6,
+            column(
+              width = 6,
               div(
-                style = "border: 1px solid #ccc; padding: 10px; height: 100%;",
+                style = "margin-top: 40px;border: 1px solid #ccc;padding: 10px;",
+                # Text output for when there are NO missing values
+                div(
+                  style = "font-size: 24px;color: green;text-align: center;padding-top: 10px;",
+                  textOutput(
+                    ns("no_missings_text_2")
+                  )
+                ),
                 plotly::plotlyOutput(
                   ns("missing_values_2"),
                   width = "100%"
@@ -375,28 +386,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       # Check for missing values
       missing_count <- sum(is.na(current_data_2()))
 
-      if (missing_count == 0) {
-        # Create a plotly text plot when no missing values exist
-        plotly::plot_ly() %>%
-          plotly::add_text(
-            x = 0.5,
-            y = 0.5,
-            text = "No Missing Values Detected",
-            textfont = list(size = 20, color = "green")
-          ) %>%
-          plotly::layout(
-            xaxis = list(
-              showticklabels = FALSE,
-              showgrid = FALSE,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              showticklabels = FALSE,
-              showgrid = FALSE,
-              zeroline = FALSE
-            )
-          )
-      } else {
+      if (missing_count > 0) {
         # Your existing missing values plot
         p <- missing_values_plot(current_data_2())
         if (!is.null(p)) {
@@ -404,8 +394,26 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
         } else {
           return(NULL)
         }
+      } else {
+        return(NULL)
       }
     })
+
+    # Render the no missing values text
+    output$no_missings_text_2 <- renderText({
+      req(!is.null(current_data_2()))
+
+      # Check for missing values
+      missing_count <- sum(is.na(current_data_2()))
+
+      # Show text only when there are no missing values
+      if (missing_count == 0) {
+        "No Missing Values Detected"
+      } else {
+        ""
+      }
+    })
+
 
     ## Categorical Panel ##
     output$dynamic_categorical_plot <- renderPlot({
