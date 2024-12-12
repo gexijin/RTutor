@@ -25,11 +25,18 @@ app_ui <- function(request) {
     tags$footer(
       style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;
         padding: 10px;text-align: center;z-index: 99;",
-      span("© 2024 Orditus LLC | "),
+      span("© 2024 Orditus LLC"),
+      HTML("&nbsp;"),  # Adds space
       actionLink(inputId = "ppolicy", "Privacy Policy"),
-      span(" | "),
+      HTML("&nbsp;"),
       actionLink(inputId = "tofu", "Terms of Use"),
-      span(" | "),
+      HTML("&nbsp;"),
+      a(
+        "Contact",
+        href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com",
+        target = "_blank"
+      ),
+      HTML("&nbsp;"),
       a("Orditus.com", href = "https://orditus.com/", target = "_blank")
     ), # footer
 

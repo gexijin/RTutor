@@ -11,7 +11,7 @@ mod_01_styles_ui <- function(id) {
     body {padding-bottom: 80px;}
 
     /* navbar */
-        /* .navbar is a built in bootstrap class */
+    /* .navbar is a built in bootstrap class */
     .navbar {
       background-color: #C1E2BE;
       border-color: #90BD8C;
@@ -229,6 +229,18 @@ mod_01_styles_ui <- function(id) {
       {background-color: #f3faf3;}
     [class*=site-updates-wrapper] table tbody tr:nth-child(even)
       {background-color: #ffffff;}
+
+
+    /* Welcome Banner */
+    #rtutor-banner {
+      background: linear-gradient(to right, #afd0ad, #deecdd, #afd0ad);
+      text-align: center;padding: 20px;border-radius: 10px;
+      margin-right: 30px;margin-bottom: 20px;border: 1px solid #90BD8C;
+    }
+    #rtutor-banner img {height: 50px;margin-bottom: 15px;vertical-align:middle;}
+    #rtutor-banner h2 {font-size: 24px;margin: 0;padding-bottom: 10px;}
+    #rtutor-banner p {font-size: 18px;margin: 0;}
+
 
   ")))
 }

@@ -23,16 +23,22 @@ mod_04_main_panel_ui <- function(id) {
       condition = "input['send_request-submit_button'] == 0",
       fluidRow(
         column(
-          width = 5,
+          width = 2,
           actionButton("first_user", strong("Quick Start"), class = "first-user"),
           align = "left"
         ),
         column(
-          width = 7,
-          img(src = "www/logo.png", width = "155", height = "77"),
+          width = 10,
+          div(
+            id = "rtutor-banner",
+            img(src = "www/logo_no_bckgrd.png", alt = "RTutor Logo"),
+            h2("Welcome to RTutor!"),
+            p("No code? No problem. Analyze data with simple, natural language."),
+            p("Upload your data, ask questions, and get results in seconds!")
+          ),
           align = "left"
         )
-      ),
+      )
     ),
 
     # After submit is clicked
@@ -133,11 +139,9 @@ mod_04_main_panel_ui <- function(id) {
     conditionalPanel(
       condition = "1",
       # First dataset
-      hr(class = "custom-hr-thick"),
       uiOutput(ns("data_size")),
       DT::dataTableOutput(ns("data_table_DT")),
       # Second dataset
-      hr(class = "custom-hr-thick"),
       uiOutput(ns("data_size_2")),
       DT::dataTableOutput(ns("data_table_DT_2")),
       # Data tables styling
@@ -430,6 +434,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$data_size <- renderUI({
       req(!is.null(current_data()))
       tagList(
+        hr(class = "custom-hr-thick"),
         h4("Selected Dataset"),
         paste(
           dim(current_data())[1], "rows X",
@@ -456,6 +461,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$data_size_2 <- renderUI({
       req(!is.null(current_data_2()))
       tagList(
+        hr(class = "custom-hr-thick"),
         h4("2nd Dataset (Must specify, e.g. 'create a piechart of X in df2.')"),
         paste(
           dim(current_data_2())[1], "rows X",
