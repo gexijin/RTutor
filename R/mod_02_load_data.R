@@ -153,6 +153,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
         df <- rna_seq_data()
       } else {
         # otherwise built-in data is unavailable when running from R package.
+        library(tidyverse)
         df <- get(input$user_selected_dataset)
       }
 
