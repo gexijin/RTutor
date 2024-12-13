@@ -21,25 +21,30 @@ mod_04_main_panel_ui <- function(id) {
     # Initial UI display
     conditionalPanel(
       condition = "input['send_request-submit_button'] == 0",
-      fluidRow(
-        column(
-          width = 2,
-          actionButton("first_user", strong("Quick Start"), class = "first-user"),
-          align = "left"
-        ),
-        column(
-          width = 10,
-          div(
-            id = "rtutor-banner",
-            img(src = "www/logo_no_bckgrd.png", alt = "RTutor Logo"),
-            h2("Welcome to RTutor!"),
-            p("No code? No problem. Analyze data with simple, natural language."),
-            p("Upload your data, ask questions, and get results in seconds!")
+        div(
+          id = "rtutor-banner",
+          fluidRow(
+            column(
+            width = 1,
+              actionButton("first_user", strong("Quick Start"), class = "first-user"),
+              align = "left"
+            ),
+            column(
+              width = 10,
+              img(src = "www/logo_no_bckgrd.png", alt = "RTutor Logo"),
+              align = "center"
+            )
           ),
-          align = "left"
+          fluidRow(
+            column(width = 1, h2("")),
+            column(width = 10,
+              h2("Welcome to RTutor!"),
+              p("No code? No problem. Analyze data with simple, natural language."),
+              p("Upload your data, ask questions, and get results in seconds!"),
+            )
+          )
         )
-      )
-    ),
+      ),
 
     # After submit is clicked
     conditionalPanel(
