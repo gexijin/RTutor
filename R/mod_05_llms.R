@@ -232,6 +232,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
       # Send request depending on selection if OpenAI then openAI_agent, if Anthropic then anthropic_agent
       response <- openAI_agent(prompt_total)
+      # browser()
       response$choices[1, 1] <- response$choices$message.content #Get rid of this bad code. Overwriting is not good.
 
       return(response)
