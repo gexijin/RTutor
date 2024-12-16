@@ -26,7 +26,8 @@ Imports:
     janitor,
     RSQLite,
     canvasXpress,
-    moments
+    moments,
+    hexbin
 Depends:
     tidyverse
 Encoding: UTF-8
