@@ -156,7 +156,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       if (length(ch$code_history) > 0) {
         df <- ch$code_history[[1]]$env$df
       }
-      #df <- na.omit(df) # remove missing values
+
       cat_variables <- colnames(df)[!sapply(df, is.numeric)]
       # ggpairs does not tolerate variables with too many levels
       for (v in cat_variables) {
@@ -419,8 +419,9 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     output$dynamic_categorical_plot <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
-        DataExplorer::plot_bar(current_data())
+      DataExplorer::plot_bar(current_data())
     })
+
     output$distribution_category <- renderUI({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
@@ -428,19 +429,27 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       withProgress(message = "Barplots of categorical variables ...", {
         incProgress(0.3)
 
-        # Calculate the number of categorical variables
+        # Identify categorical variables
         categorical_vars <- names(Filter(is.factor, current_data()))
         num_vars <- length(categorical_vars)
-        
-        # Set a base height, e.g., 400px, and add 100px per variable
-        rows_needed <- ceiling(num_vars / 3)
-        plot_height <- paste0(rows_needed * 400, "px")
-        
-        plotOutput(
-          ns("dynamic_categorical_plot"), 
-          width = "100%", 
-          height = plot_height
-        )
+
+        if (num_vars > 0) {
+          # Set a base height, e.g., 400px, and add 100px per variable
+          rows_needed <- ceiling(num_vars / 3)
+          plot_height <- paste0(rows_needed * 400, "px")
+
+          plotOutput(
+            ns("dynamic_categorical_plot"),
+            width = "100%",
+            height = plot_height
+          )
+        } else {
+          # Show a message if no categorical variables exist
+          div(
+            style = "text-align: center;padding: 20px;font-weight: bold;font-size: 20px;",
+            "The data frame contains no categorical variables."
+          )
+        }
       })
     })
 
@@ -461,14 +470,14 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
         # Calculate the number of categorical variables
         numeric_vars <- names(Filter(is.numeric, current_data()))
         num_vars <- length(numeric_vars)
-        
+
         # Set a base height, e.g., 400px, and add 100px per variable
         rows_needed <- ceiling(num_vars / 4)
         plot_height <- paste0(rows_needed * 400, "px")
-        
+
         plotOutput(
-          ns("dynamic_numeric_plot"), 
-          width = "100%", 
+          ns("dynamic_numeric_plot"),
+          width = "100%",
           height = plot_height
         )
       })
@@ -489,14 +498,14 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
         # Calculate the number of categorical variables
         numeric_vars <- names(Filter(is.numeric, current_data()))
         num_vars <- length(numeric_vars)
-        
+
         # Set a base height, e.g., 400px, and add 100px per variable
         rows_needed <- ceiling(num_vars / 3)
         plot_height <- paste0(rows_needed * 400, "px")
-        
+
         plotOutput(
-          ns("dynamic_qq_numeric"), 
-          width = "100%", 
+          ns("dynamic_qq_numeric"),
+          width = "100%",
           height = plot_height
         )
       })
