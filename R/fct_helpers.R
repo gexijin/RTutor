@@ -66,19 +66,15 @@ available_datasets <- Filter(function(x)
   available_datasets
 )
 
-# Function to move specified items to the front in order
-move_front <- function(v, elements) {
-  found <- intersect(elements, v)
-  v <- c(found, setdiff(v, elements))
-  return(v)
-}
-
 # Add diamonds and mpg df to list
 available_datasets <- c(available_datasets, "diamonds", "mpg", rna_seq)
 
-# Move important datasets to the front in order & add custom entries
-available_datasets <- move_front(available_datasets, c("mpg", "iris",
- "diamonds", rna_seq, "airquality", "CO2", "ToothGrowth", "pressure", "ChickWeight")
+# Order the datasets
+order <- c("mpg", "iris", "diamonds", rna_seq, "airquality", "CO2",
+           "ToothGrowth", "pressure", "ChickWeight")
+available_datasets <- c(
+  intersect(order, available_datasets),
+  setdiff(available_datasets, order)
 )
 
 # Append dummy values for user-uploaded data & no data
