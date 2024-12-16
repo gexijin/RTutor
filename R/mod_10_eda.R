@@ -419,7 +419,9 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     output$dynamic_categorical_plot <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
-      DataExplorer::plot_bar(current_data())
+
+      df <- as.data.frame(current_data())
+      DataExplorer::plot_bar(df)
     })
 
     output$distribution_category <- renderUI({
@@ -430,7 +432,8 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
         incProgress(0.3)
 
         # Identify categorical variables
-        categorical_vars <- names(Filter(is.factor, current_data()))
+        df <- as.data.frame(current_data())
+        categorical_vars <- names(Filter(is.factor, df))
         num_vars <- length(categorical_vars)
 
         if (num_vars > 0) {
@@ -458,8 +461,11 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     output$dynamic_numeric_plot <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
-        DataExplorer::plot_histogram(current_data())
+
+      df <- as.data.frame(current_data())
+      DataExplorer::plot_histogram(df)
     })
+
     output$distribution_numeric <- renderUI({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
@@ -467,47 +473,62 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       withProgress(message = "Creating histograms ...", {
         incProgress(0.3)
 
-        # Calculate the number of categorical variables
-        numeric_vars <- names(Filter(is.numeric, current_data()))
+        # Identify numeric variables
+        df <- as.data.frame(current_data())
+        numeric_vars <- names(Filter(is.numeric, df))
         num_vars <- length(numeric_vars)
 
-        # Set a base height, e.g., 400px, and add 100px per variable
-        rows_needed <- ceiling(num_vars / 4)
-        plot_height <- paste0(rows_needed * 400, "px")
+        if (num_vars > 0) {
+          # Set a base height and adjust based on the number of variables
+          rows_needed <- ceiling(num_vars / 4)
+          plot_height <- paste0(rows_needed * 400, "px")
 
-        plotOutput(
-          ns("dynamic_numeric_plot"),
-          width = "100%",
-          height = plot_height
-        )
+          plotOutput(
+            ns("dynamic_numeric_plot"),
+            width = "100%",
+            height = plot_height
+          )
+        } else {
+          # Show a message if no numeric variables exist
+          div(
+            style = "text-align: center;padding: 20px;font-weight: bold;font-size: 20px;",
+            "The data frame contains no numeric variables for histograms or Q_Q plots."
+          )
+        }
       })
     })
 
     output$dynamic_qq_numeric <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
-        DataExplorer::plot_qq(current_data())
+
+      df <- as.data.frame(current_data())
+      DataExplorer::plot_qq(df)
     })
-    output$qq_numeric  <- renderUI({
+
+    output$qq_numeric <- renderUI({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
 
       withProgress(message = "Generating QQ plots ...", {
         incProgress(0.3)
 
-        # Calculate the number of categorical variables
-        numeric_vars <- names(Filter(is.numeric, current_data()))
+        # Identify numeric variables
+        df <- as.data.frame(current_data())
+        numeric_vars <- names(Filter(is.numeric, df))
         num_vars <- length(numeric_vars)
 
-        # Set a base height, e.g., 400px, and add 100px per variable
-        rows_needed <- ceiling(num_vars / 3)
-        plot_height <- paste0(rows_needed * 400, "px")
+        if (num_vars > 0) {
+          # Set a base height and adjust based on the number of variables
+          rows_needed <- ceiling(num_vars / 3)
+          plot_height <- paste0(rows_needed * 400, "px")
 
-        plotOutput(
-          ns("dynamic_qq_numeric"),
-          width = "100%",
-          height = plot_height
-        )
+          plotOutput(
+            ns("dynamic_qq_numeric"),
+            width = "100%",
+            height = plot_height
+          )
+        }
       })
     })
 
@@ -573,26 +594,39 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
     output$corr_map <- renderPlot({
       req(!is.null(current_data()))
       req(selected_dataset_name() != no_data)
+
       withProgress(message = "Generating correlation map ...", {
         incProgress(0.3)
-        df <- current_data()
-        df <- df[, sapply(df, is.numeric)]
-        df <- na.omit(df) # remove missing values
-        M <- cor(df)
-        testRes <- corrplot::cor.mtest(df, conf.level = 0.95)
-        corrplot::corrplot(
-          M,
-          p.mat = testRes$p,
-          method = "circle",
-          type = "lower",
-          insig = "blank",
-          addCoef.col = "black",
-          number.cex = 0.8,
-          order = "AOE",
-          diag = FALSE
-        )
+
+        df <- as.data.frame(current_data())
+
+        # Extract numeric columns
+        numeric_vars <- df[, sapply(df, is.numeric), drop = FALSE]
+
+        if (ncol(numeric_vars) > 1) {  # Require at least 2 numeric variables for a correlation map
+          numeric_vars <- na.omit(numeric_vars)  # Remove rows with missing values
+          M <- cor(numeric_vars)
+          testRes <- corrplot::cor.mtest(numeric_vars, conf.level = 0.95)
+          corrplot::corrplot(
+            M,
+            p.mat = testRes$p,
+            method = "circle",
+            type = "lower",
+            insig = "blank",
+            addCoef.col = "black",
+            number.cex = 0.8,
+            order = "AOE",
+            diag = FALSE
+          )
+        } else {
+          # If insufficient numeric variables, display a blank plot with a message
+          plot.new()
+          text(0.5, 0.5, "The data frame must contain at least two numeric variables to generate a correlation map.",
+               cex = 1.2, col = "red", font = 2)
+        }
       })
     })
+
 
 
     ## GGPairs Panel ##
