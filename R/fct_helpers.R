@@ -687,7 +687,6 @@ python_html <- function(python_code, select_data, current_data) {
 # # note that error column, 1 means error, 0 means no error, success.
 #' Saves user queries, code, and error status
 #'
-#'
 #' @param date Date in the format of "2023-01-04"
 #' @param time Time "13:05:12"
 #' @param request, user request
