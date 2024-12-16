@@ -35,6 +35,7 @@ max_eda_levels <- 12 # max number of levels in categorical varaible for EDA, gga
 max_eda_var <- 20 # maximum num of variables in EDA
 sqlitePath <- "../../data/usage_data.db" # folder to store the user queries, generated R code, and running results
 sqltable <- "usage"
+sqltable2 <- "feedback"
 
 # additional prompts to send to ChatGPT
 system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
@@ -778,7 +779,7 @@ save_comments <- function(date, time, comments, helpfulness, experience) {
     # Construct the update query by looping over the data fields
     txt <- sprintf(
       "INSERT INTO %s (%s) VALUES ('%s')",
-      "feedback",
+      sqltable2,
       "date, time, comments, helpfulness, experience",
       paste(
         c(
