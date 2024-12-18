@@ -1,8 +1,11 @@
 .Rproj.user
+.Ruserdata
 inst/doc
 /doc/
 /Meta/
 .Rhistory
+.RData
+.RDataTmp
 api_key.txt
 RTutor UK 3_6_2023/
 RTutor_Tracking_data_Jan_2023.db
