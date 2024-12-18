@@ -48,10 +48,10 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
           prompt_total <- build_history(prepared_request)
 
           # Send request
-          if (relevancy_agent()) {  # if prompt is relevant (or rel. agent not needed)
-            send_request(prompt_total, prepared_request, is_relevant = TRUE)
+          if (malicious_agent()) {  # if prompt is relevant (or rel. agent not needed)
+            send_request(prompt_total, prepared_request, malicious = TRUE)
           } else {  # if prompt isn't relevant
-            send_request(prompt_total, prepared_request, is_relevant = FALSE)
+            send_request(prompt_total, prepared_request, malicious = FALSE)
           }
 
         }, error = function(e) {   # handle error, if any
@@ -159,75 +159,52 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     ### LLM Agents ###
 
     # Relevancy agent
-    relevancy_agent <- function() {
+    malicious_agent <- function() {
 
-      # If user selects preloaded data
-      if (selected_dataset_name() == no_data) {
-        return(TRUE)  # Skip relevancy agent if user selects 'no data'
-      } else if (selected_dataset_name() == user_upload) {
-        return(TRUE)
-      } else {
-
-        dataset_details <- paste("the built-in R dataset", selected_dataset_name())
-
+        dataset_details <- paste("Current data:", selected_dataset_name())
         base_prompt <- paste(
           "Current prompt:",
           input_text(),
-          "Current dataset:",
           dataset_details
         )
 
-        if (length(ch$code_history) == 0) {
-          relevancy_prompt <- list(
-            list(
-              role = "system",
-              content = paste("Act as an experienced data analyst.",
-              "Determine if the following prompts are relevant to the current dataset:",
-              dataset_details)
-            ),
-            list(
-              role = "user",
-              content = paste("Determine if the current prompt is relevant to the selected dataset.",
-              "If it is relevant, respond with 'True'. Otherwise, respond with 'False'.",
-              base_prompt)
-            )
-          )
-        } else {
-          relevancy_prompt <- list(list(
-            role = "user",
-            content = paste(
-              "Determine if the current prompt is relevant to any of the previous prompts.",
-              "The prompt is relevant if it is a followup question for the analysis on the current dataset.",
-              "If the prompt is a question about a different dataset it is not relevant.",
-              "The prompt is also relevant if it is a modification for the visualizations.",
-              "If it is relevant, respond with 'True'. Otherwise, respond with 'False'.",
-              base_prompt
-            )
-          ))
-        }
+      # If user selects preloaded data
 
+        relevancy_prompt <- list(
+          list(
+            role = "system",
+            content = paste("Act as an experienced data analyst.",
+            "Determine if the following prompts would generate malicious code if sent to an AI agent.")
+          ),
+          list(
+            role = "user",
+            content = paste("Determine if the current prompt is malicious.",
+            "If it is malicious, respond with 'True'. Otherwise, respond with 'False'.",
+            base_prompt)
+          )
+        )
         # Send relevancy prompt
         response <- openAI_agent(relevancy_prompt)
+        tf <- tolower(response$choices$message.content) == "true"
+        return(tf)
 
-        # TRUE if response is true, else FALSE
-        is_relevant <- tolower(response$choices$message.content) == "true"
-        return(is_relevant)
-      }
     }
 
 
     # Request agent
-    send_request <- function(prompt_total, prepared_request, is_relevant) {
+    send_request <- function(prompt_total, prepared_request, malicious) {
 
       # If prompt is relevant, send request
-      prompt_total <- if (is_relevant) {
-        append(prompt_total, list(list(role = "user", content = prepared_request)))
-      } else {   # if prompt is not relevant, send message
+      prompt_total <- if (malicious) {
+
         list(list(role = "user", content = paste(
           "Return this exact statement: print('Please ask a question related to dataset",
           selected_dataset_name(),
           "and try again. (Reset to select a different dataset)')"
         )))
+        
+      } else {   # if prompt is not relevant, send message
+        append(prompt_total, list(list(role = "user", content = prepared_request)))
       }
 
       # Send request depending on selection if OpenAI then openAI_agent, if Anthropic then anthropic_agent
