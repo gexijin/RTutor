@@ -856,7 +856,7 @@ site_updates_df <- data.frame(
     "V0.3", "V0.2", "V0.1"
   ),
   Date = c(
-    "12/10/2024", "10/8/2024",
+    "12/18/2024", "10/8/2024",
     "8/30/2024","8/20/2024", "7/30/2024",
     "11/1/2023","11/1/2023","10/28/2023",
            "10/23/2023","9/26/2023","6/11/2023",
@@ -868,7 +868,7 @@ site_updates_df <- data.frame(
            "12/27/2022","12/24/2022","12/23/2022",
            "12/20/2022","12/16/2022","12/11/2022"),
   Description = c(
-    "Backend Changes",
+    "Modularize Backend",
     "Add option to delete code chunks",
     "Bug Fixes: API Key Validation, EDA Report Download",
     "Redesign UI; Create Privacy Policy, Terms & Conditions; Fix Data Types Bug; Add Data Revert Option",
