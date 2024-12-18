@@ -66,29 +66,42 @@ mod_17_policies_serv <- function(id) {
     })
 
 
-    # Pop-up to warn users under age 13 & those associated with a
-    # for-profit organization to NOT use RTutor without a license
+    # Pop-up for informational meeting and Q&A session
     observe({
       commercial_use_modal <- shiny::modalDialog(
-        title = "RTutor Usage Policy",
+        title = div("Join Our Informational Meeting and Q&A Session", 
+                style = "font-weight: bold;color: red;font-size: 24px;"),
 
-        tags$br(),
-        tags$h4("RTutor is available to the public strictly for education and
-          non-profit organizations. If you are affiliated with a company or intend
-          to use RTutor for commercial activities, you must obtain a license from us.
-          Please contact us at ",
-          a("ge@orditus.com.", href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com")
+        tags$h4(
+          style = "font-size: 17px;font-weight: bold;",
+          "We will be hosting our first live Q&A session!"
         ),
-
-        tags$br(),
-        tags$h4("We've updated our ",
-          actionLink("ppolicy", "Privacy Policy"),
-          "and ",
-          actionLink("tofu", "Terms of Use."),
-          " By continuing to RTutor.ai, you acknowledge and agree to these changes."
+        tags$h4(
+          style = "font-size: 17px;",
+          "Date: Thursday, January 9th", tags$br(),
+          "Time: 2:00 PM CST (UTC-6)", tags$br(),
+          "Location: Online (request meeting link via email: ",
+          a("jenna@orditus.com", href = "mailto:jenna@orditus.com?Subject=RTutor Informational Meeting 1/9"),
+          ")"
         ),
+        tags$br(),
+        tags$h4(
+          style = "font-size: 16px;",
+          "This is a great opportunity to:"
+        ),
+        tags$ul(
+          style = "font-size: 16px;",
+          tags$li("Learn more about our platform and its features."),
+          tags$li("Get your questions answered in real-time."),
+          tags$li("Provide feedback to help shape future developments.")
+        ),
+        tags$h4(
+          style = "font-size: 17px;font-weight: bold;",
+          "All are welcome, hope to see you there!"
+        ),
+        tags$br(),
 
-        footer = tagList(modalButton("Agree")),
+        footer = tagList(modalButton("Close")),
 
         easyClose = TRUE,
         size = "l"
@@ -96,6 +109,39 @@ mod_17_policies_serv <- function(id) {
 
       shiny::showModal(commercial_use_modal)
     })
+
+
+    # old popup modal
+    # # Pop-up to warn users under age 13 & those associated with a
+    # # for-profit organization to NOT use RTutor without a license
+    # observe({
+    #   commercial_use_modal <- shiny::modalDialog(
+    #     title = "RTutor Usage Policy",
+
+    #     tags$br(),
+    #     tags$h4("RTutor is available to the public strictly for education and
+    #       non-profit organizations. If you are affiliated with a company or intend
+    #       to use RTutor for commercial activities, you must obtain a license from us.
+    #       Please contact us at ",
+    #       a("ge@orditus.com.", href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com")
+    #     ),
+
+    #     tags$br(),
+    #     tags$h4("We've updated our ",
+    #       actionLink("ppolicy", "Privacy Policy"),
+    #       "and ",
+    #       actionLink("tofu", "Terms of Use."),
+    #       " By continuing to RTutor.ai, you acknowledge and agree to these changes."
+    #     ),
+
+    #     footer = tagList(modalButton("Agree")),
+
+    #     easyClose = TRUE,
+    #     size = "l"
+    #   )
+
+    #   shiny::showModal(commercial_use_modal)
+    # })
 
   })
 }
