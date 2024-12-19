@@ -27,7 +27,8 @@ Imports:
     RSQLite,
     canvasXpress,
     moments,
-    hexbin
+    hexbin,
+    shinyAce
 Depends:
     tidyverse
 Encoding: UTF-8
