@@ -102,7 +102,7 @@ mod_04_main_panel_ui <- function(id) {
       conditionalPanel(
         condition = "input.show_code == true",
         ns = ns,
-        verbatimTextOutput(ns("code_results"))
+        uiOutput(ns("code_results"))
       ),
 
       conditionalPanel(
@@ -193,11 +193,25 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     ###  Print Results or Error  ###
 
     # Print code chunk
-    output$code_results <- renderPrint({
+    output$code_results <- renderUI({
       req(llm_response()$cmd)
-      res <- logs$raw
-      res <- gsub("```", "", res)
-      cat(res)
+      results <- gsub("```", "", logs$raw)
+
+      # Calculate height based on number of lines
+      num_lines <- lengths(regmatches(results, gregexpr("\n", results))) + 1
+      height_px <- max(120, min(600, num_lines * 18))
+      height <- sprintf("%dpx", height_px)
+
+      # use shinyAce to print with syntax coloring
+      shinyAce::aceEditor(
+        ns("code_display"),
+        value = results,  # code results
+        mode = "r",
+        theme = "xcode",  # change syntax color theme here
+        height = height,
+        fontSize = 14,
+        readOnly = TRUE  # feature idea: build out RT so user can edit code here
+      )
     })
 
     # Print results
