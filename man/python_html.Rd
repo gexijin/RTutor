@@ -9,7 +9,7 @@ python_html(python_code, select_data, current_data)
 \arguments{
 \item{python_code, }{a chunk of code}
 
-\item{select_data}{input$select data}
+\item{select_data}{selected_dataset_name}
 
 \item{current_data}{current_data()}
 
