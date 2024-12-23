@@ -16,9 +16,9 @@ mod_02_load_data_ui <- function(id) {
           condition = paste0("output['", ns("show_option1"), "'] === 'show'"),
           selectInput(
             inputId = ns("user_selected_dataset"),
-            label = HTML("<span style='font-size: 18px; font-weight: bold;'>1. Select Dataset</span>"),
+            label = HTML("<span style='font-size: 18px; font-weight: bold;'>1. Data</span>"),
             choices = available_datasets,
-            selected = "Select a Dataset:",
+            selected = data_placeholder,
             multiple = FALSE
           )
         ),
@@ -54,7 +54,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
     output$data_upload_ui <- renderUI({
 
       # LHS: Hide after first run; RHS: For when submitted accidentally
-      req(submit_button() == 0 || input$user_selected_dataset == "Select a Dataset:")
+      req(submit_button() == 0 || input$user_selected_dataset == data_placeholder)
       req(is.null(input$user_file)) # Hide after user inputs data
 
       fileInput(
@@ -147,7 +147,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
 
       if (input$user_selected_dataset == user_upload) {
         eval(parse(text = paste0("df <- user_data()$df")))
-      } else if (input$user_selected_dataset %in% c(no_data, "Select a Dataset:")) {
+      } else if (input$user_selected_dataset %in% c(no_data, data_placeholder)) {
         df <- NULL
       } else if (input$user_selected_dataset == rna_seq) {
         df <- rna_seq_data()
@@ -341,12 +341,12 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
         if (is.null(input$user_file)) {
           txt <- "No file uploaded! Please Reset and upload your data first."
         } else {
-          txt <- "Dataset: User Upload"
+          txt <- "Dataset: Upload"
         }
-      } else if (input$user_selected_dataset == "Select a Dataset:") {
+      } else if (input$user_selected_dataset == data_placeholder) {
         txt <- NULL
       } else {
-        txt <- paste0("Selected Dataset:\n", input$user_selected_dataset)
+        txt <- paste0("Data:\n", input$user_selected_dataset)
       }
 
       # Create a line break if dataset name is too long
@@ -363,7 +363,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
     # Condition based on input from mod_03 for UI conditional panel
     output$show_option1 <- renderText({
       # Check both conditions: submit_button() from mod_03 and user_selected_dataset from this module
-      if (submit_button() == 0 || input$user_selected_dataset == "Select a Dataset:") {
+      if (submit_button() == 0 || input$user_selected_dataset == data_placeholder) {
         return("show")  # Show dataset dropdown
       } else {
         return("hide")  # Show selected dataset

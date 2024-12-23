@@ -78,18 +78,24 @@ mod_12_about_ui <- function(id) {
       style = "font-size: 18px;padding-left: 20px;padding-right: 20px;"
     ),
     br(), br(),
-    p(" Written by Dr. Steven Ge",
+    p(" Originally writen by Steven Ge",
       a(
         "(Twitter, ",
         href = "https://twitter.com/StevenXGe",
         target = "_blank"
       ),
       a(
-        "LinkedIn),",
+        "LinkedIn).",
         href = "https://www.linkedin.com/in/steven-ge-ab016947/",
         target = "_blank"
       ),
-      " as part of Orditus LLC. For feedback, please email",
+      "Now developed and maintained by",
+      a("Orditus LLC.",
+        href = "https://orditus.com/",
+        target = "_blank"
+      ),
+      
+      "For feedback, please email",
       a(
         "ge@orditus.com.",
         href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com"
@@ -98,8 +104,8 @@ mod_12_about_ui <- function(id) {
     ),
     p(
       "Explore our other AI tools at ",
-      a("Orditus.com!",
-        href = "https://orditus.com/",
+      a("Chatlize.ai",
+        href = "https://chatlize.ai/",
         target = "_blank"
       ),
       style = "font-size: 23px;padding-left: 20px;padding-right: 20px;"

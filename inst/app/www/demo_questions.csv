@@ -1,5 +1,5 @@
 ﻿data,R,Python,name,requests,memo
-Select a Dataset:,1,1,Example Requests:,Example requests,
+Select a Dataset:,1,1,Examples:,Examples,
 Select a Dataset:,0,0,Lookup R package,List popular R packages for time-series forecast.,
 Select a Dataset:,0,0,Explain concepts,What is Moran's I in sptatial statistics?,
 Select a Dataset:,0,0,Find statistic method,What statistics test should I use to examine the correlation of two categorical variables?,

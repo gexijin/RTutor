@@ -13,12 +13,12 @@
 
 release <- "2.00" # RTutor
 no_data <- "no_data" #'No Data' # no data is uploaded or selected
-user_upload <- "User Upload" # data is uploaded by user, used to be called uploaded_data
+user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_data
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
-language_models <- c("gpt-4o-2024-08-06",  "gpt-4o-mini", "gpt-3.5-turbo")
-names(language_models) <- c("GPT-4o", "GPT-4o mini", "GPT-3.5 Turbo")
+language_models <- c("chatgpt-4o-latest",  "gpt-4o-mini")
+names(language_models) <- c("GPT-4o", "GPT-4o mini")
 default_model <- "GPT-4o"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
@@ -76,25 +76,25 @@ available_datasets <- c(
   intersect(order, available_datasets),
   setdiff(available_datasets, order)
 )
-
+data_placeholder <- "Demo:"
 # Append dummy values for user-uploaded data & no data
-available_datasets <- c("Select a Dataset:", no_data, available_datasets,
+available_datasets <- c(data_placeholder, no_data, available_datasets,
   user_upload
 )
 
 # Define the datasets to rename & their desired display names
 rename_map <- c(
   "no_data" = "No Data",
-  "iris" = "Iris (examples)",
-  "mpg" = "MPG (examples)",
-  "diamonds" = "Diamonds (examples)",
-  "airquality" = "Air Quality (examples)",
-  "CO2" = "CO2 (examples)",
-  "ToothGrowth" = "Tooth Growth (examples)",
-  "pressure" = "Pressure (examples)",
-  "ChickWeight" = "Chick Weights (examples)",
-  "rna_seq" = "RNA Seq (examples)",
-  "User Upload" = "User Upload"
+  "iris" = "Iris",
+  "mpg" = "MPG",
+  "diamonds" = "Diamonds",
+  "airquality" = "Air Quality",
+  "CO2" = "CO2",
+  "ToothGrowth" = "Tooth Growth",
+  "pressure" = "Pressure",
+  "ChickWeight" = "Chick Weights",
+  "rna_seq" = "RNA Seq",
+  "Upload" = "Upload"
 )
 
 # Update the names of `available_datasets` using the mapping

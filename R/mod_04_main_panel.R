@@ -38,8 +38,7 @@ mod_04_main_panel_ui <- function(id) {
           fluidRow(
             column(width = 1, h2("")),
             column(width = 10,
-              h2("Welcome to RTutor!"),
-              p("No code? No problem. Analyze data with simple, natural language."),
+              p("No code? No problem. Analyze data in your own languages."),
               p("Upload your data, ask questions, and get results in seconds!"),
             )
           )
@@ -56,17 +55,25 @@ mod_04_main_panel_ui <- function(id) {
           div(
             style = "display: flex; align-items: center; gap: 35px;
               margin-top: 10px; margin-bottom: 7px;",
-            selectInput(
-              inputId = ns("selected_chunk"),
-              label = div("Request Results (Chunks):", style = "font-size: 18px;"),
-              selected = NULL,
-              choices = NULL
+            div(
+              style = "display: flex; align-items: center; position: relative;",
+              tags$style(HTML("
+                .shiny-input-container {
+                  margin-bottom: 0 !important; /* Remove label spacing */
+                }
+              ")),
+              selectInput(
+                inputId = ns("selected_chunk"),
+                label = NULL,
+                selected = NULL,
+                choices = NULL
+              )
             ),
             actionButton(
               ns("delete_chunk"),
               "Delete Chunk",
               style = "font-size: 14px; color: #000; background-color: #F6FFF5;
-                border-color: #90BD8C; margin-top: 15px;"
+                border-color: #90BD8C; padding: 6px 12px;"
             )
           ),
 

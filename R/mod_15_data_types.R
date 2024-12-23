@@ -10,24 +10,22 @@ mod_15_data_types_ui <- function(id) {
   tagList(
     fluidRow(
       column(
-        width = 12,
+        width = 6,
         tags$label(
-          "2. Modify Data Fields",
+          "2. Data types",
           style = "font-size: 18px;font-weight: bold;color: #000;
             display: block;margin-bottom: 5px;"
         )
-      )
-    ),
-    fluidRow(
+      ),
       column(
-        width = 12,
+        width = 6,
         div(
           tippy::tippy_this(
             ns("data_edit_modal"),
             "Numbers, Categories, etc.",
             theme = "light-border"
           ),
-          actionButton(ns("data_edit_modal"), "Data Types"),
+          actionButton(ns("data_edit_modal"), "Edit"),
           align = "left"
         ),
         tags$head(tags$style(
