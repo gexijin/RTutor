@@ -2,7 +2,7 @@
 % Please edit documentation in R/fct_helpers.R
 \name{missing_values_plot}
 \alias{missing_values_plot}
-\title{Estimate API cost}
+\title{Plot missing values}
 \usage{
 missing_values_plot(df)
 }
@@ -13,5 +13,5 @@ missing_values_plot(df)
 a plot
 }
 \description{
-Estimate API cost
+Plot missing values
 }

@@ -14,7 +14,7 @@ clean_cmd(cmd, selected_data, on_server = FALSE)
 \item{on_server, }{whether or not running on the server.}
 }
 \value{
-Returns a cleaned up version, so that it could be executed as R command.
+Returns a cleaned up version, so it can be executed as an R command.
 }
 \description{
 The response from GTP3 sometimes contains strings that are not R commands.
