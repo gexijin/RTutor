@@ -166,26 +166,26 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
       }
 
       # if the first column looks like ID
-      if (!is.null(df)) {
-        if (
-          length(unique(df[, 1])) == nrow(df) &&  # all unique
-            is.character(df[, 1])  # first column is character
-        ) {
-          row.names(df) <- df[, 1]
-          col_name <- colnames(df)[1]
-          df <- df[, -1]
+      # if (!is.null(df)) {
+      #   if (
+      #     length(unique(df[, 1])) == nrow(df) &&  # all unique
+      #       is.character(df[, 1])  # first column is character
+      #   ) {
+      #     row.names(df) <- df[, 1]
+      #     col_name <- colnames(df)[1]
+      #     df <- df[, -1]
 
-          shinyalert::shinyalert(
-            title = paste(
-              "Column", col_name,
-              "has been recognized as an unique identifier and has been removed."
-            ),
-            text = NULL,
-            type = "warning",
-            showCancelButton = FALSE
-          )
-        }
-      }
+      #     shinyalert::shinyalert(
+      #       title = paste(
+      #         "Column", col_name,
+      #         "has been recognized as an unique identifier and has been removed."
+      #       ),
+      #       text = NULL,
+      #       type = "warning",
+      #       showCancelButton = FALSE
+      #     )
+      #   }
+      # }
 
       # sometimes no row is left after processing.
       if (is.null(df) || nrow(df) == 0) { # no_data

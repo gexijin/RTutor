@@ -12,7 +12,7 @@ mod_15_data_types_ui <- function(id) {
       column(
         width = 6,
         tags$label(
-          "2. Data types",
+          "2. Data Types",
           style = "font-size: 18px;font-weight: bold;color: #000;
             display: block;margin-bottom: 5px;"
         )
@@ -31,11 +31,11 @@ mod_15_data_types_ui <- function(id) {
         tags$head(tags$style(
           sprintf(
             "#%s {
-              font-size: 16px;
+              font-size: 14px;
               color: #000;
               background-color: #F6FFF5;
               border-color: #90BD8C;
-              margin-top: 5px;
+              min-width: 70px;    /* Increased minimum width */
               }",
             ns("data_edit_modal")
           )
