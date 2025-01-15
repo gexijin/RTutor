@@ -14,7 +14,7 @@ We highly recommend that users watch this 10-min [YouTube video.](https://youtu.
   2. GPT-4o becomes the default, providing more accurate code.
   3. Comprehensive EDA reports.
 
-### See examples, installation instructions, and more at our [Github Wiki.](https://github.com/gexijin/RTutor/wiki)
+### Find installation instructions & examples at our [Github Wiki.](https://github.com/gexijin/RTutor/wiki)
 ***
 
 ## License
