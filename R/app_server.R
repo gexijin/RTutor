@@ -191,6 +191,7 @@ app_server <- function(input, output, session) {
   # Module 05 - Outputs
   llm_prompt <- mod_05$llm_prompt
   llm_response <- mod_05$llm_response
+  agent_name <- mod_05$agent_name
 
 
 
@@ -253,6 +254,7 @@ app_server <- function(input, output, session) {
     submit_button = submit_button,
     ch = ch,
     selected_model = selected_model,
+    agent_name = agent_name,
     llm_response = llm_response,
     input_text = input_text,
     use_python = use_python,

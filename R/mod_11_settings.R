@@ -66,47 +66,65 @@ mod_11_settings_ui <- function(id) {
             fluidRow(
               column(
                 width = 12,
-                h3(strong("Use your own API Key"),
-                   style = "padding-left: 85px; padding-right: 20px;padding-bottom: 10px;"),
-                h4("We pay a small fee to use the AI for every request. If you use this regularly, 
-                  please take a few minutes to create your own API key: ",
-                   style = common_styles$right_div_style),
                 div(
-                  tags$ul(
-                    tags$li("Create a personal account at",
-                          a("OpenAI.", href = "https://openai.com/api/", target = "_blank")),
-                    tags$li("Once logged in, click \"Personal\" from top right."),
-                    tags$li("Click \"Manage Account\", then \"Billing\", where you can add 
-                          \"Payment methods\" and set \"Usage limits\". $5 per month is more than enough."),
-                    tags$li("Click \"API keys\" to create a new key, which can be copied and pasted below."),
-                    uiOutput("save_api_ui")
-                  ),
-                  style = common_styles$right_div_style
+                  style = "padding-left: 85px;padding-right: 20px;padding-bottom: 10px;",
+                  h3(strong("Use personal API Key")),
+                  shinyWidgets::materialSwitch(
+                    inputId = ns("show_api_settings"),
+                    label = "",
+                    value = FALSE,
+                    status = "primary"
+                  )
+                ),
+                div(
+                  h4("By default, RTutor uses Azure's OpenAI models which costs us a small fee per request.", 
+                    style = common_styles$right_div_style),
+                  h4("If you are a regular user, please take a few minutes to create and use a personal API key instead.", 
+                    style = common_styles$right_div_style)
+                ),
+                conditionalPanel(  # only shown when toggled
+                  condition = "input.show_api_settings == true",
+                  ns = NS(id),
+                  div(
+                    tags$ul(
+                      tags$li("Create a personal account at",
+                            a("OpenAI.", href = "https://openai.com/api/", target = "_blank")),
+                      tags$li("Once logged in, click \"Personal\" from top right."),
+                      tags$li("Click \"Manage Account\", then \"Billing\", where you can add
+                            \"Payment methods\" and set \"Usage limits\". $5 per month is more than enough."),
+                      tags$li("Click \"API keys\" to create a new key, which can be copied and pasted below."),
+                      uiOutput("save_api_ui")
+                    ),
+                    style = common_styles$right_div_style
+                  )
                 )
               )
             ),
 
-            # API Key Input
-            fluidRow(
-              column(
-                width = 6,
-                # API key input
-                div(
-                  textInput(
-                    inputId = ns("api_key"),
-                    label = h4("Paste your API key from OpenAI:"),
-                    value = NULL,
-                    placeholder = "sk-......"
+            # API Key Input,
+            conditionalPanel(  # only shown when toggled
+              condition = "input.show_api_settings == true",
+              ns = NS(id),
+              fluidRow(
+                column(
+                  width = 6,
+                  div(
+                    textInput(
+                      inputId = ns("api_key"),
+                      label = h4("Paste your API key from OpenAI:"),
+                      value = NULL,
+                      placeholder = "sk-......"
+                    ),
+                    style = common_styles$right_div_style
                   ),
-                  style = common_styles$right_div_style
                 ),
-              ),
-              column(
-                width = 6,
-                h4("Current API Key:", style = "padding-right: 20px;"),
-                div(
-                  verbatimTextOutput(ns("session_api_source")),
-                  style = "padding-right: 20px; font-size: 18px;"
+                column(
+                  width = 6,
+                  h4("Current API Key:", style = "padding-right: 20px;"),
+                  div(
+                    verbatimTextOutput(ns("session_api_source")),
+                    style = "padding-right: 20px; font-size: 18px;"
+                  )
                 )
               )
             )
@@ -234,10 +252,48 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
 
     ### LLM Parameters ###
 
+    ## AI Model Toggle logic ##
+    # Update toggle switch variable within api_key
+    observeEvent(input$show_api_settings, {
+      api_key$switch_on <- input$show_api_settings
+    })
+
+    # Track previous submit button value
+    previous_submit <- reactiveVal(0)
+
+    # Handle toggle reset based on submit button
+    observe({
+      # Only proceed if all conditions are met:
+      # 1. Toggle is ON, 2. No API key,
+      # 3. Submit button was just pressed (value changed)
+      if (api_key$switch_on &&
+            (is.null(api_key$key) || nchar(api_key$key) == 0) &&
+            submit_button() != previous_submit()) {
+
+        # Update the material switch UI
+        shinyWidgets::updateMaterialSwitch(
+          session,
+          inputId = "show_api_settings",
+          value = FALSE
+        )
+
+        # Update our reactive values
+        api_key$switch_on <- FALSE
+
+        # Update previous submit value
+        previous_submit(submit_button())
+      } else {
+        # Always keep track of previous submit value
+        previous_submit(submit_button())
+      }
+    })
+
+    ## API Key ##
     # Initialize API Key
     api_key <- reactiveValues(
       key = "",
-      source = ""
+      source = "",
+      switch_on = FALSE # also toggle logic
     )
 
     # Update API Key
@@ -271,6 +327,7 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
     }
 
 
+    ## Other Settings ##
     # Sample temperature
     sample_temp <- reactive({
       temp <- default_temperature
