@@ -218,7 +218,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         theme = "xcode",  # change syntax color theme here
         height = height,
         fontSize = 14,
-        readOnly = TRUE  # feature idea: build out RT so user can edit code here
+        readOnly = TRUE,  # feature idea: build out RT so user can edit code here
+        showPrintMargin = FALSE  # remove vertical line at 80 chars
       )
     })
 
