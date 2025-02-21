@@ -107,7 +107,7 @@ app_server <- function(input, output, session) {
     # message(speech)
     #showNotification(speech)
 
-    if (input$tabs == "Home")    {
+    # if (input$tabs == "Home")    {
       if (grepl("^continue", speech)) {
         speech <- paste0(
           input$input_text, # current prompt
@@ -126,18 +126,18 @@ app_server <- function(input, output, session) {
         )
       }
 
-    } else if (input$tabs == "Ask") {
+    # } else if (input$tabs == "Ask") {
       # submit the request when user said  action verb
-      if (tolower(speech) %in% action_verbs) {
-        shinyjs::click("ask_button")
-      } else {
-        updateTextInput(
-          session,
-          "ask_question",
-          value = speech
-        )
-      }
-    }
+      # if (tolower(speech) %in% action_verbs) {
+      #   shinyjs::click("ask_button")
+      # } else {
+      #   updateTextInput(
+      #     session,
+      #     "ask_question",
+      #     value = speech
+      #   )
+      # }
+    # }
 
   })
 
@@ -250,33 +250,33 @@ app_server <- function(input, output, session) {
           txt <- "Dataset: uploaded."
         }
       } else {
-        txt <- paste0("", selected_data_file())
+        txt <- paste0("Selected Dataset: ", selected_data_file())
       }
 
       return(txt)
   })
 
-  output$data_upload_ui <- renderUI({
+  # output$data_upload_ui <- renderUI({
 
-    # Hide this input box after the first run.
-    req(input$submit_button == 0)
-    req(is.null(input$user_file))
-    fileInput(
-      inputId = "user_file",
-      label = "File Upload",
-      accept = c(
-        "text/csv",
-        "text/comma-separated-values",
-        "text/tab-separated-values",
-        "text/plain",
-        ".csv",
-        ".tsv",
-        ".txt",
-        ".xls",
-        ".xlsx"
-      )
-    )
-  })
+  #   # Hide this input box after the first run.
+  #   req(input$submit_button == 0)
+  #   req(is.null(input$user_file))
+  #   fileInput(
+  #     inputId = "user_file",
+  #     label = "File Upload",
+  #     accept = c(
+  #       "text/csv",
+  #       "text/comma-separated-values",
+  #       "text/tab-separated-values",
+  #       "text/plain",
+  #       ".csv",
+  #       ".tsv",
+  #       ".txt",
+  #       ".xls",
+  #       ".xlsx"
+  #     )
+  #   )
+  # })
 
   output$demo_data_ui <- renderUI({
 
@@ -337,186 +337,186 @@ app_server <- function(input, output, session) {
   # API key management
   #____________________________________________________________________________
   # pop up modal for Settings
-  observeEvent(input$api_button, {
-    shiny::showModal(
-      shiny::modalDialog(
-        size = "l",
-        footer = modalButton("Confirm"),
-                # Custom CSS to make the chat area scrollable
-        tags$head(
-            tags$style(HTML("
-                #settings_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
-        ),
-        div( id = "settings_window", 
+  # observeEvent(input$api_button, {
+  #   shiny::showModal(
+  #     shiny::modalDialog(
+  #       size = "l",
+  #       footer = modalButton("Confirm"),
+  #               # Custom CSS to make the chat area scrollable
+  #       tags$head(
+  #           tags$style(HTML("
+  #               #settings_window {
+  #                   height: 400px;  /* Adjust the height as needed */
+  #                   overflow-y: auto;  /* Enables vertical scrolling */
+  #                   padding: 10px;
+  #                   border-radius: 5px;
+  #               }
+  #           "))
+  #       ),
+  #       div( id = "settings_window", 
 
-          tagList(
-            fluidRow(
-              column(
-                width = 2,
-                "Model:",
-                align = "center"
-              ),
-              column(
-                width = 10,
-                align = "left",
-                selectInput(
-                  inputId = "language_model",
-                  choices = language_models,
-                  label = NULL,
-                  selected = selected_model()
-                )
-              ),
-              column(
-                width = 4,
-                sliderInput(
-                  inputId = "temperature",
-                  label = "Sampling temperature",
-                  min = 0,
-                  max = 1,
-                  value = sample_temp(),
-                  step = .1,
-                  round = FALSE,
-                  width = "100%"
-                )
-              ),
-              column(
-                width = 8,
-                p("This important parameter controls the AI's behavior in choosing 
-                among possible answers. A higher sampling temperature tells the AI 
-                to take more risks, producing more diverse and creative 
-                solutions when the same request is repeated. A lower  temperature
-                (such as 0) results in more
-                conservative and well-defined solutions, 
-                but less variety when repeated.
-                "),
-              )
-            ),
-            hr(),
-            h4("Use your own API key"),
-            h5("We pay a small fee to use the AI for every request.
-              If you use this regularily, 
-              please take a few minutes to create your own API key: "),
+  #         tagList(
+  #           fluidRow(
+  #             column(
+  #               width = 2,
+  #               "Model:",
+  #               align = "center"
+  #             ),
+  #             column(
+  #               width = 10,
+  #               align = "left",
+  #               selectInput(
+  #                 inputId = "language_model",
+  #                 choices = language_models,
+  #                 label = NULL,
+  #                 selected = selected_model()
+  #               )
+  #             ),
+  #             column(
+  #               width = 4,
+  #               sliderInput(
+  #                 inputId = "temperature",
+  #                 label = "Sampling temperature",
+  #                 min = 0,
+  #                 max = 1,
+  #                 value = sample_temp(),
+  #                 step = .1,
+  #                 round = FALSE,
+  #                 width = "100%"
+  #               )
+  #             ),
+  #             column(
+  #               width = 8,
+  #               p("This important parameter controls the AI's behavior in choosing 
+  #               among possible answers. A higher sampling temperature tells the AI 
+  #               to take more risks, producing more diverse and creative 
+  #               solutions when the same request is repeated. A lower  temperature
+  #               (such as 0) results in more
+  #               conservative and well-defined solutions, 
+  #               but less variety when repeated.
+  #               "),
+  #             )
+  #           ),
+  #           hr(),
+  #           h4("Use your own API key"),
+  #           h5("We pay a small fee to use the AI for every request.
+  #             If you use this regularily, 
+  #             please take a few minutes to create your own API key: "),
 
-            tags$ul(
-                tags$li(
-                  "Create a personal account at",
-                  a(
-                    "OpenAI.",
-                    href = "https://openai.com/api/",
-                    target = "_blank"
-                  )
-                ),
-                tags$li("After logging in, click \"Personal\" from top right."),
-                tags$li(
-                  "Click \"Manage Account\" and then \"Billing\",
-                  where you can add \"Payment methods\" and set \"Usage 
-                  limits\". $5 per month is more than enough."
-                ),
-                tags$li(
-                  "Click \"API keys\" to create a new key, 
-                  which can be copied and pasted it below."
-                ),
-            ),
-            textInput(
-              inputId = "api_key",
-              label = h5("Paste your API key from OpenAI:"),
-              value = NULL,
-              placeholder = "sk-..... (51 characters)"
-            ),
-            uiOutput("valid_key"),
-            uiOutput("save_api_ui"),
-            verbatimTextOutput("session_api_source"),
-          ),
+  #           tags$ul(
+  #               tags$li(
+  #                 "Create a personal account at",
+  #                 a(
+  #                   "OpenAI.",
+  #                   href = "https://openai.com/api/",
+  #                   target = "_blank"
+  #                 )
+  #               ),
+  #               tags$li("After logging in, click \"Personal\" from top right."),
+  #               tags$li(
+  #                 "Click \"Manage Account\" and then \"Billing\",
+  #                 where you can add \"Payment methods\" and set \"Usage 
+  #                 limits\". $5 per month is more than enough."
+  #               ),
+  #               tags$li(
+  #                 "Click \"API keys\" to create a new key, 
+  #                 which can be copied and pasted it below."
+  #               ),
+  #           ),
+  #           textInput(
+  #             inputId = "api_key",
+  #             label = h5("Paste your API key from OpenAI:"),
+  #             value = NULL,
+  #             placeholder = "sk-..... (51 characters)"
+  #           ),
+  #           uiOutput("valid_key"),
+  #           uiOutput("save_api_ui"),
+  #           verbatimTextOutput("session_api_source"),
+  #         ),
 
-          hr(),
-          fluidRow(
-            column(
-              width = 4,
-              checkboxInput(
-                inputId = "numeric_as_factor",
-                label = strong("Treat as factors"),
-                value = convert_to_factor()
-              ),
-              tippy::tippy_this(
-                elementId = "numeric_as_factor",
-                tooltip = "Treat the columns that looks like a category 
-                as a category. This applies to columns that contain numbers
-                but have very few unique values. ",
-                theme = "light-border"
-              )
-            ),
-            column(
-              width = 4,
-              numericInput(
-                inputId = "max_levels_factor",
-                label = "Max levels",
-                value = max_levels_factor(),
-                min = 3,
-                max = 50,
-                step = 1
-              ),
-              tippy::tippy_this(
-                elementId = "max_levels_factor",
-                tooltip = "To convert a numeric column as category, 
-                the column must have no more than this number of unique values.",
-                theme = "light-border"
-              )
-            ),
-            column(
-              width = 4,
-              numericInput(
-                inputId = "max_proptortion_factor",
-                label = "Max proportion",
-                value = max_proptortion_factor(),
-                min = 0.05,
-                max = 0.5,
-                step = 0.1
-              ),
-              tippy::tippy_this(
-                elementId = "max_proptortion_factor",
-                tooltip = "To convert a numeric column as category, 
-                the number of unique values in a column must not exceed 
-                more this proportion of the total number of rows.",
-                theme = "light-border"
-              )
-            )
-          ),
-          h5("Some columns contains numbers but should be treated 
-          as categorical values or factors. For example, we sometimes 
-          use 1 to label success and 0 for failure.
-          If this is selected, using the default setting, a column 
-          is treated as categories when the number of unique values 
-          is less than or equal to 12, and less than 10% of the total rows."
-          ),
-          hr(),
-          fluidRow(
-            column(
-              width = 4,
-              checkboxInput(
-                inputId = "contribute_data",
-                label = "Help us make RTutor better",
-                value = contribute_data()
-              )
-            ),
-            column(
-              width = 8,
-              h5("Save your requests and the structure of your data 
-              such as column names and data types, not the data itself. 
-              We can learn from users about creative ways to use AI. 
-              And we can try to improve unsuccessful attempts. ")
-            )
-          )
-        ), #div
-        easyClose = TRUE
-      )
-    )
-  })
+  #         hr(),
+  #         fluidRow(
+  #           column(
+  #             width = 4,
+  #             checkboxInput(
+  #               inputId = "numeric_as_factor",
+  #               label = strong("Treat as factors"),
+  #               value = convert_to_factor()
+  #             ),
+  #             tippy::tippy_this(
+  #               elementId = "numeric_as_factor",
+  #               tooltip = "Treat the columns that looks like a category 
+  #               as a category. This applies to columns that contain numbers
+  #               but have very few unique values. ",
+  #               theme = "light-border"
+  #             )
+  #           ),
+  #           column(
+  #             width = 4,
+  #             numericInput(
+  #               inputId = "max_levels_factor",
+  #               label = "Max levels",
+  #               value = max_levels_factor(),
+  #               min = 3,
+  #               max = 50,
+  #               step = 1
+  #             ),
+  #             tippy::tippy_this(
+  #               elementId = "max_levels_factor",
+  #               tooltip = "To convert a numeric column as category, 
+  #               the column must have no more than this number of unique values.",
+  #               theme = "light-border"
+  #             )
+  #           ),
+  #           column(
+  #             width = 4,
+  #             numericInput(
+  #               inputId = "max_proptortion_factor",
+  #               label = "Max proportion",
+  #               value = max_proptortion_factor(),
+  #               min = 0.05,
+  #               max = 0.5,
+  #               step = 0.1
+  #             ),
+  #             tippy::tippy_this(
+  #               elementId = "max_proptortion_factor",
+  #               tooltip = "To convert a numeric column as category, 
+  #               the number of unique values in a column must not exceed 
+  #               more this proportion of the total number of rows.",
+  #               theme = "light-border"
+  #             )
+  #           )
+  #         ),
+  #         h5("Some columns contains numbers but should be treated 
+  #         as categorical values or factors. For example, we sometimes 
+  #         use 1 to label success and 0 for failure.
+  #         If this is selected, using the default setting, a column 
+  #         is treated as categories when the number of unique values 
+  #         is less than or equal to 12, and less than 10% of the total rows."
+  #         ),
+  #         hr(),
+  #         fluidRow(
+  #           column(
+  #             width = 4,
+  #             checkboxInput(
+  #               inputId = "contribute_data",
+  #               label = "Help us make RTutor better",
+  #               value = contribute_data()
+  #             )
+  #           ),
+  #           column(
+  #             width = 8,
+  #             h5("Save your requests and the structure of your data 
+  #             such as column names and data types, not the data itself. 
+  #             We can learn from users about creative ways to use AI. 
+  #             And we can try to improve unsuccessful attempts. ")
+  #           )
+  #         )
+  #       ), #div
+  #       easyClose = TRUE
+  #     )
+  #   )
+  # })
   # api key for the session
   api_key_session <- reactive({
 
@@ -651,12 +651,105 @@ app_server <- function(input, output, session) {
       return(model)
   })
 
+  observeEvent(input$submit_button, {
+    # Only proceed if the condition is true
+    if (input$submit_button == 1) {
+        # construct prompt for selecting a dataset
+        data_prompt <- list()
+        data_prompt <- append(
+          data_prompt,
+          list(list(
+            role = "system",
+            content = "Act as an experienced data engineer. You will identify a file that is best suited for a task. "
+          ))
+        )
+        data_prompt <- append(
+          data_prompt,
+          list(list(
+            role = "user", 
+            content = paste(
+              "Identify a single file by file name, without explanation, that contain information related to this question or analytical goal.  Use the latest data.
+                Respon with \"Not found\" if no file is found. ",
+              input$input_text,
+              #"Plot the distribution of residential electricity rates in South Dakota. ",
+              #"Proportion of engergy use in the automotive industry in the US. ", # fail
+              # "Plot total energy use by sector in the US.",
+
+              " Available datasets: \"\"\"",
+              meta_data_res(),
+              "\"\"\""
+            )
+          ))
+        )
+
+        # ChatGPT API
+        response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
+          model = selected_model(),
+          openai_api_key = api_key_session()$api_key,
+          #max_tokens = 500,
+          temperature = sample_temp(),
+            messages = data_prompt
+        )
+
+        selected_file <- response$choices$message.content
+
+        tem1 <- gsub("\\..*", "", selected_file)
+        tem2 <- gsub("_", " ", tem1)
+        selected_data_file(tem2)
+        # show message for 10s with the fine name
+        showNotification(
+          paste("Selected dataset: ", tem2),
+          duration = 60
+        )
+        selected_file <- paste0(data_path, selected_file)
+
+        # if file is found, load it and update the current_data() reactive value
+        if(selected_file != "Not found" && file.exists(selected_file)) {
+
+          df <- readRDS(selected_file)
+          if (convert_to_factor()) {
+            df <- numeric_to_factor(
+              df,
+              max_levels_factor(),
+              max_proptortion_factor()
+            )
+          }
+          # update the current_data() reactive value
+          current_data(df) 
+        } else {
+          # show error message
+          showNotification(
+            "No file is found. Please try again.",
+            duration = 10
+          )
+
+          # restart
+          Sys.sleep(5)
+          session$reload()
+
+
+        }
+
+        # update runtime environment with new data frame
+        run_env(rlang::env(run_env(), df = current_data()))
+        run_env_start(as.list(run_env()))
+    }
+  }, ignoreInit = TRUE)  # ignoreInit prevents triggering on initialization
+
   openAI_prompt <- reactive({
     req(input$submit_button)
     req(input$select_data)
     req(input$input_text)
     isolate({ # so that it does not do it twice with each submit
-      prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model(), df2 = current_data_2())      
+      prep_input(
+        txt = input$input_text,
+        selected_data = input$select_data,
+        df = current_data(),
+        use_python = input$use_python,
+        chunk_id = logs$id,
+        selected_model = selected_model(),
+        df2 = current_data_2()
+      )      
     })
 
   })
@@ -760,99 +853,29 @@ app_server <- function(input, output, session) {
                 list(list(role = "assistant", content = code_plus_error))
               )
             }
+
             prompt_total <- append(prompt_total, history)
           } else {  # if first prompt,  identify and load dataset
-
-            # construct prompt for selecting a dataset
-            data_prompt <- list()
-            data_prompt <- append(
-              data_prompt,
-              list(list(
-                role = "system",
-                content = "Act as an experienced data engineer. You will identify a file that is best suited for a task. "
-              ))
-            )
-            data_prompt <- append(
-              data_prompt,
-              list(list(
-                role = "user", 
-                content = paste(
-                  "Identify a single file by file name, without explanation, that contain information related to this question or analytical goal.  Use the latest data.
-                   Respon with \"Not found\" if no file is found. ",
-                  input$input_text,
-                  #"Plot the distribution of residential electricity rates in South Dakota. ",
-                  #"Proportion of engergy use in the automotive industry in the US. ", # fail
-                  # "Plot total energy use by sector in the US.",
-
-                  " Available datasets: \"\"\"",
-                  meta_data_res(),
-                  "\"\"\""
-                )
-              ))
-            )
-
-            # ChatGPT API
-            response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
-              model = selected_model(),
-              openai_api_key = api_key_session()$api_key,
-              #max_tokens = 500,
-              temperature = sample_temp(),
-                messages = data_prompt
-            )
-
-            selected_file <- response$choices$message.content
-
-            tem1 <- gsub("\\..*", "", selected_file)
-            tem2 <- gsub("_", " ", tem1)
-            selected_data_file(tem2)
-            # show message for 10s with the fine name
-            showNotification(
-              paste("Selected dataset: ", tem2),
-              duration = 60
-            )
-            selected_file <- paste0(data_path, selected_file)
-
-            # if file is found, load it and update the current_data() reactive value
-            if(selected_file != "Not found" && file.exists(selected_file)) {
-
-              df <- readRDS(selected_file)
-              if (convert_to_factor()) {
-                df <- numeric_to_factor(
-                  df,
-                  max_levels_factor(),
-                  max_proptortion_factor()
-                )
-              }
-              # update the current_data() reactive value
-              current_data(df) 
-            } else {
-              # show error message
-              showNotification(
-                "No file is found. Please try again.",
-                duration = 10
-              )
-
-              # restart
-              Sys.sleep(5)
-              session$reload()
-
-
-            }
-
-            # update runtime environment with new data frame
-            run_env(rlang::env(run_env(), df = current_data()))
-            run_env_start(as.list(run_env()))
 
 
           } # end loading selected data
 
-          prepared_request = prep_input(input$input_text, input$select_data, current_data(), input$use_python, logs$id, selected_model(), df2 = current_data_2())
+          # prepared_request = prep_input(
+          #   txt = input$input_text, 
+          #   selected_data = input$select_data,
+          #   df = current_data(),
+          #   use_python = input$use_python,
+          #   chunk_id = logs$id,
+          #   selected_model = selected_model(),
+          #   df2 = current_data_2()
+          # )
 
           # add new user prompt
           prompt_total <- append(
             prompt_total,
             list(list(role = "user", content = prepared_request))
           )
+          # browser()
 
           response <- openai::create_chat_completion(  # chat model: gpt-3.5-turbo, gpt-4
             model = selected_model(),
@@ -1092,50 +1115,50 @@ app_server <- function(input, output, session) {
 
   })
 
-  output$usage <- renderText({
-    req(input$submit_button != 0)
+  # output$usage <- renderText({
+  #   req(input$submit_button != 0)
 
-    paste0(
-      "R",
-      counter$requests, ":  ",
-      counter$tokens_current,
-      " tokens, ",
-      counter$time,
-      " second(s)"
-    )
-  })
+  #   paste0(
+  #     "R",
+  #     counter$requests, ":  ",
+  #     counter$tokens_current,
+  #     " tokens, ",
+  #     counter$time,
+  #     " second(s)"
+  #   )
+  # })
 
-  output$total_cost <- renderText({
-    if(input$submit_button == 0) {
-      return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
-      use your own API key (Settings), or help cover the fee via PayPal(gexijin@gmail.com)."
-      )
-    } else {
-    #req(openAI_response()$cmd)
-      paste0(
-        "Total API Cost: $",
-        sprintf("%5.3f", counter$costs_total) 
-      )
-    }
-  })
+  # output$total_cost <- renderText({
+  #   if(input$submit_button == 0) {
+  #     return("OpenAI charges us $1 for about 60 requests via GPT-4 Turbo. Heavy users please
+  #     use your own API key (Settings), or help cover the fee via PayPal(gexijin@gmail.com)."
+  #     )
+  #   } else {
+  #   #req(openAI_response()$cmd)
+  #     paste0(
+  #       "Total API Cost: $",
+  #       sprintf("%5.3f", counter$costs_total) 
+  #     )
+  #   }
+  # })
 
-  output$temperature <- renderText({
-    req(openAI_response()$cmd)
+  # output$temperature <- renderText({
+  #   req(openAI_response()$cmd)
 
-    paste0(
-        names(selected_model()),
-        ", Temperature=",
-        sample_temp()
-    )
-  })
+  #   paste0(
+  #       names(selected_model()),
+  #       ", Temperature=",
+  #       sample_temp()
+  #   )
+  # })
 
-   output$retry_on_error <- renderText({
-     req(code_error())
-     if(code_error()) {
-      "Error! Try again or change request."
-     }
+  #  output$retry_on_error <- renderText({
+  #    req(code_error())
+  #    if(code_error()) {
+  #     "Error! Try again or change request."
+  #    }
 
-   })
+  #  })
  # Defining & initializing the reactiveValues object
   counter <- reactiveValues(
     costs_total = 0, # cummulative cost
@@ -1209,10 +1232,17 @@ app_server <- function(input, output, session) {
         run_env(list2env(run_env_start())) # revert the environment
       }
 
+      if (inherits(result, "leaflet")){
+        leaflet_flg = TRUE
+      }else{
+        leaflet_flg = FALSE
+      }
+
       run_result(list(
         result = result,
         console_output = console_output,
-        error_message = error_message
+        error_message = error_message,
+        leaflet_flg = leaflet_flg
       ))
     })
   })
@@ -1324,6 +1354,7 @@ app_server <- function(input, output, session) {
     req(!input$use_python)
     req(!code_error())
     req(logs$code)
+    req(!run_result()$leaflet_flg)
     if (
       is_interactive_plot() ||   # natively interactive
       turned_on(input$make_ggplot_interactive) # converted
@@ -1337,6 +1368,13 @@ app_server <- function(input, output, session) {
       plotOutput("result_plot")
     }
   })
+
+observe({
+  req(run_result()$leaflet_flg)
+    output$leaflet_map <- renderLeaflet({
+        return(run_result()$result)
+    })
+})
 
   observe({
     # hide it by default
@@ -1516,8 +1554,8 @@ app_server <- function(input, output, session) {
       current_data(df)
     }
     # add the data to the current environment
-    run_env(rlang::env(run_env(), df = current_data()))
-    run_env_start(as.list(run_env()))
+    # run_env(rlang::env(run_env(), df = current_data()))
+    # run_env_start(as.list(run_env()))
   })
 
 
@@ -1701,14 +1739,14 @@ app_server <- function(input, output, session) {
   })
 
   # Add a download button for current_data()
-  output$download_data <- downloadHandler(
-    filename = function() {
-      paste("data-", Sys.Date(), ".csv", sep = "")
-    },
-    content = function(file) {
-      write.csv(current_data(), file, row.names = FALSE)
-    }
-  )
+  # output$download_data <- downloadHandler(
+  #   filename = function() {
+  #     paste("data-", Sys.Date(), ".csv", sep = "")
+  #   },
+  #   content = function(file) {
+  #     write.csv(current_data(), file, row.names = FALSE)
+  #   }
+  # )
 
 
 
@@ -2393,277 +2431,277 @@ app_server <- function(input, output, session) {
 #______________________________________________________________________________
 
 
-  answer_one <- reactive({
-    req(input$ask_button)
+  # answer_one <- reactive({
+  #   req(input$ask_button)
 
-    isolate({
-    req(input$ask_question)    
-      #----------------------------Prep question
-      txt <- input$ask_question
+  #   isolate({
+  #   req(input$ask_question)    
+  #     #----------------------------Prep question
+  #     txt <- input$ask_question
 
-      # force to within 280 characters
-      if (nchar(txt) > max_char_question) {
-        txt <- substr(txt, 1, max_char_question)
-        showNotification(
-          paste("Only the first", max_char_question, " characters will be used."),
-          duration = 10
-        )
-      }
+  #     # force to within 280 characters
+  #     if (nchar(txt) > max_char_question) {
+  #       txt <- substr(txt, 1, max_char_question)
+  #       showNotification(
+  #         paste("Only the first", max_char_question, " characters will be used."),
+  #         duration = 10
+  #       )
+  #     }
 
-      # If the last character is not a stop, add it.
-      # Otherwise, GPT3 will add a sentence.
+  #     # If the last character is not a stop, add it.
+  #     # Otherwise, GPT3 will add a sentence.
 
-      # The following 5 lines were generated by ChatGPT!!!!!
-      # Check if the last character is not a period
-      if (substr(txt, nchar(txt), nchar(txt)) != ".") {
-      # If the last character is not a period, add it to the end
-        txt <- paste(txt, ".", sep = "")
-      }
+  #     # The following 5 lines were generated by ChatGPT!!!!!
+  #     # Check if the last character is not a period
+  #     if (substr(txt, nchar(txt), nchar(txt)) != ".") {
+  #     # If the last character is not a period, add it to the end
+  #       txt <- paste(txt, ".", sep = "")
+  #     }
 
-      prepared_request <- txt 
+  #     prepared_request <- txt 
       
 
 
-      #----------------------------Send request
-      shinybusy::show_modal_spinner(
-        spin = "orbit",
-        text = paste(
-          sample(jokes, 1)
-        ),
-        color = "#000000"
-      )
-      prompt_total <- list()
+  #     #----------------------------Send request
+  #     shinybusy::show_modal_spinner(
+  #       spin = "orbit",
+  #       text = paste(
+  #         sample(jokes, 1)
+  #       ),
+  #       color = "#000000"
+  #     )
+  #     prompt_total <- list()
 
-      # System role: You are an experience programmar, etc
-      if (!is.null(system_role)) {
-        if (nchar(system_role) > 10) {
-          prompt_total <- append(
-            prompt_total,
-            list(list(
-              role = "system",
-              content = system_role_tutor
-            ))
-          )
-        }
-      }
+  #     # System role: You are an experience programmar, etc
+  #     if (!is.null(system_role)) {
+  #       if (nchar(system_role) > 10) {
+  #         prompt_total <- append(
+  #           prompt_total,
+  #           list(list(
+  #             role = "system",
+  #             content = system_role_tutor
+  #           ))
+  #         )
+  #       }
+  #     }
 
-      # add history, first, if any
-      if (length(logs$code_history) > 0) {
+  #     # add history, first, if any
+  #     if (length(logs$code_history) > 0) {
     
-        # manage context length. If it is too long, remove the oldest ones, except the first one
-        history_tokens <- sapply(
-          1:length(logs$code_history), 
-          function(i) {
-            if(i == 1) {
-              logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens
-            } else {
-              # since the chat history includes previous prompt and output
-              logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens  - logs$code_history[[i - 1]]$prompt_tokens - logs$code_history[[i - 1]]$output_tokens
-            }
-        })
+  #       # manage context length. If it is too long, remove the oldest ones, except the first one
+  #       history_tokens <- sapply(
+  #         1:length(logs$code_history), 
+  #         function(i) {
+  #           if(i == 1) {
+  #             logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens
+  #           } else {
+  #             # since the chat history includes previous prompt and output
+  #             logs$code_history[[i]]$prompt_tokens + logs$code_history[[i]]$output_tokens  - logs$code_history[[i - 1]]$prompt_tokens - logs$code_history[[i - 1]]$output_tokens
+  #           }
+  #       })
 
-        #cumulative from backwards
-        cum_sum <- rev(cumsum(rev(history_tokens))) 
-                                                              # new request               # first one
-        cutoff <-  max_content_length_ask - tokens(prepared_request) - history_tokens[1]
+  #       #cumulative from backwards
+  #       cum_sum <- rev(cumsum(rev(history_tokens))) 
+  #                                                             # new request               # first one
+  #       cutoff <-  max_content_length_ask - tokens(prepared_request) - history_tokens[1]
 
-        cum_sum[1] <- 0 # do not remove the first one
-        included <- which(cum_sum < cutoff)  # 1, 4, 5, 6, 7
+  #       cum_sum[1] <- 0 # do not remove the first one
+  #       included <- which(cum_sum < cutoff)  # 1, 4, 5, 6, 7
 
-        # add each chunk, only keep chunk
-        history <- list()
-        for(i in included) {
-          history <- append(
-            history,
-            list(list(role = "user", content = logs$code_history[[i]]$prompt_all))
-          )
+  #       # add each chunk, only keep chunk
+  #       history <- list()
+  #       for(i in included) {
+  #         history <- append(
+  #           history,
+  #           list(list(role = "user", content = logs$code_history[[i]]$prompt_all))
+  #         )
 
-          #Note error message is not properly stored in the logs variable. 
-          # only add error for the current one
-          # append error message, if any
-          code <- logs$code_history[[i]]$raw
-          if(i == length(logs$code_history) && code_error()) {
-            code <- paste0(
-              code,
-              "\n\nError: ",
-              run_result()$error_message,
-              "\n"
-            )
-          }
+  #         #Note error message is not properly stored in the logs variable. 
+  #         # only add error for the current one
+  #         # append error message, if any
+  #         code <- logs$code_history[[i]]$raw
+  #         if(i == length(logs$code_history) && code_error()) {
+  #           code <- paste0(
+  #             code,
+  #             "\n\nError: ",
+  #             run_result()$error_message,
+  #             "\n"
+  #           )
+  #         }
 
-          # append result, only the printed out. Figures in the future with gpt-4V
-          if(i == length(logs$code_history) && !is.null(run_result()$console_output)) {
-            result <- paste(run_result()$console_output, collapse = "\n")
-            if(nchar(result) > 10) {
-              code <- paste0(
-                code,
-                "\n\nResult: ",
-                result,
-                "\n"
-              )              
-            }
-          }
+  #         # append result, only the printed out. Figures in the future with gpt-4V
+  #         if(i == length(logs$code_history) && !is.null(run_result()$console_output)) {
+  #           result <- paste(run_result()$console_output, collapse = "\n")
+  #           if(nchar(result) > 10) {
+  #             code <- paste0(
+  #               code,
+  #               "\n\nResult: ",
+  #               result,
+  #               "\n"
+  #             )              
+  #           }
+  #         }
 
-          history <- append(
-            history,
-            list(list(role = "assistant", content = code))
-          )
-        }
-        prompt_total <- append(prompt_total, history)
-      }
+  #         history <- append(
+  #           history,
+  #           list(list(role = "assistant", content = code))
+  #         )
+  #       }
+  #       prompt_total <- append(prompt_total, history)
+  #     }
 
-      # add new user prompt
-      prompt_total <- append(
-        prompt_total,
-        list(list(role = "user", content = prepared_request))
-      )
+  #     # add new user prompt
+  #     prompt_total <- append(
+  #       prompt_total,
+  #       list(list(role = "user", content = prepared_request))
+  #     )
 
-      # Send to openAI
-      tryCatch(
-        response <- openai::create_chat_completion(
-          model = selected_model(),
-          openai_api_key = api_key_session()$api_key,
-          temperature = sample_temp(),
-          messages = prompt_total
-        ),
-        error = function(e) {
-          # remove spinner, show message for 5s, & reload
-          shinybusy::remove_modal_spinner()
-          shiny::showModal(api_error_modal)
-          Sys.sleep(5)
-          session$reload()
+  #     # Send to openAI
+  #     tryCatch(
+  #       response <- openai::create_chat_completion(
+  #         model = selected_model(),
+  #         openai_api_key = api_key_session()$api_key,
+  #         temperature = sample_temp(),
+  #         messages = prompt_total
+  #       ),
+  #       error = function(e) {
+  #         # remove spinner, show message for 5s, & reload
+  #         shinybusy::remove_modal_spinner()
+  #         shiny::showModal(api_error_modal)
+  #         Sys.sleep(5)
+  #         session$reload()
 
-          list(
-            error_value = -1,
-            message = capture.output(print(e$message)),
-            error_status = TRUE
-          )
-        }
-      )
+  #         list(
+  #           error_value = -1,
+  #           message = capture.output(print(e$message)),
+  #           error_status = TRUE
+  #         )
+  #       }
+  #     )
 
-      error_api <- FALSE
-      # if error returns true, otherwise 
-      #  that slot does not exist, returning false.
-      # or be NULL
-      error_api <- tryCatch(
-        !is.null(response$error_status),
-        error = function(e) {
-          return(TRUE)
-        }
-      )
+  #     error_api <- FALSE
+  #     # if error returns true, otherwise 
+  #     #  that slot does not exist, returning false.
+  #     # or be NULL
+  #     error_api <- tryCatch(
+  #       !is.null(response$error_status),
+  #       error = function(e) {
+  #         return(TRUE)
+  #       }
+  #     )
 
-      error_message <- NULL
-      if (error_api) {
-        cmd <- NULL
-        response <- NULL
-        error_message <- response$message
-      } else {
-        ans <- response$choices$message.content
-      }
+  #     error_message <- NULL
+  #     if (error_api) {
+  #       cmd <- NULL
+  #       response <- NULL
+  #       error_message <- response$message
+  #     } else {
+  #       ans <- response$choices$message.content
+  #     }
 
-      shinybusy::remove_modal_spinner()
+  #     shinybusy::remove_modal_spinner()
 
-      # update usage via global reactive value
-      # update usage via global reactive value/ ouput token is twice as expensive
-      counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens    
-      counter$requests <- counter$requests + 1
-      counter$costs_total <- counter$costs_total + 
-        api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, "gpt-3.5-turbo")
+  #     # update usage via global reactive value
+  #     # update usage via global reactive value/ ouput token is twice as expensive
+  #     counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens    
+  #     counter$requests <- counter$requests + 1
+  #     counter$costs_total <- counter$costs_total + 
+  #       api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, "gpt-3.5-turbo")
 
 
-      humor <- c(
-        "Seriously? Statistics only!",
-        "Come on. Statistics only!",
-        "You know better. Statistics only!",
-        "Bruh... I am a statistics tutor! ",
-        "Are you kidding? Statistics only!",
-        "Gee..., Statistics only!!"
-      )
+  #     humor <- c(
+  #       "Seriously? Statistics only!",
+  #       "Come on. Statistics only!",
+  #       "You know better. Statistics only!",
+  #       "Bruh... I am a statistics tutor! ",
+  #       "Are you kidding? Statistics only!",
+  #       "Gee..., Statistics only!!"
+  #     )
 
-      if (grepl("No comment", ans)) {
-        ans <- paste(
-          sample(humor, 1),
-          "     Ask again with more context. It might
-          be helpful to add \"in statistics\" to the question."
-        )
-      }
-      # Replace double newlines with HTML paragraph tags
-      ans <- gsub("\n\n", "</p><p>", ans)
-      ans <- paste0("<p><strong>", input$ask_question, "</strong></p>", "<p>", ans, "</p>")
+  #     if (grepl("No comment", ans)) {
+  #       ans <- paste(
+  #         sample(humor, 1),
+  #         "     Ask again with more context. It might
+  #         be helpful to add \"in statistics\" to the question."
+  #       )
+  #     }
+  #     # Replace double newlines with HTML paragraph tags
+  #     ans <- gsub("\n\n", "</p><p>", ans)
+  #     ans <- paste0("<p><strong>", input$ask_question, "</strong></p>", "<p>", ans, "</p>")
 
-      return(ans)
-    })
+  #     return(ans)
+  #   })
 
-  })
+  # })
 
   chat_content <- reactiveVal(c())
 
-  observeEvent(input$ask_button, {
-    new_message <- answer_one()
-    if (new_message != "") {
-      chat_content(c(new_message, chat_content()))
-      #updateTextInput(session, "ask_question", value = "")
-      updateTextInput(
-        session,
-        inputId = "ask_question",
-        label = NULL,
-        placeholder = "Ask a question on the code or statistics",
-        value = ""
-      )
-    }
-  })
+  # observeEvent(input$ask_button, {
+  #   new_message <- answer_one()
+  #   if (new_message != "") {
+  #     chat_content(c(new_message, chat_content()))
+  #     #updateTextInput(session, "ask_question", value = "")
+  #     updateTextInput(
+  #       session,
+  #       inputId = "ask_question",
+  #       label = NULL,
+  #       placeholder = "Ask a question on the code or statistics",
+  #       value = ""
+  #     )
+  #   }
+  # })
 
-  output$answer <- renderUI({
-    req(input$ask_button)
-    req(answer_one())
+  # output$answer <- renderUI({
+  #   req(input$ask_button)
+  #   req(answer_one())
 
-    HTML(paste(chat_content(), collapse = "\n <hr> \n"))
+  #   HTML(paste(chat_content(), collapse = "\n <hr> \n"))
 
-  })
+  # })
 
   # JavaScript to trigger the send button when Enter key is pressed
-  shinyjs::runjs("
-      $('#ask_question').on('keyup', function (e) {
-          if (e.keyCode === 13) {
-              setTimeout(function(){
-                  $('#ask_button').click();
-              }, 500);  // Delay of 100 milliseconds
-          }
-      });
-  ")
+  # shinyjs::runjs("
+  #     $('#ask_question').on('keyup', function (e) {
+  #         if (e.keyCode === 13) {
+  #             setTimeout(function(){
+  #                 $('#ask_button').click();
+  #             }, 500);  // Delay of 100 milliseconds
+  #         }
+  #     });
+  # ")
 
-  observeEvent(answer_one(), {
-    showModal(
-      modalDialog(
-        title = "Chat with your tutor",
-        # Custom CSS to make the chat area scrollable
-        tags$head(
-            tags$style(HTML("
-                #chat_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
-        ),
-        div( id = "chat_window", htmlOutput("answer")),
-        tags$head(
-          tags$style(
-            "#answer{
-              color: purple;
-              font-size: 14px
-            }"
-          )
-        ),
-        footer = tagList(
-          modalButton("Close")
-        ),
-        size = "s",
-        easyClose = TRUE
-      )
-    )
-  })
+  # observeEvent(answer_one(), {
+  #   showModal(
+  #     modalDialog(
+  #       title = "Chat with your tutor",
+  #       # Custom CSS to make the chat area scrollable
+  #       tags$head(
+  #           tags$style(HTML("
+  #               #chat_window {
+  #                   height: 400px;  /* Adjust the height as needed */
+  #                   overflow-y: auto;  /* Enables vertical scrolling */
+  #                   padding: 10px;
+  #                   border-radius: 5px;
+  #               }
+  #           "))
+  #       ),
+  #       div( id = "chat_window", htmlOutput("answer")),
+  #       tags$head(
+  #         tags$style(
+  #           "#answer{
+  #             color: purple;
+  #             font-size: 14px
+  #           }"
+  #         )
+  #       ),
+  #       footer = tagList(
+  #         modalButton("Close")
+  #       ),
+  #       size = "s",
+  #       easyClose = TRUE
+  #     )
+  #   )
+  # })
 
 #                                      10.
 #______________________________________________________________________________
@@ -2969,46 +3007,46 @@ app_server <- function(input, output, session) {
     }
   })
 
-  observeEvent(input$save_feedbck, {
-    req(input$save_feedbck)
-    feedback_len <- nchar(input$user_feedback)
-    if (feedback_len < 5) {
-      showNotification("Feedback is too short.")
-    } else  if (feedback_len > 2000) {
-      showNotification("Feedback is too long.")
-    } else {
-      showNotification("Thank you for your feedback!")
+  # observeEvent(input$save_feedbck, {
+  #   req(input$save_feedbck)
+  #   feedback_len <- nchar(input$user_feedback)
+  #   if (feedback_len < 5) {
+  #     showNotification("Feedback is too short.")
+  #   } else  if (feedback_len > 2000) {
+  #     showNotification("Feedback is too long.")
+  #   } else {
+  #     showNotification("Thank you for your feedback!")
 
-    try(
-      save_comments(
-        date = Sys.Date(),
-        time = format(Sys.time(), "%H:%M:%S"),
-        comments = input$user_feedback,
-        helpfulness = input$helpfulness,
-        experience = input$experience
-      )
-    )
-    }
+  #   try(
+  #     save_comments(
+  #       date = Sys.Date(),
+  #       time = format(Sys.time(), "%H:%M:%S"),
+  #       comments = input$user_feedback,
+  #       helpfulness = input$helpfulness,
+  #       experience = input$experience
+  #     )
+  #   )
+  #   }
 
-    # clear the comments after submitted. 
-    # This prevents users submit the same thing twice.
-    updateTextInput(
-      session,
-      "user_feedback",
-      value = "",
-      placeholder = "Any questions? Suggestions? Things you like, don't like?" 
-    )
+  #   clear the comments after submitted. 
+  #   This prevents users submit the same thing twice.
+  #   updateTextInput(
+  #     session,
+  #     "user_feedback",
+  #     value = "",
+  #     placeholder = "Any questions? Suggestions? Things you like, don't like?" 
+  #   )
 
 
-  })
+  # })
 
-  observe({
-    shinyjs::toggle(id = "user_feedback", condition = input$Comments)
-    shinyjs::toggle(id = "save_feedbck", condition = input$Comments)
-    shinyjs::toggle(id = "helpfulness", condition = input$Comments)
-    shinyjs::toggle(id = "experience", condition = input$Comments)
+  # observe({
+  #   shinyjs::toggle(id = "user_feedback", condition = input$Comments)
+  #   shinyjs::toggle(id = "save_feedbck", condition = input$Comments)
+  #   shinyjs::toggle(id = "helpfulness", condition = input$Comments)
+  #   shinyjs::toggle(id = "experience", condition = input$Comments)
 
-  })
+  # })
 
 
 #
@@ -3050,33 +3088,33 @@ app_server <- function(input, output, session) {
 #  Data Editing
 #______________________________________________________________________________
 
-  show_pop_up <- function() {
-    showModal(
-      modalDialog(
-        title = "Verify data types (important!)",
-        # Custom CSS to make the chat area scrollable
-        tags$head(
-            tags$style(HTML("
-                #data_type_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
-        ),
-        div( id = "data_type_window", uiOutput("column_type_ui")),
-        h4("If a column represents categories, choose 'Factor', even if 
-        it contains numbers. For columns that are numbers, but with few unique values, RTutor 
-        automatically convert them to factors. See Settings.", 
-        style = "color: blue"),
-        br(),
-        footer = actionButton("dismiss_modal",label = "Dismiss"),
-        size = "l",
-        easyClose = TRUE
-      )
-    )
-  }
+  # show_pop_up <- function() {
+  #   showModal(
+  #     modalDialog(
+  #       title = "Verify data types (important!)",
+  #       # Custom CSS to make the chat area scrollable
+  #       tags$head(
+  #           tags$style(HTML("
+  #               #data_type_window {
+  #                   height: 400px;  /* Adjust the height as needed */
+  #                   overflow-y: auto;  /* Enables vertical scrolling */
+  #                   padding: 10px;
+  #                   border-radius: 5px;
+  #               }
+  #           "))
+  #       ),
+  #       div( id = "data_type_window", uiOutput("column_type_ui")),
+  #       h4("If a column represents categories, choose 'Factor', even if 
+  #       it contains numbers. For columns that are numbers, but with few unique values, RTutor 
+  #       automatically convert them to factors. See Settings.", 
+  #       style = "color: blue"),
+  #       br(),
+  #       footer = actionButton("dismiss_modal",label = "Dismiss"),
+  #       size = "l",
+  #       easyClose = TRUE
+  #     )
+  #   )
+  # }
 
   modal_closed <- reactiveVal(FALSE)
 
@@ -3085,9 +3123,9 @@ app_server <- function(input, output, session) {
     shiny::removeModal()
   })  
 
-  observeEvent(input$user_file, {
-    show_pop_up()
-  })
+  # observeEvent(input$user_file, {
+  #   show_pop_up()
+  # })
 
   # The notification is shown when the pop-up is closed
   observeEvent(modal_closed(), {
@@ -3099,9 +3137,9 @@ app_server <- function(input, output, session) {
   })
 
   # Trigger the pop-up when a file is uploaded
-  observeEvent(input$data_edit_modal, {
-    show_pop_up()
-  }) 
+  # observeEvent(input$data_edit_modal, {
+  #   show_pop_up()
+  # }) 
    
   output$column_type_ui <- renderUI({
     req(current_data())
@@ -3170,31 +3208,31 @@ app_server <- function(input, output, session) {
     try(describe_data(current_data()))
   })
 
-  observeEvent(input$data_desc_modal, {
-    showModal(
-      modalDialog(
-        title = "Data description",
-        # Custom CSS to make the chat area scrollable
-        tags$head(
-            tags$style(HTML("
-                #description_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
-        ),
-        div( id = "description_window", textOutput("data_description")),
-        tags$style(type="text/css", "#data_description {white-space: pre-wrap;}"),
-        footer = tagList(
-          modalButton("Close")
-        ),
-        size = "m",
-        easyClose = TRUE
-      )
-    )
-  })
+  # observeEvent(input$data_desc_modal, {
+  #   showModal(
+  #     modalDialog(
+  #       title = "Data description",
+  #       # Custom CSS to make the chat area scrollable
+  #       tags$head(
+  #           tags$style(HTML("
+  #               #description_window {
+  #                   height: 400px;  /* Adjust the height as needed */
+  #                   overflow-y: auto;  /* Enables vertical scrolling */
+  #                   padding: 10px;
+  #                   border-radius: 5px;
+  #               }
+  #           "))
+  #       ),
+  #       div( id = "description_window", textOutput("data_description")),
+  #       tags$style(type="text/css", "#data_description {white-space: pre-wrap;}"),
+  #       footer = tagList(
+  #         modalButton("Close")
+  #       ),
+  #       size = "m",
+  #       easyClose = TRUE
+  #     )
+  #   )
+  # })
 
 
   # Upload the second file------------------------------------------------------
@@ -3207,27 +3245,27 @@ app_server <- function(input, output, session) {
           shinyjs::hide("second_file_summary")  # Hide the panel if no file is uploaded
       }
   })
-  output$data_upload_ui_2 <- renderUI({
-    req(!is.null(input$user_file))
+  # output$data_upload_ui_2 <- renderUI({
+  #   req(!is.null(input$user_file))
 
-    req(is.null(input$user_file_2))
+  #   req(is.null(input$user_file_2))
 
-    fileInput(
-      inputId = "user_file_2",
-      label = "Upload 2nd file",
-      accept = c(
-        "text/csv",
-        "text/comma-separated-values",
-        "text/tab-separated-values",
-        "text/plain",
-        ".csv",
-        ".tsv",
-        ".txt",
-        ".xls",
-        ".xlsx"
-      )
-    )
-  })
+  #   fileInput(
+  #     inputId = "user_file_2",
+  #     label = "Upload 2nd file",
+  #     accept = c(
+  #       "text/csv",
+  #       "text/comma-separated-values",
+  #       "text/tab-separated-values",
+  #       "text/plain",
+  #       ".csv",
+  #       ".tsv",
+  #       ".txt",
+  #       ".xls",
+  #       ".xlsx"
+  #     )
+  #   )
+  # })
 
  # uploaded data
   user_data_2 <- reactive({
@@ -3282,41 +3320,41 @@ app_server <- function(input, output, session) {
     })
   })
 
-show_pop_up_2 <- function() {
-    showModal(
-      modalDialog(
-        title = "Verify data types (important!)  2",
-        # Custom CSS to make the chat area scrollable
-        tags$head(
-            tags$style(HTML("
-                #data_type_window {
-                    height: 400px;  /* Adjust the height as needed */
-                    overflow-y: auto;  /* Enables vertical scrolling */
-                    padding: 10px;
-                    border-radius: 5px;
-                }
-            "))
-        ),
-        div( id = "data_type_window", uiOutput("column_type_ui_2")),
-        h4("If a column represents categories, choose 'Factor', even if 
-        it is coded as numbers. Some columns are 
-        automatically converted. For columns that are numbers, but with few unique values, RTutor 
-        automatically convert them to factors. See Settings.", 
-        style = "color: blue"),
-        br(),
-        footer = tagList(
-          modalButton("Close")
-        ),
-        size = "l",
-        easyClose = TRUE
-      )
-    )
-  }
+# show_pop_up_2 <- function() {
+#     showModal(
+#       modalDialog(
+#         title = "Verify data types (important!)  2",
+#         # Custom CSS to make the chat area scrollable
+#         tags$head(
+#             tags$style(HTML("
+#                 #data_type_window {
+#                     height: 400px;  /* Adjust the height as needed */
+#                     overflow-y: auto;  /* Enables vertical scrolling */
+#                     padding: 10px;
+#                     border-radius: 5px;
+#                 }
+#             "))
+#         ),
+#         div( id = "data_type_window", uiOutput("column_type_ui_2")),
+#         h4("If a column represents categories, choose 'Factor', even if 
+#         it is coded as numbers. Some columns are 
+#         automatically converted. For columns that are numbers, but with few unique values, RTutor 
+#         automatically convert them to factors. See Settings.", 
+#         style = "color: blue"),
+#         br(),
+#         footer = tagList(
+#           modalButton("Close")
+#         ),
+#         size = "l",
+#         easyClose = TRUE
+#       )
+#     )
+#   }
 
-  observeEvent(input$user_file_2, {
-     showNotification("2nd file uploaded! To use it, specify with its name df2.")
-     show_pop_up_2()
-  })
+  # observeEvent(input$user_file_2, {
+  #    showNotification("2nd file uploaded! To use it, specify with its name df2.")
+  #    show_pop_up_2()
+  # })
 
    
   # The current data
