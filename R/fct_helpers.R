@@ -19,7 +19,7 @@ min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 language_models <- c("gpt-4o", "gpt-4o-mini")
 names(language_models) <- c("GPT-4o", "GPT-4o mini")
-default_model <- "GPT-4o mini"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
+default_model <- "GPT-4o"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 api_versions <- list(  # API version list corresponding to selected model, may need adjusting
   "gpt-4o" = "2024-08-01",
   "gpt-4o-mini" = "2024-08-01"
