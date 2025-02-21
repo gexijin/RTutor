@@ -68,7 +68,7 @@ mod_11_settings_ui <- function(id) {
                 width = 12,
                 div(
                   style = "padding-left: 85px;padding-right: 20px;padding-bottom: 10px;",
-                  h3(strong("Use personal API Key")),
+                  h3(strong("Use Personal API Key")),
                   shinyWidgets::materialSwitch(
                     inputId = ns("show_api_settings"),
                     label = "",
@@ -79,7 +79,7 @@ mod_11_settings_ui <- function(id) {
                 div(
                   h4("By default, RTutor uses Azure's OpenAI models which costs us a small fee per request.", 
                     style = common_styles$right_div_style),
-                  h4("If you are a regular user, please take a few minutes to create and use a personal API key instead.", 
+                  h4("If you are a regular user, please toggle the button; and take a few minutes to create a personal API key at", a("OpenAI.", href = "https://openai.com/api/", target = "_blank"),
                     style = common_styles$right_div_style)
                 ),
                 conditionalPanel(  # only shown when toggled
