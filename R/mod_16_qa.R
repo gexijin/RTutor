@@ -331,7 +331,6 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       # OpenAI ChatGPT API function
       openAI_agent <- function(messages) {
-        print("OpenAI")
         openai::create_chat_completion(
           model = selected_model(),
           openai_api_key = api_key$key,
@@ -342,7 +341,6 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       # Azure OpenAI ChatGPT API function
       azure_openAI_agent <- function(messages) {
-        print("Azure")
         create_chat_completion_azure(
           model = selected_model(),
           api_version = api_versions[[selected_model()]],

@@ -315,7 +315,6 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     # Azure OpenAI ChatGPT API function
     azure_openAI_agent <- function(messages) {
-      print("Azure")
       create_chat_completion_azure(
         model = selected_model(),
         api_version = api_versions[[selected_model()]],

@@ -40,6 +40,16 @@ mod_04_main_panel_ui <- function(id) {
             column(width = 10,
               p("No code? No problem. Analyze data in your own languages."),
               p("Upload your data, ask questions, and get results in seconds!"),
+              br(),
+              p(
+                "Also try ",
+                a(
+                  "Chatlize.ai,",
+                  href = "https://chatlize.ai",
+                  target = "_blank"
+                ),
+                " a more flexible AI platform."
+              ),
             )
           )
         )
