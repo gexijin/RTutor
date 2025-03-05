@@ -1059,3 +1059,43 @@ site_updates_df <- data.frame(
     "Initial launch"
   )
 )
+
+
+#' Map R Column Classes to User-Friendly Types
+#'
+#' This function takes a column from a dataset and maps its R class
+#' to one of the predefined user-friendly categories:
+#' "character", "numeric", "integer", "factor", or "Date".
+#'
+#' @param col A column vector from a dataframe (e.g., `df$column_name`).
+#'
+#' @return A character string representing the mapped data type.
+#' Possible values: `"character"`, `"numeric"`, `"integer"`, `"factor"`, `"Date"`, `"Datetime"`.
+#'
+#' @export
+#'
+#' @examples
+#' map_class_to_type(Sys.Date())   # Returns "Date"
+#' map_class_to_type(42)           # Returns "numeric"
+#' map_class_to_type(factor("A"))  # Returns "factor"
+#'
+map_class_to_type <- function(col) {
+  col_class <- class(col)
+  
+  if ("character" %in% col_class) {
+    return("character")
+  } else if ("factor" %in% col_class) {
+    return("factor")
+  } else if ("integer" %in% col_class) {
+    return("integer")
+  } else if ("numeric" %in% col_class) {
+    return("numeric")
+  } else if ("Date" %in% col_class) {
+    return("Date")  # Pure dates
+  } else if (any(c("POSIXct", "POSIXt") %in% col_class)) {
+    return("Datetime")  # Preserve Datetime
+  } else {
+    return("character")  # Default to character if unrecognized
+  }
+}
+
