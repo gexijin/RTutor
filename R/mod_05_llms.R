@@ -342,27 +342,13 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     azure_openAI_agent <- function(messages) {
       print("Azure")
 
-      # Get the selected model
-      model_name <- selected_model()
-
-      if (model_name == "o3-mini") {
-        # Call API without temperature
-        create_chat_completion_azure(
-          model = model_name,
-          api_version = api_versions[[model_name]],
-          messages = messages
-        )
-      } else {
-        # Call API with temperature
-        create_chat_completion_azure(
-          model = model_name,
-          api_version = api_versions[[model_name]],
-          temperature = sample_temp(),
-          messages = messages
-        )
-      }
+      create_chat_completion_azure(
+        model = selected_model(),
+        api_version = api_versions[[selected_model()]],
+        temperature = sample_temp(),
+        messages = messages
+      )
     }
-
 
 
     # Return reactive values so they can be used outside the module

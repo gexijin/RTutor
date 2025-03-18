@@ -21,7 +21,7 @@ language_models <- c("o3-mini", "gpt-4o", "gpt-4o-mini")
 names(language_models) <- c("o3 mini", "GPT-4o", "GPT-4o mini")
 default_model <- "o3 mini"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 api_versions <- list(  # API version list corresponding to selected model, may need adjusting
-  "o3-mini" = "2025-01-31",
+  "o3-mini" = "2025-01-01",
   "gpt-4o" = "2024-08-01",
   "gpt-4o-mini" = "2024-08-01"
 )
@@ -737,7 +737,7 @@ create_chat_completion_azure <- function(
   }
 
   #---------------------------------------------------------------------------
-  # Build path parameters
+  # Build path parameters/API URL
 
   api_call <- glue::glue("{endpoint}openai/deployments/{model}/chat/completions?api-version={api_version}-preview")
 
@@ -747,22 +747,41 @@ create_chat_completion_azure <- function(
   )
 
   #---------------------------------------------------------------------------
-  # Build request body
+  # Build Request Body Based on Model
 
-  body <- list(
-    messages = messages,
-    temperature = temperature,
-    top_p = top_p,
-    n = n,
-    stream = stream,
-    stop = stop,
-    max_tokens = max_tokens,
-    presence_penalty = presence_penalty,
-    frequency_penalty = frequency_penalty,
-    logit_bias = logit_bias,
-    user = user,
-    seed = seed
-  )
+  if (model == "o3-mini") {
+    # Use max_completion_tokens instead of max_tokens & exclude temperature
+    body <- list(
+      model = model,
+      messages = messages,
+      n = n,
+      stream = stream,
+      stop = stop,
+      max_completion_tokens = max_tokens,
+      presence_penalty = presence_penalty,
+      frequency_penalty = frequency_penalty,
+      logit_bias = logit_bias,
+      user = user,
+      seed = seed
+    )
+  } else {
+    # Default case: Include temperature & max_tokens
+    body <- list(
+      model = model,
+      messages = messages,
+      temperature = temperature,
+      top_p = top_p,
+      n = n,
+      stream = stream,
+      stop = stop,
+      max_tokens = max_tokens,
+      presence_penalty = presence_penalty,
+      frequency_penalty = frequency_penalty,
+      logit_bias = logit_bias,
+      user = user,
+      seed = seed
+    )
+  }
 
   #---------------------------------------------------------------------------
   # Make a request and parse it
@@ -780,13 +799,12 @@ create_chat_completion_azure <- function(
   #---------------------------------------------------------------------------
   # Check whether request failed and return parsed
   if (httr::http_error(response)) {
-    paste0(
+    stop(paste0(
       "OpenAI API request failed [",
       httr::status_code(response),
       "]:\n\n",
       parsed$error$message
-    ) %>%
-      stop(call. = FALSE)
+    ), call. = FALSE)
   }
   parsed
 }
