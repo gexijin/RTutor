@@ -77,6 +77,59 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # JSON file handling
+    json_file_path <- "submissions.json"
+
+    # Function to create JSON file if it doesn't exist
+    create_json_file <- function() {
+      if (!file.exists(json_file_path)) {
+        writeLines("[]", json_file_path)
+      }
+    }
+
+    # Function to add new submission to JSON file
+    add_submission_to_json <- function(dataset, question, temp, code) {
+      create_json_file()
+
+      # Read existing JSON data
+      existing_data <- tryCatch({
+        jsonlite::fromJSON(json_file_path, simplifyVector = FALSE)
+      }, error = function(e) {
+        list()
+      })
+
+      # Create new submission entry
+      new_entry <- list(
+        Dataset = dataset,
+        Question = question,
+        Temp = temp,
+        Code = code
+      )
+
+      # Add new entry to existing data
+      existing_data[[length(existing_data) + 1]] <- new_entry
+
+      # Write back to JSON file
+      jsonlite::write_json(existing_data, json_file_path, pretty = TRUE, auto_unbox = TRUE)
+    }
+
+    # Observer for submit button
+    observeEvent(submit_button(), {
+      req(submit_button() > 0)
+      req(selected_dataset_name())
+      req(input_text())
+      req(llm_response()$cmd)
+      req(sample_temp())
+
+      # Add submission to JSON file
+      add_submission_to_json(
+        dataset = selected_dataset_name(),
+        question = input_text(),
+        code = llm_response()$cmd,
+        temp = sample_temp()
+      )
+    })
+
     # Dropdown to pick what chunks to include in report
     observe({
       choices <- seq_along(ch$code_history)

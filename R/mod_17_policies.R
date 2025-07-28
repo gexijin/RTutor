@@ -114,34 +114,34 @@ mod_17_policies_serv <- function(id) {
     # old popup modal
     # Pop-up to warn users under age 13 & those associated with a
     # for-profit organization to NOT use RTutor without a license
-    observe({
-      commercial_use_modal <- shiny::modalDialog(
-        title = "RTutor Usage Policy",
+    # observe({
+    #   commercial_use_modal <- shiny::modalDialog(
+    #     title = "RTutor Usage Policy",
 
-        tags$br(),
-        tags$h4("RTutor is available to the public strictly for education and
-          non-profit organizations. If you are affiliated with a company or intend
-          to use RTutor for commercial activities, you must obtain a license from us.
-          Please contact us at ",
-          a("ge@orditus.com.", href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com")
-        ),
+    #     tags$br(),
+    #     tags$h4("RTutor is available to the public strictly for education and
+    #       non-profit organizations. If you are affiliated with a company or intend
+    #       to use RTutor for commercial activities, you must obtain a license from us.
+    #       Please contact us at ",
+    #       a("ge@orditus.com.", href = "mailto:ge@orditus.com?Subject=RTutor&cc=daniel.burkhalter@orditus.com,jenna@orditus.com")
+    #     ),
 
-        tags$br(),
-        tags$h4("We've updated our ",
-          actionLink("ppolicy", "Privacy Policy"),
-          "and ",
-          actionLink("tofu", "Terms of Use."),
-          " By continuing to RTutor.ai, you acknowledge and agree to these changes."
-        ),
+    #     tags$br(),
+    #     tags$h4("We've updated our ",
+    #       actionLink("ppolicy", "Privacy Policy"),
+    #       "and ",
+    #       actionLink("tofu", "Terms of Use."),
+    #       " By continuing to RTutor.ai, you acknowledge and agree to these changes."
+    #     ),
 
-        footer = tagList(modalButton("Agree")),
+    #     footer = tagList(modalButton("Agree")),
 
-        easyClose = TRUE,
-        size = "l"
-      )
+    #     easyClose = TRUE,
+    #     size = "l"
+    #   )
 
-      shiny::showModal(commercial_use_modal)
-    })
+    #   shiny::showModal(commercial_use_modal)
+    # })
 
   })
 }

@@ -16,7 +16,7 @@ mod_03_send_request_ui <- function(id) {
       inputId = ns("input_text"),
       label = NULL,
       placeholder = "Ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples below.",
-      rows = 6
+      rows = 4
     ),
 
     # Example Prompts

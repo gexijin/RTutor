@@ -27,7 +27,7 @@ api_versions <- list(  # API version list corresponding to selected model, may n
 )
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
-default_temperature <- 0.2
+default_temperature <- 0
 pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
