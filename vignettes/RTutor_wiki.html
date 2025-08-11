@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RTutor Wiki</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RTutor Wiki</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#rtutorai---talk-to-your-data-via-ai"
+id="toc-rtutorai---talk-to-your-data-via-ai">RTutor.ai - Talk to your
+data via AI</a>
+<ul>
+<li><a href="#video-tutorial" id="toc-video-tutorial">Video Tutorial</a>
+<ul>
+<li><a href="#example-report" id="toc-example-report">Example
+Report</a></li>
+</ul></li>
+<li><a href="#whats-new" id="toc-whats-new">What's New</a></li>
+</ul></li>
+<li><a href="#local-installation" id="toc-local-installation">Local
+Installation</a>
+<ul>
+<li><a href="#1-update-r-and-rstudio-to-the-most-recent-version"
+id="toc-1-update-r-and-rstudio-to-the-most-recent-version">1. Update R
+and RStudio to the most recent version.</a></li>
+<li><a href="#2-install-the-rtutor-package"
+id="toc-2-install-the-rtutor-package">2. Install the RTutor
+package</a></li>
+<li><a href="#3-install-other-r-packages-when-prompted"
+id="toc-3-install-other-r-packages-when-prompted">3. Install other R
+packages when prompted.</a></li>
+<li><a href="#4-obtain-an-api-key-from-openai"
+id="toc-4-obtain-an-api-key-from-openai">4. Obtain an API key from
+OpenAI</a></li>
+<li><a href="#5-use-the-api-key-with-rtutor"
+id="toc-5-use-the-api-key-with-rtutor">5. Use the API key with
+RTutor</a></li>
+<li><a href="#6-to-start-rtutor" id="toc-6-to-start-rtutor">6. To start
+RTutor</a></li>
+</ul></li>
+<li><a href="#examples" id="toc-examples">Examples</a></li>
+<li><a href="#tutorial" id="toc-tutorial">Tutorial</a>
+<ul>
+<li><a href="#rtutor-basics" id="toc-rtutor-basics">RTutor Basics</a>
+<ul>
+<li><a href="#load-demo-data-select-example-request"
+id="toc-load-demo-data-select-example-request">Load demo data, select
+example request</a></li>
+<li><a href="#upload-your-data-verify-and-edit-data-types"
+id="toc-upload-your-data-verify-and-edit-data-types">Upload your data,
+verify and edit data types</a></li>
+<li><a href="#upload-a-second-dataset-delete-a-code-chunk"
+id="toc-upload-a-second-dataset-delete-a-code-chunk">Upload a second
+dataset, delete a code chunk</a></li>
+<li><a href="#download-a-report-as-html-or-rmd"
+id="toc-download-a-report-as-html-or-rmd">Download a report, as HTML or
+RMD</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#frequently-asked-questions"
+id="toc-frequently-asked-questions">Frequently Asked Questions</a>
+<ul>
+<li><a href="#what-is-rtutorai" id="toc-what-is-rtutorai">What is
+RTutor.ai?</a></li>
+<li><a href="#how-does-rtutorai-work"
+id="toc-how-does-rtutorai-work">How does RTutor.ai work?</a></li>
+<li><a href="#is-my-data-uploaded-to-openai"
+id="toc-is-my-data-uploaded-to-openai">Is my data uploaded to
+OpenAI?</a></li>
+<li><a href="#who-is-rtutorai-for" id="toc-who-is-rtutorai-for">Who is
+RTutor.ai for?</a></li>
+<li><a href="#how-do-you-make-sure-the-results-are-correct"
+id="toc-how-do-you-make-sure-the-results-are-correct">How do you make
+sure the results are correct?</a></li>
+<li><a href="#can-you-use-rtutor-to-do-r-coding-homework"
+id="toc-can-you-use-rtutor-to-do-r-coding-homework">Can you use RTutor
+to do R coding homework?</a></li>
+<li><a href="#can-private-companies-use-rtutor"
+id="toc-can-private-companies-use-rtutor">Can private companies use
+RTutor?</a></li>
+<li><a href="#can-you-run-rtutor-locally"
+id="toc-can-you-run-rtutor-locally">Can you run RTutor locally?</a></li>
+<li><a href="#why-do-i-get-different-results-with-the-same-request"
+id="toc-why-do-i-get-different-results-with-the-same-request">Why do I
+get different results with the same request?</a></li>
+<li><a
+href="#can-people-without-r-coding-experience-use-rtutor-for-statistical-analysis"
+id="toc-can-people-without-r-coding-experience-use-rtutor-for-statistical-analysis">Can
+people without R coding experience use RTutor for statistical
+analysis?</a></li>
+<li><a href="#can-rtutor-replace-statisticians-or-data-scientists"
+id="toc-can-rtutor-replace-statisticians-or-data-scientists">Can RTutor
+replace statisticians or data scientists?</a></li>
+<li><a href="#how-do-i-write-my-request-effectively"
+id="toc-how-do-i-write-my-request-effectively">How do I write my request
+effectively?</a></li>
+<li><a href="#can-i-install-r-packages-in-the-ai-generated-code"
+id="toc-can-i-install-r-packages-in-the-ai-generated-code">Can I install
+R packages in the AI-generated code?</a></li>
+<li><a href="#can-i-upload-big-files-to-the-site"
+id="toc-can-i-upload-big-files-to-the-site">Can I upload big files to
+the site?</a></li>
+<li><a href="#voice-input-does-not-work"
+id="toc-voice-input-does-not-work">Voice input does not work!</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="rtutorai---talk-to-your-data-via-ai">RTutor.ai - Talk to your
+data via AI</h1>
+<p>Hosted at <a href="https://rtutor.ai/">RTutor.ai</a>.</p>
+<p>No code? No problem. Analyze data with simple, natural language.
+Upload your data, ask questions, and get results in seconds!</p>
+<p>Contact the RTutor team by email, <a
+href="mailto:ge@orditus.com">ge@orditus.com</a>, and find Steven Ge on
+<a href="https://www.linkedin.com/in/steven-ge-ab016947/">LinkedIn</a>
+and <a href="https://x.com/StevenXGe">X</a>.</p>
+<h2 id="video-tutorial">Video Tutorial</h2>
+<p>We highly recommend that users watch this 10-minute <a
+href="https://www.youtube.com/watch?v=a-bZW26nK9k">YouTube
+video</a>.</p>
+<h3 id="example-report">Example Report</h3>
+<p>See this <a
+href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/gexijin/RTutor/main/vignettes/RTutor_Example_Report_0825.html">example
+report</a> generated by RTutor after a typical session. (PDF version: <a
+href="https://github.com/gexijin/RTutor/blob/3fafc466c587b97f53eeea896965b7fc55cdd863/vignettes/RTutor_Example_Report_0825.pdf">report.pdf</a>,
+Rmd file: <a
+href="https://github.com/gexijin/RTutor/blob/3fafc466c587b97f53eeea896965b7fc55cdd863/vignettes/RTutor_Example_Report_0825.Rmd">report.Rmd</a>)</p>
+<h2 id="whats-new">What's New</h2>
+<ol type="1">
+<li>Redesigned UI and backend.</li>
+<li>GPT-4o becomes the default, providing more accurate code.</li>
+<li>Comprehensive EDA reports.</li>
+<li>Chat window that helps explain code, result, error messages, and
+statistics in general. This makes RTutor a great platform for learning R
+and statistics.</li>
+</ol>
+<h1 id="local-installation">Local Installation</h1>
+<p>This repository is updated frequently, sometimes a few times a
+day.<br />
+We suggest users reinstall everytime before using it, so that you always
+have the most recent version.</p>
+<h3 id="1-update-r-and-rstudio-to-the-most-recent-version">1. Update R
+and RStudio to the most recent version.</h3>
+<h3 id="2-install-the-rtutor-package">2. Install the RTutor package</h3>
+<p>Run this code in RStudio:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install &#39;remotes&#39; package</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(<span class="st">&quot;remotes&quot;</span>)) {</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;remotes&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(remotes)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Install &#39;heyshiny&#39; package, for voice input</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">install_github</span>(<span class="st">&quot;jcrodriguez1989/heyshiny&quot;</span>, <span class="at">dependencies =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Install &#39;RTutor&#39; package</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">install_github</span>(<span class="st">&quot;gexijin/RTutor&quot;</span>)</span></code></pre></div>
+<h3 id="3-install-other-r-packages-when-prompted">3. Install other R
+packages when prompted.</h3>
+<p>If you'd like to use additional R packages for analyzing your data,
+you should install those on your computer too.</p>
+<h3 id="4-obtain-an-api-key-from-openai">4. Obtain an API key from
+OpenAI</h3>
+<blockquote>
+<ol type="1">
+<li>Create a personal account at <a
+href="https://platform.openai.com/docs/overview">OpenAI</a>.</li>
+<li>After logging in, click 'Quickstart' at the sidebar on the
+left.</li>
+<li>Click 'Create an API key in the dashboard here' underneath the
+heading 'Create and export an API key'</li>
+<li>Click 'Create a new secret key' to create a key, which can be
+copied.<br />
+Currently, the first $5 of usage is free. If you exceed this, add a
+payment method to your account.<br />
+Then navigate to 'Usage' at the sidebar on the left and set usage
+limits. <span class="math inline">3−</span>5 per month is more than
+enough for most people.</li>
+</ol>
+</blockquote>
+<h3 id="5-use-the-api-key-with-rtutor">5. Use the API key with
+RTutor</h3>
+<p>There are several ways to do this:</p>
+<blockquote>
+<ul>
+<li>Once RTutor is running, click on the 'Settings' tab and paste in
+your API key.</li>
+<li>You can also save this key as a text file called "api_key.txt" in
+the working directory.</li>
+<li>Or, you can create an environment variable called "OPEN_API_KEY"
+where the value is your API key. Here are the instructions for <a
+href="https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html">Windows</a>,
+<a
+href="https://phoenixnap.com/kb/set-environment-variable-mac">Mac</a>,
+and <a
+href="https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/">Linux</a>.</li>
+</ul>
+</blockquote>
+<h3 id="6-to-start-rtutor">6. To start RTutor</h3>
+<p>Run the following code in RStudio:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RTutor)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">run_app</span>()</span></code></pre></div>
+<h1 id="examples">Examples</h1>
+<p>See this <a
+href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/gexijin/RTutor/main/vignettes/RTutor_Example_Report_0825.html">example
+report</a> generated by RTutor after a typical session. (PDF version: <a
+href="https://github.com/gexijin/RTutor/blob/3fafc466c587b97f53eeea896965b7fc55cdd863/vignettes/RTutor_Example_Report_0825.pdf">report.pdf</a>,
+Rmd file: <a
+href="https://github.com/gexijin/RTutor/blob/3fafc466c587b97f53eeea896965b7fc55cdd863/vignettes/RTutor_Example_Report_0825.Rmd">report.Rmd</a>)</p>
+<p>Watch an introductory tutorial video <a
+href="https://www.youtube.com/watch?v=a-bZW26nK9k">here</a>.</p>
+<p>We are creating a YouTube channel to share more tutorials and
+in-depth RTutor examples. Stay tuned for updates!<br />
+<br><br></p>
+<h1 id="tutorial">Tutorial</h1>
+<h2 id="rtutor-basics">RTutor Basics</h2>
+<h3 id="load-demo-data-select-example-request">Load demo data, select
+example request</h3>
+<p><img
+src="https://github.com/user-attachments/assets/8d928ef6-3b5d-4682-ac0b-24eda6de08fe"
+alt="gif1" /> <br><br></p>
+<h3 id="upload-your-data-verify-and-edit-data-types">Upload your data,
+verify and edit data types</h3>
+<p><img
+src="https://github.com/user-attachments/assets/51c452de-f833-4032-987e-a41bcb5701d2"
+alt="gif2" /> <br><br></p>
+<h3 id="upload-a-second-dataset-delete-a-code-chunk">Upload a second
+dataset, delete a code chunk</h3>
+<p><img
+src="https://github.com/user-attachments/assets/0142d4cf-63e8-420c-a638-40f4558ea6ad"
+alt="gif3" /> <br><br></p>
+<h3 id="download-a-report-as-html-or-rmd">Download a report, as HTML or
+RMD</h3>
+<p><img
+src="https://github.com/user-attachments/assets/907f0aae-fc70-4592-ac16-c1f27f429d6c"
+alt="gif4" /> <br><br></p>
+<h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+<h3 id="what-is-rtutorai">What is RTutor.ai?</h3>
+<blockquote>
+<p>RTutor.ai is an artificial intelligence (AI)-based app that enables
+users to interact with their data via natural language. Users ask
+questions about or request analyses in English. The app generates and
+runs R code to answer the question with plots and numeric results. Users
+may also request interpretation of results and analyses.</p>
+</blockquote>
+<h3 id="how-does-rtutorai-work">How does RTutor.ai work?</h3>
+<blockquote>
+<p>The requests are structured and sent to OpenAI’s AI system, which
+returns R code. The R code is cleaned up and executed in a Shiny
+environment, showing results or error messages. Multiple requests are
+logged to produce an R Markdown file, which can be knitted into an HTML
+report for record-keeping and reproducibility.</p>
+</blockquote>
+<h3 id="is-my-data-uploaded-to-openai">Is my data uploaded to
+OpenAI?</h3>
+<blockquote>
+<p>By default, 5 randomly selected rows are sent to OpenAI to provide
+precise code results. You may opt out of this in the settings tab. All
+column names of your data are sent to OpenAI as a prompt to generate R
+code. Your data is not stored on our server after the session has
+ended.</p>
+</blockquote>
+<h3 id="who-is-rtutorai-for">Who is RTutor.ai for?</h3>
+<blockquote>
+<p>The primary goal is to help people with minimal R experience to learn
+R or be more productive. RTutor can speed up the coding process using R
+by providing draft code to test and refine. Be cautious of potential
+bugs or errors.</p>
+</blockquote>
+<h3 id="how-do-you-make-sure-the-results-are-correct">How do you make
+sure the results are correct?</h3>
+<blockquote>
+<p>Try to word your question differently or more specifically and repeat
+the same request several times. This allows users to double-check and
+ensure consistent results from different runs.</p>
+</blockquote>
+<h3 id="can-you-use-rtutor-to-do-r-coding-homework">Can you use RTutor
+to do R coding homework?</h3>
+<blockquote>
+<p>No. That would defeat the purpose. You need to learn R coding
+properly to ensure the generated R code is correct.</p>
+</blockquote>
+<h3 id="can-private-companies-use-rtutor">Can private companies use
+RTutor?</h3>
+<blockquote>
+<p>Not without licensure. RTutor is available for demo purposes only.
+The RTutor website and source code are freely available for non-profit
+organizations and distributed under the CC NC 3.0 license. Contact us
+for more information about commercial licensing.</p>
+</blockquote>
+<h3 id="can-you-run-rtutor-locally">Can you run RTutor locally?</h3>
+<blockquote>
+<p>Yes. Download the R package and install it locally. You will also
+need to obtain an API key from OpenAI. See the 'Local Installation' wiki
+page for more information.</p>
+</blockquote>
+<h3 id="why-do-i-get-different-results-with-the-same-request">Why do I
+get different results with the same request?</h3>
+<blockquote>
+<p>OpenAI’s language model has a certain degree of randomness when
+providing results, controlled by a 'temperature' parameter. Although
+this is set low, the app may still produce varying results.</p>
+</blockquote>
+<h3
+id="can-people-without-r-coding-experience-use-rtutor-for-statistical-analysis">Can
+people without R coding experience use RTutor for statistical
+analysis?</h3>
+<blockquote>
+<p>Not entirely. The generated code may sometimes be incorrect. However,
+RTutor can help quickly perform data visualization and exploratory data
+analysis (EDA). Be mindful that this is experimental technology.</p>
+</blockquote>
+<h3 id="can-rtutor-replace-statisticians-or-data-scientists">Can RTutor
+replace statisticians or data scientists?</h3>
+<blockquote>
+<p>No, but RTutor can make them more efficient by accelerating parts of
+their workflow.</p>
+</blockquote>
+<h3 id="how-do-i-write-my-request-effectively">How do I write my request
+effectively?</h3>
+<blockquote>
+<p>Think of RTutor as a summer intern—a college student with one
+semester of statistics and R experience. Your instructions need to be
+clear and precise. While the intern is fast and works hard, they can
+make mistakes. Thanks to AI, this intern is lightning-fast and nearly
+free.</p>
+</blockquote>
+<h3 id="can-i-install-r-packages-in-the-ai-generated-code">Can I install
+R packages in the AI-generated code?</h3>
+<blockquote>
+<p>No. However, we are working to pre-install the top 5000 most
+frequently used R packages on the server. Chances are, your favorite
+package is already installed!</p>
+</blockquote>
+<h3 id="can-i-upload-big-files-to-the-site">Can I upload big files to
+the site?</h3>
+<blockquote>
+<p>Not if they are larger than 10MB. Instead, upload a small portion of
+your data to generate the code, which you can run locally on your
+laptop. Alternatively, download the RTutor R package and use it on your
+computer.</p>
+</blockquote>
+<h3 id="voice-input-does-not-work">Voice input does not work!</h3>
+<blockquote>
+<p>This could be due to your browser blocking the website from accessing
+the microphone. Make sure to access the site using <a
+href="https://RTutor.ai">https://RTutor.ai</a> (with HTTPS). If you use
+HTTP, microphone access is automatically blocked in Chrome. Also, speak
+closer to the mic and ensure only one browser tab is using it.</p>
+</blockquote>
+</body>
+</html>
