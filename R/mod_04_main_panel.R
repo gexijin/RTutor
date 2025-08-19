@@ -509,58 +509,69 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         confirmButtonText = "Yes",
         cancelButtonText = "No",
         callbackR = function(isConfirmed) {
-          if (isConfirmed) {
-            # What current chunk is selected??
-            id_pre <- as.integer(input$selected_chunk)
-            ch$code_history[[id_pre]] <- NULL # R Automatically shifts list down
+          if (!isTRUE(isConfirmed)) return(invisible())
 
-            max_id <- length(ch$code_history)
+          # Which chunk is selected?
+          id_pre <- as.integer(input$selected_chunk)
+          ch$code_history[[id_pre]] <- NULL  # R reindexes list automatically
 
-            if (max_id > 0){ # Order Operation MATTERS!!!!
-              # Order Operation 1 (Reorder Code History ID's & rmd chunk numbering)
-              ch$code_history <- lapply(1:max_id, function(i) {
-                ch$code_history[[i]]$id = i #Reasign the id's
-                substr(ch$code_history[[i]]$rmd,6,6) = as.character(i) #Updating the RMD number as well.
-                ch$code_history[[i]]
-              })
+          max_id <- length(ch$code_history)
 
-              # Order Operation 2 (Update current code info)
-              logs$id <- ch$code_history[[max_id]]$id
-              logs$code <- ch$code_history[[max_id]]$code
-              logs$raw <- ch$code_history[[max_id]]$raw
-              logs$last_code <- ch$code_history[[max_id]]$last_code
-              logs$language <- ch$code_history[[max_id]]$language
+          if (max_id > 0) {
+            # 1) Reindex ids and rmds deterministically
+            ch$code_history <- lapply(seq_len(max_id), function(i) {
+              x <- ch$code_history[[i]]
+              x$id  <- i
+              # safer than substr assignment; rebuild the rmd tag
+              x$rmd <- paste0("chunk", i)
+              x
+            })
 
+            # 2) Point logs to the last chunk (common UX)
+            last <- ch$code_history[[max_id]]
+            logs$id        <- last$id
+            logs$code      <- last$code
+            logs$raw       <- last$raw
+            logs$last_code <- last$last_code
+            logs$language  <- last$language
 
-              choices <- 1:length(ch$code_history)
-              names(choices) <- paste0("Chunk #", choices)
-              chunk_selection$chunk_choices <- choices
+            # 3) Build choices: names = labels, values = character ids
+            vals <- as.character(seq_len(max_id))         # "1","2","3"
+            labs <- paste0("Chunk #", seq_len(max_id))    # "Chunk #1", ...
+            choices <- stats::setNames(vals, labs)
 
-              # Update chunk choices
-              updateSelectInput(
-                session = session,
-                inputId = "selected_chunk",
-                choices = choices,
-                selected = logs$id
-              )
+            # Keep reactive value in sync for tests and server logic
+            chunk_selection$chunk_choices  <- choices
+            chunk_selection$selected_chunk <- as.character(logs$id)
 
-            } else {
-              logs$id <- 0
-              logs$code = ""
-              logs$raw = ""
-              logs$last_code = ""
-              logs$language = ""
-              ch$code_history = list()
+            # Update UI control
+            updateSelectInput(
+              session = session,
+              inputId = "selected_chunk",
+              choices = choices,
+              selected = as.character(logs$id)
+            )
 
-              # update chunk choices
-              updateSelectInput(
-                session = session,
-                inputId = "selected_chunk",
-                choices = "",
-                selected = NULL
-              )
-              
-            }
+          } else {
+            # No chunks left: clear logs and choices
+            logs$id        <- 0
+            logs$code      <- ""
+            logs$raw       <- ""
+            logs$last_code <- ""
+            logs$language  <- ""
+            ch$code_history <- list()
+
+            # empty choices (named character(0))
+            empty_choices <- stats::setNames(character(), character())
+            chunk_selection$chunk_choices  <- empty_choices
+            chunk_selection$selected_chunk <- NULL
+
+            updateSelectInput(
+              session = session,
+              inputId = "selected_chunk",
+              choices = empty_choices,
+              selected = NULL
+            )
           }
         }
       )

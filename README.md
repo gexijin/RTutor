@@ -1,4 +1,9 @@
 # RTutor.ai - Talk to your data via AI
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/gexijin/RTutor/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gexijin/RTutor/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 An R package hosted at [RTutor.ai](https://RTutor.ai). <br>
 Contact Steven Ge on [LinkedIn](https://www.linkedin.com/in/steven-ge-ab016947/) or [Twitter.](https://twitter.com/StevenXGe) Reach the RTutor team by email, ge@orditus.com.
 

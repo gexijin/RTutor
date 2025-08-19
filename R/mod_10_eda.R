@@ -421,7 +421,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       req(selected_dataset_name() != no_data)
 
       df <- as.data.frame(current_data())
-      DataExplorer::plot_bar(df)
+      suppressWarnings(DataExplorer::plot_bar(df))
     })
 
     output$distribution_category <- renderUI({
@@ -463,7 +463,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       req(selected_dataset_name() != no_data)
 
       df <- as.data.frame(current_data())
-      DataExplorer::plot_histogram(df)
+      suppressWarnings(DataExplorer::plot_histogram(df))
     })
 
     output$distribution_numeric <- renderUI({
@@ -503,7 +503,7 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       req(selected_dataset_name() != no_data)
 
       df <- as.data.frame(current_data())
-      DataExplorer::plot_qq(df)
+      suppressWarnings(DataExplorer::plot_qq(df))
     })
 
     output$qq_numeric <- renderUI({
@@ -687,26 +687,50 @@ mod_10_eda_serv <- function(id, selected_dataset_name, use_python,
       req(selected_dataset_name() != no_data)
       req(ggpairs_data())
       req(input$ggpairs_submit)
+      
       isolate({
         req(input$ggpairs_variables)
         req(length(input$ggpairs_variables) > 0)
 
         withProgress(message = "Running ggpairs ...", {
           incProgress(0.3)
+          
           df <- as.data.frame(ggpairs_data())
-          if (input$ggpairs_variables_color != "") {
-            GGally::ggpairs(
-              df[, input$ggpairs_variables],
-              mapping = aes(
-                color = df[, input$ggpairs_variables_color],
-                alpha = 0.5
-              )
-            )
-          } else {  # no color
-            GGally::ggpairs(
-              df[, input$ggpairs_variables]
-            )
+          plot_data <- df[, input$ggpairs_variables, drop = FALSE]
+          color_var <- input$ggpairs_variables_color
+
+          # Basic validation: need enough rows and finite data for correlations
+          if (nrow(plot_data) < 3) {
+            return(ggplot() + annotate("text", x=0.5, y=0.5, label="Need ≥3 observations") + theme_void())
           }
+
+          # Check if we have enough complete cases for numeric pairs
+          numeric_vars <- sapply(plot_data, is.numeric)
+          if (sum(numeric_vars) >= 2) {
+            numeric_data <- plot_data[, numeric_vars, drop = FALSE]
+            complete_cases <- complete.cases(numeric_data)
+            if (sum(complete_cases) < 3) {
+              return(ggplot() + annotate("text", x=0.5, y=0.5, label="Insufficient complete data\nfor correlations") + theme_void())
+            }
+          }
+
+          incProgress(0.7)
+
+          # Create plot with error handling
+          tryCatch({
+            if (!is.null(color_var) && color_var != "" && color_var %in% colnames(df)) {
+              GGally::ggpairs(
+                plot_data,
+                mapping = aes(color = df[, color_var], alpha = 0.5)
+              )
+            } else {
+              GGally::ggpairs(plot_data)
+            }
+          }, error = function(e) {
+            ggplot() + 
+              annotate("text", x=0.5, y=0.5, label=paste("ggpairs failed:\n", substr(e$message, 1, 50))) + 
+              theme_void()
+          })
         })
       })
     })

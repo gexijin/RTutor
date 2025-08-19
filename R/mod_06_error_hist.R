@@ -136,27 +136,38 @@
 
     })
 
-    # Change code when past code is selected
+    # Change code when past code is selected (robust to invalid IDs)
     observeEvent(chunk_selection$selected_chunk, {
-      req(chunk_selection$selected_chunk)
+      val <- chunk_selection$selected_chunk
+      if (is.null(val) || length(val) == 0) return()
 
-      id <- chunk_selection$selected_chunk
-      id <- as.integer(id)
+      # coerce to integer safely
+      id <- suppressWarnings(as.integer(val))
+      n  <- length(ch$code_history)
 
-      logs$code <- ch$code_history[[id]]$code
-      logs$raw <- ch$code_history[[id]]$raw
+      # guard: nothing to select from OR invalid index → ignore
+      if (is.na(id) || n == 0 || id < 1 || id > n) {
+        # optional: tell the user (comment out if you want it completely silent)
+        # showNotification("Invalid chunk selection ignored.", type = "message", duration = 3)
+        return()
+      }
 
+      # safe pulls with fallbacks
+      entry <- ch$code_history[[id]]
 
-      # Switched to previous chunks
-      if (id < length(ch$code_history)) {
-        # convert list to environment;
-        # update the run_env reactive value.
-        # restore the environment to the before running the ith chunk
-        run_env(list2env(ch$code_history[[id]]$env))
-        current_data(run_env()$df)
-        current_data_2(run_env()$df2)
+      logs$code <- if (!is.null(entry$code)) entry$code else ""
+      logs$raw  <- if (!is.null(entry$raw))  entry$raw  else logs$code
+      chunk_selection$past_prompt <- if (!is.null(entry$prompt)) entry$prompt else ""
 
-        # enable re-calculation of the code
+      # If we switched to a past chunk (not the latest), restore env & bump reverted()
+      if (id < n) {
+        if (!is.null(entry$env) && is.list(entry$env)) {
+          # convert list snapshot back to an environment
+          run_env(list2env(entry$env, parent = emptyenv()))
+          # update current data reactives if present
+          if (!is.null(run_env()$df))  current_data(run_env()$df)
+          if (!is.null(run_env()$df2)) current_data_2(run_env()$df2)
+        }
         reverted(reverted() + 1)
 
         showNotification(

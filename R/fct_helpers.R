@@ -14,6 +14,7 @@
 release <- "2.00" # RTutor
 no_data <- "no_data" #'No Data' # no data is uploaded or selected
 user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_data
+data_placeholder <- "Demo:"
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
@@ -76,7 +77,7 @@ available_datasets <- c(
   intersect(order, available_datasets),
   setdiff(available_datasets, order)
 )
-data_placeholder <- "Demo:"
+
 # Append dummy values for user-uploaded data & no data
 available_datasets <- c(data_placeholder, no_data, available_datasets,
   user_upload
