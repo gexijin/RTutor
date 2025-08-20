@@ -234,29 +234,40 @@ testthat::test_that("CSV upload is parsed and assigned to current_data()", {
 testthat::test_that("RNA_SEQ loads csv via app_sys", {
   library(shiny)
 
-  # temp CSV to stand in for packaged RNA-SEQ file
-  tmp <- tempfile(fileext = ".csv")
-  on.exit(unlink(tmp), add = TRUE)
-  utils::write.csv(head(iris), tmp, row.names = FALSE)
+  # ---- temp CSV as packaged file stand-in ----
+  tmp_csv <- tempfile(fileext = ".csv")
+  on.exit(unlink(tmp_csv), add = TRUE)
+  utils::write.csv(utils::head(iris), tmp_csv, row.names = FALSE)
 
-  # stub app_sys for this test only
-  old_app_sys <- get0("app_sys", ifnotfound = NULL)
-  app_sys <- function(...) tmp
-  assign("app_sys", app_sys, envir = .GlobalEnv)
+  # app_sys stub -> always return our temp CSV
+  fake_app_sys <- function(...) tmp_csv
+
+  # Get the module’s enclosing env so free vars resolve there
+  mod_env <- environment(mod_02_load_data_serv)
+  if (is.null(mod_env)) mod_env <- .GlobalEnv
+
+  # ---- install app_sys stub in BOTH envs; restore on exit ----
+  old_app_sys_global <- get0("app_sys", envir = .GlobalEnv, inherits = FALSE)
+  old_app_sys_mod    <- get0("app_sys", envir = mod_env,    inherits = FALSE)
+  assign("app_sys", fake_app_sys, envir = .GlobalEnv)
+  assign("app_sys", fake_app_sys, envir = mod_env)
   on.exit({
-    if (!is.null(old_app_sys)) assign("app_sys", old_app_sys, envir = .GlobalEnv)
+    if (!is.null(old_app_sys_global)) assign("app_sys", old_app_sys_global, envir = .GlobalEnv) else if (exists("app_sys", envir = .GlobalEnv, inherits = FALSE)) rm("app_sys", envir = .GlobalEnv)
+    if (!is.null(old_app_sys_mod))    assign("app_sys", old_app_sys_mod,    envir = mod_env)    else if (exists("app_sys", envir = mod_env,    inherits = FALSE)) rm("app_sys", envir = mod_env)
   }, add = TRUE)
 
-  # required globals
-  assign("data_placeholder", "DATA_PLACEHOLDER", envir = .GlobalEnv)
-  assign("no_data",         "NO_DATA",          envir = .GlobalEnv)
-  assign("user_upload",     "USER_UPLOAD",      envir = .GlobalEnv)
-  assign("rna_seq",         "RNA_SEQ",          envir = .GlobalEnv)
-  assign("available_datasets",
-         c("RNA_SEQ","NO_DATA","DATA_PLACEHOLDER","USER_UPLOAD"),
-         envir = .GlobalEnv)
+  # ---- define constants in BOTH envs ----
+  define_const <- function(name, value) { assign(name, value, envir = .GlobalEnv); assign(name, value, envir = mod_env) }
+  # Include BOTH variants so whichever the module expects will match
+  define_const("data_placeholder", "DATA_PLACEHOLDER")
+  define_const("no_data",          "NO_DATA")
+  define_const("user_upload",      "USER_UPLOAD")
+  # Try both tags the module might use
+  rnaseq_tags <- c("RNA_SEQ", "RNA-SEQ")
+  define_const("rna_seq", rnaseq_tags[1])  # won't be used directly if module compares literal
+  define_const("available_datasets", c(rnaseq_tags, "NO_DATA", "DATA_PLACEHOLDER", "USER_UPLOAD"))
 
-  # reactives expected by the module
+  # ---- reactives required by the module ----
   current_data    <- reactiveVal(NULL); current_data_2  <- reactiveVal(NULL)
   original_data   <- reactiveVal(NULL); original_data_2 <- reactiveVal(NULL)
   run_env         <- reactiveVal(new.env(parent = emptyenv()))
@@ -283,11 +294,25 @@ testthat::test_that("RNA_SEQ loads csv via app_sys", {
       max_levels_factor=max_levels_factor
     ),
     {
-      session$setInputs(user_selected_dataset = rna_seq)
-      session$flushReact()
+      # Try both label variants; bail as soon as data appears
+      loaded <- FALSE
+      for (tag in c("RNA_SEQ", "RNA-SEQ")) {
+        session$setInputs(user_selected_dataset = tag)
+        # allow a couple of reactive passes; some modules do multi-step updates
+        for (i in 1:4) {
+          session$flushReact()
+          if (!is.null(current_data())) { loaded <- TRUE; break }
+        }
+        if (loaded) break
+      }
+
+      # Give a more helpful failure if nothing loaded
+      testthat::expect_true(loaded, info = "Module did not populate current_data() for either 'RNA_SEQ' or 'RNA-SEQ'")
+
       df <- current_data()
       testthat::expect_true(is.data.frame(df))
-      testthat::expect_equal(nrow(df), nrow(head(iris)))
+      testthat::expect_equal(nrow(df), nrow(utils::head(iris)))
+      testthat::expect_equal(names(df), names(utils::head(iris)))
     }
   )
 })

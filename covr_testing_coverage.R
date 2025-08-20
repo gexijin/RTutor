@@ -4,6 +4,15 @@
 library(devtools)
 library(covr)
 
+
+# Covr uses a different app_sys() than the main app, must copy demo_questions to new dir to work properly
+if (file.exists("inst/app/www/demo_questions.csv") && !file.exists("app/www/demo_questions.csv")) {
+  dir.create("app/www", recursive = TRUE, showWarnings = FALSE)
+  file.copy("inst/app/www/demo_questions.csv", "app/www/demo_questions.csv")
+  cat("Created app/www/demo_questions.csv for testing\n")
+}
+
+
 # Make sure your code is loaded into the session (no package install needed)
 devtools::load_all(".")
 
@@ -15,4 +24,12 @@ cov <- covr::file_coverage(
 
 # View coverage summary & HTML report
 cov
-covr::report(cov)
+
+# Create timestamp for unique filenames
+timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
+
+# Save to coverage_reports directory with timestamp (Option 3)
+dir.create("coverage_reports", showWarnings = FALSE)
+report_path <- file.path("coverage_reports", paste0("coverage_", timestamp, ".html"))
+covr::report(cov, file = report_path)
+cat("Coverage report saved to:", report_path, "\n")
