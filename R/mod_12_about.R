@@ -104,8 +104,8 @@ mod_12_about_ui <- function(id) {
     ),
     p(
       "Explore our other AI tools at ",
-      a("Chatlize.ai",
-        href = "https://chatlize.ai/",
+      a("Datably.ai",
+        href = "https://datably.ai/",
         target = "_blank"
       ),
       style = "font-size: 23px;padding-left: 20px;padding-right: 20px;"
