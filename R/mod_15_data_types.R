@@ -1,3 +1,8 @@
+
+
+
+
+
 #____________________________________________________________________________
 #  Data Types
 #____________________________________________________________________________
@@ -227,8 +232,9 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
                             "Numeric" = "numeric",
                             "Integer" = "integer",
                             "Category" = "factor",
-                            "Date" = "Date"),
-                selected = class(current_data()[[i]])
+                            "Date" = "Date",
+                            "Datetime" = "Datetime"),
+                selected = map_class_to_type(current_data()[[i]])
               )
             ),
             column(
@@ -262,8 +268,9 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
                           "Numeric" = "numeric",
                           "Integer" = "integer",
                           "Category" = "factor",
-                          "Date" = "Date"),
-              selected = class(current_data_2()[[i]])
+                          "Date" = "Date",
+                          "Datetime" = "Datetime"),
+              selected = map_class_to_type(current_data_2()[[i]])
             )
           ),
           column(
@@ -275,7 +282,6 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
         )
       })
     })
-
 
     # Update data based on column_type - 1st Dataset
     observe({
@@ -291,17 +297,27 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
         col_type <- input[[paste0("column_type_", i)]]
         if (!is.null(col_type)) {
           updated_data <- isolate(current_data())
-
+          
           # when converting to factor the as function gives an error
           if (col_type == "factor") {
             updated_data[[i]] <- as.factor(updated_data[[i]])
           } else if (col_type == "Date") {
+
             updated_data[[i]] <- lubridate::parse_date_time(
               updated_data[[i]],
               orders = c("mdy", "dmy", "ymd")
             )
             updated_data[[i]] <- as.Date(updated_data[[i]])
-          } else if(col_type == "numeric" & class(updated_data[[i]]) == "factor") {
+
+          }  else if (col_type == "Datetime") {
+
+            updated_data[[i]] <- lubridate::parse_date_time(
+              updated_data[[i]],
+              orders = c("ymd HMS", "ymd HM", "ymd", "mdy HMS", "mdy HM", "mdy", "dmy HMS", "dmy HM", "dmy")
+            )
+            # No as.Date() here; time is preserved
+
+          } else if(col_type == "numeric" & "factor" %in% class(updated_data[[i]])) {
             updated_data[[i]] <- as(as.character(updated_data[[i]]), col_type)
           } else {
             updated_data[[i]] <- as(updated_data[[i]], col_type)
@@ -340,7 +356,15 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
               orders = c("mdy", "dmy", "ymd")
             )
             updated_data[[i]] <- as.Date(updated_data[[i]])
-          } else if(col_type == "numeric" & class(updated_data[[i]]) == "factor") {
+          } else if (col_type == "Datetime") {
+
+            updated_data[[i]] <- lubridate::parse_date_time(
+              updated_data[[i]],
+              orders = c("ymd HMS", "ymd HM", "ymd", "mdy HMS", "mdy HM", "mdy", "dmy HMS", "dmy HM", "dmy")
+            )
+            # No as.Date() here; time is preserved
+
+          } else if(col_type == "numeric" & "factor" %in% class(updated_data[[i]])) {
             updated_data[[i]] <- as(as.character(updated_data[[i]]), col_type)
           } else {
             updated_data[[i]] <- as(updated_data[[i]], col_type)

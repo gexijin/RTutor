@@ -83,11 +83,11 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
         start_time <- Sys.time()
 
-                # Get LLM response
+        # Get LLM response
         response <- tryCatch({
           # Update env. & append history, if any
           update_environment()
-          
+
           prompt_total <- build_history(prepared_request)
 
           # Send request
@@ -128,8 +128,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
     })
 
     output$answer <- renderUI({
-      req(input$ask_button)
-      req(answer_one())
+      req(input$ask_button, answer_one())
       HTML(paste(chat_content(), collapse = "\n <hr> \n"))
     })
 
@@ -146,33 +145,18 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
 
     observeEvent(answer_one(), {
-      showModal(
-        modalDialog(
-          title = strong("Chat With Your Tutor"),
-          # Custom CSS to make the chat area scrollable
-          tags$head(
-            tags$style(HTML("
-                .modal-dialog {width: 30%;max-width: 30%;margin: 20px;}
-                #chat_window {height: 500px;width: 100%;overflow-y: auto;padding:
-                  10px;border-radius: 5px;}
-            "))
-          ),
-          div( id = "chat_window", htmlOutput(ns("answer"))),
-          tags$head(
-            tags$style(
-              "#answer{
-                color: purple;
-                font-size: 16px
-              }"
-            )
-          ),
-          footer = tagList(
-            modalButton("Close")
-          ),
-          size = "s",
-          easyClose = TRUE
-        )
-      )
+      showModal(modalDialog(
+        title = strong("Chat With Your Tutor"),
+        tags$head(tags$style("
+          .modal-dialog {width: 30%; max-width: 30%; margin: 20px;}
+          #chat_window {height: 500px; width: 100%; overflow-y: auto; padding: 10px; border-radius: 5px;}
+          #answer {color: purple; font-size: 16px}
+        ")),
+        div(id = "chat_window", htmlOutput(ns("answer"))),
+        footer = modalButton("Close"),
+        size = "s",
+        easyClose = TRUE
+      ))
     })
 
 
@@ -185,7 +169,10 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       # Add system role
       if (!is.null(system_role_tutor) && nchar(system_role_tutor) > 10) {
-        prompt_total <- append(prompt_total, list(list(role = "system", content = system_role_tutor)))
+        system_content <- format_content(system_role_tutor)
+        prompt_total <- append(prompt_total,
+          list(list(role = "system", content = system_content))
+        )
       }
 
       # If there's history
@@ -208,23 +195,37 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           code_plus_console <- ch$code_history[[i]]$raw
 
           if (i == length(ch$code_history)) {
-            if(code_error()){
+            if (code_error()) {
               code_plus_console <- paste0(code_plus_console, "\n\nError: ", run_result()$error_message)
-            } else{
-                result <- paste(run_result()$console_output, collapse = "\n")
-                code_plus_console <- paste0(code_plus_console, "\n\nResult: ", result,"\n")
+            } else {
+              result <- paste(run_result()$console_output, collapse = "\n")
+              code_plus_console <- paste0(code_plus_console, "\n\nResult: ", result,"\n")
             }
           }
 
           prompt_total <- append(prompt_total, list(
-            list(role = "user", content = ch$code_history[[i]]$prompt_all),
-            list(role = "assistant", content = code_plus_console)
+            list(role = "user", content = format_content(ch$code_history[[i]]$prompt_all)),
+            list(role = "assistant", content = format_content(code_plus_console))
           ))
         }
       }
 
       # Return prompt history
       return(prompt_total)
+    }
+
+    # Format prompt content based on API key status & toggle status
+    format_content <- function(text) {
+      if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+        # 1. Format for OpenAI
+        return(paste(text))
+      } else {
+        # 2. Format for Azure
+        return(list(list(
+          type = "text",
+          text = text
+        )))
+      }
     }
 
 
@@ -255,77 +256,23 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       ### LLM Agents ###
 
-      # Relevancy agent
-      relevancy_agent <- function() {
-
-        # If user selects preloaded data,    '&& != user_upload'
-        # if (dataset_name() != no_data) {
-        #   dataset_details <- paste("the built-in R dataset", selected_dataset_name())
-        # } #else if (dataset_name() == user_upload) {
-        # #  dataset_details <- metadata you create
-        # #}
-
-        # If user selects preloaded data
-        if (selected_dataset_name() == no_data){ # Skip relevancy agent if user selects 'no data'
-          return(TRUE)
-        } else if (selected_dataset_name() == user_upload){
-          return(TRUE)
-        } else {
-
-          dataset_details <- paste("the built-in R dataset", selected_dataset_name())
-
-          base_prompt <- paste(
-            "Current prompt:",
-            input$ask_question, #input_text()
-            "Current dataset:",
-            dataset_details
-          )
-
-          if (length(ch$code_history) == 0) {
-            relevancy_prompt <- list(
-              list(role = "system", content = paste("Act as an experienced data analyst.",
-                "Determine if the following prompts are relevant to the current dataset:",
-                dataset_details)
-              ),
-              list(role = "user", content = paste("Determine if the current prompt is relevant to the selected dataset.",
-                "If it is relevant, respond with 'True'. Otherwise, respond with 'False'.",
-                base_prompt)
-              )
-            )
-          } else {
-            relevancy_prompt <- list(list(
-              role = "user",
-              content = paste(
-                "Determine if the current prompt is relevant to any of the previous prompts.",
-                "The prompt is relevant if it is a followup question for the analysis on the current dataset.",
-                "If the prompt is a question about a different dataset it is not relevant.",
-                "The prompt is also relevant if it is a modification for the visualizations.",
-                "If it is relevant, respond with 'True'. Otherwise, respond with 'False'.",
-                base_prompt
-              )
-            ))
-          }
-
-          # Send relevancy prompt
-          response <- openAI_agent(relevancy_prompt)
-
-          # TRUE if response is true, else FALSE
-          is_relevant <- tolower(response$choices$message.content) == "true"
-          return(is_relevant)
-        }
-      }
-
-
       # Request agent
       send_request_qa <- function(prompt_total, prepared_request) {
+        # Format content based on API key status
+        formatted_request <- format_content(prepared_request)
+        
+        # Append user request
+        prompt_total <- append(prompt_total, list(list(
+          role = "user",
+          content = formatted_request
+        )))
 
-
-        # If prompt is relevant, send request
-        prompt_total <- append(prompt_total, list(list(role = "user", content = prepared_request))) #paste0(prepared_request, dataset_details)
-
-        # Send request
-        response <- openAI_agent(prompt_total)
-        response$choices[1, 1] <- response$choices$message.content
+        # Send request to appropriate agent
+        response <- if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+          openAI_agent(prompt_total)
+        } else {
+          azure_openAI_agent(prompt_total)
+        }
 
         return(response)
       }
@@ -336,7 +283,8 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
         # Handle if error/no error
         error_api <- !is.null(response$error_status)
-        cmd <- if (error_api) NULL else response$choices[1, 1]
+        cmd <- if (error_api) NULL else response$choices$message.content
+
         # error_message <- if (error_api) response$message else NULL
 
         # Get API time
@@ -348,8 +296,6 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
         update_counter(response, api_time)
 
-
-        # final_response$response
         humor <- c(
           "Seriously? Statistics only!",
           "Come on. Statistics only!",
@@ -358,35 +304,26 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           "Are you kidding? Statistics only!",
           "Gee..., Statistics only!!"
         )
-        if(is.null(cmd)){
+        if (is.null(cmd)) { # If response is null
           cmd <- "Error in LLM Response"
-        }else{
-          if (grepl("No comment", cmd)) {
+          return(cmd)
+        } else {
+          if (grepl("No comment", cmd)) { # If response is irrelevant
             cmd <- paste(
               sample(humor, 1),
               "     Ask again with more context. It might
               be helpful to add \"in statistics\" to the question."
             )
+            return(cmd)
           }
         }
 
-        # Replace double newlines with HTML paragraph tags
-        cmd2 <- polish_cmd(cmd)
+        # Format response, if not null and is relevant
+        cmd2 <- cmd
         cmd2 <- gsub("\n\n", "</p><p>", cmd2)
         cmd2 <- paste0("<p><strong>", input$ask_question, "</strong></p>", "<p>", cmd2, "</p>")
 
         return(cmd2)
-
-
-
-        # Store info in response variable, return it
-        # return(list(
-        #   cmd = polish_cmd(cmd),
-        #   response = response,
-        #   time = round(api_time, 0),
-        #   error = error_api,
-        #   error_message = error_message
-        # ))
       }
 
 
@@ -394,23 +331,51 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       # OpenAI ChatGPT API function
       openAI_agent <- function(messages) {
-        openai::create_chat_completion(
+        print("OpenAI")
+
+        # Check if the selected model is "o4-mini"
+        model_name <- selected_model()
+
+        response <- tryCatch(
+          {
+            if (model_name == "o4-mini") {
+              # Call API without temperature
+              res <- openai::create_chat_completion(
+                model = model_name,
+                openai_api_key = api_key$key,
+                messages = messages
+              )
+            } else {
+              # Call API with temperature
+              res <- openai::create_chat_completion(
+                model = model_name,
+                openai_api_key = api_key$key,
+                temperature = sample_temp(),
+                messages = messages
+              )
+            }
+            # print(res)  # Uncomment for debugging
+            res  # Return response
+          },
+          error = function(e) {
+            print(e)  # Print error details
+            return(NULL)
+          }
+        )
+        return(response)
+      }
+
+      # Azure OpenAI ChatGPT API function
+      azure_openAI_agent <- function(messages) {
+        print("Azure")
+
+        create_chat_completion_azure(
           model = selected_model(),
-          openai_api_key = api_key$key,
+          api_version = api_versions[[selected_model()]],
           temperature = sample_temp(),
           messages = messages
         )
       }
-
-
-
-
-    # Return all reactive values so they can be used outside the module
-    return(
-      list(
-
-      )
-    )
 
   })
 }

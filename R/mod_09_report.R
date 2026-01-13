@@ -68,7 +68,7 @@ mod_09_report_ui <- function(id) {
 
 }
 
-mod_09_report_serv <- function(id, submit_button, ch, selected_model,
+mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name,
                                llm_response, input_text, use_python, logs,
                                sample_temp, code_error, python_to_html,
                                current_data, current_data_2, selected_dataset_name,
@@ -117,8 +117,9 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model,
       Rmd_script <- ""
       Rmd_script <- paste0(
         "\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) using API access via the
-        [openai](https://cran.rstudio.com/web/packages/openai/index.html) package to
-        [OpenAI's](https://cran.rstudio.com/web/packages/openai/index.html) \"",
+        [OpenAI](https://cran.rstudio.com/web/packages/openai/index.html) package and custom
+        [chat completion](https://platform.openai.com/docs/api-reference/chat/create) package to
+        [OpenAI's](https://openai.com/) \"",
         names(language_models)[language_models == selected_model()], "\" model.",
         "\n\nRTutor Website: [https://RTutor.ai](https://RTutor.ai)\n",
         "Source code: [GitHub.](https://github.com/gexijin/RTutor)\n\n"
@@ -217,7 +218,7 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model,
       Rmd_script <- paste0(
         Rmd_script,
         "\n### ", logs$id, ". ", input_text(), #counter$requests
-        "\n", names(language_models)[language_models == selected_model()],
+        "\n", agent_name(), " ", names(language_models)[language_models == selected_model()],
         " (Temperature = ", sample_temp(), ")\n"
       )
 

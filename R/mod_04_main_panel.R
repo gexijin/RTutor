@@ -21,28 +21,46 @@ mod_04_main_panel_ui <- function(id) {
     # Initial UI display
     conditionalPanel(
       condition = "input['send_request-submit_button'] == 0",
-        div(
-          id = "rtutor-banner",
-          fluidRow(
-            column(
-            width = 1,
+      div(
+        id = "rtutor-banner",
+        fluidRow(
+          column(
+            width = 3,
+            div(
+              img(
+                src = "www/hex_sticker_rtutor_black.png",
+                alt = "RTutor Logo",
+                style = "width: 125px; height: auto; display: block; margin: auto; margin-top: 10px;"
+              ),
+              br(),
               actionButton("first_user", strong("Quick Start"), class = "first-user"),
-              align = "left"
-            ),
-            column(
-              width = 10,
-              img(src = "www/logo_no_bckgrd.png", alt = "RTutor Logo"),
-              align = "center"
+              style = "text-align: center;"
             )
           ),
-          fluidRow(
-            column(width = 1, h2("")),
-            column(width = 10,
-              p("No code? No problem. Analyze data in your own languages."),
-              p("Upload your data, ask questions, and get results in seconds!"),
+          column(
+            width = 9,
+            div(
+              style = "display: flex; align-items: center; height: 100%; min-height: 150px;", 
+              div(
+                p("No code? No problem. Analyze data in your own languages."),
+                p("Upload your data, ask questions, and get results in seconds!"),
+                br(),
+                p(
+                  "Also try ",
+                  a(
+                    "Chatlize.ai,",
+                    href = "https://chatlize.ai",
+                    target = "_blank"
+                  ),
+                  " a more flexible AI platform."
+                ),
+                style = "text-align: left; font-size: 18px; margin-left: 20px;"
+              )
             )
           )
         )
+      ),
+
       ),
 
     # After submit is clicked
@@ -218,7 +236,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         theme = "xcode",  # change syntax color theme here
         height = height,
         fontSize = 14,
-        readOnly = TRUE  # feature idea: build out RT so user can edit code here
+        readOnly = TRUE,  # feature idea: build out RT so user can edit code here
+        showPrintMargin = FALSE  # remove vertical line at 80 chars
       )
     })
 

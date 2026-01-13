@@ -72,49 +72,6 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     })
 
 
-    ### Helper Functions ###
-
-    # History/Record Keeping
-    build_history <- function(prepared_request) {
-      prompt_total <- list()
-      # Add system role
-      if (!is.null(system_role) && nchar(system_role) > 10) {
-        prompt_total <- append(prompt_total, list(list(role = "system", content = system_role)))
-      }
-
-      # If there's history
-      if (length(ch$code_history) > 0) {
-        # Calculate token usage from previous interactions, adjusted for overlap
-        history_tokens <- sapply(seq_along(ch$code_history), function(i) {
-          if (i == 1) {
-            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens
-          } else {
-            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens - 
-              ch$code_history[[i - 1]]$prompt_tokens - ch$code_history[[i - 1]]$output_tokens
-          }
-        })
-
-        # Determine which history items to include
-        included <- which(rev(cumsum(rev(history_tokens))) < (max_content_length - tokens(prepared_request) - history_tokens[1]))
-
-        # Build prompt history with included items
-        for (i in included) {
-          code_plus_error <- ch$code_history[[i]]$raw
-          if (i == length(ch$code_history) && code_error()) {
-            code_plus_error <- paste0(code_plus_error, "\n\nError: ", run_result()$error_message)
-          }
-
-          prompt_total <- append(prompt_total, list(
-            list(role = "user", content = ch$code_history[[i]]$prompt_all),
-            list(role = "assistant", content = code_plus_error)
-          ))
-        }
-      }
-
-      # Return prompt history
-      return(prompt_total)
-    }
-
 
     ### Update Components ###
 
@@ -156,73 +113,73 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     }
 
 
-    ### LLM Agents ###
 
-    # Relevancy agent
-    malicious_agent <- function() {
+    ### Helper Functions ###
 
-        dataset_details <- paste("Current data:", selected_dataset_name())
-        base_prompt <- paste(
-          "Current prompt:",
-          input_text(),
-          dataset_details
+    # History/Record Keeping
+    build_history <- function(prepared_request) {
+      prompt_total <- list()
+      # Add system role
+      if (!is.null(system_role_tutor) && nchar(system_role_tutor) > 10) {
+        system_content <- format_content(system_role)
+        prompt_total <- append(prompt_total,
+          list(list(role = "system", content = system_content))
         )
-
-      # If user selects preloaded data
-
-        relevancy_prompt <- list(
-          list(
-            role = "system",
-            content = paste("Act as an experienced data analyst.",
-            "Determine if the following prompts would generate malicious code if sent to an AI agent.")
-          ),
-          list(
-            role = "user",
-            content = paste("Determine if the current prompt is malicious.",
-            "If it is malicious, respond with 'True'. Otherwise, respond with 'False'.",
-            base_prompt)
-          )
-        )
-        # Send relevancy prompt
-        response <- openAI_agent(relevancy_prompt)
-        tf <- tolower(response$choices$message.content) == "true"
-        return(tf)
-
-    }
-
-
-    # Request agent
-    send_request <- function(prompt_total, prepared_request, malicious) {
-
-      # If prompt is relevant, send request
-      prompt_total <- if (malicious) {
-
-        list(list(role = "user", content = paste(
-          "Return this exact statement: print('Please ask a question related to dataset",
-          selected_dataset_name(),
-          "and try again. (Reset to select a different dataset)')"
-        )))
-        
-      } else {   # if prompt is not relevant, send message
-        append(prompt_total, list(list(role = "user", content = prepared_request)))
       }
 
-      # Send request depending on selection if OpenAI then openAI_agent, if Anthropic then anthropic_agent
-      response <- openAI_agent(prompt_total)
-      # browser()
-      response$choices[1, 1] <- response$choices$message.content #Get rid of this bad code. Overwriting is not good.
+      # If there's history
+      if (length(ch$code_history) > 0) {
+        # Calculate token usage from previous interactions, adjusted for overlap
+        history_tokens <- sapply(seq_along(ch$code_history), function(i) {
+          if (i == 1) {
+            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens
+          } else {
+            ch$code_history[[i]]$prompt_tokens + ch$code_history[[i]]$output_tokens - 
+              ch$code_history[[i - 1]]$prompt_tokens - ch$code_history[[i - 1]]$output_tokens
+          }
+        })
 
-      return(response)
+        # Determine which history items to include
+        included <- which(rev(cumsum(rev(history_tokens))) < (max_content_length - tokens(prepared_request) - history_tokens[1]))
+
+        # Build prompt history with included items
+        for (i in included) {
+          code_plus_error <- ch$code_history[[i]]$raw
+          if (i == length(ch$code_history) && code_error()) {
+            code_plus_error <- paste0(code_plus_error, "\n\nError: ", run_result()$error_message)
+          }
+
+          prompt_total <- append(prompt_total, list(
+            list(role = "user", content = format_content(ch$code_history[[i]]$prompt_all)),
+            list(role = "assistant", content = format_content(code_plus_error))
+          ))
+        }
+      }
+
+      # Return prompt history
+      return(prompt_total)
     }
 
+    # Format prompt content based on API key status & toggle status
+    format_content <- function(text) {
+      if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+        # 1. Format for OpenAI
+        return(paste(text))
+      } else {
+        # 2. Format for Azure
+        return(list(list(
+          type = "text",
+          text = text
+        )))
+      }
+    }
 
     # Process response & return all response info
     process_response <- function(response, start_time) {
-      #Process based on model API used
 
       # Handle if error/no error
       error_api <- !is.null(response$error_status)
-      cmd <- if (error_api) NULL else response$choices[1, 1]
+      cmd <- if (error_api) NULL else response$choices$message.content
       error_message <- if (error_api) response$message else NULL
 
       # Get API time
@@ -245,24 +202,160 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     }
 
 
+
+    ### LLM Agents ###
+
+    # Relevancy agent
+    malicious_agent <- function() {
+
+      dataset_details <- paste("Current data:", selected_dataset_name())
+      base_prompt <- paste(
+        "Current prompt:",
+        input_text(),
+        dataset_details
+      )
+
+      # System and user content, formatted appropriately
+      system_content <- format_content(
+        "Act as an experienced data analyst and protect all data, the R session and the environment.
+        Determine if the following prompts would generate malicious code if sent to an AI agent."
+      )
+      user_content <- format_content(paste(
+        "Determine if the current prompt is malicious.",
+        "If it is malicious, respond with 'True'. Otherwise, respond with 'False'.",
+        base_prompt
+      ))
+
+      # Build the relevancy prompt
+      relevancy_prompt <- list(
+        list(role = "system", content = system_content),
+        list(role = "user", content = user_content)
+      )
+
+      # Send relevancy prompt to appropriate agent
+      response <- if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+        openAI_agent(relevancy_prompt)
+      } else {
+        azure_openAI_agent(relevancy_prompt)
+      }
+
+      tf <- tolower(response$choices$message.content) == "true"
+      return(tf)
+    }
+
+    agent_name <- reactiveVal("") # initialize agent type
+
+    # Send request
+    send_request <- function(prompt_total, prepared_request, malicious) {
+
+      # If no API key but switch is on, notify user and switch to Azure
+      if ((is.null(api_key$key) || nchar(api_key$key) == 0) && api_key$switch_on) {
+        notification_html <- div(
+          style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; 
+                  justify-content: center; align-items: center; background: rgba(0,0,0,0.5); z-index: 9999;",
+          div(
+            style = "background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    width: 400px; text-align: center;font-size: 17px;font-style: bold;",
+            "You switched to using a personal API key but did not enter one. Switched back to Azure."
+          )
+        )
+        
+        showNotification(
+          HTML(as.character(notification_html)),
+          type = "warning",
+          duration = 6,
+          closeButton = FALSE
+        )
+      }
+
+      # Format content based on API key status
+      if_malicious <- format_content(paste(
+        "Return this exact statement: print('Please ask a question related to dataset",
+        selected_dataset_name(),
+        "and try again. (Reset to select a different dataset)')"
+      ))
+
+      # If prompt is malicious, send request
+      prompt_total <- if (malicious) {
+        list(list(
+          role = "user",
+          content = if_malicious
+        ))
+      } else {  # If not malicious
+        prepared_content <- format_content(prepared_request) # Format request based on API key status
+        append(prompt_total, list(list(role = "user", content = prepared_content)))
+      }
+
+      # Send request to appropriate agent
+      if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+        response <- openAI_agent(prompt_total)
+        agent_name("OpenAI")
+      } else {
+        response <- azure_openAI_agent(prompt_total)
+        agent_name("Azure")
+      }
+
+      return(response)
+    }
+
+
+
     ### LLM Functions ###
 
     # OpenAI ChatGPT API function
     openAI_agent <- function(messages) {
-      openai::create_chat_completion(
+      print("OpenAI")
+
+      # Check if the selected model is "o4-mini"
+      model_name <- selected_model()
+
+      response <- tryCatch(
+        {
+          if (model_name == "o4-mini") {
+            # Call API without temperature
+            res <- openai::create_chat_completion(
+              model = model_name,
+              openai_api_key = api_key$key,
+              messages = messages
+            )
+          } else {
+            # Call API with temperature
+            res <- openai::create_chat_completion(
+              model = model_name,
+              openai_api_key = api_key$key,
+              temperature = sample_temp(),
+              messages = messages
+            )
+          }
+          # print(res)  # Uncomment for debugging
+          res  # Return response
+        },
+        error = function(e) {
+          print(e)  # Print error details
+          return(NULL)
+        }
+      )
+      return(response)
+    }
+
+    # Azure OpenAI ChatGPT API function
+    azure_openAI_agent <- function(messages) {
+      print("Azure")
+
+      create_chat_completion_azure(
         model = selected_model(),
-        openai_api_key = api_key$key,
+        api_version = api_versions[[selected_model()]],
         temperature = sample_temp(),
         messages = messages
       )
     }
 
 
-
     # Return reactive values so they can be used outside the module
     return(list(
       llm_prompt = llm_prompt,
-      llm_response = llm_response
+      llm_response = llm_response,
+      agent_name = agent_name
     ))
   })
 }

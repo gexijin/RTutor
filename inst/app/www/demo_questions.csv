@@ -35,7 +35,7 @@ No Data,1,1,"Financial, stocks",Retrieve and plot the stock price of Apple in 20
 No Data,1,1,Bioinformatics - Genes,Use the biomaRt package to retrieve all human genes on Chr.Y. Show gene symbols.,
 No Data,1,1,Bioinformatics - Position,Use the biomaRt package to retrieve the gene symbol. The start and end position of all human genes on Chr.Y. Only print the first 100.,
 No Data,1,1,Bioinformatics - Length,Use the biomaRt package to retrieve the gene symbol. The start and end position of all human genes on Chr.Y. Calculate the length as the absolute difference between the start and end positions. Create a density plot of the length after log10 transformation.,
-MPG (examples),1,0,"Boxplot, ggplot2",Create a boxplot of highway vs. type. Color by type. Add jitter points.,
+MPG (examples),1,0,"Boxplot, ggplot2",Create a boxplot of highway vs. class. Color by class. Add jitter points.,
 MPG (examples),0,1,"Boxplot, plotnine",Use the plotnine package to create a boxplot of highway vs. type. Color by type.,
 MPG (examples),1,0,Distribution (D): Numbers,Show me the distribution of highway.,
 MPG (examples),0,1,Distribution (D): Numbers,Plot the distribution of highway.,

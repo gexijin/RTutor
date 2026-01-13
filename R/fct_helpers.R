@@ -17,9 +17,14 @@ user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_d
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
-language_models <- c("chatgpt-4o-latest",  "gpt-4o-mini")
-names(language_models) <- c("GPT-4o", "GPT-4o mini")
-default_model <- "GPT-4o"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
+language_models <- c("o4-mini") #, "gpt-5.1-chat", "gpt-5-mini")
+names(language_models) <- c("O4 Mini") #, "GPT 5.1", "GPT-5 mini")
+default_model <- "O4 Mini"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
+api_versions <- list(  # API version list corresponding to selected model, may need adjusting
+  "o4-mini" = "2025-01-01"
+  #, "gpt-5.1-chat" = "2025-04-01",
+  #"gpt-5-mini" = "2025-04-01"
+)
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
@@ -41,8 +46,9 @@ sqltable2 <- "feedback"
 system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
 If the goal can be achieved by showing quantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. 
 If multiple plots are generated, try to combine them into one."
-system_role_tutor <- "Act as a professor of statistics, computer science and mathematics. You will respond like answering questions by students.
-If the question is in languages other than English, respond in that language. If the question is not remotely related to your expertise, respond with 'No comment'."
+system_role_tutor <- "Act as a professor of statistics, computer science, coding, and math. You will respond like answering questions by students.
+If the question is in languages other than English, respond in that language. If the question is not remotely related to your expertise, respond with 'No comment'.
+Response should be structured HTML with proper formatting and spacing."
 
 # If this file exists, running on the server. Otherwise local. This is used to change app behavior.
 on_server <- "on_server.txt"
@@ -635,6 +641,175 @@ python_html <- function(python_code, select_data, current_data) {
 }
 
 
+### Azure API Calling ###
+
+#' Create Chat Completion Azure
+#'
+#' Creates a completion for the chat message. See [this
+#' page](https://platform.openai.com/docs/api-reference/chat/create) for
+#' details.
+#'
+#' For arguments description please refer to the [official
+#' documentation](https://platform.openai.com/docs/api-reference/chat/create).
+#'
+#' @param model required; a length one character vector.
+#' @param messages required; defaults to `NULL`; a list in the following
+#'   format: `list(list("role" = "user", "content" = "Hey! How old are you?")`
+#' @param temperature required; defaults to `1`; a length one numeric vector
+#'   with the value between `0` and `2`.
+#' @param top_p required; defaults to `1`; a length one numeric vector with the
+#'   value between `0` and `1`.
+#' @param n required; defaults to `1`; a length one numeric vector with the
+#'   integer value greater than `0`.
+#' @param stream required; defaults to `FALSE`; a length one logical vector.
+#'   **Currently is not implemented.**
+#' @param stop optional; defaults to `NULL`; a character vector of length
+#'   between one and four.
+#' @param max_tokens required; defaults to `(4096 - prompt tokens)`; a length
+#'   one numeric vector with the integer value greater than `0`.
+#' @param presence_penalty required; defaults to `0`; a length one numeric
+#'   vector with a value between `-2` and `2`.
+#' @param frequency_penalty required; defaults to `0`; a length one numeric
+#'   vector with a value between `-2` and `2`.
+#' @param logit_bias optional; defaults to `NULL`; a named list.
+#' @param user optional; defaults to `NULL`; a length one character vector.
+#' @param openai_api_key required; defaults to `Sys.getenv("OPENAI_API_KEY")`
+#'   (i.e., the value is retrieved from the `.Renviron` file); a length one
+#'   character vector. Specifies OpenAI API key.
+#' @param openai_organization optional; defaults to `NULL`; a length one
+#'   character vector. Specifies OpenAI organization.
+#' @param seed optional; defaults to `NULL`; a length one
+#'   numeric vector with integer values. Attempts deterministic sampling.
+#' @return Returns a list, elements of which contain chat completion(s) and
+#'   supplementary information.
+#' @examples \dontrun{
+#' create_chat_completion_azure(
+#'    model = "gpt-4o-mini",
+#'    api_version = "2023-03-15",
+#'    messages = list(
+#'        list(
+#'            "role" = "system",
+#'            "content" = "You are a helpful assistant."
+#'        ),
+#'        list(
+#'            "role" = "user",
+#'            "content" = "Who won the world series in 2020?"
+#'        ),
+#'        list(
+#'            "role" = "assistant",
+#'            "content" = "The LA Dodgers won the World Series in 2020."
+#'        ),
+#'        list(
+#'            "role" = "user",
+#'            "content" = "Where was it played?"
+#'        )
+#'    )
+#' )
+#' }
+#' #export
+create_chat_completion_azure <- function(
+  model,
+  api_version,
+  messages = NULL,
+  temperature = 0.2,
+  top_p = 0.95,
+  n = 1,
+  stream = FALSE,
+  stop = NULL,
+  max_tokens = NULL,
+  presence_penalty = 0,
+  frequency_penalty = 0,
+  logit_bias = NULL,
+  user = NULL,
+  openai_api_key = Sys.getenv("AZURE_OPENAI_API_KEY"),
+  endpoint = Sys.getenv("AZURE_OPENAI_API_ENDPOINT"),
+  seed = NULL
+) {
+
+  #---------------------------------------------------------------------------
+  # Validate Arguments
+  if (is.null(openai_api_key) || openai_api_key == "") {
+    stop("Error: AZURE_OPENAI_API_KEY is missing. Set it in your environment variables.", call. = FALSE)
+  }
+  if (is.null(endpoint) || endpoint == "") {
+    stop("Error: AZURE_OPENAI_API_ENDPOINT is missing. Set it in your environment variables.", call. = FALSE)
+  }
+
+  #---------------------------------------------------------------------------
+  # Build path parameters/API URL
+
+  api_call <- glue::glue("{endpoint}openai/deployments/{model}/chat/completions?api-version={api_version}-preview")
+
+  headers <- httr::add_headers(
+    `Content-Type` = "application/json",
+    `api-key` = openai_api_key
+  )
+
+  #---------------------------------------------------------------------------
+  # Build Request Body Based on Model
+
+  if (model == "o4-mini") {
+    # Use max_completion_tokens instead of max_tokens & exclude temperature
+    body <- list(
+      model = model,
+      messages = messages,
+      n = n,
+      stream = stream,
+      stop = stop,
+      max_completion_tokens = max_tokens,
+      presence_penalty = presence_penalty,
+      frequency_penalty = frequency_penalty,
+      logit_bias = logit_bias,
+      user = user,
+      seed = seed
+    )
+  } else {
+    # Default case: Include temperature & max_tokens
+    body <- list(
+      model = model,
+      messages = messages,
+      temperature = temperature,
+      top_p = top_p,
+      n = n,
+      stream = stream,
+      stop = stop,
+      max_tokens = max_tokens,
+      presence_penalty = presence_penalty,
+      frequency_penalty = frequency_penalty,
+      logit_bias = logit_bias,
+      user = user,
+      seed = seed
+    )
+  }
+
+  #---------------------------------------------------------------------------
+  # Make a request and parse it
+  response <- httr::POST(
+    api_call,
+    headers,
+    body = body,
+    encode = "json"
+  )
+
+  parsed <- response %>%
+    httr::content(as = "text", encoding = "UTF-8") %>%
+    jsonlite::fromJSON(flatten = TRUE)
+
+  #---------------------------------------------------------------------------
+  # Check whether request failed and return parsed
+  if (httr::http_error(response)) {
+    stop(paste0(
+      "OpenAI API request failed [",
+      httr::status_code(response),
+      "]:\n\n",
+      parsed$error$message
+    ), call. = FALSE)
+  }
+  parsed
+}
+
+
+
 ### Save User Data and Feedback ###
 
 # #' Creates a SQLite database file for collecting user data
@@ -902,3 +1077,43 @@ site_updates_df <- data.frame(
     "Initial launch"
   )
 )
+
+
+#' Map R Column Classes to User-Friendly Types
+#'
+#' This function takes a column from a dataset and maps its R class
+#' to one of the predefined user-friendly categories:
+#' "character", "numeric", "integer", "factor", or "Date".
+#'
+#' @param col A column vector from a dataframe (e.g., `df$column_name`).
+#'
+#' @return A character string representing the mapped data type.
+#' Possible values: `"character"`, `"numeric"`, `"integer"`, `"factor"`, `"Date"`, `"Datetime"`.
+#'
+#' @export
+#'
+#' @examples
+#' map_class_to_type(Sys.Date())   # Returns "Date"
+#' map_class_to_type(42)           # Returns "numeric"
+#' map_class_to_type(factor("A"))  # Returns "factor"
+#'
+map_class_to_type <- function(col) {
+  col_class <- class(col)
+  
+  if ("character" %in% col_class) {
+    return("character")
+  } else if ("factor" %in% col_class) {
+    return("factor")
+  } else if ("integer" %in% col_class) {
+    return("integer")
+  } else if ("numeric" %in% col_class) {
+    return("numeric")
+  } else if ("Date" %in% col_class) {
+    return("Date")  # Pure dates
+  } else if (any(c("POSIXct", "POSIXt") %in% col_class)) {
+    return("Datetime")  # Preserve Datetime
+  } else {
+    return("character")  # Default to character if unrecognized
+  }
+}
+
