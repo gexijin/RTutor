@@ -17,13 +17,13 @@ user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_d
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
-language_models <- c("o3-mini", "gpt-4o", "gpt-4o-mini")
-names(language_models) <- c("o3 mini", "GPT-4o", "GPT-4o mini")
-default_model <- "o3 mini"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
+language_models <- c("o4-mini") #, "gpt-5.1-chat", "gpt-5-mini")
+names(language_models) <- c("O4 Mini") #, "GPT 5.1", "GPT-5 mini")
+default_model <- "O4 Mini"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 api_versions <- list(  # API version list corresponding to selected model, may need adjusting
-  "o3-mini" = "2025-01-01",
-  "gpt-4o" = "2024-08-01",
-  "gpt-4o-mini" = "2024-08-01"
+  "o4-mini" = "2025-01-01"
+  #, "gpt-5.1-chat" = "2025-04-01",
+  #"gpt-5-mini" = "2025-04-01"
 )
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
@@ -728,7 +728,6 @@ create_chat_completion_azure <- function(
 
   #---------------------------------------------------------------------------
   # Validate Arguments
-
   if (is.null(openai_api_key) || openai_api_key == "") {
     stop("Error: AZURE_OPENAI_API_KEY is missing. Set it in your environment variables.", call. = FALSE)
   }
@@ -749,7 +748,7 @@ create_chat_completion_azure <- function(
   #---------------------------------------------------------------------------
   # Build Request Body Based on Model
 
-  if (model == "o3-mini") {
+  if (model == "o4-mini") {
     # Use max_completion_tokens instead of max_tokens & exclude temperature
     body <- list(
       model = model,
