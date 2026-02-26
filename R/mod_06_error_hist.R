@@ -79,6 +79,7 @@
       # A list holds current request
       current_code <- list(
         id = logs$id,
+        name = paste0("Chunk #", logs$id),
         code = logs$code,
         raw = logs$raw, # for print
         prompt = input_text(),
@@ -128,7 +129,9 @@
       }
 
       choices <- seq_along(ch$code_history)
-      names(choices) <- paste0("Chunk #", choices)
+      names(choices) <- sapply(choices, function(i) {
+        if (!is.null(ch$code_history[[i]]$name)) ch$code_history[[i]]$name else paste0("Chunk #", i)
+      })
 
       # Directly update chunk selection
       chunk_selection$chunk_choices <- choices

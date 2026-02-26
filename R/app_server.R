@@ -159,7 +159,9 @@ app_server <- function(input, output, session) {
     current_data = current_data,
     current_data_2 = current_data_2,
     selected_dataset_name = selected_dataset_name,
-    chunk_selection = chunk_selection
+    chunk_selection = chunk_selection,
+    run_env = run_env,
+    reverted = reverted
   )
 
 
@@ -300,8 +302,14 @@ app_server <- function(input, output, session) {
 
   # Module 11 - Outputs
   api_key <- mod_11$api_key
-  sample_temp <- mod_11$sample_temp
   selected_model <- mod_11$selected_model
+
+  # Temperature from sidebar numericInput (overrides commented-out Settings slider)
+  sample_temp <- reactive({
+    val <- input$sidebar_temperature
+    if (is.null(val) || is.na(val)) return(default_temperature)
+    max(0, min(1, val))  # clamp to valid range [0, 1]
+  })
   use_python <- mod_11$use_python
   convert_to_factor <- mod_11$convert_to_factor
   max_proportion_factor <- mod_11$max_proportion_factor

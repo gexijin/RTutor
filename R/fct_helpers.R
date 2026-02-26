@@ -48,7 +48,7 @@ If the goal can be achieved by showing quantitative results, do not produce a pl
 If multiple plots are generated, try to combine them into one."
 system_role_tutor <- "Act as a professor of statistics, computer science, coding, and math. You will respond like answering questions by students.
 If the question is in languages other than English, respond in that language. If the question is not remotely related to your expertise, respond with 'No comment'.
-Response should be structured HTML with proper formatting and spacing."
+Format your entire response in Markdown only. Use headers, bullet points, bold, italics, inline code, code blocks, and other Markdown elements as appropriate. Do not use HTML tags."
 
 # If this file exists, running on the server. Otherwise local. This is used to change app behavior.
 on_server <- "on_server.txt"

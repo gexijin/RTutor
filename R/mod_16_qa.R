@@ -14,7 +14,7 @@ mod_16_qa_ui <- function(id) {
         column(12,
           textInput(
             inputId = ns("ask_question"),
-            label = HTML("<span style='font-size: 18px;'>Ask About Results</span>"),
+            label = HTML("<span style='font-size: 18px;'>4. Ask About Results</span>"),
             placeholder = "Q&A on code, results, error, or statistics in general",
             value = ""
           ),
@@ -43,11 +43,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
     ns <- session$ns
 
     output$show_qa <- renderText({
-      if (submit_button() >= 1) {
-        return("show")
-      } else {
-        return("hide")
-      }
+      return("show")
     })
     outputOptions(output, "show_qa", suspendWhenHidden = FALSE)
 
@@ -129,7 +125,15 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
     output$answer <- renderUI({
       req(input$ask_button, answer_one())
-      HTML(paste(chat_content(), collapse = "\n <hr> \n"))
+      # chat_content() is a vector of HTML strings (newest first); display oldest first
+      blocks <- rev(chat_content())
+      html_blocks <- lapply(seq_along(blocks), function(i) {
+        tagList(
+          div(class = "qa-answer-block", HTML(blocks[[i]])),
+          if (i < length(blocks)) hr(class = "qa-divider") else NULL
+        )
+      })
+      tagList(html_blocks)
     })
 
     # JavaScript to trigger the send button when Enter key is pressed
@@ -147,14 +151,39 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
     observeEvent(answer_one(), {
       showModal(modalDialog(
         title = strong("Chat With Your Tutor"),
-        tags$head(tags$style("
-          .modal-dialog {width: 30%; max-width: 30%; margin: 20px;}
-          #chat_window {height: 500px; width: 100%; overflow-y: auto; padding: 10px; border-radius: 5px;}
-          #answer {color: purple; font-size: 16px}
+        tags$style(HTML("
+          .modal-dialog { width: 55% !important; max-width: 55% !important; }
+          #chat_window {
+            height: 520px; width: 100%; overflow-y: auto;
+            padding: 14px 18px; border-radius: 6px;
+            background: #fafafa;
+          }
+          .qa-answer-block { margin-bottom: 20px; }
+          .qa-question {
+            font-size: 15px; font-weight: 600; color: #333;
+            border-left: 3px solid #90BD8C; padding-left: 10px;
+            margin-bottom: 8px;
+          }
+          .qa-answer-block h1, .qa-answer-block h2, .qa-answer-block h3 {
+            font-size: 16px; font-weight: 700; margin-top: 10px; color: #222;
+          }
+          .qa-answer-block p  { font-size: 14px; line-height: 1.6; color: #333; margin: 6px 0; }
+          .qa-answer-block ul, .qa-answer-block ol { padding-left: 20px; margin: 6px 0; }
+          .qa-answer-block li { font-size: 14px; line-height: 1.6; color: #333; }
+          .qa-answer-block code {
+            background: #f0f0f0; padding: 1px 5px;
+            border-radius: 3px; font-size: 13px; font-family: monospace;
+          }
+          .qa-answer-block pre {
+            background: #f5f5f5; border: 1px solid #ddd;
+            border-radius: 4px; padding: 10px; overflow-x: auto;
+          }
+          .qa-answer-block pre code { background: none; padding: 0; }
+          .qa-answer-block strong { color: #111; }
+          .qa-divider { border: none; border-top: 1px solid #e0e0e0; margin: 16px 0; }
         ")),
         div(id = "chat_window", htmlOutput(ns("answer"))),
         footer = modalButton("Close"),
-        size = "s",
         easyClose = TRUE
       ))
     })
@@ -318,10 +347,12 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           }
         }
 
-        # Format response, if not null and is relevant
-        cmd2 <- cmd
-        cmd2 <- gsub("\n\n", "</p><p>", cmd2)
-        cmd2 <- paste0("<p><strong>", input$ask_question, "</strong></p>", "<p>", cmd2, "</p>")
+        # Render markdown response to HTML
+        rendered <- commonmark::markdown_html(cmd, extensions = TRUE)
+        cmd2 <- paste0(
+          "<div class='qa-question'>", htmltools::htmlEscape(input$ask_question), "</div>",
+          rendered
+        )
 
         return(cmd2)
       }

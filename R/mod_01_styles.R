@@ -191,13 +191,14 @@ mod_01_styles_ui <- function(id) {
       /* The #'module tag'-'id' is used with modules */
     #send_request-submit_button {
       font-size: 18px;
-      color: red !important;
+      color: green !important;
       background-color: #F6FFF5;
       border-color: #90BD8C;
       }
 
     #send_request-reset_button {
       font-size: 18px;
+      color: red !important;
       background-color: #F6FFF5;
       border-color: #90BD8C;
       }

@@ -55,6 +55,29 @@ app_ui <- function(request) {
             mod_15_data_types_ui("data_edit_modal"),
             mod_03_send_request_ui("send_request"),
             mod_16_qa_ui("qa"),
+            hr(class = "custom-hr"),
+            div(
+              style = "padding-bottom: 60px;",  # clear the fixed footer
+              tags$label(
+                "Sampling Temperature",
+                `for` = "sidebar_temperature",
+                style = "font-size: 18px; font-weight: bold; color: #000; display: block; margin-bottom: 4px;"
+              ),
+              tippy::tippy_this(
+                "sidebar_temperature",
+                "Controls randomness in AI responses. 0 = focused and deterministic. 1 = more creative and varied.",
+                theme = "light-border"
+              ),
+              numericInput(
+                inputId = "sidebar_temperature",
+                label = NULL,
+                value = 0.2,
+                min = 0,
+                max = 1,
+                step = 0.1,
+                width = "120px"
+              )
+            ),
             mod_17_policies_ui("policies")
           ),
 

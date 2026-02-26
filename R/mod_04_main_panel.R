@@ -16,6 +16,12 @@ mod_04_main_panel_ui <- function(id) {
       $(document).on('click', '#first_user', function() {
         $('#tabs a[data-value=\"first-time-user\"]').tab('show');
       });
+      /* Double-click on chunk selector to rename */
+      $(document).on('dblclick', '#main_panel-selected_chunk', function() {
+        var id = $(this).val();
+        var name = $(this).find('option:selected').text();
+        Shiny.setInputValue('main_panel-chunk_dblclick', {id: id, name: name}, {priority: 'event'});
+      });
     ")),
 
     # Initial UI display
@@ -66,61 +72,79 @@ mod_04_main_panel_ui <- function(id) {
     # After submit is clicked
     conditionalPanel(
       condition = "input['send_request-submit_button'] != 0",
-      fluidRow(
-        column(
-          width = 5,
-          # Chunk select dropdown
+      # Toolbar: [dropdown | Delete Chunk] .............. [Save | Resubmit | Show Code]
+      tags$style(HTML("
+        .shiny-input-container { margin-bottom: 0 !important; }
+      ")),
+      div(
+        style = "display: flex; align-items: center; justify-content: space-between;
+          margin-top: 10px; margin-bottom: 7px;",
+        # Left group: chunk selector + delete
+        div(
+          style = "display: flex; align-items: center; gap: 10px;",
           div(
-            style = "display: flex; align-items: center; gap: 35px;
-              margin-top: 10px; margin-bottom: 7px;",
-            div(
-              style = "display: flex; align-items: center; position: relative;",
-              tags$style(HTML("
-                .shiny-input-container {
-                  margin-bottom: 0 !important; /* Remove label spacing */
-                }
-              ")),
-              selectInput(
-                inputId = ns("selected_chunk"),
-                label = NULL,
-                selected = NULL,
-                choices = NULL
-              )
-            ),
+            style = "position: relative;",
+            selectInput(
+              inputId = ns("selected_chunk"),
+              label = NULL,
+              selected = NULL,
+              choices = NULL
+            )
+          ),
+          actionButton(
+            ns("delete_chunk"),
+            "Delete Chunk",
+            style = "font-size: 14px; color: #000; background-color: #F6FFF5;
+              border-color: #90BD8C; padding: 6px 12px;"
+          )
+        ),
+        # Right group: save + resubmit (shown when dirty) + show code
+        div(
+          style = "display: flex; align-items: center; gap: 8px;",
+          shinyjs::hidden(
             actionButton(
-              ns("delete_chunk"),
-              "Delete Chunk",
+              ns("save_code"),
+              "Save",
               style = "font-size: 14px; color: #000; background-color: #F6FFF5;
                 border-color: #90BD8C; padding: 6px 12px;"
             )
           ),
-
-          # Tooltip for dropdown
-          tippy::tippy_this(
-            ns("selected_chunk"),
-            "You can go back to any previous code chunk and continue from there. The data will also be reverted to that point.",
-            theme = "light-border"
+          shinyjs::hidden(
+            actionButton(
+              ns("resubmit_code"),
+              "Resubmit",
+              style = "font-size: 14px; color: #fff; background-color: #5a9e56;
+                border-color: #4a8e46; padding: 6px 12px;"
+            )
           ),
-          # Tooltip for button
-          tippy::tippy_this(
-            ns("delete_chunk"),
-            "Don't like this code chunk? Click to remove.",
-            theme = "light-border"
-          )
-        ),
-        column(
-          width = 7,
-          # Checkbox to show code behind output
           checkboxInput(
             inputId = ns("show_code"),
-            label = div(
-              "Show Code",
-              style = "font-size: 16px;padding-right: 25px;"
-            ),
+            label = div("Show Code", style = "font-size: 16px; padding-right: 10px;"),
             value = TRUE
-          ),
-          align = "right"
+          )
         )
+      ),
+
+      # Tooltips
+      tippy::tippy_this(
+        ns("selected_chunk"),
+        "Select a previous code chunk to view or continue from it. Double-click to rename.",
+        theme = "light-border"
+      ),
+      tippy::tippy_this(
+        ns("delete_chunk"),
+        "Don't like this code chunk? Click to remove.",
+        theme = "light-border"
+      ),
+      tippy::tippy_this(
+        ns("save_code"),
+        "Save edits to this chunk without re-running.",
+        theme = "light-border"
+      ),
+      tippy::tippy_this(
+        ns("resubmit_code"),
+        "Re-run the edited code and save it to this chunk.",
+        theme = "light-border"
       ),
 
       # If checked, show the code
@@ -189,10 +213,114 @@ mod_04_main_panel_ui <- function(id) {
 mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
                                    run_result, run_env_start, submit_button,
                                    use_python, tabs, current_data, current_data_2,
-                                   selected_dataset_name, chunk_selection) {
+                                   selected_dataset_name, chunk_selection,
+                                   run_env, reverted) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    ###  Code Edit State  ###
+
+    # ID of chunk currently being resubmitted (NULL when not in resubmit)
+    resubmit_chunk_id <- reactiveVal(NULL)
+
+    # True when the editor content differs from the stored code for the selected chunk
+    is_dirty <- reactive({
+      current_code <- input$code_display
+      if (is.null(current_code)) return(FALSE)
+      sel <- chunk_selection$selected_chunk
+      if (is.null(sel)) return(FALSE)
+      id <- as.integer(sel)
+      if (id < 1 || id > length(ch$code_history)) return(FALSE)
+      stored <- gsub("```", "", ch$code_history[[id]]$raw)
+      trimws(current_code, "right") != trimws(stored, "right")
+    })
+
+    # Show / hide Save & Resubmit buttons based on dirty state
+    observe({
+      req(submit_button())
+      if (isTRUE(is_dirty())) {
+        shinyjs::show("save_code")
+        shinyjs::show("resubmit_code")
+      } else {
+        shinyjs::hide("save_code")
+        shinyjs::hide("resubmit_code")
+      }
+    })
+
+    # Save: persist edited code to history without re-running
+    observeEvent(input$save_code, {
+      req(input$code_display)
+      req(chunk_selection$selected_chunk)
+      chunk_id <- as.integer(chunk_selection$selected_chunk)
+      new_code <- input$code_display
+
+      ch$code_history[[chunk_id]]$code <- new_code
+      ch$code_history[[chunk_id]]$raw  <- new_code
+      # Update the code block inside the stored Rmd chunk
+      ch$code_history[[chunk_id]]$rmd <- sub(
+        "(?s)```\\{R\\}\\n.*?\\n```",
+        paste0("```{R}\n", trimws(new_code, "right"), "\n```"),
+        ch$code_history[[chunk_id]]$rmd,
+        perl = TRUE
+      )
+      showNotification("Code saved.", duration = 3, type = "message")
+      # is_dirty() becomes FALSE automatically because ch$code_history$raw is updated
+    })
+
+    # Resubmit: auto-save + restore pre-chunk env + re-run
+    observeEvent(input$resubmit_code, {
+      req(input$code_display)
+      req(chunk_selection$selected_chunk)
+      chunk_id <- as.integer(chunk_selection$selected_chunk)
+      new_code <- input$code_display
+
+      # Auto-save to history
+      ch$code_history[[chunk_id]]$code <- new_code
+      ch$code_history[[chunk_id]]$raw  <- new_code
+      ch$code_history[[chunk_id]]$rmd <- sub(
+        "(?s)```\\{R\\}\\n.*?\\n```",
+        paste0("```{R}\n", trimws(new_code, "right"), "\n```"),
+        ch$code_history[[chunk_id]]$rmd,
+        perl = TRUE
+      )
+
+      # Update logs so mod_07 runs the right code
+      logs$code <- new_code
+      logs$raw  <- new_code  # triggers editor re-render (same content)
+
+      # Restore the environment that existed before this chunk originally ran
+      run_env(list2env(ch$code_history[[chunk_id]]$env))
+
+      # Track that a resubmit is in progress (for post-run history update)
+      resubmit_chunk_id(chunk_id)
+
+      # Warn if later chunks now depend on this changed chunk
+      if (chunk_id < length(ch$code_history)) {
+        showNotification(
+          paste0(
+            "Chunk #", chunk_id, " re-run. Chunks ",
+            chunk_id + 1, "\u2013", length(ch$code_history),
+            " may need to be re-run."
+          ),
+          duration = 8,
+          type = "warning"
+        )
+      }
+
+      # Trigger mod_07 to execute the edited code
+      reverted(reverted() + 1)
+    })
+
+    # After a resubmit run completes, update error status in the history entry
+    observeEvent(run_result(), {
+      req(!is.null(resubmit_chunk_id()))
+      id <- resubmit_chunk_id()
+      ch$code_history[[id]]$error         <- code_error()
+      ch$code_history[[id]]$error_message <- run_result()$error_message
+      resubmit_chunk_id(NULL)
+    })
+
 
     ###  Selecting Chunk  ###
 
@@ -214,6 +342,50 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       chunk_selection$selected_chunk <- input$selected_chunk
     })
 
+    # Rename chunk on double-click
+    observeEvent(input$chunk_dblclick, {
+      req(input$chunk_dblclick)
+      chunk_id <- as.integer(input$chunk_dblclick$id)
+      current_name <- input$chunk_dblclick$name
+
+      shinyalert::shinyalert(
+        title = "Rename Chunk",
+        text = "Enter a new name:",
+        type = "input",
+        inputValue = current_name,
+        showCancelButton = TRUE,
+        confirmButtonText = "Rename",
+        cancelButtonText = "Cancel",
+        callbackR = function(value) {
+          if (!isFALSE(value) && !is.null(value) && nchar(trimws(value)) > 0) {
+            new_name <- trimws(value)
+
+            # Update name and rmd heading in code history
+            ch$code_history[[chunk_id]]$name <- new_name
+            ch$code_history[[chunk_id]]$rmd <- sub(
+              "### [0-9]+\\. [^\n]*",
+              paste0("### ", chunk_id, ". ", new_name),
+              ch$code_history[[chunk_id]]$rmd
+            )
+
+            # Rebuild choices with updated names
+            choices <- seq_along(ch$code_history)
+            names(choices) <- sapply(choices, function(i) {
+              if (!is.null(ch$code_history[[i]]$name)) ch$code_history[[i]]$name else paste0("Chunk #", i)
+            })
+            chunk_selection$chunk_choices <- choices
+
+            updateSelectInput(
+              session = session,
+              inputId = "selected_chunk",
+              choices = choices,
+              selected = chunk_selection$selected_chunk
+            )
+          }
+        }
+      )
+    })
+
 
     ###  Print Results or Error  ###
 
@@ -228,7 +400,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       height_px <- max(120, min(600, num_lines * 18))
       height <- sprintf("%dpx", height_px)
 
-      # use shinyAce to print with syntax coloring
+      # use shinyAce to print with syntax coloring (editable)
       shinyAce::aceEditor(
         ns("code_display"),
         value = results,  # code results
@@ -236,7 +408,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         theme = "xcode",  # change syntax color theme here
         height = height,
         fontSize = 14,
-        readOnly = TRUE,  # feature idea: build out RT so user can edit code here
+        readOnly = FALSE,
         showPrintMargin = FALSE  # remove vertical line at 80 chars
       )
     })
@@ -551,8 +723,10 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
               logs$language <- ch$code_history[[max_id]]$language
 
 
-              choices <- 1:length(ch$code_history)
-              names(choices) <- paste0("Chunk #", choices)
+              choices <- seq_along(ch$code_history)
+              names(choices) <- sapply(choices, function(i) {
+                if (!is.null(ch$code_history[[i]]$name)) ch$code_history[[i]]$name else paste0("Chunk #", i)
+              })
               chunk_selection$chunk_choices <- choices
 
               # Update chunk choices

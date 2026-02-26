@@ -94,7 +94,9 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name
         )
 
       } else {
-        names(choices) <- paste0("Chunk #", choices)
+        names(choices) <- sapply(choices, function(i) {
+          if (!is.null(ch$code_history[[i]]$name)) ch$code_history[[i]]$name else paste0("Chunk #", i)
+        })
 
         updateSelectInput(
           session = session,
