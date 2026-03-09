@@ -72,7 +72,7 @@ mod_11_settings_ui <- function(id) {
                   shinyWidgets::materialSwitch(
                     inputId = ns("show_api_settings"),
                     label = "",
-                    value = FALSE,
+                    value = TRUE,
                     status = "primary"
                   )
                 ),
@@ -293,7 +293,7 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
     api_key <- reactiveValues(
       key = "",
       source = "",
-      switch_on = FALSE # also toggle logic
+      switch_on = TRUE # also toggle logic
     )
 
     # Update API Key
