@@ -29,22 +29,22 @@ mod_03_send_request_ui <- function(id) {
         div(
           style = "display: flex; justify-content: space-between;",
           div(
-            # Submit Button
-            actionButton(ns("submit_button"), strong("Submit")),
-
-            tippy::tippy_this(
-              ns("submit_button"),
-              "ChatGPT can return different results for the same request.",
-              theme = "light-border"
-            )
-          ),
-          div(
             # Reset Button
             actionButton(ns("reset_button"), strong("Reset")),
 
             tippy::tippy_this(
               ns("reset_button"),
               "Reset before asking a new question. Clears data objects, chat history, & code chunks.",
+              theme = "light-border"
+            )
+          ),
+          div(
+            # Submit Button
+            actionButton(ns("submit_button"), strong("Submit")),
+
+            tippy::tippy_this(
+              ns("submit_button"),
+              "ChatGPT can return different results for the same request.",
               theme = "light-border"
             )
           )

@@ -55,7 +55,6 @@ app_ui <- function(request) {
             mod_15_data_types_ui("data_edit_modal"),
             mod_03_send_request_ui("send_request"),
             mod_16_qa_ui("qa"),
-            hr(class = "custom-hr"),
             div(
               style = "padding-bottom: 60px;",  # clear the fixed footer
               tags$label(
@@ -71,7 +70,7 @@ app_ui <- function(request) {
               numericInput(
                 inputId = "sidebar_temperature",
                 label = NULL,
-                value = 0.2,
+                value = 0.0,
                 min = 0,
                 max = 1,
                 step = 0.1,
