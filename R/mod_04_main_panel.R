@@ -16,11 +16,99 @@ mod_04_main_panel_ui <- function(id) {
       $(document).on('click', '#first_user', function() {
         $('#tabs a[data-value=\"first-time-user\"]').tab('show');
       });
-      /* Double-click on chunk selector to rename */
-      $(document).on('dblclick', '#main_panel-selected_chunk', function() {
-        var id = $(this).val();
-        var name = $(this).find('option:selected').text();
-        Shiny.setInputValue('main_panel-chunk_dblclick', {id: id, name: name}, {priority: 'event'});
+    ")),
+
+    # Chunk rename — triggered by the pencil button, NOT by clicking the select.
+    tags$script(HTML("
+      // Toggle Ace editor read-only state when the user clicks into / out of
+      // the code display.  focusout (not blur) is used because blur does not bubble.
+      function setAceEditable(on) {
+        try { ace.edit('main_panel-code_display').setReadOnly(!on); } catch(e) {}
+      }
+      $(document).on('mousedown', '#main_panel-code_display', function() {
+        setAceEditable(true);
+      });
+      $(document).on('focusout', '#main_panel-code_display', function() {
+        setAceEditable(false);
+      });
+
+      $(document).on('click', '#rtutor-rename-btn', function() {
+        var $select  = $(this).siblings().find('select').first();
+        if (!$select.length) {
+          $select = $('#main_panel-selected_chunk');
+        }
+        var chunkId   = $select.val();
+        var chunkName = $select.find('option:selected').text();
+        if (!chunkId) return;
+
+        var $wrapper = $('#rtutor-rename-btn').closest('div[style*=\"flex\"]');
+        var $btn     = $('#rtutor-rename-btn');
+        var $selWrap = $select.closest('[id$=\"select_wrapper\"]');
+
+        // Remove any stale rename widget
+        $('#rtutor-rename-container').remove();
+
+        // Hide the dropdown and pencil button
+        $selWrap.hide();
+        $btn.hide();
+
+        // Build vanilla rename widget — never managed by Shiny
+        var $inp = $('<input>', {
+          type: 'text', id: 'rtutor-rename-input', value: chunkName
+        }).css({
+          fontSize: '14px', padding: '4px 8px', height: '34px',
+          border: '1px solid #ccc', borderRadius: '4px',
+          width: '190px', boxSizing: 'border-box'
+        });
+
+        var bStyle = { fontSize:'14px', padding:'5px 10px', borderRadius:'4px',
+                       cursor:'pointer', height:'34px', border:'1px solid' };
+        var $ok = $('<button>&#x2713;</button>').css(
+          $.extend({}, bStyle, {marginLeft:'4px', color:'#fff',
+                                background:'#5a9e56', borderColor:'#4a8e46'})
+        );
+        var $x  = $('<button>&#x2715;</button>').css(
+          $.extend({}, bStyle, {marginLeft:'4px', color:'#000',
+                                background:'#F6FFF5', borderColor:'#90BD8C'})
+        );
+
+        var $box = $('<div>', {id:'rtutor-rename-container'})
+          .css({display:'inline-flex', alignItems:'center'})
+          .append($inp, $ok, $x);
+
+        $selWrap.after($box);
+        $inp.focus();
+        $inp[0].select();
+
+        function doConfirm() {
+          var name = $inp.val().trim();
+          if (name) {
+            Shiny.setInputValue('main_panel-chunk_rename_result',
+              {id: parseInt(chunkId), name: name}, {priority: 'event'});
+          }
+          doCleanup();
+        }
+        function doCleanup() {
+          $box.remove();
+          $selWrap.show();
+          $btn.show();
+        }
+
+        $inp.on('keydown', function(e) {
+          if (e.key === 'Enter')  { e.preventDefault(); doConfirm(); }
+          if (e.key === 'Escape') { e.preventDefault(); doCleanup(); }
+        });
+        $ok.on('click', doConfirm);
+        $x.on('click',  doCleanup);
+
+        setTimeout(function() {
+          $(document).one('click.rename', function(ev) {
+            if (!$(ev.target).closest('#rtutor-rename-container').length &&
+                ev.target.id !== 'rtutor-rename-btn') {
+              doCleanup();
+            }
+          });
+        }, 0);
       });
     ")),
 
@@ -75,6 +163,16 @@ mod_04_main_panel_ui <- function(id) {
       # Toolbar: [dropdown | Delete Chunk] .............. [Save | Resubmit | Show Code]
       tags$style(HTML("
         .shiny-input-container { margin-bottom: 0 !important; }
+        /* Style the native chunk-selector to match the app's green theme */
+        #main_panel-selected_chunk {
+          background-color: #F6FFF5;
+          border-color: #90BD8C;
+          color: #000;
+          font-size: 16px;
+          height: 34px;
+          border-radius: 4px;
+          padding: 4px 8px;
+        }
       ")),
       div(
         style = "display: flex; align-items: center; justify-content: space-between;
@@ -82,20 +180,30 @@ mod_04_main_panel_ui <- function(id) {
         # Left group: chunk selector + delete
         div(
           style = "display: flex; align-items: center; gap: 10px;",
-          div(
-            style = "position: relative;",
+          tags$div(
+            id = ns("select_wrapper"),
             selectInput(
               inputId = ns("selected_chunk"),
               label = NULL,
               selected = NULL,
-              choices = NULL
+              choices = NULL,
+              selectize = FALSE
             )
+          ),
+          # Pencil button to rename chunk (not a Shiny input, just a trigger for JS)
+          tags$button(
+            id    = "rtutor-rename-btn",
+            type  = "button",
+            style = "font-size: 15px; padding: 4px 8px; line-height: 1;
+              border: 1px solid #90BD8C; background: #F6FFF5;
+              border-radius: 4px; cursor: pointer;",
+            "\u270F"   # pencil icon
           ),
           actionButton(
             ns("delete_chunk"),
-            "Delete Chunk",
-            style = "font-size: 14px; color: #000; background-color: #F6FFF5;
-              border-color: #90BD8C; padding: 6px 12px;"
+            "\U0001F5D1", # trash bin icon
+            style = "font-size: 15px; color: #000; background-color: #F6FFF5;
+              border-color: #90BD8C; padding: 4px 8px; line-height: 1;"
           )
         ),
         # Right group: save + resubmit (shown when dirty) + show code
@@ -128,7 +236,12 @@ mod_04_main_panel_ui <- function(id) {
       # Tooltips
       tippy::tippy_this(
         ns("selected_chunk"),
-        "Select a previous code chunk to view or continue from it. Double-click to rename.",
+        "Select a previous code chunk to view or continue from it.",
+        theme = "light-border"
+      ),
+      tippy::tippy_this(
+        "rtutor-rename-btn",
+        "Rename this chunk.",
         theme = "light-border"
       ),
       tippy::tippy_this(
@@ -223,6 +336,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
 
     # ID of chunk currently being resubmitted (NULL when not in resubmit)
     resubmit_chunk_id <- reactiveVal(NULL)
+
 
     # True when the editor content differs from the stored code for the selected chunk
     is_dirty <- reactive({
@@ -342,47 +456,30 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       chunk_selection$selected_chunk <- input$selected_chunk
     })
 
-    # Rename chunk on double-click
-    observeEvent(input$chunk_dblclick, {
-      req(input$chunk_dblclick)
-      chunk_id <- as.integer(input$chunk_dblclick$id)
-      current_name <- input$chunk_dblclick$name
+    # Apply rename — JS sends this only when the user confirms (Enter / ✓ button)
+    observeEvent(input$chunk_rename_result, {
+      req(input$chunk_rename_result)
+      chunk_id <- as.integer(input$chunk_rename_result$id)
+      new_name <- trimws(input$chunk_rename_result$name)
+      req(nchar(new_name) > 0)
+      req(chunk_id >= 1 && chunk_id <= length(ch$code_history))
 
-      shinyalert::shinyalert(
-        title = "Rename Chunk",
-        text = "Enter a new name:",
-        type = "input",
-        inputValue = current_name,
-        showCancelButton = TRUE,
-        confirmButtonText = "Rename",
-        cancelButtonText = "Cancel",
-        callbackR = function(value) {
-          if (!isFALSE(value) && !is.null(value) && nchar(trimws(value)) > 0) {
-            new_name <- trimws(value)
+      ch$code_history[[chunk_id]]$name <- new_name
+      ch$code_history[[chunk_id]]$rmd  <- sub(
+        "### [0-9]+\\. [^\n]*",
+        paste0("### ", chunk_id, ". ", new_name),
+        ch$code_history[[chunk_id]]$rmd
+      )
 
-            # Update name and rmd heading in code history
-            ch$code_history[[chunk_id]]$name <- new_name
-            ch$code_history[[chunk_id]]$rmd <- sub(
-              "### [0-9]+\\. [^\n]*",
-              paste0("### ", chunk_id, ". ", new_name),
-              ch$code_history[[chunk_id]]$rmd
-            )
-
-            # Rebuild choices with updated names
-            choices <- seq_along(ch$code_history)
-            names(choices) <- sapply(choices, function(i) {
-              if (!is.null(ch$code_history[[i]]$name)) ch$code_history[[i]]$name else paste0("Chunk #", i)
-            })
-            chunk_selection$chunk_choices <- choices
-
-            updateSelectInput(
-              session = session,
-              inputId = "selected_chunk",
-              choices = choices,
-              selected = chunk_selection$selected_chunk
-            )
-          }
-        }
+      choices <- seq_along(ch$code_history)
+      names(choices) <- sapply(choices, function(i) {
+        nm <- ch$code_history[[i]]$name
+        if (!is.null(nm)) nm else paste0("Chunk #", i)
+      })
+      chunk_selection$chunk_choices <- choices
+      updateSelectInput(session, "selected_chunk",
+        choices  = choices,
+        selected = chunk_selection$selected_chunk
       )
     })
 
@@ -400,7 +497,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       height_px <- max(120, min(600, num_lines * 18))
       height <- sprintf("%dpx", height_px)
 
-      # use shinyAce to print with syntax coloring (editable)
+      # use shinyAce to print with syntax coloring (editable when focused)
       shinyAce::aceEditor(
         ns("code_display"),
         value = results,  # code results
@@ -408,7 +505,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         theme = "xcode",  # change syntax color theme here
         height = height,
         fontSize = 14,
-        readOnly = FALSE,
+        readOnly = TRUE,   # JS toggles this to FALSE on focus, TRUE on blur
         showPrintMargin = FALSE  # remove vertical line at 80 chars
       )
     })

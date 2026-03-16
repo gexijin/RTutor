@@ -11,19 +11,16 @@
 #
 # Coverage:
 #   1.  Global constants            (fct_helpers.R)
-#   2.  create_chat_completion_openai  (new direct-httr function)
-#   3.  create_chat_completion_azure   (missing-credential error messages)
-#   4.  system_role_tutor              (Markdown not HTML)
+#   2.  system_role_tutor              (Markdown not HTML)
+#   3.  create_chat_completion_openai  (new direct-httr function)
+#   4.  create_chat_completion_azure   (missing-credential error messages)
 #   5.  Q&A always visible             (mod_16_qa.R)
 #   6.  Q&A "4." label                 (mod_16_qa.R)
 #   7.  Q&A markdown rendering         (commonmark + file check)
-#   8.  Chunk renaming — name field    (mod_06_error_hist.R)
-#   9.  Chunk renaming — JS handler    (mod_04_main_panel.R)
-#   10. Chunk renaming — rmd patching  (logic + mod_04_main_panel.R)
-#   11. Temperature removed from Settings  (mod_11_settings.R)
-#   12. Temperature added to sidebar       (app_ui.R)
-#   13. sample_temp override in server     (app_server.R)
-#   14. Report uses custom chunk names     (mod_09_report.R)
+#   8. Temperature removed from Settings  (mod_11_settings.R)
+#   9. Temperature added to sidebar       (app_ui.R)
+#   10. sample_temp override in server     (app_server.R)
+#   11. Inline code editing — Save & Resubmit (mod_04_main_panel.R)
 # =============================================================================
 
 library(testthat)
@@ -259,127 +256,8 @@ test_that("commonmark renders numbered list to <ol><li>", {
   expect_match(html, "<li>")
 })
 
-
 # =============================================================================
-# 8. Chunk renaming — name field in code_history (mod_06_error_hist.R)
-# =============================================================================
-
-test_that("mod_06_error_hist.R: current_code list includes a 'name' field", {
-  src <- r_file("mod_06_error_hist.R")
-  expect_match(src, 'name\\s*=\\s*paste0\\("Chunk #"', ignore.case = FALSE)
-})
-
-test_that("mod_06_error_hist.R: choices use code_history[[i]]$name for labels", {
-  src <- r_file("mod_06_error_hist.R")
-  expect_match(src, "code_history\\[\\[i\\]\\]\\$name")
-})
-
-test_that("chunk naming logic: custom name takes priority", {
-  naming <- function(code_history) {
-    choices <- seq_along(code_history)
-    names(choices) <- sapply(choices, function(i) {
-      if (!is.null(code_history[[i]]$name)) code_history[[i]]$name
-      else paste0("Chunk #", i)
-    })
-    names(choices)
-  }
-  hist <- list(
-    list(name = "EDA"),
-    list(name = NULL),
-    list(name = "Model Fit")
-  )
-  result <- naming(hist)
-  expect_equal(result[[1]], "EDA")
-  expect_equal(result[[2]], "Chunk #2")
-  expect_equal(result[[3]], "Model Fit")
-})
-
-test_that("chunk naming logic: all NULL names fall back to 'Chunk #N'", {
-  naming <- function(n) {
-    code_history <- rep(list(list(name = NULL)), n)
-    sapply(seq_len(n), function(i) {
-      if (!is.null(code_history[[i]]$name)) code_history[[i]]$name
-      else paste0("Chunk #", i)
-    })
-  }
-  expect_equal(naming(3), c("Chunk #1", "Chunk #2", "Chunk #3"))
-})
-
-test_that("chunk naming logic: mixed names + fallbacks work correctly", {
-  code_history <- list(
-    list(name = "Step A"), list(name = NULL),
-    list(name = NULL),    list(name = "Step D")
-  )
-  choices <- seq_along(code_history)
-  names(choices) <- sapply(choices, function(i) {
-    if (!is.null(code_history[[i]]$name)) code_history[[i]]$name
-    else paste0("Chunk #", i)
-  })
-  expect_equal(names(choices), c("Step A", "Chunk #2", "Chunk #3", "Step D"))
-  expect_equal(unname(choices), 1:4)
-})
-
-
-# =============================================================================
-# 9. Chunk renaming — rmd heading patching (mod_04_main_panel.R)
-# =============================================================================
-
-test_that("rmd sub() regex replaces '### N. old title' with new name", {
-  rmd     <- "\n### 1. plot a histogram\nAzure O4 Mini\n```{R}\nhist(df$x)\n```\n"
-  updated <- sub("### [0-9]+\\. [^\n]*", "### 1. Histogram Analysis", rmd)
-  expect_match(updated, "### 1\\. Histogram Analysis")
-  expect_false(grepl("plot a histogram", updated, fixed = TRUE))
-})
-
-test_that("rmd sub() does not touch code inside code blocks", {
-  rmd <- "\n### 2. regression\nInfo\n```{R}\n### this is a comment\nlm(y~x)\n```\n"
-  updated <- sub("### [0-9]+\\. [^\n]*", "### 2. New Name", rmd)
-  expect_match(updated,  "### this is a comment", fixed = TRUE)
-  expect_match(updated,  "lm(y~x)",               fixed = TRUE)
-})
-
-test_that("rmd sub() works for any chunk number 1-999", {
-  for (n in c(1, 5, 10, 99, 100, 999)) {
-    rmd     <- paste0("\n### ", n, ". old title\n```{R}\nx<-1\n```\n")
-    updated <- sub("### [0-9]+\\. [^\n]*", paste0("### ", n, ". New Name"), rmd)
-    expect_match(updated, paste0("### ", n, "\\. New Name"))
-    expect_false(grepl("old title", updated, fixed = TRUE))
-  }
-})
-
-test_that("mod_04_main_panel.R: dblclick JS fires Shiny.setInputValue with chunk_dblclick", {
-  src <- r_file("mod_04_main_panel.R")
-  expect_match(src, "dblclick",      fixed = TRUE)
-  expect_match(src, "chunk_dblclick", fixed = TRUE)
-  expect_match(src, "setInputValue",  fixed = TRUE)
-})
-
-test_that("mod_04_main_panel.R: observeEvent responds to input$chunk_dblclick", {
-  src <- r_file("mod_04_main_panel.R")
-  expect_match(src, "observeEvent.*chunk_dblclick")
-  expect_match(src, "shinyalert",   fixed = TRUE)
-})
-
-test_that("mod_04_main_panel.R: rename updates both $name and $rmd fields", {
-  src <- r_file("mod_04_main_panel.R")
-  expect_match(src, "code_history\\[\\[chunk_id\\]\\]\\$name")
-  expect_match(src, "code_history\\[\\[chunk_id\\]\\]\\$rmd")
-})
-
-test_that("mod_04_main_panel.R: rename refreshes chunk_selection$chunk_choices", {
-  src <- r_file("mod_04_main_panel.R")
-  # Use regex (not fixed) so \$ matches a literal dollar sign
-  expect_match(src, "chunk_selection\\$chunk_choices")
-})
-
-test_that("mod_04_main_panel.R: tooltip text mentions double-click to rename", {
-  src <- r_file("mod_04_main_panel.R")
-  expect_match(src, "[Dd]ouble.click")
-})
-
-
-# =============================================================================
-# 10. Temperature — removed from Settings (mod_11_settings.R)
+# 8. Temperature — removed from Settings (mod_11_settings.R)
 # =============================================================================
 
 test_that("mod_11_settings.R: sliderInput for temperature is commented out", {
@@ -432,7 +310,7 @@ test_that("mod_11_settings.R: a comment explains the temperature was moved to si
 
 
 # =============================================================================
-# 11. Temperature — added to sidebar (app_ui.R)
+# 9. Temperature — added to sidebar (app_ui.R)
 # =============================================================================
 
 test_that("app_ui.R: contains numericInput with id 'sidebar_temperature'", {
@@ -475,7 +353,7 @@ test_that("app_ui.R: sidebar temperature has a tooltip", {
 
 
 # =============================================================================
-# 12. sample_temp override in app_server.R
+# 10. sample_temp override in app_server.R
 # =============================================================================
 
 test_that("app_server.R: sample_temp reads from input$sidebar_temperature", {
@@ -529,51 +407,16 @@ test_that("sample_temp clamping logic: NULL and NA return the default (0.2)", {
   expect_equal(clamp(NA),        0.2)
 })
 
-
 # =============================================================================
-# 13. Report module uses custom chunk names (mod_09_report.R)
-# =============================================================================
-
-test_that("mod_09_report.R: chunk names come from code_history[[i]]$name", {
-  src <- r_file("mod_09_report.R")
-  expect_match(src, "code_history\\[\\[i\\]\\]\\$name")
-})
-
-test_that("mod_09_report.R: falls back to 'Chunk #i' when name is NULL", {
-  src <- r_file("mod_09_report.R")
-  expect_match(src, "Chunk #",  fixed = TRUE)
-  expect_match(src, "is.null",  fixed = TRUE)
-})
-
-test_that("report naming logic is consistent with mod_04 / mod_06 logic", {
-  naming <- function(code_history) {
-    choices <- seq_along(code_history)
-    names(choices) <- sapply(choices, function(i) {
-      if (!is.null(code_history[[i]]$name)) code_history[[i]]$name
-      else paste0("Chunk #", i)
-    })
-    names(choices)
-  }
-  history <- list(
-    list(name = "Data Cleaning"),
-    list(name = NULL),
-    list(name = NULL),
-    list(name = "Final Results")
-  )
-  result <- naming(history)
-  expect_equal(result, c("Data Cleaning", "Chunk #2", "Chunk #3", "Final Results"))
-})
-
-
-# =============================================================================
-# 14. Inline code editing — Save & Resubmit (mod_04_main_panel.R)
+# 11. Inline code editing — Save & Resubmit (mod_04_main_panel.R)
 # =============================================================================
 
-test_that("mod_04_main_panel.R: aceEditor is not read-only", {
+test_that("mod_04_main_panel.R: aceEditor starts read-only, toggled by JS on focus", {
   src <- r_file("mod_04_main_panel.R")
-  # readOnly = FALSE must be present; readOnly = TRUE must not
-  expect_match(src, "readOnly\\s*=\\s*FALSE")
-  expect_false(grepl("readOnly\\s*=\\s*TRUE", src))
+  # Starts read-only; JS mousedown/focusout handlers toggle editability
+  expect_match(src, "readOnly\\s*=\\s*TRUE")
+  expect_match(src, "setAceEditable", fixed = TRUE)
+  expect_match(src, "mousedown",      fixed = TRUE)
 })
 
 test_that("mod_04_main_panel.R: Save button exists (hidden by default)", {

@@ -130,7 +130,8 @@
 
       choices <- seq_along(ch$code_history)
       names(choices) <- sapply(choices, function(i) {
-        if (!is.null(ch$code_history[[i]]$name)) ch$code_history[[i]]$name else paste0("Chunk #", i)
+        nm <- ch$code_history[[i]]$name
+        if (!is.null(nm)) nm else paste0("Chunk #", i)
       })
 
       # Directly update chunk selection
