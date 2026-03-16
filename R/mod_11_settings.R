@@ -293,7 +293,7 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
     api_key <- reactiveValues(
       key = "",
       source = "",
-      switch_on = TRUE # also toggle logic
+      switch_on = TRUE # default to OpenAI key
     )
 
     # Update API Key
