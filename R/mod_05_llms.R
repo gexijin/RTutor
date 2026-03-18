@@ -242,7 +242,8 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         azure_openAI_agent(relevancy_prompt)
       }
 
-      tf <- tolower(response$choices$message.content) == "true"
+      if (is.null(response)) return(FALSE)
+      tf <- tolower(response$choices[[1, "message.content"]]) == "true"
       return(tf)
     }
 
@@ -335,7 +336,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         },
         error = function(e) {
           print(e)  # Print error details
-          return(NULL)
+          stop(e$message, call. = FALSE)  # re-throw so outer tryCatch sees the real HTTP error
         }
       )
       return(response)

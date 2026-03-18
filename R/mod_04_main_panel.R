@@ -327,7 +327,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
                                    run_result, run_env_start, submit_button,
                                    use_python, tabs, current_data, current_data_2,
                                    selected_dataset_name, chunk_selection,
-                                   run_env, reverted) {
+                                   run_env, reverted, api_key) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -336,6 +336,9 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
 
     # ID of chunk currently being resubmitted (NULL when not in resubmit)
     resubmit_chunk_id <- reactiveVal(NULL)
+
+    # Per-session counter for LLM security reviews — caps API calls from rapid resubmits
+    security_check_count <- reactiveVal(0)
 
 
     # True when the editor content differs from the stored code for the selected chunk
@@ -387,7 +390,62 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       req(input$code_display)
       req(chunk_selection$selected_chunk)
       chunk_id <- as.integer(chunk_selection$selected_chunk)
+      req(chunk_id >= 1 && chunk_id <= length(ch$code_history))
       new_code <- input$code_display
+
+      # --- Pre-save security check on editor content ---
+      validation <- validate_r_code(new_code)
+      if (!validation$safe) {
+        issue_list <- paste0("<li>", validation$issues, "</li>", collapse = "")
+        showNotification(
+          ui = HTML(paste0(
+            "<b>Code blocked — security violation:</b><ul>", issue_list, "</ul>"
+          )),
+          type = "error",
+          duration = 20
+        )
+        return()
+      }
+
+      # --- Layer 2: LLM review if diff is significant (max 20 checks per session) ---
+      original_code <- ch$code_history[[chunk_id]]$raw
+      if (diff_is_significant(original_code, new_code) && security_check_count() < 20) {
+        security_check_count(security_check_count() + 1)
+
+        notify_id <- showNotification("Reviewing edits...", duration = NULL, type = "message")
+
+        review_prompt <- paste0(
+          "A student edited the following R code chunk in a statistics tutoring app.\n\n",
+          "ORIGINAL:\n", original_code, "\n\n",
+          "EDITED:\n", new_code, "\n\n",
+          "Does the edited version attempt anything outside legitimate data analysis — ",
+          "such as file system access, network calls, environment variable access, ",
+          "or executing system commands?"
+        )
+
+        result <- call_llm_check(review_prompt, api_key)
+        removeNotification(notify_id)
+
+        if (is.null(result)) {
+          showNotification(
+            ui = HTML("<b>Code blocked — security review could not complete (API unavailable). Please try again.</b>"),
+            type = "error",
+            duration = 15
+          )
+          return()
+        }
+
+        if (grepl("^yes", result, ignore.case = TRUE)) {
+          message("[SECURITY] LLM review flagged edited code in chunk ", chunk_id,
+                  " at ", Sys.time(), "\nEdited code:\n", new_code)
+          showNotification(
+            ui = HTML("<b>Code blocked — edits flagged as potentially harmful.</b>"),
+            type = "error",
+            duration = 20
+          )
+          return()
+        }
+      }
 
       # Auto-save to history
       ch$code_history[[chunk_id]]$code <- new_code
@@ -451,9 +509,18 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       )
     })
 
-    # React to user selection in the dropdown
+    # Sync dropdown selection to chunk_selection$selected_chunk
+    # Skip if value is unchanged to avoid an echo loop
     observeEvent(input$selected_chunk, {
-      chunk_selection$selected_chunk <- input$selected_chunk
+      if (!isTRUE(as.character(chunk_selection$selected_chunk) == input$selected_chunk)) {
+        # Set past_prompt before selected_chunk so mod_03 reads the correct prompt
+        # when it reacts to the selected_chunk change
+        new_id <- as.integer(input$selected_chunk)
+        if (new_id >= 1 && new_id <= length(ch$code_history)) {
+          chunk_selection$past_prompt <- ch$code_history[[new_id]]$prompt
+        }
+        chunk_selection$selected_chunk <- input$selected_chunk
+      }
     })
 
     # Apply rename — JS sends this only when the user confirms (Enter / ✓ button)
@@ -488,7 +555,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
 
     # Print code chunk
     output$code_results <- renderUI({
-      req(llm_response()$cmd)
+      req(logs$raw)
 
       results <- gsub("```", "", logs$raw)
 
@@ -534,6 +601,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$result_plot <- renderPlot({
       req(!code_error())
       req(logs$code)
+      req(!is.null(run_result()$result) || !is.null(run_result()$console_output))
       # Check if the result is not a ggplot or a known plot type
       if (inherits(run_result()$result, "ggplot") || is.null(run_result()$console_output)) {
         return(run_result()$result)
@@ -554,6 +622,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$result_plotly <- plotly::renderPlotly({
       req(!code_error())
       req(!use_python())
+      req(!is.null(run_result()$result))
       req(
         is_interactive_plot() ||   # natively interactive
           turned_on(input$make_ggplot_interactive)
@@ -572,6 +641,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$result_CanvasXpress <- canvasXpress::renderCanvasXpress({
       req(!code_error())
       req(!use_python())
+      req(!is.null(run_result()$result))
 
       g <- run_result()$result
       if (

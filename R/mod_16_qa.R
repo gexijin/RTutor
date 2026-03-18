@@ -392,7 +392,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           },
           error = function(e) {
             print(e)  # Print error details
-            return(NULL)
+            stop(e$message, call. = FALSE)  # re-throw so outer tryCatch sees the real HTTP error
           }
         )
         return(response)

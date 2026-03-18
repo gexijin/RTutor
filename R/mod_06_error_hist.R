@@ -168,21 +168,30 @@
         if (!is.null(nm)) nm else paste0("Chunk #", i)
       })
 
-      # Directly update chunk selection
+      # Directly update chunk selection.
+      # past_prompt must be set BEFORE selected_chunk: mod_03's observer fires
+      # before mod_06's selected_chunk observer (earlier registration order), so
+      # it reads past_prompt while it still holds the previous chunk's value.
       chunk_selection$chunk_choices <- choices
+      chunk_selection$past_prompt   <- current_code$prompt
       chunk_selection$selected_chunk <- logs$id
 
     })
 
-    # Change code when past code is selected
+    # Update logs$code and logs$raw when a past chunk is selected
     observeEvent(chunk_selection$selected_chunk, {
       req(chunk_selection$selected_chunk)
 
-      id <- chunk_selection$selected_chunk
-      id <- as.integer(id)
+      id <- as.integer(chunk_selection$selected_chunk)
 
-      logs$code <- ch$code_history[[id]]$code
-      logs$raw <- ch$code_history[[id]]$raw
+      # Avoid out-of-bounds access if selected_chunk updates before code_history is appended
+      req(id >= 1 && id <= length(ch$code_history))
+
+      new_code <- ch$code_history[[id]]$code
+      new_raw  <- ch$code_history[[id]]$raw
+      # Skip assignment if value is unchanged to avoid re-triggering mod_07's code runner infinitely
+      if (!identical(logs$code, new_code)) logs$code <- new_code
+      if (!identical(logs$raw,  new_raw))  logs$raw  <- new_raw
 
 
       # Switched to previous chunks
