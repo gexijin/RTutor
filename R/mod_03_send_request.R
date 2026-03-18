@@ -165,9 +165,9 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
       }
 
       # if no file is selected, do not send
-      if (selected_dataset_name() == "Select a Dataset:") {
+      if (selected_dataset_name() == data_placeholder) {
         showNotification(
-          paste("No file found. Please select a dataset and try again."),
+          paste("Please select a dataset in Step 1 before submitting."),
           duration = 10
         )
       }

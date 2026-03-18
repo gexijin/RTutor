@@ -161,7 +161,8 @@ app_server <- function(input, output, session) {
     selected_dataset_name = selected_dataset_name,
     chunk_selection = chunk_selection,
     run_env = run_env,
-    reverted = reverted
+    reverted = reverted,
+    api_key = api_key
   )
 
 

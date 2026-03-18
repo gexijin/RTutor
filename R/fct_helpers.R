@@ -53,6 +53,41 @@ Format your entire response in Markdown only. Use headers, bullet points, bold, 
 # If this file exists, running on the server. Otherwise local. This is used to change app behavior.
 on_server <- "on_server.txt"
 
+# Named character vector: function name -> reason it is blocked.
+# Used by validate_r_code() for AST-based pre-execution security checks.
+BLOCKED_FNS <- c(
+  # OS command execution
+  "system"           = "OS command execution",
+  "system2"          = "OS command execution",
+  "shell"            = "OS command execution",
+  "shell.exec"       = "OS command execution",
+  # File deletion
+  "unlink"           = "file deletion",
+  "file.remove"      = "file deletion",
+  # Session / app termination
+  "q"                = "session termination",
+  "quit"             = "session termination",
+  "stopApp"          = "session termination",
+  # Credential / environment access
+  "Sys.setenv"       = "environment variable modification",
+  "Sys.unsetenv"     = "environment variable modification",
+  "Sys.getenv"       = "credential access",
+  # Network
+  "download.file"    = "network access",
+  "socketConnection" = "raw network access",
+  "serverSocket"     = "raw network access",
+  "make.socket"      = "raw network access",
+  # Native / compiled code execution
+  ".Call"            = "native code execution",
+  ".C"               = "native code execution",
+  ".Fortran"         = "native code execution",
+  ".External"        = "native code execution",
+  ".External2"       = "native code execution",
+  # Arbitrary file execution
+  "source"           = "arbitrary file execution",
+  "sys.source"       = "arbitrary file execution"
+)
+
 
 
 ###################################################################
@@ -66,11 +101,10 @@ available_datasets <- data()$results[, 3] # name of datasets
 available_datasets <- sort(gsub(" .*", "", available_datasets)) # clean and sort
 
 # Filter to include only data frames & matrices
-available_datasets <- Filter(function(x)
-  is.data.frame(get(x, envir = .GlobalEnv)) ||
-  is.matrix(get(x, envir = .GlobalEnv)),
-  available_datasets
-)
+available_datasets <- Filter(function(x) {
+  obj <- tryCatch(get(x), error = function(e) NULL)
+  is.data.frame(obj) || is.matrix(obj)
+}, available_datasets)
 
 # Add diamonds and mpg df to list
 available_datasets <- c(available_datasets, "diamonds", "mpg", rna_seq)
@@ -161,7 +195,7 @@ prep_input <- function(txt, selected_data, df, use_python, chunk_id, send_head, 
   }
 
   if (!is.null(selected_data)) {
-    if (selected_data != no_data) {
+    if (selected_data != no_data && !is.null(df)) {
       # variables mentioned in request
       relevant_var <- sapply(
         colnames(df),
@@ -321,6 +355,359 @@ describe_df <- function(df, list_levels = FALSE, relevant_var = NULL, send_head 
   paste(data_info, collapse = " ")
 }
 
+
+
+###################################################################
+# Pre-Execution Security Validation
+###################################################################
+
+
+#' Recursively extract every function name called in a parsed R expression
+#'
+#' Handles: plain calls foo(), qualified calls pkg::foo(),
+#' do.call("foo", ...) and get("foo")() with string literals.
+#'
+#' @param parsed_exprs result of parse(text = ...)
+#' @return character vector of unique called function names
+extract_calls <- function(parsed_exprs) {
+  calls <- character(0)
+
+  walk <- function(node) {
+    if (is.call(node)) {
+      fn <- node[[1]]
+
+      # Plain call: foo(...)
+      if (is.name(fn)) {
+        calls <<- c(calls, as.character(fn))
+      }
+      # Qualified call: pkg::foo(...) or pkg:::foo(...)
+      else if (is.call(fn) && length(fn) == 3 &&
+               as.character(fn[[1]]) %in% c("::", ":::")) {
+        fn_name <- as.character(fn[[3]])
+        calls <<- c(calls, fn_name,
+                    paste0(as.character(fn[[2]]), "::", fn_name))
+      }
+
+      # do.call("foo", ...) — extract string-literal function name
+      if (is.name(node[[1]]) &&
+          as.character(node[[1]]) == "do.call" &&
+          length(node) >= 2 &&
+          is.character(node[[2]])) {
+        calls <<- c(calls, as.character(node[[2]]))
+      }
+
+      # get("foo")() — extract string-literal from get()
+      if (is.name(node[[1]]) &&
+          as.character(node[[1]]) == "get" &&
+          length(node) >= 2 &&
+          is.character(node[[2]])) {
+        calls <<- c(calls, as.character(node[[2]]))
+      }
+
+      # Walk all child nodes (tryCatch guards against missing formals in fn defs)
+      for (i in seq_along(node)) tryCatch(walk(node[[i]]), error = function(e) NULL)
+
+    } else if (is.recursive(node)) {
+      for (item in node) tryCatch(walk(item), error = function(e) NULL)
+    }
+  }
+
+  for (expr in as.list(parsed_exprs)) walk(expr)
+  unique(calls)
+}
+
+
+#' Validate R code for security issues before execution
+#'
+#' Uses AST analysis (catches obfuscated calls) plus regex fallback.
+#' Returns immediately on the first layer that finds a problem.
+#'
+#' @param code character vector of R code lines
+#' @return list(safe = logical, issues = character vector of descriptions)
+validate_r_code <- function(code) {
+  if (is.null(code) || length(code) == 0) {
+    return(list(safe = TRUE, issues = character(0)))
+  }
+
+  code_str <- paste(code, collapse = "\n")
+  if (nchar(trimws(code_str)) == 0) {
+    return(list(safe = TRUE, issues = character(0)))
+  }
+
+  issues <- character(0)
+
+  # --- Layer 1: AST-based check -------------------------------------------
+  parsed <- tryCatch(parse(text = code_str), error = function(e) NULL)
+
+  if (!is.null(parsed)) {
+    found <- extract_calls(parsed)
+
+    # Flag any call that matches a blocked function
+    matched <- found[found %in% names(BLOCKED_FNS)]
+    for (fn in unique(matched)) {
+      issues <- c(issues, paste0(
+        "'", fn, "' is not permitted (", BLOCKED_FNS[[fn]], ")."
+      ))
+    }
+
+    # eval(parse(...)) together is a dynamic code-execution bypass
+    if ("eval" %in% found && "parse" %in% found) {
+      issues <- c(issues,
+        "'eval(parse(...))' is not permitted — it can execute arbitrary code.")
+    }
+  }
+
+  # --- Layer 2: Regex checks for patterns AST cannot see ------------------
+  regex_checks <- list(
+    list(
+      pattern = "\\.GlobalEnv|globalenv\\s*\\(",
+      message = "Direct access to the global R environment is not permitted."
+    ),
+    list(
+      pattern = "readLines\\s*\\(['\"]https?://",
+      message = "'readLines()' with a remote URL is not permitted."
+    ),
+    list(
+      pattern = "url\\s*\\(['\"]https?://",
+      message = "Opening remote URL connections is not permitted."
+    ),
+    list(
+      pattern = "Sys\\.sleep\\s*\\(\\s*[5-9][0-9]{2,}|Sys\\.sleep\\s*\\(\\s*[0-9]{4,}",
+      message = "Extremely long 'Sys.sleep()' calls are not permitted (potential denial of service)."
+    ),
+    list(
+      pattern = "while\\s*\\(\\s*TRUE\\s*\\)|repeat\\s*\\{",
+      message = "Unconditional infinite loops ('while(TRUE)' / 'repeat') are not permitted."
+    )
+  )
+
+  for (chk in regex_checks) {
+    if (grepl(chk$pattern, code_str, perl = TRUE)) {
+      issues <- c(issues, chk$message)
+    }
+  }
+
+  list(safe = length(issues) == 0, issues = unique(issues))
+}
+
+
+# Extract string literals from a parsed expression tree.
+# Returns a character vector of unique string values (not symbol names).
+extract_strings <- function(parsed_exprs) {
+  strings <- character(0)
+  walk <- function(node) {
+    if (is.character(node)) {
+      strings <<- c(strings, node)
+      return()
+    }
+    if (is.call(node) || is.expression(node)) {
+      for (i in seq_along(node)) tryCatch(walk(node[[i]]), error = function(e) NULL)
+    } else if (is.recursive(node)) {
+      for (item in node) tryCatch(walk(item), error = function(e) NULL)
+    }
+  }
+  for (expr in as.list(parsed_exprs)) walk(expr)
+  unique(strings)
+}
+
+
+# Allowlist of common data-analysis functions that are safe to add without LLM review.
+# A new call that appears in the edited code but is in this set does NOT trigger escalation.
+SAFE_FNS <- c(
+  # ggplot2
+  "ggplot", "aes", "aes_string", "geom_point", "geom_line", "geom_bar", "geom_col",
+  "geom_histogram", "geom_boxplot", "geom_violin", "geom_jitter", "geom_smooth",
+  "geom_density", "geom_text", "geom_label", "geom_tile", "geom_ribbon",
+  "geom_errorbar", "geom_hline", "geom_vline", "geom_abline", "geom_area",
+  "geom_segment", "geom_path", "geom_rug", "geom_step", "geom_contour",
+  "geom_raster", "geom_polygon", "geom_spoke", "stat_summary", "stat_smooth",
+  "stat_bin", "stat_density", "stat_count", "stat_function",
+  "facet_wrap", "facet_grid", "facet_null",
+  "theme", "theme_minimal", "theme_bw", "theme_classic", "theme_gray",
+  "theme_light", "theme_dark", "theme_void", "theme_set",
+  "element_text", "element_blank", "element_rect", "element_line",
+  "labs", "xlab", "ylab", "ggtitle",
+  "scale_x_continuous", "scale_y_continuous", "scale_x_discrete", "scale_y_discrete",
+  "scale_x_log10", "scale_y_log10", "scale_x_reverse", "scale_y_reverse",
+  "scale_color_manual", "scale_fill_manual", "scale_color_gradient",
+  "scale_fill_gradient", "scale_color_brewer", "scale_fill_brewer",
+  "scale_size", "scale_shape", "scale_linetype", "scale_alpha",
+  "coord_flip", "coord_fixed", "coord_polar", "coord_cartesian",
+  "position_dodge", "position_stack", "position_fill", "position_jitter",
+  "position_nudge", "position_identity",
+  "ggplotly", "plot_ly", "add_trace", "layout",
+  # dplyr
+  "filter", "select", "mutate", "summarise", "summarize", "group_by", "ungroup",
+  "arrange", "desc", "slice", "rename", "distinct", "count", "tally", "n",
+  "pull", "case_when", "if_else", "left_join", "right_join", "inner_join",
+  "full_join", "anti_join", "semi_join", "bind_rows", "bind_cols",
+  "across", "everything", "starts_with", "ends_with", "contains", "where",
+  "relocate", "transmute", "add_count", "coalesce", "lead", "lag",
+  "row_number", "ntile", "percent_rank", "cume_dist", "first", "last", "nth",
+  # tidyr
+  "pivot_longer", "pivot_wider", "gather", "spread", "separate", "unite",
+  "drop_na", "fill", "replace_na", "complete", "unnest", "nest",
+  # stringr
+  "str_detect", "str_replace", "str_replace_all", "str_extract", "str_extract_all",
+  "str_split", "str_c", "str_length", "str_sub", "str_to_upper", "str_to_lower",
+  "str_trim", "str_pad", "str_count", "str_starts", "str_ends", "str_remove",
+  "str_remove_all", "str_glue", "str_wrap",
+  # lubridate
+  "ymd", "mdy", "dmy", "ymd_hms", "year", "month", "day",
+  "hour", "minute", "second", "wday", "yday",
+  "floor_date", "ceiling_date", "round_date", "as_date",
+  # forcats
+  "fct_reorder", "fct_rev", "fct_relevel", "fct_recode",
+  "fct_collapse", "fct_drop", "fct_lump",
+  # purrr
+  "map", "map_dbl", "map_chr", "map_lgl", "map_df", "map2",
+  "walk", "reduce", "keep", "discard", "possibly", "safely",
+  # stats
+  "lm", "glm", "t.test", "wilcox.test", "chisq.test", "cor.test",
+  "aov", "anova", "manova", "predict", "residuals", "coef", "confint",
+  "fitted", "model.matrix", "formula", "fisher.test", "kruskal.test",
+  "shapiro.test", "ks.test", "bartlett.test", "pairwise.t.test", "TukeyHSD",
+  "dist", "hclust", "kmeans", "prcomp", "biplot", "cutree", "cmdscale",
+  "factanal", "density", "quantile", "IQR", "fivenum", "ecdf",
+  "loess", "spline", "smooth.spline", "poly", "ns", "bs",
+  # base R — arithmetic / vector / string ops
+  "c", "list", "data.frame", "tibble", "matrix", "cbind", "rbind",
+  "apply", "lapply", "sapply", "tapply", "mapply", "vapply",
+  "which", "which.min", "which.max", "match",
+  "head", "tail", "nrow", "ncol", "dim", "length", "names", "colnames", "rownames",
+  "str", "class", "typeof", "inherits", "is.na", "is.null", "is.numeric",
+  "is.character", "is.factor", "is.logical", "is.integer", "is.data.frame",
+  "na.omit", "complete.cases",
+  "table", "prop.table", "addmargins", "margin.table",
+  "sort", "order", "rev", "unique", "duplicated", "rank",
+  "paste", "paste0", "sprintf", "format", "formatC", "nchar",
+  "gsub", "sub", "grepl", "grep", "regexpr", "regmatches",
+  "strsplit", "toupper", "tolower", "trimws", "chartr", "substr", "substring",
+  "round", "floor", "ceiling", "trunc", "signif", "abs", "sqrt",
+  "exp", "log", "log10", "log2", "sign",
+  "sum", "prod", "cumsum", "cumprod", "cummax", "cummin",
+  "max", "min", "range", "mean", "median", "sd", "var", "cor", "cov",
+  "scale", "diff", "weighted.mean",
+  "seq", "seq_len", "seq_along", "rep", "rep_len",
+  "as.numeric", "as.character", "as.factor", "as.logical", "as.integer",
+  "as.double", "as.Date", "as.POSIXct", "as.POSIXlt", "as.data.frame",
+  "as.matrix", "as.tibble", "as_tibble", "as.list", "as.vector",
+  "format.Date", "difftime",
+  "setNames", "do.call", "Reduce", "Map", "Filter", "Position", "Find",
+  "tryCatch", "try", "stop", "warning", "message",
+  "cat", "print", "sprintf", "invisible", "return",
+  "interaction", "droplevels", "relevel", "levels", "nlevels",
+  "ave", "aggregate", "reshape", "merge", "with", "within",
+  "Sys.time", "Sys.Date", "proc.time", "date",
+  "set.seed", "sample", "runif", "rnorm", "rbinom", "rpois",
+  "dnorm", "pnorm", "qnorm", "dbinom", "pbinom", "qbinom",
+  "dpois", "ppois", "qpois", "dt", "pt", "qt", "df", "pf", "qf",
+  # knitr / display
+  "kable", "knitr", "options", "par",
+  # package loading (these are generally safe)
+  "library", "require", "p_load",
+  # summarytools (mod_10 EDA)
+  "summarytools", "dfSummary", "freq", "descr", "ctable",
+  # DataExplorer (mod_10 EDA)
+  "DataExplorer", "create_report", "plot_missing", "plot_bar", "plot_histogram",
+  "plot_correlation", "plot_boxplot", "plot_scatterplot", "plot_density",
+  # GGally (mod_10 EDA)
+  "GGally", "ggpairs", "ggcorr", "ggduo", "ggmatrix"
+)
+
+
+# Returns TRUE if the edit is significant enough to warrant an LLM security review.
+# Triggers on:
+#   1. >= n_chars raw character difference
+#   2. A new function call that is not in the SAFE_FNS allowlist
+#   3. A new string literal
+diff_is_significant <- function(original_code, edited_code, n_chars = 40) {
+  orig_str <- paste(original_code, collapse = "\n")
+  edit_str <- paste(edited_code,   collapse = "\n")
+
+  # 1. Raw character count
+  if (abs(nchar(edit_str) - nchar(orig_str)) >= n_chars) return(TRUE)
+
+  parse_safe <- function(code) {
+    tryCatch(parse(text = code, keep.source = FALSE), error = function(e) NULL)
+  }
+  orig_parsed <- parse_safe(orig_str)
+  edit_parsed <- parse_safe(edit_str)
+
+  if (!is.null(orig_parsed) && !is.null(edit_parsed)) {
+    # 2. New function call not in the safe allowlist
+    new_calls <- setdiff(extract_calls(edit_parsed), extract_calls(orig_parsed))
+    if (length(setdiff(new_calls, SAFE_FNS)) > 0) return(TRUE)
+
+    # 3. New or changed string literal
+    if (length(setdiff(extract_strings(edit_parsed), extract_strings(orig_parsed))) > 0) return(TRUE)
+  }
+
+  FALSE
+}
+
+
+# Lightweight LLM security check. Sends prompt to OpenAI (gpt-4o-mini) or Azure.
+# Returns "YES" or "NO" (trimmed), or NULL on API failure (caller should fail closed).
+# model_override defaults to "gpt-4o-mini" for OpenAI. For Azure, api_versions does not
+# include "gpt-4o-mini", so the fallback uses api_versions[[1]] (currently "o4-mini" / 2025-01-01).
+# If the Azure deployment does not have gpt-4o-mini, the call will error and return NULL.
+call_llm_check <- function(prompt, api_key, model_override = "gpt-4o-mini") {
+  # System message enforces a strict YES/NO reply — no explanations.
+  messages <- list(
+    list(
+      role    = "system",
+      content = "You are a security reviewer. You must reply with only the single word YES or NO. No explanation, no punctuation, nothing else."
+    ),
+    list(role = "user", content = prompt)
+  )
+
+  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+    # OpenAI path
+    response <- tryCatch(
+      openai::create_chat_completion(
+        model          = model_override,
+        openai_api_key = api_key$key,
+        temperature    = 0,
+        messages       = messages
+      ),
+      error = function(e) {
+        message("[SECURITY] call_llm_check OpenAI error: ", e$message)
+        NULL
+      }
+    )
+  } else {
+    # Azure path — look up api_version for this model; fall back to the first configured entry
+    az_version <- if (!is.null(api_versions[[model_override]])) {
+      api_versions[[model_override]]
+    } else {
+      api_versions[[1]]
+    }
+    response <- tryCatch(
+      create_chat_completion_azure(
+        model       = model_override,
+        api_version = az_version,
+        temperature = 0,
+        messages    = messages
+      ),
+      error = function(e) {
+        message("[SECURITY] call_llm_check Azure error: ", e$message)
+        NULL
+      }
+    )
+  }
+
+  if (is.null(response)) return(NULL)
+
+  # choices is a data frame; extract the first row's content safely
+  tryCatch(
+    trimws(response$choices[[1, "message.content"]]),
+    error = function(e) {
+      message("[SECURITY] call_llm_check: failed to parse response — ", e$message)
+      NULL
+    }
+  )
+}
 
 
 #' Clean up R commands generated by GTP

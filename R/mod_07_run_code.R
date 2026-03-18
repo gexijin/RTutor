@@ -27,7 +27,27 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
       ),{
       req(logs$code != "")
       req(!use_python())
-      # print("Run Code")
+
+      # --- Pre-execution security check ---
+      validation <- validate_r_code(logs$code)
+      if (!validation$safe) {
+        issue_list <- paste0("<li>", validation$issues, "</li>", collapse = "")
+        showNotification(
+          ui = HTML(paste0(
+            "<b>Code blocked — security violation:</b><ul>", issue_list, "</ul>"
+          )),
+          type = "error",
+          duration = 20
+        )
+        code_error(TRUE)
+        run_result(list(
+          result       = NULL,
+          console_output = NULL,
+          error_message  = paste("Security violation:",
+                                 paste(validation$issues, collapse = "; "))
+        ))
+        return()
+      }
 
       result <- NULL
       console_output <- NULL
@@ -70,11 +90,14 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
         }
 
         # Check to see if df changed from running the code
-        if (!is.null(current_data())) {
+        if (!is.null(current_data()) && !is.null(run_env()$df)) {
           row_check <- nrow(current_data()) == nrow(run_env()$df) # Check if # of rows are same
           col_check <- ncol(current_data()) == ncol(run_env()$df) # Check if # of columns are same
           if (row_check && col_check) {
-            val_check <- length(which(current_data() != run_env()$df)) # Check if values are the same
+            val_check <- tryCatch(
+              length(which(current_data() != run_env()$df)),
+              error = function(e) 1L  # treat uncomparable types as changed
+            )
             if (val_check > 0) {
               current_data(run_env()$df)
             }
@@ -84,11 +107,14 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
         }
 
         # Check to see if df2 changed from running the code
-        if (!is.null(current_data_2())) {
+        if (!is.null(current_data_2()) && !is.null(run_env()$df2)) {
           row_check <- nrow(current_data_2()) == nrow(run_env()$df2) # Check if # of rows are same
           col_check <- ncol(current_data_2()) == ncol(run_env()$df2) # Check if # of columns are same
           if (row_check && col_check) {
-            val_check <- length(which(current_data_2() != run_env()$df2)) # Check if values are the same
+            val_check <- tryCatch(
+              length(which(current_data_2() != run_env()$df2)),
+              error = function(e) 1L  # treat uncomparable types as changed
+            )
             if (val_check > 0) {
               current_data_2(run_env()$df2)
             }

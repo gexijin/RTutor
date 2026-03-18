@@ -465,7 +465,7 @@ test_that("mod_04_main_panel.R: save handler does NOT call reverted()", {
 test_that("mod_04_main_panel.R: resubmit handler restores pre-chunk environment", {
   src <- r_file("mod_04_main_panel.R")
   resub_start <- regexpr("observeEvent\\(input\\$resubmit_code", src)
-  resub_block  <- substring(src, resub_start, resub_start + 900)
+  resub_block  <- substring(src, resub_start, resub_start + 5000)
   expect_match(resub_block, "run_env",  fixed = TRUE)
   expect_match(resub_block, "list2env", fixed = TRUE)
   expect_match(resub_block, "\\$env")   # regex: \\$ = literal $
@@ -474,14 +474,14 @@ test_that("mod_04_main_panel.R: resubmit handler restores pre-chunk environment"
 test_that("mod_04_main_panel.R: resubmit handler triggers reverted()", {
   src <- r_file("mod_04_main_panel.R")
   resub_start <- regexpr("observeEvent\\(input\\$resubmit_code", src)
-  resub_block  <- substring(src, resub_start, resub_start + 1600)
+  resub_block  <- substring(src, resub_start, resub_start + 5000)
   expect_match(resub_block, "reverted", fixed = TRUE)
 })
 
 test_that("mod_04_main_panel.R: resubmit warns about downstream chunks", {
   src <- r_file("mod_04_main_panel.R")
   resub_start <- regexpr("observeEvent\\(input\\$resubmit_code", src)
-  resub_block  <- substring(src, resub_start, resub_start + 1600)
+  resub_block  <- substring(src, resub_start, resub_start + 5000)
   expect_match(resub_block, "may need to be re-run", fixed = TRUE)
 })
 

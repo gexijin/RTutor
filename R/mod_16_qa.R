@@ -75,9 +75,9 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
         #----------------------------Send request
         shinybusy::show_modal_spinner(spin = "orbit", text = paste(sample(jokes, 1)),color = "#000000")
-        on.exit(shinybusy::remove_modal_spinner(), add = TRUE)
 
         start_time <- Sys.time()
+        api_error_occurred <- FALSE
 
         # Get LLM response
         response <- tryCatch({
@@ -90,15 +90,17 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           send_request_qa(prompt_total, prepared_request)
 
         }, error = function(e) {   # handle error, if any
-          shiny::showModal(api_error_modal)
-          Sys.sleep(5)
-          session$reload()
+          api_error_occurred <<- TRUE
+          shinybusy::remove_modal_spinner()   # close spinner first, then show error modal
+          shiny::showModal(api_error_modal(e$message))
           list(
             error_value = -1,
             message = capture.output(print(e$message)),
             error_status = TRUE
           )
         })
+
+        if (!api_error_occurred) shinybusy::remove_modal_spinner()
 
         final_response <- process_response(response, start_time)
       })
@@ -390,7 +392,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           },
           error = function(e) {
             print(e)  # Print error details
-            return(NULL)
+            stop(e$message, call. = FALSE)  # re-throw so outer tryCatch sees the real HTTP error
           }
         )
         return(response)

@@ -17,20 +17,53 @@
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # API Connection Error Modal
-    api_error_modal <- shiny::modalDialog(
-      title = "API connection error!",
-      tags$h4("Is the API key is correct?", style = "color:red"),
-      tags$h4("How about the WiFi?", style = "color:red"),
-      tags$h4("Maybe the openAI.com website is taking forever to respond.", style = "color:red"),
-      tags$h5("If you keep having trouble, send us an email.", style = "color:red"),
-      tags$h4(
-        "Auto-reset ...",
-        style = "color:blue; text-align:right"
-      ),
-      easyClose = TRUE,
-      size = "s"
-    )
+    # API Connection Error Modal — built dynamically from the error message
+    api_error_modal <- function(error_message = "") {
+
+      # Extract HTTP status code from message, e.g. "request failed [401]:"
+      code_match <- regmatches(error_message, regexpr("\\[\\d{3}\\]", error_message))
+      status_code <- if (length(code_match) > 0) gsub("\\[|\\]", "", code_match) else NULL
+
+      detail <- switch(if (is.null(status_code)) "" else status_code,
+        "401" = tagList(
+          tags$h4("Your API key was rejected (401).", style = "color:red"),
+          tags$p("Go to the Settings tab and check that your key is correct and active.")
+        ),
+        "403" = tagList(
+          tags$h4("Access denied (403).", style = "color:red"),
+          tags$p("Your account may have a billing issue or exceeded its quota. Check your OpenAI account.")
+        ),
+        "429" = tagList(
+          tags$h4("Too many requests (429).", style = "color:red"),
+          tags$p("You've hit the rate limit. Wait a moment, then try submitting again.")
+        ),
+        "500" = tagList(
+          tags$h4("OpenAI server error (500).", style = "color:red"),
+          tags$p("The AI server is having issues. Try again in a few moments.")
+        ),
+        "502" = ,
+        "503" = tagList(
+          tags$h4("Service unavailable (502/503).", style = "color:red"),
+          tags$p("The AI server is temporarily down. Try again shortly.")
+        ),
+        # Default: no recognisable status code
+        tagList(
+          tags$h4("Could not connect to the AI server.", style = "color:red"),
+          tags$p("Check your internet connection, and verify your API key in Settings."),
+          tags$p("If the problem continues, the OpenAI service may be temporarily unavailable.")
+        )
+      )
+
+      shiny::modalDialog(
+        title = "API connection error!",
+        detail,
+        tags$p("Your data and history have been preserved. You can try again without resetting.",
+               style = "color: #555; font-style: italic; margin-top: 10px;"),
+        footer = shiny::modalButton("Dismiss"),
+        easyClose = TRUE,
+        size = "s"
+      )
+    }
 
     # Warning message when reached 10 cents, 20c, 30c ...
     observeEvent(submit_button(), {
@@ -58,6 +91,7 @@
 
     observeEvent(llm_response(), {
       req(llm_response())
+      req(!isTRUE(llm_response()$error))  # skip on API error; don't corrupt logs
       # print("Save Logs")
       # browser()
 
@@ -134,21 +168,30 @@
         if (!is.null(nm)) nm else paste0("Chunk #", i)
       })
 
-      # Directly update chunk selection
+      # Directly update chunk selection.
+      # past_prompt must be set BEFORE selected_chunk: mod_03's observer fires
+      # before mod_06's selected_chunk observer (earlier registration order), so
+      # it reads past_prompt while it still holds the previous chunk's value.
       chunk_selection$chunk_choices <- choices
+      chunk_selection$past_prompt   <- current_code$prompt
       chunk_selection$selected_chunk <- logs$id
 
     })
 
-    # Change code when past code is selected
+    # Update logs$code and logs$raw when a past chunk is selected
     observeEvent(chunk_selection$selected_chunk, {
       req(chunk_selection$selected_chunk)
 
-      id <- chunk_selection$selected_chunk
-      id <- as.integer(id)
+      id <- as.integer(chunk_selection$selected_chunk)
 
-      logs$code <- ch$code_history[[id]]$code
-      logs$raw <- ch$code_history[[id]]$raw
+      # Avoid out-of-bounds access if selected_chunk updates before code_history is appended
+      req(id >= 1 && id <= length(ch$code_history))
+
+      new_code <- ch$code_history[[id]]$code
+      new_raw  <- ch$code_history[[id]]$raw
+      # Skip assignment if value is unchanged to avoid re-triggering mod_07's code runner infinitely
+      if (!identical(logs$code, new_code)) logs$code <- new_code
+      if (!identical(logs$raw,  new_raw))  logs$raw  <- new_raw
 
 
       # Switched to previous chunks

@@ -13,6 +13,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     # LLM prompt
     llm_prompt <- reactive({
       req(submit_button(), selected_dataset_name(), input_text())
+      req(selected_dataset_name() != data_placeholder)
 
       isolate({  # so it does not run twice with each submit
         prep_input(input_text(), selected_dataset_name(), current_data(),
@@ -24,11 +25,11 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     # LLM response
     llm_response <- reactive({
-      req(selected_dataset_name() != "Select a Dataset:")
       req(submit_button())
 
       isolate({
         # will not respond to text input until submitted
+        req(selected_dataset_name() != data_placeholder)
         req(input_text(), llm_prompt(), selected_dataset_name())
 
         # Store prompt
@@ -36,9 +37,9 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
         # Loading modal
         shinybusy::show_modal_spinner(spin = "orbit", text = sample(jokes, 1), color = "#000000")
-        on.exit(shinybusy::remove_modal_spinner(), add = TRUE)
 
         start_time <- Sys.time()
+        api_error_occurred <- FALSE
 
         # Get LLM response
         response <- tryCatch({
@@ -55,15 +56,17 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
           }
 
         }, error = function(e) {   # handle error, if any
-          shiny::showModal(api_error_modal)
-          Sys.sleep(5)
-          session$reload()
+          api_error_occurred <<- TRUE
+          shinybusy::remove_modal_spinner()   # close spinner first, then show error modal
+          shiny::showModal(api_error_modal(e$message))
           list(
             error_value = -1,
             message = capture.output(print(e$message)),
             error_status = TRUE
           )
         })
+
+        if (!api_error_occurred) shinybusy::remove_modal_spinner()
 
         final_response <- process_response(response, start_time)
       })
@@ -189,7 +192,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         Sys.sleep(counter$requests / 40 + runif(1, 0, 40))
       }
 
-      update_counter(response, api_time)
+      if (!error_api) update_counter(response, api_time)
 
       # Store info in response variable, return it
       return(list(
@@ -239,7 +242,8 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         azure_openAI_agent(relevancy_prompt)
       }
 
-      tf <- tolower(response$choices$message.content) == "true"
+      if (is.null(response)) return(FALSE)
+      tf <- tolower(response$choices[[1, "message.content"]]) == "true"
       return(tf)
     }
 
@@ -332,7 +336,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         },
         error = function(e) {
           print(e)  # Print error details
-          return(NULL)
+          stop(e$message, call. = FALSE)  # re-throw so outer tryCatch sees the real HTTP error
         }
       )
       return(response)
