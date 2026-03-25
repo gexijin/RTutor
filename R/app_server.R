@@ -1,7 +1,7 @@
 ##########################################################
 # RTutor.AI | A Shiny app for chatting with your data.
 # Author: Xijin Ge | ge@orditus.com
-# © 2024 Orditus LLC
+# © 2026 Orditus LLC
 # No warranty & not for commercial use without a license.
 ##########################################################
 
@@ -94,6 +94,11 @@ app_server <- function(input, output, session) {
   ## Module 15
   modal_closed <- reactiveVal(FALSE)
 
+  # Incremented after prompt quality clears; gates mod_05/06/07/09 instead of submit_button
+  quality_cleared <- reactiveVal(0)
+  # Stores the latest plain-English error explanation from explain_error()
+  error_explanation <- reactiveVal(list())
+
 
 
   #                    Modules and Outputs
@@ -124,6 +129,36 @@ app_server <- function(input, output, session) {
   user_data_2 <- mod_02$user_data_2
   use_python <- FALSE
 
+  # soft reset: clears execution state while preserving uploaded data
+  do_soft_reset <- function() {
+    logs$id        <- 0
+    logs$code      <- ""
+    logs$raw       <- ""
+    logs$last_code <- ""
+    logs$language  <- ""
+    ch$code_history <- list()
+    counter$costs_total    <- 0
+    counter$requests       <- 0
+    counter$tokens_current <- 0
+    counter$time           <- 0
+    code_error(FALSE)
+    run_result(list())
+    reverted(0)
+    error_explanation(list())
+    chunk_selection$chunk_choices  <- NULL
+    chunk_selection$selected_chunk <- NULL
+    chunk_selection$past_prompt    <- NULL
+    # Fresh env seeded with preserved data
+    new_e <- new.env()
+    new_e$df      <- current_data()
+    new_e$df_name <- selected_dataset_name()
+    new_e$df2     <- current_data_2()
+    run_env(new_e)
+    run_env_start(as.list(new_e))
+    # Clear the prompt text area (namespaced input on parent session)
+    updateTextAreaInput(session, "send_request-input_text", value = "")
+  }
+
 
 
   #    Module 03 - 'Send Request'
@@ -133,7 +168,11 @@ app_server <- function(input, output, session) {
     chunk_selection = chunk_selection,
     user_file = user_file,
     selected_dataset_name = selected_dataset_name,
-    use_python = use_python
+    use_python = use_python,
+    quality_cleared = quality_cleared,
+    api_key = api_key,
+    current_data = current_data,
+    do_soft_reset = do_soft_reset
   )
 
   # Module 03 - Outputs
@@ -162,7 +201,9 @@ app_server <- function(input, output, session) {
     chunk_selection = chunk_selection,
     run_env = run_env,
     reverted = reverted,
-    api_key = api_key
+    api_key = api_key,
+    error_explanation = error_explanation,
+    input_text = input_text
   )
 
 
@@ -171,7 +212,7 @@ app_server <- function(input, output, session) {
   # __________________________________
   mod_05 <- mod_05_llms_serv(
     id = "llms",
-    submit_button = submit_button,
+    submit_button = quality_cleared,
     input_text = input_text,
     selected_dataset_name = selected_dataset_name,
     api_key = api_key,
@@ -202,7 +243,7 @@ app_server <- function(input, output, session) {
   # __________________________________
   mod_06 <- mod_06_error_hist_serv(
     id = "errors_and_history",
-    submit_button = submit_button,
+    submit_button = quality_cleared,
     llm_response = llm_response,
     logs = logs,
     ch = ch,
@@ -238,7 +279,7 @@ app_server <- function(input, output, session) {
     run_env = run_env,
     run_env_start = run_env_start,
     run_result = run_result,
-    submit_button = submit_button,
+    submit_button = quality_cleared,
     reverted = reverted,
     logs = logs,
     use_python = use_python,
@@ -254,7 +295,7 @@ app_server <- function(input, output, session) {
   # __________________________________
   mod_09 <- mod_09_report_serv(
     id = "report",
-    submit_button = submit_button,
+    submit_button = quality_cleared,
     ch = ch,
     selected_model = selected_model,
     agent_name = agent_name,

@@ -327,7 +327,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
                                    run_result, run_env_start, submit_button,
                                    use_python, tabs, current_data, current_data_2,
                                    selected_dataset_name, chunk_selection,
-                                   run_env, reverted, api_key) {
+                                   run_env, reverted, api_key,
+                                   error_explanation, input_text) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -493,6 +494,37 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       resubmit_chunk_id(NULL)
     })
 
+    # Generate a plain-English explanation when code fails
+    # Guard with resubmit_chunk_id() to avoid firing during reverts to errored chunks
+    observeEvent(code_error(), {
+      req(code_error())
+      req(is.null(resubmit_chunk_id()))
+      isolate({
+        notif_id <- showNotification("Generating explanation...", duration = NULL)
+        result <- tryCatch(
+          explain_error(
+            error_message = run_result()$error_message,
+            code          = logs$code,
+            prompt        = input_text(),
+            api_key       = api_key,
+            dataset_name  = selected_dataset_name(),
+            col_names     = colnames(current_data())
+          ),
+          error = function(e) {
+            message("[EXPLAIN] explain_error failed: ", e$message)
+            list(explanation = NULL, suggestions = character(0))
+          }
+        )
+        removeNotification(notif_id)
+        error_explanation(result)
+      })
+    })
+
+    # Clear the explanation when a new submission starts
+    observeEvent(submit_button(), {
+      error_explanation(list())
+    })
+
 
     ###  Selecting Chunk  ###
 
@@ -587,11 +619,30 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$error_message <- renderUI({
       req(code_error())
       req(logs$code)
-      if(code_error()) {
-        h4(paste("Error!", run_result()$error_message), style = "color:red")
+      if (code_error()) {
+        tagList(
+          h4(paste("Error!", run_result()$error_message), style = "color:red"),
+          uiOutput(ns("error_explanation_ui"))
+        )
       } else {
         return(NULL)
       }
+    })
+
+    # Plain-English explanation panel, populated asynchronously by the observer above
+    output$error_explanation_ui <- renderUI({
+      exp <- error_explanation()
+      req(!is.null(exp$explanation))
+      div(
+        style = "border-left: 3px solid #f0ad4e; padding: 8px; margin-top: 8px;",
+        strong("What went wrong:"),
+        p(exp$explanation),
+        if (length(exp$suggestions) > 0)
+          tagList(
+            strong("Try this:"),
+            tags$ul(lapply(exp$suggestions, tags$li))
+          )
+      )
     })
 
 

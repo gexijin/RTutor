@@ -710,6 +710,237 @@ call_llm_check <- function(prompt, api_key, model_override = "gpt-4o-mini") {
 }
 
 
+# Check whether a prompt is specific enough for R code generation.
+# Returns list(verdict = "ok"|"vague"|"off_topic", suggestions = character(0..2)).
+# Fails open: on any API or parse error returns verdict "ok" so students are never blocked.
+# Logs all inputs, raw API response, and parsed result to the console for tuning.
+check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names = character(0)) {
+  user_content <- paste0(
+    "Prompt: ", prompt, "\n",
+    if (nchar(dataset_name) > 0) paste0("Dataset: ", dataset_name, "\n") else "",
+    if (length(col_names) > 0) paste0("Columns: ", paste(head(col_names, 10), collapse = ", "), "\n") else ""
+  )
+
+  # Log what we are sending
+  message(
+    "[QUALITY] --- check_prompt_quality ---\n",
+    "  Prompt   : ", prompt, "\n",
+    "  Dataset  : ", if (nchar(dataset_name) > 0) dataset_name else "(none)", "\n",
+    "  Columns  : ", if (length(col_names) > 0) paste(head(col_names, 10), collapse = ", ") else "(none)"
+  )
+
+  messages <- list(
+    list(
+      role    = "system",
+      content = paste0(
+        "You are a teaching assistant deciding if a student's data analysis prompt is specific enough ",
+        "to generate correct R or Python code without guessing.\n\n",
+        
+        "The student is working with a dataset called '", dataset_name, "' ",
+        "with these columns: ", paste(col_names, collapse = ", "), ".\n\n",
+        
+        "## GOOD prompts — mark these 'ok':\n",
+        "- 'Generate 100 random numbers. Plot their distribution.'\n",
+        "- 'Provide a demo for ridge regression.'\n",
+        "- 'Provide a demo for hierarchical clustering tree.'\n",
+        "- 'Create a boxplot of highway vs. class. Color by class. Add jitter points.'\n",
+        "- 'Is city normally distributed?'\n",
+        "- 'Calculate the correlation coefficient of city and highway.'\n",
+        "- 'Conduct ANOVA of log-transformed highway by type and drive.'\n",
+        "- 'Build a regression model of highway based on cylinder, dis, drive, and type.'\n",
+        "- 'What is Moran's I in spatial statistics?'\n",
+        "- 'Create a pie chart based on type.'\n",
+        "- 'What statistics test should I use to examine the correlation of two categorical variables?'\n",
+        "- 'How do you perform regression when predictor variables are highly correlated?'\n",
+        "- 'Create a world map.'\n",
+        "- 'Create a heatmap.'\n\n",
+        
+        "## BAD prompts — mark these 'vague':\n",
+        "- 'Plot these two columns.' (does not name the columns)\n",
+        "- 'Graph petal length by sepal width.' (names columns but no chart type and relationship is ambiguous)\n",
+        "- 'Analyze the data.' (no specific goal)\n",
+        "- 'Do something interesting with this dataset.' (no specific goal)\n",
+        "- 'Compare the groups.' (does not say which columns or which groups)\n",
+        "- 'Show me a plot.' (no columns, no chart type)\n\n",
+        
+        "## Key principle:\n",
+        "A prompt is 'ok' if a competent data analyst could execute it without asking a follow-up question. ",
+        "Demonstrations, method names, conceptual questions, and prompts that name specific columns ",
+        "and actions all pass. ONLY FLAG 'vague' if there is genuine ambiguity that would force guessing.\n\n",
+        
+        "Mark as 'off_topic' only if the prompt has nothing to do with data, statistics, or programming.\n\n",
+        
+        "If verdict is 'vague', write 1-2 suggestions that fix the ambiguity using column names from ",
+        "the dataset above. Stay as close to the student's original intent as possible.\n\n",
+        
+        "Reply ONLY with valid JSON, no markdown, no explanation:\n",
+        "{\"verdict\": \"ok\", \"suggestions\": []}\n",
+        "verdict must be exactly one of: \"ok\", \"vague\", \"off_topic\". ",
+        "If verdict is \"ok\" or \"off_topic\", suggestions must be empty."
+      )
+    ),
+    list(role = "user", content = user_content)
+  )
+
+  fail_open <- list(verdict = "ok", suggestions = character(0))
+
+  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+    response <- tryCatch(
+      openai::create_chat_completion(
+        model          = "gpt-4o-mini",
+        openai_api_key = api_key$key,
+        temperature    = 0,
+        messages       = messages
+      ),
+      error = function(e) {
+        message("[QUALITY] OpenAI error: ", e$message)
+        NULL
+      }
+    )
+  } else {
+    az_version <- if (!is.null(api_versions[["gpt-4o-mini"]])) {
+      api_versions[["gpt-4o-mini"]]
+    } else {
+      api_versions[[1]]
+    }
+    response <- tryCatch(
+      create_chat_completion_azure(
+        model       = "gpt-4o-mini",
+        api_version = az_version,
+        temperature = 0,
+        messages    = messages
+      ),
+      error = function(e) {
+        message("[QUALITY] Azure error: ", e$message)
+        NULL
+      }
+    )
+  }
+
+  if (is.null(response)) {
+    message("[QUALITY] Response: NULL (fail open)")
+    return(fail_open)
+  }
+
+  raw_text <- tryCatch(
+    trimws(response$choices[[1, "message.content"]]),
+    error = function(e) NULL
+  )
+
+  message("[QUALITY] Raw response: ", if (is.null(raw_text)) "NULL" else raw_text)
+
+  if (is.null(raw_text) || nchar(raw_text) == 0) return(fail_open)
+
+  parsed <- tryCatch(
+    jsonlite::fromJSON(raw_text, simplifyVector = TRUE),
+    error = function(e) {
+      message("[QUALITY] JSON parse error: ", e$message)
+      NULL
+    }
+  )
+  if (is.null(parsed) || !("verdict" %in% names(parsed))) return(fail_open)
+
+  result <- list(
+    verdict     = as.character(parsed$verdict),
+    suggestions = as.character(if (is.null(parsed$suggestions)) character(0) else parsed$suggestions)
+  )
+
+  message(
+    "[QUALITY] Verdict: ", result$verdict, "\n",
+    "  Suggestions: ",
+    if (length(result$suggestions) > 0) paste(result$suggestions, collapse = " | ") else "(none)"
+  )
+
+  result
+}
+
+
+# Generate a plain-English explanation for an R error
+# Returns list(explanation = character(1), suggestions = character(0..2))
+# Fails open: on any API or parse error returns list(explanation = NULL, suggestions = character(0))
+explain_error <- function(error_message, code, prompt, api_key,
+                          dataset_name = "", col_names = character(0)) {
+  user_content <- paste0(
+    "Error: ", error_message, "\n\n",
+    "Code that failed:\n", code, "\n\n",
+    "Student's original prompt: ", prompt, "\n",
+    if (nchar(dataset_name) > 0) paste0("Dataset: ", dataset_name, "\n") else "",
+    if (length(col_names) > 0) paste0("Columns: ", paste(head(col_names, 10), collapse = ", "), "\n") else ""
+  )
+
+  messages <- list(
+    list(
+      role    = "system",
+      content = paste0(
+        "You are a statistics tutor for undergraduate students using R for the first time. ",
+        "Explain the R error message in plain English in 2-3 sentences — no jargon. ",
+        "Then give 1-2 short, specific, actionable suggestions for fixing it. ",
+        "Reply ONLY with valid JSON in this exact format: ",
+        "{\"explanation\": \"...\", \"suggestions\": [\"...\", \"...\"]}"
+      )
+    ),
+    list(role = "user", content = user_content)
+  )
+
+  fail_open <- list(explanation = NULL, suggestions = character(0))
+
+  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
+    response <- tryCatch(
+      openai::create_chat_completion(
+        model          = "gpt-4o-mini",
+        openai_api_key = api_key$key,
+        temperature    = 0,
+        messages       = messages
+      ),
+      error = function(e) {
+        message("[EXPLAIN] explain_error OpenAI error: ", e$message)
+        NULL
+      }
+    )
+  } else {
+    az_version <- if (!is.null(api_versions[["gpt-4o-mini"]])) {
+      api_versions[["gpt-4o-mini"]]
+    } else {
+      api_versions[[1]]
+    }
+    response <- tryCatch(
+      create_chat_completion_azure(
+        model       = "gpt-4o-mini",
+        api_version = az_version,
+        temperature = 0,
+        messages    = messages
+      ),
+      error = function(e) {
+        message("[EXPLAIN] explain_error Azure error: ", e$message)
+        NULL
+      }
+    )
+  }
+
+  if (is.null(response)) return(fail_open)
+
+  raw_text <- tryCatch(
+    trimws(response$choices[[1, "message.content"]]),
+    error = function(e) NULL
+  )
+  if (is.null(raw_text) || nchar(raw_text) == 0) return(fail_open)
+
+  parsed <- tryCatch(
+    jsonlite::fromJSON(raw_text, simplifyVector = TRUE),
+    error = function(e) {
+      message("[EXPLAIN] explain_error JSON parse error: ", e$message)
+      NULL
+    }
+  )
+  if (is.null(parsed) || !("explanation" %in% names(parsed))) return(fail_open)
+
+  list(
+    explanation = as.character(parsed$explanation),
+    suggestions = as.character(if (is.null(parsed$suggestions)) character(0) else parsed$suggestions)
+  )
+}
+
+
 #' Clean up R commands generated by GTP
 #'
 #' The response from GTP3 sometimes contains strings that are not R commands.
