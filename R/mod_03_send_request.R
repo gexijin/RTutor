@@ -23,6 +23,9 @@ mod_03_send_request_ui <- function(id) {
     uiOutput(ns("prompt_ui")),
     hr(class = "custom-hr"),
 
+    # Quality gate feedback panel (hidden until a vague prompt is detected)
+    uiOutput(ns("quality_feedback_ui")),
+
     fluidRow(
       column(
         width = 12,
@@ -34,7 +37,7 @@ mod_03_send_request_ui <- function(id) {
 
             tippy::tippy_this(
               ns("reset_button"),
-              "Reset before asking a new question. Clears data objects, chat history, & code chunks.",
+              "Resets only chat history & code. To start with new data, refresh the page.",
               theme = "light-border"
             )
           ),
@@ -64,10 +67,15 @@ mod_03_send_request_ui <- function(id) {
 
 
 mod_03_send_request_serv <- function(id, chunk_selection, user_file,
-                                     selected_dataset_name, use_python) {
+                                     selected_dataset_name, use_python,
+                                     quality_cleared, api_key, current_data,
+                                     do_soft_reset) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    # Tracks whether the user has already seen a quality warning for the current prompt
+    quality_warned <- reactiveVal(FALSE)
 
     # Load previous prompts based on selected chunk
     observeEvent(chunk_selection$selected_chunk, {
@@ -139,43 +147,98 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
       )
     })
 
+    # Default quality feedback panel to empty
+    output$quality_feedback_ui <- renderUI(NULL)
+
     # User Request Handling
     observeEvent(input$submit_button, {
       # if user's request too short, do not send
       if (nchar(input$input_text) < min_query_length) {
         showNotification(
-          paste(
-            "Request too short! Should be more than ",
-            min_query_length,
-            " characters."
-          ),
+          paste("Request too short! Should be more than", min_query_length, "characters."),
           duration = 10
         )
+        return()
       }
       # if user's request too long, do not send
       if (nchar(input$input_text) > max_query_length) {
         showNotification(
-          paste(
-            "Request too long! Should be less than ",
-            max_query_length,
-            " characters."
-          ),
+          paste("Request too long! Should be less than", max_query_length, "characters."),
           duration = 10
         )
+        return()
       }
-
       # if no file is selected, do not send
       if (selected_dataset_name() == data_placeholder) {
         showNotification(
-          paste("Please select a dataset in Step 1 before submitting."),
+          "Please select a dataset in Step 1 before submitting.",
           duration = 10
         )
+        return()
+      }
+
+      # If user already saw the quality warning and is re-clicking Submit to bypass
+      if (quality_warned()) {
+        quality_warned(FALSE)
+        output$quality_feedback_ui <- renderUI(NULL)
+        quality_cleared(quality_cleared() + 1)
+        return()
+      }
+
+      # Run quality check before calling the LLM wrapped in tryCatch
+      notif_id <- showNotification("Checking prompt...", duration = NULL)
+      result <- tryCatch(
+        check_prompt_quality(
+          prompt       = input$input_text,
+          api_key      = api_key,
+          dataset_name = selected_dataset_name(),
+          col_names    = colnames(current_data())
+        ),
+        error = function(e) {
+          message("[QUALITY] check_prompt_quality failed: ", e$message)
+          list(verdict = "ok", suggestions = character(0))
+        }
+      )
+      removeNotification(notif_id)
+
+      if (result$verdict == "ok") {
+        output$quality_feedback_ui <- renderUI(NULL)
+        quality_cleared(quality_cleared() + 1)
+      } else {
+        quality_warned(TRUE)
+        suggestions <- result$suggestions
+        output$quality_feedback_ui <- renderUI({
+          div(
+            style = "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-bottom: 10px;",
+            tags$p(strong("\u26a0\ufe0f Your prompt may need more detail.")),
+            tags$p("Here are some suggestions (or click Submit again to proceed with your original prompt):"),
+            radioButtons(
+              inputId  = ns("suggestion_choice"),
+              label    = NULL,
+              choices  = c(suggestions, "Keep my original prompt"),
+              selected = if (length(suggestions) > 0) suggestions[1] else "Keep my original prompt"
+            ),
+            actionButton(ns("submit_anyway"), strong("Submit"), class = "btn-warning")
+          )
+        })
       }
     })
 
+    # Feedback panel Submit button: apply selected suggestion (if any) then release the gate
+    observeEvent(input$submit_anyway, {
+      choice <- input$suggestion_choice
+      if (!is.null(choice) && choice != "Keep my original prompt") {
+        updateTextAreaInput(session, "input_text", value = choice)
+      }
+      output$quality_feedback_ui <- renderUI(NULL)
+      quality_warned(FALSE)
+      quality_cleared(quality_cleared() + 1)
+    })
+
     observeEvent(input$reset_button, {
-      # reset session
-      session$reload()
+      quality_warned(FALSE)
+      output$quality_feedback_ui <- renderUI(NULL)
+      do_soft_reset()
     })
 
 

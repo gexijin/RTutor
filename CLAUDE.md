@@ -65,24 +65,31 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 
 | Reactive | Purpose |
 |---|---|
-| `current_data`, `current_data_2` | Loaded data frames |
+| `current_data`, `current_data_2` | Loaded data frames (may be mutated by user code) |
+| `original_data`, `original_data_2` | Immutable copies of uploaded data for reset |
 | `run_env` | R environment where user code executes |
-| `logs` | List with `id`, `code`, `raw`, `last_code`, `language` per chunk |
+| `run_env_start` | Snapshot of `run_env` taken before each execution (used for reverting) |
+| `run_result` | List with `result`, `console_output`, `error_message` from last execution |
+| `logs` | reactiveValues with `id`, `code`, `raw`, `last_code`, `language` for the current chunk |
+| `ch` | reactiveValues with `code_history` list — all past chunks |
 | `chunk_selection` | Currently selected code chunk |
 | `counter` | API cost, request count, token counts |
 | `code_error` | Error state from last execution |
 | `reverted` | Whether the last chunk was reverted |
+| `modal_closed` | Tracks close of data-types edit modal |
 
 ### Key files
 
 | File | Role |
 |---|---|
-| `R/fct_helpers.R` | Global constants, `prep_input()`, system prompt construction, LLM API wrappers |
+| `R/fct_helpers.R` | Global constants, `prep_input()`, system prompt construction, LLM API wrappers, `validate_r_code()` |
 | `R/mod_04_main_panel.R` | Code chunk display, result rendering, chunk management UI |
 | `R/mod_05_llms.R` | `create_chat_completion_openai()` / `_azure()` HTTP calls |
+| `R/mod_09_report.R` | R Markdown assembly and download |
 | `R/mod_10_eda.R` | Automated EDA using summarytools, DataExplorer, GGally, etc. |
 | `R/mod_11_settings.R` | API key input, model selection, LLM parameters |
-| `R/mod_09_report.R` | R Markdown assembly and download |
+| `R/mod_15_data_types.R` | Modal for editing column data types after upload |
+| `R/mod_16_qa.R` | Q&A tab — ask natural language questions about analysis results |
 
 ### Documentation is generated
 
@@ -92,7 +99,8 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 
 - Framework: **testthat 3** (`Config/testthat/edition: 3` in DESCRIPTION)
 - Tests live in `tests/testthat/`
-- `test-uiuc_improvements.R` is a large integration-style test suite (28k+ lines) that verifies UI structure and module behavior by reading source files directly with `readLines()`
+- `test-uiuc_improvements.R` — large integration-style suite that verifies UI structure and module behavior by reading source files with `readLines()`
+- `test-r_code_security.R` — tests for `validate_r_code()` / `BLOCKED_FNS`; inlines the security logic so it runs without loading the full package
 - Snapshot tests use `tests/testthat/_snaps/`
 
 ## Configuration
@@ -100,6 +108,11 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 - `inst/golem-config.yml` — golem environments (default / production / dev); `golem.app.prod` option switches modes
 - API keys can be set via: Settings tab in the UI, an `api_key.txt` file in the working directory, or the `OPEN_API_KEY` environment variable
 - File upload limits: 50 MB in production, 10 GB locally (set in `app_server.R`)
+- Server vs. local detection: if `on_server.txt` exists in the working directory, the app treats itself as running on a server (affects upload limits and other behavior)
+
+## Security
+
+LLM-generated R code is validated before execution by `validate_r_code()` in `fct_helpers.R`. It performs AST-based checks against `BLOCKED_FNS` — a named character vector mapping dangerous function names to reason strings (OS execution, file deletion, network access, native code, etc.). Blocked code sets `code_error(TRUE)` and shows a notification; it is never `eval()`-ed.
 
 ## Golem development workflow
 
