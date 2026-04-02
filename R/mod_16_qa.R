@@ -109,12 +109,13 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
 
 
-    chat_content <- reactiveVal(c())
+    # List of list(question, answer) pairs, newest first
+    chat_content <- reactiveVal(list())
 
     observeEvent(input$ask_button, {
-      new_message <- answer_one()
-      if (new_message != "") {
-        chat_content(c(new_message, chat_content()))
+      new_entry <- answer_one()
+      if (!is.null(new_entry)) {
+        chat_content(c(list(new_entry), chat_content()))
         updateTextInput(
           session,
           inputId = "ask_question",
@@ -127,13 +128,25 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
     output$answer <- renderUI({
       req(input$ask_button, answer_one())
-      # chat_content() is a vector of HTML strings (newest first); display oldest first
+      # chat_content() is newest-first; reverse to oldest-first for display
       blocks <- rev(chat_content())
+      n <- length(blocks)
       html_blocks <- lapply(seq_along(blocks), function(i) {
-        tagList(
-          div(class = "qa-answer-block", HTML(blocks[[i]])),
-          if (i < length(blocks)) hr(class = "qa-divider") else NULL
-        )
+        is_latest <- i == n
+        if (is_latest) {
+          tags$details(
+            open = NA,
+            class = "qa-item",
+            tags$summary(class = "qa-summary", HTML(blocks[[i]]$question)),
+            div(class = "qa-answer-block", HTML(blocks[[i]]$answer))
+          )
+        } else {
+          tags$details(
+            class = "qa-item",
+            tags$summary(class = "qa-summary", HTML(blocks[[i]]$question)),
+            div(class = "qa-answer-block", HTML(blocks[[i]]$answer))
+          )
+        }
       })
       tagList(html_blocks)
     })
@@ -160,12 +173,18 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
             padding: 14px 18px; border-radius: 6px;
             background: #fafafa;
           }
-          .qa-answer-block { margin-bottom: 20px; }
-          .qa-question {
+          details.qa-item { border-bottom: 1px solid #e8e8e8; margin-bottom: 4px; }
+          details.qa-item[open] { margin-bottom: 10px; }
+          summary.qa-summary {
+            cursor: pointer; list-style: none; outline: none;
             font-size: 15px; font-weight: 600; color: #333;
-            border-left: 3px solid #90BD8C; padding-left: 10px;
-            margin-bottom: 8px;
+            border-left: 3px solid #90BD8C; padding: 8px 10px;
+            user-select: none;
           }
+          summary.qa-summary::-webkit-details-marker { display: none; }
+          summary.qa-summary::before { content: '\\25B6  '; font-size: 10px; color: #90BD8C; }
+          details.qa-item[open] summary.qa-summary::before { content: '\\25BC  '; }
+          .qa-answer-block { padding: 8px 4px 12px 13px; }
           .qa-answer-block h1, .qa-answer-block h2, .qa-answer-block h3 {
             font-size: 16px; font-weight: 700; margin-top: 10px; color: #222;
           }
@@ -182,7 +201,6 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           }
           .qa-answer-block pre code { background: none; padding: 0; }
           .qa-answer-block strong { color: #111; }
-          .qa-divider { border: none; border-top: 1px solid #e0e0e0; margin: 16px 0; }
         ")),
         div(id = "chat_window", htmlOutput(ns("answer"))),
         footer = modalButton("Close"),
@@ -336,28 +354,23 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           "Are you kidding? Statistics only!",
           "Gee..., Statistics only!!"
         )
+        question_text <- htmltools::htmlEscape(input$ask_question)
+
         if (is.null(cmd)) { # If response is null
-          cmd <- "Error in LLM Response"
-          return(cmd)
-        } else {
-          if (grepl("No comment", cmd)) { # If response is irrelevant
-            cmd <- paste(
-              sample(humor, 1),
-              "     Ask again with more context. It might
-              be helpful to add \"in statistics\" to the question."
-            )
-            return(cmd)
-          }
+          return(list(question = question_text, answer = "<p>Error in LLM Response</p>"))
+        }
+
+        if (grepl("No comment", cmd)) { # If response is irrelevant
+          answer_text <- paste(
+            sample(humor, 1),
+            "Ask again with more context. It might be helpful to add \"in statistics\" to the question."
+          )
+          return(list(question = question_text, answer = paste0("<p>", htmltools::htmlEscape(answer_text), "</p>")))
         }
 
         # Render markdown response to HTML
         rendered <- commonmark::markdown_html(cmd, extensions = TRUE)
-        cmd2 <- paste0(
-          "<div class='qa-question'>", htmltools::htmlEscape(input$ask_question), "</div>",
-          rendered
-        )
-
-        return(cmd2)
+        return(list(question = question_text, answer = rendered))
       }
 
 
@@ -365,7 +378,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       # OpenAI ChatGPT API function
       openAI_agent <- function(messages) {
-        print("OpenAI")
+        #print("OpenAI")
 
         # Check if the selected model is "o4-mini"
         model_name <- selected_model()
@@ -401,7 +414,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       # Azure OpenAI ChatGPT API function
       azure_openAI_agent <- function(messages) {
-        print("Azure")
+        #print("Azure")
 
         create_chat_completion_azure(
           model = selected_model(),
