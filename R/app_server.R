@@ -348,12 +348,7 @@ app_server <- function(input, output, session) {
   api_key <- mod_11$api_key
   selected_model <- mod_11$selected_model
 
-  # Temperature from sidebar numericInput (overrides commented-out Settings slider)
-  sample_temp <- reactive({
-    val <- input$sidebar_temperature
-    if (is.null(val) || is.na(val)) return(default_temperature)
-    max(0, min(1, val))  # clamp to valid range [0, 1]
-  })
+  sample_temp <- mod_11$sample_temp
   use_python <- mod_11$use_python
   convert_to_factor <- mod_11$convert_to_factor
   max_proportion_factor <- mod_11$max_proportion_factor

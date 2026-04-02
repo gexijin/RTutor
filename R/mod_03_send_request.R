@@ -213,33 +213,32 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         quality_cleared(quality_cleared() + 1)
       } else {
         quality_warned(TRUE)
+        verdict     <- result$verdict
         suggestions <- result$suggestions
         output$quality_feedback_ui <- renderUI({
-          div(
-            style = "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-bottom: 10px;",
-            tags$p(strong("\u26a0\ufe0f Your prompt may need more detail.")),
-            tags$p("Here are some suggestions (or click Submit again to proceed with your original prompt):"),
-            radioButtons(
-              inputId  = ns("suggestion_choice"),
-              label    = NULL,
-              choices  = c(suggestions, "Keep my original prompt"),
-              selected = if (length(suggestions) > 0) suggestions[1] else "Keep my original prompt"
-            ),
-            actionButton(ns("submit_anyway"), strong("Submit"), class = "btn-warning")
-          )
+          box_style <- "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-bottom: 10px;"
+          if (verdict == "off_topic") {
+            div(
+              style = box_style,
+              tags$p(strong("\u26a0\ufe0f Your prompt appears to be off-topic.")),
+              tags$p(
+                "RTutor is designed for data analysis, statistics, and R coding questions. ",
+                "Please revise your prompt to ask about your dataset, a statistical method, or a coding task.",
+                tags$br(),
+                "(or click Submit again to proceed anyway)"
+              )
+            )
+          } else {
+            div(
+              style = box_style,
+              tags$p(strong("\u26a0\ufe0f Your prompt may need more detail.")),
+              tags$p("Here are some suggestions (or click Submit again to proceed with your original prompt):"),
+              if (length(suggestions) > 0)
+                tags$ul(lapply(suggestions, tags$li))
+            )
+          }
         })
       }
-    })
-
-    # Feedback panel Submit button: apply selected suggestion (if any) then release the gate
-    observeEvent(input$submit_anyway, {
-      choice <- input$suggestion_choice
-      if (!is.null(choice) && choice != "Keep my original prompt") {
-        updateTextAreaInput(session, "input_text", value = choice)
-      }
-      output$quality_feedback_ui <- renderUI(NULL)
-      quality_warned(FALSE)
-      quality_cleared(quality_cleared() + 1)
     })
 
     observeEvent(input$reset_button, {
