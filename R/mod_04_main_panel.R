@@ -328,7 +328,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
                                    use_python, tabs, current_data, current_data_2,
                                    selected_dataset_name, chunk_selection,
                                    run_env, reverted, api_key,
-                                   error_explanation, input_text) {
+                                   error_explanation, input_text, counter) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -436,7 +436,13 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
           return()
         }
 
-        if (grepl("^yes", result, ignore.case = TRUE)) {
+        if (!is.null(result$usage)) {
+          sec_cost <- api_cost(result$usage$prompt_tokens, result$usage$completion_tokens, "gpt-4o-mini")
+          counter$costs_total <- counter$costs_total + sec_cost
+          message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Security check", sec_cost, counter$costs_total))
+        }
+
+        if (grepl("^yes", result$verdict, ignore.case = TRUE)) {
           message("[SECURITY] LLM review flagged edited code in chunk ", chunk_id,
                   " at ", Sys.time(), "\nEdited code:\n", new_code)
           showNotification(
@@ -516,6 +522,14 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
           }
         )
         removeNotification(notif_id)
+
+        # Track cost of this mini call
+        if (!is.null(result$usage)) {
+          mini_cost <- api_cost(result$usage$prompt_tokens, result$usage$completion_tokens, "gpt-4o-mini")
+          counter$costs_total <- counter$costs_total + mini_cost
+          message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Error explanation", mini_cost, counter$costs_total))
+        }
+
         error_explanation(result)
       })
     })

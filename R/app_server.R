@@ -172,7 +172,8 @@ app_server <- function(input, output, session) {
     quality_cleared = quality_cleared,
     api_key = api_key,
     current_data = current_data,
-    do_soft_reset = do_soft_reset
+    do_soft_reset = do_soft_reset,
+    counter = counter
   )
 
   # Module 03 - Outputs
@@ -203,7 +204,8 @@ app_server <- function(input, output, session) {
     reverted = reverted,
     api_key = api_key,
     error_explanation = error_explanation,
-    input_text = input_text
+    input_text = input_text,
+    counter = counter
   )
 
 

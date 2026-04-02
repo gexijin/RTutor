@@ -700,13 +700,16 @@ call_llm_check <- function(prompt, api_key, model_override = "gpt-4o-mini") {
   if (is.null(response)) return(NULL)
 
   # choices is a data frame; extract the first row's content safely
-  tryCatch(
+  verdict <- tryCatch(
     trimws(response$choices[[1, "message.content"]]),
     error = function(e) {
       message("[SECURITY] call_llm_check: failed to parse response — ", e$message)
       NULL
     }
   )
+
+  if (is.null(verdict)) return(NULL)
+  list(verdict = verdict, usage = response$usage)
 }
 
 
@@ -782,7 +785,7 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
     list(role = "user", content = user_content)
   )
 
-  fail_open <- list(verdict = "ok", suggestions = character(0))
+  fail_open <- list(verdict = "ok", suggestions = character(0), usage = NULL)
 
   if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
     response <- tryCatch(
@@ -842,7 +845,8 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
 
   result <- list(
     verdict     = as.character(parsed$verdict),
-    suggestions = as.character(if (is.null(parsed$suggestions)) character(0) else parsed$suggestions)
+    suggestions = as.character(if (is.null(parsed$suggestions)) character(0) else parsed$suggestions),
+    usage       = response$usage
   )
 
   message(
@@ -882,7 +886,7 @@ explain_error <- function(error_message, code, prompt, api_key,
     list(role = "user", content = user_content)
   )
 
-  fail_open <- list(explanation = NULL, suggestions = character(0))
+  fail_open <- list(explanation = NULL, suggestions = character(0), usage = NULL)
 
   if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
     response <- tryCatch(
@@ -936,7 +940,8 @@ explain_error <- function(error_message, code, prompt, api_key,
 
   list(
     explanation = as.character(parsed$explanation),
-    suggestions = as.character(if (is.null(parsed$suggestions)) character(0) else parsed$suggestions)
+    suggestions = as.character(if (is.null(parsed$suggestions)) character(0) else parsed$suggestions),
+    usage       = response$usage
   )
 }
 
@@ -1044,7 +1049,10 @@ tokens <- function(text) {
 #' @return a number
 #'
 api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
-  if (grepl("gpt-4", selected_model)) { # gpt4
+  if (grepl("gpt-4o-mini", selected_model)) { # gpt-4o-mini — must come before general gpt-4 check
+    # input $0.00015/1K tokens, output $0.00060/1K tokens
+    completion_tokens * 6e-7 + prompt_tokens * 1.5e-7
+  } else if (grepl("gpt-4", selected_model)) { # gpt4
     # input token $0.03 / 1k token, Output is $0.06 / 1k for GPT-4
     completion_tokens * 6e-5 + prompt_tokens  * 3e-5
   } else {

@@ -69,7 +69,7 @@ mod_03_send_request_ui <- function(id) {
 mod_03_send_request_serv <- function(id, chunk_selection, user_file,
                                      selected_dataset_name, use_python,
                                      quality_cleared, api_key, current_data,
-                                     do_soft_reset) {
+                                     do_soft_reset, counter) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -200,6 +200,13 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         }
       )
       removeNotification(notif_id)
+
+      # Track cost of this mini call
+      if (!is.null(result$usage)) {
+        mini_cost <- api_cost(result$usage$prompt_tokens, result$usage$completion_tokens, "gpt-4o-mini")
+        counter$costs_total <- counter$costs_total + mini_cost
+        message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Prompt quality check", mini_cost, counter$costs_total))
+      }
 
       if (result$verdict == "ok") {
         output$quality_feedback_ui <- renderUI(NULL)

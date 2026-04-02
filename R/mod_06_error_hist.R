@@ -70,7 +70,7 @@
       req(file.exists(on_server))
       req(!llm_response()$error)
 
-      cost_session <-  counter$costs * 10
+      cost_session <-  counter$costs_total * 10
       if (cost_session %% 5  == 0 & cost_session != 0) {
         shiny::showModal(
           shiny::modalDialog(
