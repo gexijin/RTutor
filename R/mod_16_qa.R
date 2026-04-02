@@ -280,8 +280,9 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
         counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens
         counter$requests <- counter$requests + 1
         counter$time <- round(api_time, 0)
-        counter$costs_total <- counter$costs_total +
-          api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
+        call_cost <- api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
+        counter$costs_total <- counter$costs_total + call_cost
+        message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Q&A response", call_cost, counter$costs_total))
       }
 
 

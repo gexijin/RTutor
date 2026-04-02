@@ -107,12 +107,13 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     }
 
     # Update counter
-    update_counter <- function(response, api_time) {
+    update_counter <- function(response, api_time, label = "Code generation") {
       counter$tokens_current <- response$usage$completion_tokens + response$usage$prompt_tokens
       counter$requests <- counter$requests + 1
       counter$time <- round(api_time, 0)
-      counter$costs_total <- counter$costs_total +
-        api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
+      call_cost <- api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
+      counter$costs_total <- counter$costs_total + call_cost
+      message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", label, call_cost, counter$costs_total))
     }
 
 
@@ -243,6 +244,13 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
       }
 
       if (is.null(response)) return(FALSE)
+
+      if (!is.null(response$usage)) {
+        mal_cost <- api_cost(response$usage$prompt_tokens, response$usage$completion_tokens, selected_model())
+        counter$costs_total <- counter$costs_total + mal_cost
+        message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Malicious check", mal_cost, counter$costs_total))
+      }
+
       tf <- tolower(response$choices[[1, "message.content"]]) == "true"
       return(tf)
     }
@@ -308,7 +316,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     # OpenAI ChatGPT API function
     openAI_agent <- function(messages) {
-      print("OpenAI")
+      #print("OpenAI")
 
       # Check if the selected model is "o4-mini"
       model_name <- selected_model()
@@ -344,7 +352,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     # Azure OpenAI ChatGPT API function
     azure_openAI_agent <- function(messages) {
-      print("Azure")
+      #print("Azure")
 
       create_chat_completion_azure(
         model = selected_model(),
