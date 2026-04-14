@@ -26,6 +26,14 @@ mod_01_styles_ui <- function(id) {
       color: #181818;
     }
 
+    /* Hide tabs not shown in simplified version (EDA, More dropdown, policy tabs) */
+    .navbar-nav li:has(a[data-value='EDA']),
+    .navbar-nav li.dropdown,
+    .navbar-nav li:has(a[data-value='privacy_policy']),
+    .navbar-nav li:has(a[data-value='terms_of_use']) {
+      display: none;
+    }
+
     /* active tab */
     .navbar-default .navbar-nav > .active > a, 
     .navbar-default .navbar-nav > .active > a:focus, 

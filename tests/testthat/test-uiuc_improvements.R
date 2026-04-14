@@ -43,15 +43,15 @@ test_that("fct_helpers.R defines default_temperature as 0.2", {
   expect_match(src, "default_temperature\\s*<-\\s*0\\.2")
 })
 
-test_that("fct_helpers.R defines api_versions with an o4-mini entry", {
+test_that("fct_helpers.R defines api_versions with an gpt-5.4-mini entry", {
   src <- r_file("fct_helpers.R")
-  expect_match(src, '"o4-mini"', fixed = TRUE)
+  expect_match(src, '"gpt-5.4-mini"', fixed = TRUE)
   expect_match(src, "api_versions\\s*<-")
 })
 
-test_that("fct_helpers.R defines language_models containing o4-mini", {
+test_that("fct_helpers.R defines language_models containing gpt-5.4-mini", {
   src <- r_file("fct_helpers.R")
-  expect_match(src, 'language_models\\s*<-\\s*c\\("o4-mini"\\)')
+  expect_match(src, 'language_models\\s*<-\\s*c\\("gpt-5.4-mini"\\)')
 })
 
 
@@ -122,13 +122,13 @@ test_that("create_chat_completion_openai stops with 'OPENAI_API_KEY is missing' 
   expect_match(fn_body, "OPENAI_API_KEY is missing", fixed = TRUE)
 })
 
-test_that("create_chat_completion_openai excludes temperature for o4-mini model", {
+test_that("create_chat_completion_openai excludes temperature for gpt-5.4-mini model", {
   skip("Deferred: create_chat_completion_openai not yet added to fct_helpers.R")
   src <- r_file("fct_helpers.R")
   fn_start <- regexpr("create_chat_completion_openai\\s*<-\\s*function", src)
   fn_body  <- substring(src, fn_start, fn_start + 1500)
-  # Should have an if (model == "o4-mini") branch that omits temperature
-  expect_match(fn_body, 'model == "o4-mini"', fixed = TRUE)
+  # Should have an if (model == "gpt-5.4-mini") branch that omits temperature
+  expect_match(fn_body, 'model == "gpt-5.4-mini"', fixed = TRUE)
 })
 
 test_that("create_chat_completion_openai uses Bearer token auth header", {

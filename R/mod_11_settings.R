@@ -361,7 +361,7 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
 
     # Selected model
     selected_model <- reactive({
-      model <- language_models[default_model]  # name: o3 mini, value: "o4-mini"
+      model <- language_models[default_model]  # name: 5.4 mini, value: "gpt-5.4-mini"
       if (!is.null(input$language_model)) {
         model <- input$language_model
       }

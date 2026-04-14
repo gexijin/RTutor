@@ -76,6 +76,7 @@ app_ui <- function(request) {
       tabPanel(
         title = div(
           id = "eda_tab",
+          style = "display: none;", # Hide the EDA tab by default
           HTML('<span style="color: black;font-size: 18px;">EDA</span>')
         ),
         value = "EDA",
