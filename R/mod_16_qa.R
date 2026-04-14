@@ -380,12 +380,12 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
       openAI_agent <- function(messages) {
         #print("OpenAI")
 
-        # Check if the selected model is "o4-mini"
+        # Check if the selected model is "gpt-5.4-mini"
         model_name <- selected_model()
 
         response <- tryCatch(
           {
-            if (model_name == "o4-mini") {
+            if (model_name == "gpt-5.4-mini") {
               # Call API without temperature
               res <- openai::create_chat_completion(
                 model = model_name,

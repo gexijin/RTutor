@@ -17,11 +17,12 @@ user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_d
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
-language_models <- c("o4-mini") #, "gpt-5.1-chat", "gpt-5-mini")
-names(language_models) <- c("O4 Mini") #, "GPT 5.1", "GPT-5 mini")
-default_model <- "O4 Mini"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
+language_models <- c("gpt-5.4-mini") #, "o4-mini", "gpt-5.1-chat", "gpt-5-mini")
+names(language_models) <- c("GPT 5.4 Mini") #, "O4 Mini", "GPT 5.1", "GPT-5 mini")
+default_model <- "GPT 5.4 Mini"  # "O4 Mini"  "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 api_versions <- list(  # API version list corresponding to selected model, may need adjusting
-  "o4-mini" = "2025-01-01"
+  "gpt-5.4-mini" = "2026-03-17"
+  #, "o4-mini" = "2025-01-01"
   #, "gpt-5.1-chat" = "2025-04-01",
   #"gpt-5-mini" = "2025-04-01"
 )
@@ -1049,15 +1050,15 @@ tokens <- function(text) {
 #' @return a number
 #'
 api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
-  if (grepl("gpt-4o-mini", selected_model)) { # gpt-4o-mini — must come before general gpt-4 check
-    # input $0.00015/1K tokens, output $0.00060/1K tokens
-    completion_tokens * 6e-7 + prompt_tokens * 1.5e-7
+  if (grepl("gpt-5.4-mini", selected_model)) { # gpt-5.4-mini — must come before general gpt-4 check
+    # input $0.75/1M, output $4.50/1M
+    completion_tokens * 4.5e-6 + prompt_tokens * 7.5e-7
   } else if (grepl("gpt-4", selected_model)) { # gpt4
-    # input token $0.03 / 1k token, Output is $0.06 / 1k for GPT-4
-    completion_tokens * 6e-5 + prompt_tokens  * 3e-5
+    # input $0.03/1K, output $0.06/1K
+    completion_tokens * 6e-5 + prompt_tokens * 3e-5
   } else {
     # ChatGPT
-    completion_tokens * 2e-6 + prompt_tokens  * 1.5e-6
+    completion_tokens * 2e-6 + prompt_tokens * 1.5e-6
   }
 }
 
@@ -1374,7 +1375,7 @@ create_chat_completion_azure <- function(
   #---------------------------------------------------------------------------
   # Build Request Body Based on Model
 
-  if (model == "o4-mini") {
+  if (model == "gpt-5.4-mini") {
     # Use max_completion_tokens instead of max_tokens & exclude temperature
     body <- list(
       model = model,
