@@ -356,7 +356,27 @@ app_server <- function(input, output, session) {
   send_head <- mod_11$send_head
   contribute_data <- mod_11$contribute_data
 
-
+  # Log all settings to browser console once on session start
+  session$onFlushed(function() {
+    isolate({
+      key_val  <- api_key$key
+      key_disp <- if (nchar(key_val) > 4) paste0("****", substr(key_val, nchar(key_val) - 3, nchar(key_val))) else if (nchar(key_val) > 0) "****" else "(none)"
+      shinyjs::runjs(paste0(
+        'console.group("RTutor Settings");',
+        'console.log("Model:             ', selected_model(),       '");',
+        'console.log("Temperature:       ', sample_temp(),          '");',
+        'console.log("API key:           ', key_disp,               '");',
+        'console.log("API key source:    ', api_key$source,         '");',
+        'console.log("Use Python:        ', use_python(),           '");',
+        'console.log("Treat as factors:  ', convert_to_factor(),    '");',
+        'console.log("Max factor levels: ', max_levels_factor(),    '");',
+        'console.log("Max factor prop:   ', max_proportion_factor(),'");',
+        'console.log("Send data sample:  ', send_head(),            '");',
+        'console.log("Contribute data:   ', contribute_data(),      '");',
+        'console.groupEnd();'
+      ))
+    })
+  }, once = TRUE)
 
   #      Module 12 - 'About Tab'
   # __________________________________
