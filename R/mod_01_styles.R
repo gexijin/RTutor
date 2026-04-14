@@ -30,7 +30,7 @@ mod_01_styles_ui <- function(id) {
     .navbar-nav li:has(a[data-value='EDA']),
     .navbar-nav li.dropdown,
     .navbar-nav li:has(a[data-value='privacy_policy']),
-    .navbar-nav li:has(a[data-value='terms_of_use']) {
+    .navbar-nav li:has(a[data-value='terms_of_use']) { 
       display: none;
     }
 
@@ -175,6 +175,41 @@ mod_01_styles_ui <- function(id) {
       .nav-tabs > li.active > a {background-color: #f3faf3;
       color: #000; border: 1px solid #D9EDD8; border-bottom-color: transparent;}
 
+
+    /* Module 16 - Q&A */
+    #qa-ask_question::placeholder {
+      font-size: 16px;
+    }
+
+    .shiny-input-container:has(#qa-ask_question) {
+      margin-bottom: 15px;
+    }
+
+    /* Q&A suggestion dropdown */
+    .qa-dropdown {
+      position: absolute;
+      width: 100%;
+      background: white;
+      border: 1px solid #90BD8C;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .qa-dropdown-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .qa-dropdown-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #3a6b38;
+    }
+    .qa-dropdown-item:hover {
+      background-color: #e8f5e7;
+    }
 
     /* FAQ. Custom class */
     .faq-answer {

@@ -7,23 +7,6 @@ mod_17_policies_ui <- function(id) {
 
   ns <- NS(id)
   tagList(
-    # Policies (hidden)
-    conditionalPanel(
-      condition = "false",
-      fluidRow(
-        column(
-          width = 12,
-          div(
-            style = "display: flex;justify-content: space-between;",
-            # privacy policy
-            actionLink("ppolicy", "Privacy Policy"),
-            # terms of use
-            actionLink("tofu", "Terms of Use")
-          )
-        )
-      )
-    ),
-
     # Footer links to policies tabs redirect
     tags$script(HTML("
     /* Update the active tab to hidden privacy policy tab */
@@ -52,17 +35,6 @@ mod_17_policies_serv <- function(id) {
     observe({
       shinyjs::hideElement(selector = "#tabs li a[data-value=privacy_policy]")
       shinyjs::hideElement(selector = "#tabs li a[data-value=terms_of_use]")
-    })
-
-    # Redirect to privacy policy hidden tab
-    observeEvent(input$ppolicy, {
-      updateNavbarPage(session, inputId = "tabs", selected = "privacy_policy")
-      shiny::removeModal()
-    })
-    # Redirect to terms of use hidden tab
-    observeEvent(input$tofu, {
-      updateNavbarPage(session, inputId = "tabs", selected = "terms_of_use")
-      shiny::removeModal()
     })
 
 
@@ -128,9 +100,17 @@ mod_17_policies_serv <- function(id) {
 
         tags$br(),
         tags$h4("We've updated our ",
-          actionLink("ppolicy", "Privacy Policy"),
+          tags$a(
+            href = "#",
+            onclick = "$('#tabs a[data-value=\"privacy_policy\"]').tab('show'); $('.modal').modal('hide'); return false;",
+            "Privacy Policy"
+          ),
           "and ",
-          actionLink("tofu", "Terms of Use."),
+          tags$a(
+            href = "#",
+            onclick = "$('#tabs a[data-value=\"terms_of_use\"]').tab('show'); $('.modal').modal('hide'); return false;",
+            "Terms of Use."
+          ),
           " By continuing to RTutor.ai, you acknowledge and agree to these changes."
         ),
 

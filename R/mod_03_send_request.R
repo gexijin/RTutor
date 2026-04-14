@@ -21,7 +21,7 @@ mod_03_send_request_ui <- function(id) {
 
     # Example Prompts
     uiOutput(ns("prompt_ui")),
-    hr(class = "custom-hr"),
+    #hr(class = "custom-hr"),
 
     # Quality gate feedback panel (hidden until a vague prompt is detected)
     uiOutput(ns("quality_feedback_ui")),
@@ -30,7 +30,7 @@ mod_03_send_request_ui <- function(id) {
       column(
         width = 12,
         div(
-          style = "display: flex; justify-content: space-between;",
+          style = "display: flex; justify-content: space-between; margin-top: 7px;",
           div(
             # Reset Button
             actionButton(ns("reset_button"), strong("Reset")),
