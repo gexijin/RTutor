@@ -12,22 +12,38 @@ mod_16_qa_ui <- function(id) {
       condition = paste0("output['", ns("show_qa"), "'] === 'show'"),
       fluidRow(
         column(12,
-          textInput(
-            inputId = ns("ask_question"),
-            label = HTML("<span style='font-size: 18px;'>4. Ask About Results</span>"),
-            placeholder = "Q&A on code, results, error, or statistics in general",
-            value = ""
-          ),
-          tippy::tippy_this(
-            ns("ask_question"),
-            "'Walk me through this code', 'What does this result mean?',
-            'What is this error about?', 'Explain logistic regression',
-            'List R packages for time series analysis'.
-            Hit Enter to send your request.",
-            theme = "light-border"
-          ),
-          shinyjs::hidden(actionButton(ns("ask_button"), strong("Ask RTutor"))),
-          hr(class = "custom-hr")
+          div(
+            style = "margin-bottom: 5px; position: relative;",
+            textInput(
+              inputId = ns("ask_question"),
+              label = HTML("<span style='font-size: 18px;'>4. Ask About Results</span>"),
+              placeholder = "Q&A on code, results, error, or statistics in general",
+              value = ""
+            ),
+            tags$div(
+              id = ns("qa_dropdown"),
+              class = "qa-dropdown",
+              style = "display: none;",
+              tags$ul(
+                class = "qa-dropdown-list",
+                tags$li(
+                  class = "qa-dropdown-item",
+                  `data-value` = "Explain code line by line",
+                  "Explain code line by line"
+                )
+              )
+            ),
+            tippy::tippy_this(
+              ns("ask_question"),
+              "'What does this result mean?',
+              'What is this error about?', 'Explain logistic regression',
+              'List R packages for time series analysis'.<br>
+              Hit 'Enter' key to send.",
+              theme = "light-border"
+            ),
+            shinyjs::hidden(actionButton(ns("ask_button"), "Ask")),
+            #hr(class = "custom-hr")
+          )
         )
       )
     )
@@ -55,6 +71,9 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
       req(input$ask_question)
         #----------------------------Prep question
         txt <- input$ask_question
+
+        # Enforce minimum question length
+        if (nchar(trimws(txt)) < 7) return(NULL)
 
         # force to within 280 characters
         if (nchar(txt) > max_char_question) {
@@ -151,15 +170,51 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
       tagList(html_blocks)
     })
 
-    # JavaScript to trigger the send button when Enter key is pressed
+    # JavaScript: suggestion dropdown + validation + Enter key submit
     shinyjs::runjs("
-        $('#qa-ask_question').on('keyup', function (e) {
-            if (e.keyCode === 13) {
-                setTimeout(function(){
-                    $('#qa-ask_button').click();
-                }, 500);  // Delay of 100 milliseconds
-            }
-        });
+      // Show dropdown on focus when input is empty
+      $(document).on('focus', '#qa-ask_question', function() {
+        if ($(this).val().trim() === '') {
+          $('#qa-qa_dropdown').show();
+        }
+      });
+
+      // Hide dropdown as soon as user starts typing
+      $(document).on('input', '#qa-ask_question', function() {
+        $('#qa-qa_dropdown').hide();
+      });
+
+      // Populate input when a suggestion is clicked (mousedown fires before blur)
+      $(document).on('mousedown', '.qa-dropdown-item', function() {
+        var val = $(this).data('value');
+        $('#qa-ask_question').val(val);
+        Shiny.setInputValue('qa-ask_question', val);
+        $('#qa-qa_dropdown').hide();
+      });
+
+      // Hide dropdown when clicking anywhere outside the input or dropdown
+      $(document).on('mousedown', function(e) {
+        if (!$(e.target).closest('#qa-ask_question, #qa-qa_dropdown').length) {
+          $('#qa-qa_dropdown').hide();
+        }
+      });
+
+      // Block button click when invalid; let native Shiny handler fire when valid
+      $(document).on('click', '#qa-ask_button', function(e) {
+        if ($('#qa-ask_question').val().trim().length < 7) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return false;
+        }
+      });
+
+      // Enter key: hide dropdown then trigger button click
+      $(document).on('keyup', '#qa-ask_question', function(e) {
+        if (e.keyCode === 13) {
+          $('#qa-qa_dropdown').hide();
+          setTimeout(function() { $('#qa-ask_button').click(); }, 100);
+        }
+      });
     ")
 
 
