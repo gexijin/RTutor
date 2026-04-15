@@ -196,7 +196,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         ),
         error = function(e) {
           message("[QUALITY] check_prompt_quality failed: ", e$message)
-          list(verdict = "ok", suggestions = character(0))
+          list(verdict = "ok", feedback = "")
         }
       )
       removeNotification(notif_id)
@@ -213,10 +213,10 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         quality_cleared(quality_cleared() + 1)
       } else {
         quality_warned(TRUE)
-        verdict     <- result$verdict
-        suggestions <- result$suggestions
+        verdict <- result$verdict
+        feedback <- result$feedback
         output$quality_feedback_ui <- renderUI({
-          box_style <- "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-bottom: 10px;"
+          box_style <- "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-top: 8px; margin-bottom: 10px;"
           if (verdict == "off_topic") {
             div(
               style = box_style,
@@ -232,9 +232,12 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
             div(
               style = box_style,
               tags$p(strong("\u26a0\ufe0f Your prompt may need more detail.")),
-              tags$p("Here are some suggestions (or click Submit again to proceed with your original prompt):"),
-              if (length(suggestions) > 0)
-                tags$ul(lapply(suggestions, tags$li))
+              tags$p("Try adding a chart type, column names, or a condition. For example:"),
+              tags$p(style = "font-style: italic; margin-left: 10px;", feedback),
+              tags$p(
+                style = "margin-top: 6px; color: #666;",
+                "(or click Submit again to proceed with your original prompt)"
+              )
             )
           }
         })

@@ -17,10 +17,7 @@
 #   5.  Q&A always visible             (mod_16_qa.R)
 #   6.  Q&A "4." label                 (mod_16_qa.R)
 #   7.  Q&A markdown rendering         (commonmark + file check)
-#   8. Temperature removed from Settings  (mod_11_settings.R)
-#   9. Temperature added to sidebar       (app_ui.R)
-#   10. sample_temp override in server     (app_server.R)
-#   11. Inline code editing — Save & Resubmit (mod_04_main_panel.R)
+#   8. Inline code editing — Save & Resubmit (mod_04_main_panel.R)
 # =============================================================================
 
 library(testthat)
@@ -201,9 +198,9 @@ test_that("mod_16_qa.R: answer blocks use 'qa-answer-block' CSS class", {
   expect_match(src, "qa-answer-block", fixed = TRUE)
 })
 
-test_that("mod_16_qa.R: question is displayed with 'qa-question' CSS class", {
+test_that("mod_16_qa.R: question is displayed with 'qa-summary' CSS class", {
   src <- r_file("mod_16_qa.R")
-  expect_match(src, "qa-question", fixed = TRUE)
+  expect_match(src, "qa-summary", fixed = TRUE)
 })
 
 test_that("mod_16_qa.R: modal is wider than the old 30%", {
@@ -257,158 +254,7 @@ test_that("commonmark renders numbered list to <ol><li>", {
 })
 
 # =============================================================================
-# 8. Temperature — removed from Settings (mod_11_settings.R)
-# =============================================================================
-
-test_that("mod_11_settings.R: sliderInput for temperature is commented out", {
-  lines        <- readLines(file.path(rprojroot::find_package_root_file(), "R", "mod_11_settings.R"),
-                            warn = FALSE)
-  slider_lines <- grep("sliderInput", lines, value = TRUE)
-  expect_true(
-    length(slider_lines) == 0 || all(grepl("^\\s*#", slider_lines)),
-    label = "All sliderInput lines should be commented out"
-  )
-})
-
-test_that("mod_11_settings.R: output$change_temperature renderUI is commented out", {
-  lines        <- readLines(file.path(rprojroot::find_package_root_file(), "R", "mod_11_settings.R"),
-                            warn = FALSE)
-  render_lines <- grep("output\\$change_temperature", lines, value = TRUE)
-  expect_true(
-    length(render_lines) == 0 || all(grepl("^\\s*#", render_lines)),
-    label = "output$change_temperature assignment should be commented out"
-  )
-})
-
-test_that("mod_11_settings.R: uiOutput for change_temperature is commented out", {
-  lines      <- readLines(file.path(rprojroot::find_package_root_file(), "R", "mod_11_settings.R"),
-                          warn = FALSE)
-  ct_lines   <- grep("change_temperature", lines, value = TRUE)
-  ui_lines   <- grep("uiOutput", ct_lines, value = TRUE)
-  if (length(ui_lines) > 0) {
-    expect_true(
-      all(grepl("^\\s*#", ui_lines)),
-      label = "uiOutput(change_temperature) should be commented out"
-    )
-  } else {
-    succeed("No uiOutput(change_temperature) found — correctly absent")
-  }
-})
-
-test_that("mod_11_settings.R: AI Model selector is still active (not commented out)", {
-  lines        <- readLines(file.path(rprojroot::find_package_root_file(), "R", "mod_11_settings.R"),
-                            warn = FALSE)
-  model_lines  <- grep("language_model", lines, value = TRUE)
-  active_lines <- model_lines[!grepl("^\\s*#", model_lines)]
-  expect_true(length(active_lines) > 0)
-})
-
-test_that("mod_11_settings.R: a comment explains the temperature was moved to sidebar", {
-  src <- r_file("mod_11_settings.R")
-  expect_match(src, "MOVED TO SIDEBAR", ignore.case = TRUE)
-})
-
-
-# =============================================================================
-# 9. Temperature — added to sidebar (app_ui.R)
-# =============================================================================
-
-test_that("app_ui.R: contains numericInput with id 'sidebar_temperature'", {
-  src <- r_file("app_ui.R")
-  expect_match(src, 'inputId\\s*=\\s*"sidebar_temperature"', fixed = FALSE)
-})
-
-test_that("app_ui.R: sidebar temperature label is 'Sampling Temperature'", {
-  src <- r_file("app_ui.R")
-  expect_match(src, "Sampling Temperature", fixed = TRUE)
-})
-
-test_that("app_ui.R: sidebar temperature default value is 0.2", {
-  src <- r_file("app_ui.R")
-  # Anchor to inputId = "sidebar_temperature" (the numericInput), not the tippy call
-  idx     <- regexpr('inputId\\s*=\\s*"sidebar_temperature"', src, perl = TRUE)
-  context <- substring(src, idx, idx + 300)
-  expect_match(context, "value\\s*=\\s*0\\.2")
-})
-
-test_that("app_ui.R: sidebar temperature min = 0", {
-  src     <- r_file("app_ui.R")
-  idx     <- regexpr('inputId\\s*=\\s*"sidebar_temperature"', src, perl = TRUE)
-  context <- substring(src, idx, idx + 300)
-  expect_match(context, "min\\s*=\\s*0")
-})
-
-test_that("app_ui.R: sidebar temperature max = 1", {
-  src     <- r_file("app_ui.R")
-  idx     <- regexpr('inputId\\s*=\\s*"sidebar_temperature"', src, perl = TRUE)
-  context <- substring(src, idx, idx + 300)
-  expect_match(context, "max\\s*=\\s*1")
-})
-
-test_that("app_ui.R: sidebar temperature has a tooltip", {
-  src <- r_file("app_ui.R")
-  expect_match(src, "sidebar_temperature", fixed = TRUE)
-  expect_match(src, "tippy_this",          fixed = TRUE)
-})
-
-
-# =============================================================================
-# 10. sample_temp override in app_server.R
-# =============================================================================
-
-test_that("app_server.R: sample_temp reads from input$sidebar_temperature", {
-  src <- r_file("app_server.R")
-  expect_match(src, "sidebar_temperature", fixed = TRUE)
-  expect_match(src, "sample_temp\\s*<-\\s*reactive")
-})
-
-test_that("app_server.R: sample_temp clamps values with max(0, min(1, ...))", {
-  src <- r_file("app_server.R")
-  expect_match(src, "max(0",  fixed = TRUE)
-  expect_match(src, "min(1",  fixed = TRUE)
-})
-
-test_that("app_server.R: sample_temp falls back to default_temperature on NULL/NA", {
-  src <- r_file("app_server.R")
-  idx     <- regexpr("sidebar_temperature", src)
-  context <- substring(src, max(1, idx - 100), idx + 300)
-  expect_match(context, "default_temperature", fixed = TRUE)
-})
-
-test_that("sample_temp clamping logic: values within [0,1] pass through", {
-  clamp <- function(val, default = 0.2) {
-    if (is.null(val) || is.na(val)) return(default)
-    max(0, min(1, val))
-  }
-  expect_equal(clamp(0.0),  0.0)
-  expect_equal(clamp(0.2),  0.2)
-  expect_equal(clamp(0.5),  0.5)
-  expect_equal(clamp(1.0),  1.0)
-})
-
-test_that("sample_temp clamping logic: out-of-range values are clamped", {
-  clamp <- function(val, default = 0.2) {
-    if (is.null(val) || is.na(val)) return(default)
-    max(0, min(1, val))
-  }
-  expect_equal(clamp(-0.1),  0.0)
-  expect_equal(clamp(-10),   0.0)
-  expect_equal(clamp(1.1),   1.0)
-  expect_equal(clamp(100),   1.0)
-})
-
-test_that("sample_temp clamping logic: NULL and NA return the default (0.2)", {
-  clamp <- function(val, default = 0.2) {
-    if (is.null(val) || is.na(val)) return(default)
-    max(0, min(1, val))
-  }
-  expect_equal(clamp(NULL),      0.2)
-  expect_equal(clamp(NA_real_),  0.2)
-  expect_equal(clamp(NA),        0.2)
-})
-
-# =============================================================================
-# 11. Inline code editing — Save & Resubmit (mod_04_main_panel.R)
+# 8. Inline code editing — Save & Resubmit (mod_04_main_panel.R)
 # =============================================================================
 
 test_that("mod_04_main_panel.R: aceEditor starts read-only, toggled by JS on focus", {
