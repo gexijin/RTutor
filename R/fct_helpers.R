@@ -714,8 +714,13 @@ call_llm_check <- function(prompt, api_key, model_override = "gpt-4o-mini") {
 }
 
 
+vague_feedback <- 'e.g. "Create a [plot type] of [column] grouped by [group], colored by [column], filtered to [condition]."'
+
+
 # Check whether a prompt is specific enough for R code generation.
-# Returns list(verdict = "ok"|"vague"|"off_topic", suggestions = character(0..2)).
+# Returns list(verdict = "ok"|"vague"|"off_topic", feedback = character(1), usage).
+# When verdict is "vague", feedback holds a fill-in-the-blank template built from
+# the dataset's column names; otherwise feedback is "".
 # Fails open: on any API or parse error returns verdict "ok" so students are never blocked.
 # Logs all inputs, raw API response, and parsed result to the console for tuning.
 check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names = character(0)) {
@@ -739,10 +744,10 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
       content = paste0(
         "You are a teaching assistant deciding if a student's data analysis prompt is specific enough ",
         "to generate correct R or Python code without guessing.\n\n",
-        
+
         "The student is working with a dataset called '", dataset_name, "' ",
         "with these columns: ", paste(col_names, collapse = ", "), ".\n\n",
-        
+
         "## GOOD prompts — mark these 'ok':\n",
         "- 'Generate 100 random numbers. Plot their distribution.'\n",
         "- 'Provide a demo for ridge regression.'\n",
@@ -758,7 +763,7 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
         "- 'How do you perform regression when predictor variables are highly correlated?'\n",
         "- 'Create a world map.'\n",
         "- 'Create a heatmap.'\n\n",
-        
+
         "## BAD prompts — mark these 'vague':\n",
         "- 'Plot these two columns.' (does not name the columns)\n",
         "- 'Graph petal length by sepal width.' (names columns but no chart type and relationship is ambiguous)\n",
@@ -766,27 +771,23 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
         "- 'Do something interesting with this dataset.' (no specific goal)\n",
         "- 'Compare the groups.' (does not say which columns or which groups)\n",
         "- 'Show me a plot.' (no columns, no chart type)\n\n",
-        
+
         "## Key principle:\n",
         "A prompt is 'ok' if a competent data analyst could execute it without asking a follow-up question. ",
         "Demonstrations, method names, conceptual questions, and prompts that name specific columns ",
         "and actions all pass. ONLY FLAG 'vague' if there is genuine ambiguity that would force guessing.\n\n",
-        
+
         "Mark as 'off_topic' only if the prompt has nothing to do with data, statistics, or programming.\n\n",
-        
-        "If verdict is 'vague', write 1-2 suggestions that fix the ambiguity using column names from ",
-        "the dataset above. Stay as close to the student's original intent as possible.\n\n",
-        
+
         "Reply ONLY with valid JSON, no markdown, no explanation:\n",
-        "{\"verdict\": \"ok\", \"suggestions\": []}\n",
-        "verdict must be exactly one of: \"ok\", \"vague\", \"off_topic\". ",
-        "If verdict is \"ok\" or \"off_topic\", suggestions must be empty."
+        "{\"verdict\": \"ok\"}\n",
+        "verdict must be exactly one of: \"ok\", \"vague\", \"off_topic\"."
       )
     ),
     list(role = "user", content = user_content)
   )
 
-  fail_open <- list(verdict = "ok", suggestions = character(0), usage = NULL)
+  fail_open <- list(verdict = "ok", feedback = "", usage = NULL)
 
   if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
     response <- tryCatch(
@@ -844,16 +845,16 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
   )
   if (is.null(parsed) || !("verdict" %in% names(parsed))) return(fail_open)
 
-  result <- list(
-    verdict     = as.character(parsed$verdict),
-    suggestions = as.character(if (is.null(parsed$suggestions)) character(0) else parsed$suggestions),
-    usage       = response$usage
+  verdict <- as.character(parsed$verdict)
+  result  <- list(
+    verdict = verdict,
+    feedback = if (verdict == "vague") vague_feedback else "",
+    usage   = response$usage
   )
 
   message(
     "[QUALITY] Verdict: ", result$verdict, "\n",
-    "  Suggestions: ",
-    if (length(result$suggestions) > 0) paste(result$suggestions, collapse = " | ") else "(none)"
+    "  feedback: ", if (nchar(result$feedback) > 0) result$feedback else "(none)"
   )
 
   result
