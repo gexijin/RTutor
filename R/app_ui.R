@@ -161,6 +161,7 @@ golem_add_external_resources <- function() {
   )
 
   tags$head(
+    tags$meta(name = "viewport", content = "width=device-width, initial-scale=1"),
     favicon(
       ico = "icon",
       rel = "shortcut icon",

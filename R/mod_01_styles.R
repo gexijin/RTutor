@@ -34,6 +34,11 @@ mod_01_styles_ui <- function(id) {
       display: none;
     }
 
+    /* Only hide EDA tab */
+    /* .navbar-nav li:has(a[data-value='EDA']) { 
+      display: none;
+    } */
+
     /* active tab */
     .navbar-default .navbar-nav > .active > a, 
     .navbar-default .navbar-nav > .active > a:focus, 
@@ -126,6 +131,85 @@ mod_01_styles_ui <- function(id) {
       margin-left: 125px;
     }
 
+    /* iPad / tablet responsive styles (768px – 1199px) */
+    @media (min-width: 768px) and (max-width: 1199px) {
+
+      /* Keep Bootstrap 3 grid columns side-by-side (prevents sidebar stacking) */
+      .col-sm-4 { width: 28% !important; float: left !important; }
+      .col-sm-8 { width: 72% !important; float: left !important; }
+
+      /* Tighten sidebar padding so content fits without overflow */
+      .well { padding: 12px 10px; }
+
+      /* Sidebar section labels: 1. Data, 2. Data Types, 3. Prompt, 4. Ask About Results */
+      /* !important needed because these labels use inline style='font-size:18px' */
+      .well label,
+      .well .control-label,
+      .well label span,
+      .well .control-label span { font-size: 13px !important; }
+
+      /* 'Data: mpg' selected dataset display — renderUI span with inline font-size */
+      [id*='selected_dataset'] span { font-size: 13px !important; }
+
+      /* Input fields and dropdowns */
+      .well textarea,
+      .well input[type='text'],
+      .well input[type='number'] { font-size: 14px; }
+      .well .selectize-input,
+      .well .selectize-dropdown { font-size: 14px !important; }
+
+      /* Prompt textarea placeholder text */
+      #send_request-input_text::placeholder { font-size: 13px !important; }
+      #qa-ask_question::placeholder { font-size: 13px !important; }
+
+      /* Submit and Reset buttons */
+      #send_request-submit_button,
+      #send_request-reset_button { font-size: 14px !important; }
+
+      /* Compact navbar tab labels */
+      .navbar-nav > li > a span { font-size: 15px !important; }
+      .navbar-brand { font-size: 18px; }
+
+      /* Footer: smaller text and padding */
+      footer { font-size: 12px !important; padding: 6px !important; }
+
+      /* Body padding accounts for the slimmer footer */
+      body { padding-bottom: 45px; }
+
+      /* 3. Prompt: expand example-prompt dropdown to full sidebar width */
+      /* The dropdown sits in col-sm-7 with a col-sm-5 empty spacer beside it */
+      .well .col-sm-5 { display: none !important; }
+      .well .col-sm-7 { width: 100% !important; }
+
+      /* 1. Data: stack Browse button and filename vertically so text isn't cut off */
+      .well .input-group { display: flex !important; flex-direction: column; }
+      .well .input-group .input-group-btn { width: 100%; }
+      .well .input-group .input-group-btn .btn {
+        width: 100%;
+        border-radius: 4px !important;
+        font-size: 13px;
+      }
+      .well .input-group > .form-control {
+        width: 100% !important;
+        margin-top: 3px;
+        border-radius: 4px !important;
+        font-size: 12px;
+      }
+
+      /* Remove space below file upload area (three sources): */
+      /* 1. Progress bar rendered by fileInput() — 20px height + 20px margin even before upload */
+      .well .shiny-file-input-progress { display: none !important; }
+      /* 2. shiny-input-container wrapper margin */
+      [id*='data_upload_ui'] .shiny-input-container { margin-bottom: 0 !important; }
+      /* 3. Empty second-upload uiOutput still renders as a block */
+      /* FRAGILE: :empty only matches if the element has zero child nodes, including whitespace.
+         Works for Shiny's uiOutput when renderUI returns NULL (renders a truly empty div),
+         but will silently stop working if Shiny ever injects a whitespace text node inside
+         the div. If the gap reappears, inspect the element in DevTools — if the div has a
+         whitespace child, switch to: [id*='data_upload_ui_2'] { min-height: 0; height: 0; overflow: hidden; } */
+      [id*='data_upload_ui_2']:empty { display: none !important; }
+    }
+
     /* Responsive styles, for mobile browsing */
     @media (max-width: 1000px) {
       .productIntro h2{margin: 25px;font-size: 40px;}
@@ -143,6 +227,22 @@ mod_01_styles_ui <- function(id) {
       .policy h2 {font-size: 28px;}
       .policy h3 {font-size: 21px;}
       .policy p{margin: 25px !important;}
+    }
+
+    /* Small device footer fix (< 600px) */
+    /* All footer items sit on one line — on narrow screens they overflow to the right */
+    @media (max-width: 600px) {
+      footer {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        column-gap: 8px;
+        padding: 5px 8px !important;
+        font-size: 11px !important;
+        line-height: 1.8;
+      }
+      /* Extra padding so content isn't hidden behind the 2-line footer */
+      body { padding-bottom: 60px; }
     }
 
    /* Built in class for Shiny Library */ 

@@ -139,7 +139,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           session,
           inputId = "ask_question",
           label = NULL,
-          placeholder = "Ask a question on the code or statistics",
+          placeholder = "Q&A on code, results, error, or statistics in general",
           value = ""
         )
       }
