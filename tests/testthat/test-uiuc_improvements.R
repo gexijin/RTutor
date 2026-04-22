@@ -173,9 +173,9 @@ test_that("mod_16_qa.R: output$show_qa always returns 'show' (no submit_button g
   expect_match(block, 'return\\("show"\\)')
 })
 
-test_that("mod_16_qa.R: label text contains '4. Ask About Results'", {
+test_that("mod_16_qa.R: label text contains '4. Explore Further'", {
   src <- r_file("mod_16_qa.R")
-  expect_match(src, "4\\. Ask About Results")
+  expect_match(src, "4\\. Explore Further")
 })
 
 

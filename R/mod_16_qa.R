@@ -16,7 +16,7 @@ mod_16_qa_ui <- function(id) {
             style = "margin-bottom: 5px; position: relative;",
             textInput(
               inputId = ns("ask_question"),
-              label = HTML("<span style='font-size: 18px;'>4. Ask About Results</span>"),
+              label = HTML("<span style='font-size: 18px;'>4. Explore Further</span>"),
               placeholder = "Q&A on code, results, error, or statistics in general",
               value = ""
             ),
@@ -53,7 +53,7 @@ mod_16_qa_ui <- function(id) {
 
 
 mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_error_modal, counter,
-  selected_model, api_key, sample_temp, selected_dataset_name) {
+  selected_model, api_key, sample_temp, selected_dataset_name, qa_by_chunk, chunk_selection) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -128,13 +128,15 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
 
 
-    # List of list(question, answer) pairs, newest first
-    chat_content <- reactiveVal(list())
-
     observeEvent(input$ask_button, {
       new_entry <- answer_one()
       if (!is.null(new_entry)) {
-        chat_content(c(list(new_entry), chat_content()))
+        # Store answer under current chunk ID (append = oldest first)
+        chunk_id   <- as.character(chunk_selection$selected_chunk)
+        current    <- qa_by_chunk()
+        current[[chunk_id]] <- c(current[[chunk_id]], list(new_entry))
+        qa_by_chunk(current)
+
         updateTextInput(
           session,
           inputId = "ask_question",
@@ -142,33 +144,17 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           placeholder = "Q&A on code, results, error, or statistics in general",
           value = ""
         )
+
+        # Auto-scroll to the Q&A section after the UI has had time to render
+        shinyjs::runjs("
+          setTimeout(function() {
+            var qa = document.getElementById('qa-section');
+            if (qa) qa.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 400);
+        ")
       }
     })
 
-    output$answer <- renderUI({
-      req(input$ask_button, answer_one())
-      # chat_content() is newest-first; reverse to oldest-first for display
-      blocks <- rev(chat_content())
-      n <- length(blocks)
-      html_blocks <- lapply(seq_along(blocks), function(i) {
-        is_latest <- i == n
-        if (is_latest) {
-          tags$details(
-            open = NA,
-            class = "qa-item",
-            tags$summary(class = "qa-summary", HTML(blocks[[i]]$question)),
-            div(class = "qa-answer-block", HTML(blocks[[i]]$answer))
-          )
-        } else {
-          tags$details(
-            class = "qa-item",
-            tags$summary(class = "qa-summary", HTML(blocks[[i]]$question)),
-            div(class = "qa-answer-block", HTML(blocks[[i]]$answer))
-          )
-        }
-      })
-      tagList(html_blocks)
-    })
 
     # JavaScript: suggestion dropdown + validation + Enter key submit
     shinyjs::runjs("
@@ -218,50 +204,6 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
     ")
 
 
-    observeEvent(answer_one(), {
-      showModal(modalDialog(
-        title = strong("Chat With Your Tutor"),
-        tags$style(HTML("
-          .modal-dialog { width: 55% !important; max-width: 55% !important; }
-          #chat_window {
-            height: 520px; width: 100%; overflow-y: auto;
-            padding: 14px 18px; border-radius: 6px;
-            background: #fafafa;
-          }
-          details.qa-item { border-bottom: 1px solid #e8e8e8; margin-bottom: 4px; }
-          details.qa-item[open] { margin-bottom: 10px; }
-          summary.qa-summary {
-            cursor: pointer; list-style: none; outline: none;
-            font-size: 15px; font-weight: 600; color: #333;
-            border-left: 3px solid #90BD8C; padding: 8px 10px;
-            user-select: none;
-          }
-          summary.qa-summary::-webkit-details-marker { display: none; }
-          summary.qa-summary::before { content: '\\25B6  '; font-size: 10px; color: #90BD8C; }
-          details.qa-item[open] summary.qa-summary::before { content: '\\25BC  '; }
-          .qa-answer-block { padding: 8px 4px 12px 13px; }
-          .qa-answer-block h1, .qa-answer-block h2, .qa-answer-block h3 {
-            font-size: 16px; font-weight: 700; margin-top: 10px; color: #222;
-          }
-          .qa-answer-block p  { font-size: 14px; line-height: 1.6; color: #333; margin: 6px 0; }
-          .qa-answer-block ul, .qa-answer-block ol { padding-left: 20px; margin: 6px 0; }
-          .qa-answer-block li { font-size: 14px; line-height: 1.6; color: #333; }
-          .qa-answer-block code {
-            background: #f0f0f0; padding: 1px 5px;
-            border-radius: 3px; font-size: 13px; font-family: monospace;
-          }
-          .qa-answer-block pre {
-            background: #f5f5f5; border: 1px solid #ddd;
-            border-radius: 4px; padding: 10px; overflow-x: auto;
-          }
-          .qa-answer-block pre code { background: none; padding: 0; }
-          .qa-answer-block strong { color: #111; }
-        ")),
-        div(id = "chat_window", htmlOutput(ns("answer"))),
-        footer = modalButton("Close"),
-        easyClose = TRUE
-      ))
-    })
 
 
 

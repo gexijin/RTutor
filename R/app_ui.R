@@ -23,7 +23,7 @@ app_ui <- function(request) {
     mod_01_styles_ui("styles"),#NS("")
 
     tags$footer(
-      style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;
+      style = "position: fixed;bottom: 0;width: 100%;background-color: #F5F9FF;
         padding: 10px;text-align: center;z-index: 99;",
       span("© 2026 Orditus LLC"),
       HTML("&nbsp;"),  # Adds space
@@ -41,7 +41,12 @@ app_ui <- function(request) {
     ), # footer
 
     navbarPage(
-      title = HTML('<span style="color: black;font-size: 20px;">RTutor</span>'),
+      title = HTML('
+        <span style="color:black;font-size:20px;">UIUC RTutor</span>
+        <img src="www/logo_no_bckgrd.png"
+             alt="RTutor"
+             style="height:44px;width:auto;position:absolute;right:15px;top:6px;z-index:9999;">
+      '),
       id = "tabs",
 
       ### 'Home' Tab Panel ###

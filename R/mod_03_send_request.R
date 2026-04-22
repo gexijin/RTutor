@@ -15,7 +15,7 @@ mod_03_send_request_ui <- function(id) {
     textAreaInput(
       inputId = ns("input_text"),
       label = NULL,
-      placeholder = "Ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. See examples below.",
+      placeholder = "Ask questions or request analyses in English or other languages. For general questions, briefly explain the data first. Select data to see examples below.",
       rows = 6
     ),
 

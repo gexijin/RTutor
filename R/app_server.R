@@ -72,6 +72,9 @@ app_server <- function(input, output, session) {
   # change value when a previous code chunk is selected
   reverted <- reactiveVal(0)
 
+  # Per-chunk Q&A history: named list keyed by chunk ID (as character)
+  qa_by_chunk <- reactiveVal(list())
+
 
   ## Module 07
   # the current data
@@ -145,6 +148,7 @@ app_server <- function(input, output, session) {
     run_result(list())
     reverted(0)
     error_explanation(list())
+    qa_by_chunk(list())
     chunk_selection$chunk_choices  <- NULL
     chunk_selection$selected_chunk <- NULL
     chunk_selection$past_prompt    <- NULL
@@ -205,7 +209,8 @@ app_server <- function(input, output, session) {
     api_key = api_key,
     error_explanation = error_explanation,
     input_text = input_text,
-    counter = counter
+    counter = counter,
+    qa_by_chunk = qa_by_chunk
   )
 
 
@@ -425,7 +430,9 @@ app_server <- function(input, output, session) {
     selected_model = selected_model,
     api_key = api_key,
     sample_temp = sample_temp,
-    selected_dataset_name = selected_dataset_name
+    selected_dataset_name = selected_dataset_name,
+    qa_by_chunk = qa_by_chunk,
+    chunk_selection = chunk_selection
   )
 
 

@@ -38,8 +38,8 @@ mod_15_data_types_ui <- function(id) {
             "#%s {
               font-size: 14px;
               color: #000;
-              background-color: #F6FFF5;
-              border-color: #90BD8C;
+              background-color: #F5F9FF;
+              border-color: #6B9EE8;
               min-width: 70px;    /* Increased minimum width */
               }",
             ns("data_edit_modal")
@@ -128,7 +128,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
                 label = HTML('
                   <span style="font-size:16px;">Revert to Original Data</span>
                 '),
-                style = "margin-right:10px;background-color:#F6FFF5;"
+                style = "margin-right:10px;background-color:#F5F9FF;"
               ),
               uiOutput(ns("revert_data2_button"))
             ),
@@ -137,7 +137,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
               label = HTML('
                   <span style="font-size:16px;">Dismiss</span>
                 '),
-              style = "margin-right:10px;background-color:#F6FFF5;"
+              style = "margin-right:10px;background-color:#F5F9FF;"
             )
           ),
           easyClose = TRUE
@@ -432,7 +432,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
         label = HTML('
           <span style="font-size:16px;">Revert to Original Data2</span>
         '),
-        style = "margin-right:10px;background-color:#F6FFF5;"
+        style = "margin-right:10px;background-color:#F5F9FF;"
       )
     })
 
