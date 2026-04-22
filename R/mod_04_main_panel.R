@@ -69,7 +69,7 @@ mod_04_main_panel_ui <- function(id) {
         );
         var $x  = $('<button>&#x2715;</button>').css(
           $.extend({}, bStyle, {marginLeft:'4px', color:'#000',
-                                background:'#F6FFF5', borderColor:'#90BD8C'})
+                                background:'#F0F6FF', borderColor:'#6B9EE8'})
         );
 
         var $box = $('<div>', {id:'rtutor-rename-container'})
@@ -114,7 +114,7 @@ mod_04_main_panel_ui <- function(id) {
 
     # Initial UI display
     conditionalPanel(
-      condition = "input['send_request-submit_button'] == 0",
+      condition = "false",
       div(
         id = "rtutor-banner",
         fluidRow(
@@ -163,10 +163,10 @@ mod_04_main_panel_ui <- function(id) {
       # Toolbar: [dropdown | Delete Chunk] .............. [Save | Resubmit | Show Code]
       tags$style(HTML("
         .shiny-input-container { margin-bottom: 0 !important; }
-        /* Style the native chunk-selector to match the app's green theme */
+        /* Style the native chunk-selector to match the app's blue theme */
         #main_panel-selected_chunk {
-          background-color: #F6FFF5;
-          border-color: #90BD8C;
+          background-color: #F0F6FF;
+          border-color: #6B9EE8;
           color: #000;
           font-size: 16px;
           height: 34px;
@@ -195,15 +195,15 @@ mod_04_main_panel_ui <- function(id) {
             id    = "rtutor-rename-btn",
             type  = "button",
             style = "font-size: 15px; padding: 4px 8px; line-height: 1;
-              border: 1px solid #90BD8C; background: #F6FFF5;
+              border: 1px solid #6B9EE8; background: #F0F6FF;
               border-radius: 4px; cursor: pointer;",
             "\u270F"   # pencil icon
           ),
           actionButton(
             ns("delete_chunk"),
             "\U0001F5D1", # trash bin icon
-            style = "font-size: 15px; color: #000; background-color: #F6FFF5;
-              border-color: #90BD8C; padding: 4px 8px; line-height: 1;"
+            style = "font-size: 15px; color: #000; background-color: #F0F6FF;
+              border-color: #6B9EE8; padding: 4px 8px; line-height: 1;"
           )
         ),
         # Right group: save + resubmit (shown when dirty) + show code
@@ -213,8 +213,8 @@ mod_04_main_panel_ui <- function(id) {
             actionButton(
               ns("save_code"),
               "Save",
-              style = "font-size: 14px; color: #000; background-color: #F6FFF5;
-                border-color: #90BD8C; padding: 6px 12px;"
+              style = "font-size: 14px; color: #000; background-color: #F0F6FF;
+                border-color: #6B9EE8; padding: 6px 12px;"
             )
           ),
           shinyjs::hidden(
@@ -305,21 +305,78 @@ mod_04_main_panel_ui <- function(id) {
     ),
     conditionalPanel(
       condition = "1",
-      # First dataset
-      uiOutput(ns("data_size")),
-      DT::dataTableOutput(ns("data_table_DT")),
-      # Second dataset
-      uiOutput(ns("data_size_2")),
-      DT::dataTableOutput(ns("data_table_DT_2")),
+      tags$div(
+        id = "dataset-section",
+        # First dataset
+        uiOutput(ns("data_size")),
+        DT::dataTableOutput(ns("data_table_DT")),
+        # Second dataset
+        uiOutput(ns("data_size_2")),
+        DT::dataTableOutput(ns("data_table_DT_2"))
+      ),
       # Data tables styling
       tags$head(
         tags$style(HTML("
-          .dataTables_wrapper {background-color: #f8fcf8;border-color: #90BD8C;padding: 10px;border-radius: 5px;}
-          .dataTables_wrapper table.dataTable tbody tr:nth-child(odd) {background-color: #f3faf3;}
+          .dataTables_wrapper {background-color: #F5F9FF;border-color: #6B9EE8;padding: 10px;border-radius: 5px;}
+          .dataTables_wrapper table.dataTable tbody tr:nth-child(odd) {background-color: #EEF4FF;}
           .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {background-color: #fff;}
         "))
       )
-    )
+    ),
+
+    # Q&A inline display section (below selected dataset)
+    div(id = "qa-section",
+      uiOutput(ns("qa_display"))
+    ),
+
+    # Expand dataset + Q&A sections to full page width when below the sidebar
+    tags$script(HTML("
+      // Generalised: resets and conditionally expands any section by element id.
+      function adjustSection(sectionId) {
+        var sidebar  = document.querySelector('.well');
+        var section  = document.getElementById(sectionId);
+        if (!sidebar || !section) return;
+
+        // Always reset first so getBoundingClientRect reflects the natural layout.
+        section.style.marginLeft = '';
+        section.style.width      = '';
+        section.style.boxSizing  = '';
+
+        var scrollY       = window.scrollY || window.pageYOffset || 0;
+        var sidebarBottom = sidebar.getBoundingClientRect().bottom + scrollY;
+        var sectionTop    = section.getBoundingClientRect().top    + scrollY;
+        var pagePad       = 15;
+        var bodyWidth     = document.documentElement.clientWidth;
+
+        if (sectionTop - sidebarBottom >= 10) {
+          var leftOffset           = section.getBoundingClientRect().left;
+          section.style.marginLeft = -(leftOffset - pagePad) + 'px';
+          section.style.width      = (bodyWidth - 2 * pagePad) + 'px';
+          section.style.boxSizing  = 'border-box';
+        }
+      }
+
+      function adjustDatasetSection() {
+        adjustSection('dataset-section');
+        adjustSection('qa-section');
+      }
+
+      // Debounced scheduler — waits for DOM to settle, then measures once.
+      var _adjustTimer = null;
+      function scheduleAdjust() {
+        if (_adjustTimer) clearTimeout(_adjustTimer);
+        _adjustTimer = setTimeout(function() {
+          requestAnimationFrame(adjustDatasetSection);
+          _adjustTimer = null;
+        }, 50);
+      }
+
+      // shiny:idle fires when all reactive outputs finish; shiny:value catches
+      // each individual output update (e.g. verbatimTextOutput rendering text
+      // before the next idle fires).
+      $(document).on('shiny:idle shiny:value', scheduleAdjust);
+      $(window).on('resize', adjustDatasetSection);
+    "))
   )
 }
 
@@ -328,7 +385,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
                                    use_python, tabs, current_data, current_data_2,
                                    selected_dataset_name, chunk_selection,
                                    run_env, reverted, api_key,
-                                   error_explanation, input_text, counter) {
+                                   error_explanation, input_text, counter,
+                                   qa_by_chunk) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -738,7 +796,12 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         turned_on(input$make_cx_interactive) # converted
       ) {
         canvasXpress::canvasXpressOutput(ns("result_CanvasXpress"))
-      } else {
+      } else if (
+        inherits(run_result()$result, "ggplot") ||
+        is.null(run_result()$console_output)
+      ) {
+        # Only render the plot container when the result is actually a plot.
+        # For printed/table results, render nothing — avoids a 400px empty gap.
         plotOutput(ns("result_plot"))
       }
     })
@@ -884,11 +947,10 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$data_size <- renderUI({
       req(!is.null(current_data()))
       tagList(
-        hr(class = "custom-hr-thick"),
-        h4("Selected Dataset"),
-        paste(
-          dim(current_data())[1], "rows X",
-          dim(current_data())[2], "columns"
+        div(class = "qa-section-header", "Selected Dataset"),
+        div(
+          style = "padding: 6px 10px; background-color: #F5F9FF; border-radius: 0 0 6px 6px;",
+          paste(dim(current_data())[1], "rows X", dim(current_data())[2], "columns")
         )
       )
     })
@@ -911,12 +973,42 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$data_size_2 <- renderUI({
       req(!is.null(current_data_2()))
       tagList(
-        hr(class = "custom-hr-thick"),
-        h4("2nd Dataset (Must specify, e.g. 'create a piechart of X in df2.')"),
-        paste(
-          dim(current_data_2())[1], "rows X",
-          dim(current_data_2())[2], "columns"
+        div(class = "qa-section-header", "2nd Dataset (Must specify, e.g. 'create a piechart of X in df2.')"),
+        div(
+          style = "padding: 6px 10px; background-color: #F5F9FF; border-radius: 0 0 6px 6px;",
+          paste(dim(current_data_2())[1], "rows X", dim(current_data_2())[2], "columns")
         )
+      )
+    })
+
+    # Q&A inline display — chunk-specific history below the selected dataset
+    output$qa_display <- renderUI({
+      req(chunk_selection$selected_chunk)
+      chunk_id <- as.character(chunk_selection$selected_chunk)
+      entries  <- qa_by_chunk()[[chunk_id]]
+      req(length(entries) > 0)
+
+      chunk_label <- chunk_selection$chunk_choices[
+        chunk_selection$chunk_choices == as.integer(chunk_id)
+      ]
+      header_text <- if (!is.null(names(chunk_label)) && nchar(names(chunk_label)) > 0) {
+        paste("Q&A \u2014", names(chunk_label))
+      } else {
+        paste("Q&A \u2014 Chunk #", chunk_id)
+      }
+
+      html_blocks <- lapply(entries, function(e) {
+        tags$details(
+          open = NA,
+          class = "qa-item",
+          tags$summary(class = "qa-summary", HTML(e$question)),
+          div(class = "qa-answer-block", HTML(e$answer))
+        )
+      })
+
+      tagList(
+        div(class = "qa-section-header", header_text),
+        div(id = "chat_window", tagList(html_blocks))
       )
     })
 
@@ -934,7 +1026,20 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         callbackR = function(isConfirmed) {
           if (isConfirmed) {
             # What current chunk is selected??
-            id_pre <- as.integer(input$selected_chunk)
+            id_pre    <- as.integer(input$selected_chunk)
+            old_max   <- length(ch$code_history)
+
+            # Remove this chunk's Q&A and re-key all higher chunk IDs down by 1
+            current_qa <- qa_by_chunk()
+            current_qa[[as.character(id_pre)]] <- NULL
+            if (id_pre < old_max) {
+              for (i in (id_pre + 1):old_max) {
+                current_qa[[as.character(i - 1)]] <- current_qa[[as.character(i)]]
+                current_qa[[as.character(i)]]     <- NULL
+              }
+            }
+            qa_by_chunk(current_qa)
+
             ch$code_history[[id_pre]] <- NULL # R Automatically shifts list down
 
             max_id <- length(ch$code_history)

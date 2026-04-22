@@ -340,10 +340,10 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
       tagList(
         tags$style(HTML("
         .irs--shiny .irs-bar {
-          border-top: 1px solid #90BD8C;border-bottom: 1px solid #90BD8C;
-          background: #8fca89;
+          border-top: 1px solid #6B9EE8;border-bottom: 1px solid #6B9EE8;
+          background: #7AABF0;
         }
-        .irs--shiny .irs-single {background-color: #8fca89; color: #000}
+        .irs--shiny .irs-single {background-color: #7AABF0; color: #000}
       ")),
         sliderInput(
           inputId = ns("temperature"),

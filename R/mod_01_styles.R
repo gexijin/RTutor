@@ -13,16 +13,16 @@ mod_01_styles_ui <- function(id) {
     /* navbar */
     /* .navbar is a built in bootstrap class */
     .navbar {
-      background-color: #C1E2BE;
-      border-color: #90BD8C;
+      background-color: #96BFFF;
+      border-color: #6B9EE8;
       color: #181818;
       font-weight: bold;
     }
 
     /* tabs */
     .navbar-default .navbar-nav > li > a {
-      background-color: #C1E2BE;
-      border-color: #9AC596;
+      background-color: #96BFFF;
+      border-color: #7AABF0;
       color: #181818;
     }
 
@@ -40,31 +40,31 @@ mod_01_styles_ui <- function(id) {
     } */
 
     /* active tab */
-    .navbar-default .navbar-nav > .active > a, 
-    .navbar-default .navbar-nav > .active > a:focus, 
+    .navbar-default .navbar-nav > .active > a,
+    .navbar-default .navbar-nav > .active > a:focus,
     .navbar-default .navbar-nav > .active > a:hover {
-      background-color: #A0BB9E;
+      background-color: #7A9FD4;
       color: #181818;
       font-weight: bold;
     }
 
     /* sidebar panel */
         /* .well is a built in bootstrap class, */
-    .well {background-color: #C1E2BE; border-color: #90BD8C; color: #000;}
+    .well {background-color: #96BFFF; border-color: #6B9EE8; color: #000;}
 
 
     /* Session Report & RMarkdown */
     .custom-action-button, .custom-download-button
     { font-size: 24px;
       color: #000;
-      background-color: #C1E2BE;
-      border-color: #90BD8C;
+      background-color: #96BFFF;
+      border-color: #6B9EE8;
     }
 
     /* Customize Dropdown Menus */
     .selectize-input, .selectize-dropdown {
-      background-color: #F6FFF5 !important;
-      border-color: #90BD8C !important;
+      background-color: #F0F6FF !important;
+      border-color: #6B9EE8 !important;
       color: #000 !important;
       font-size: 18px;
       }
@@ -79,14 +79,14 @@ mod_01_styles_ui <- function(id) {
     textarea, input[type = 'text'], input[type='number']
     {
       width: 100%;
-      background-color: #F6FFF5;
-      border-color: #90BD8C;
+      background-color: #F0F6FF;
+      border-color: #6B9EE8;
       font-size: 18px;
     }
 
     /* horizontal line (hr()) */
-    .custom-hr{border-top: 1px solid #90BD8C;}
-    .custom-hr-thick{border-top: 3px solid #90BD8C;}
+    .custom-hr{border-top: 1px solid #6B9EE8;}
+    .custom-hr-thick{border-top: 3px solid #6B9EE8;}
 
     /* tippy this pop-ups. Built in class from Tippy.js library*/
     .tippy-content {font-size: 15px !important;}
@@ -101,7 +101,7 @@ mod_01_styles_ui <- function(id) {
       padding-top: 0px;
       display: flex;
       justify-content: center;
-      border: 50px solid #bedbb7;
+      border: 50px solid #8FBBFF;
       color: #262626;
       text-align: left;
       flex-direction: column;
@@ -141,7 +141,7 @@ mod_01_styles_ui <- function(id) {
       /* Tighten sidebar padding so content fits without overflow */
       .well { padding: 12px 10px; }
 
-      /* Sidebar section labels: 1. Data, 2. Data Types, 3. Prompt, 4. Ask About Results */
+      /* Sidebar section labels: 1. Data, 2. Data Types, 3. Prompt, 4. Explore Further */
       /* !important needed because these labels use inline style='font-size:18px' */
       .well label,
       .well .control-label,
@@ -261,19 +261,19 @@ mod_01_styles_ui <- function(id) {
 
     /* EDA Tab */
       /* Background color - tab headers */
-    .nav-tabs {background-color: #D9EDD8;}
+    .nav-tabs {background-color: #D4E4FF;}
 
       /* Text color - tab headers */
     .nav-tabs > li > a {color: #5b5b5b;font-size: 16px;
-      border: 1px solid #D9EDD8;border-radius: 4px;}
+      border: 1px solid #D4E4FF;border-radius: 4px;}
 
       /* Hover color - tab headers */
-    .nav-tabs > li > a:hover {background-color: #90BD8C;
+    .nav-tabs > li > a:hover {background-color: #6B9EE8;
       color: #000;}
 
     /* Background color - active tab */
-      .nav-tabs > li.active > a {background-color: #f3faf3;
-      color: #000; border: 1px solid #D9EDD8; border-bottom-color: transparent;}
+      .nav-tabs > li.active > a {background-color: #F5F9FF;
+      color: #000; border: 1px solid #D4E4FF; border-bottom-color: transparent;}
 
 
     /* Module 16 - Q&A */
@@ -290,7 +290,7 @@ mod_01_styles_ui <- function(id) {
       position: absolute;
       width: 100%;
       background: white;
-      border: 1px solid #90BD8C;
+      border: 1px solid #6B9EE8;
       border-top: none;
       border-radius: 0 0 4px 4px;
       z-index: 1000;
@@ -305,19 +305,63 @@ mod_01_styles_ui <- function(id) {
       padding: 8px 12px;
       cursor: pointer;
       font-size: 14px;
-      color: #3a6b38;
+      color: #1A4080;
     }
     .qa-dropdown-item:hover {
-      background-color: #e8f5e7;
+      background-color: #E0EEFF;
     }
+
+    /* Q&A inline display (main panel, below selected dataset) */
+    #qa-section {
+      margin-top: 16px;
+    }
+    .qa-section-header {
+      font-size: 15px; font-weight: 700; color: #1A4080;
+      padding: 8px 10px; margin-bottom: 6px;
+      border-left: 4px solid #6B9EE8;
+      background-color: #F0F6FF;
+      border-radius: 0 4px 4px 0;
+    }
+    #chat_window {
+      background: #F5F9FF; border-radius: 6px;
+      padding: 10px 14px;
+    }
+    details.qa-item { border-bottom: 1px solid #e8e8e8; margin-bottom: 4px; }
+    details.qa-item[open] { margin-bottom: 10px; }
+    summary.qa-summary {
+      cursor: pointer; list-style: none; outline: none;
+      font-size: 15px; font-weight: 600; color: #333;
+      border-left: 3px solid #6B9EE8; padding: 8px 10px;
+      user-select: none;
+    }
+    summary.qa-summary::-webkit-details-marker { display: none; }
+    summary.qa-summary::before { content: '▶  '; font-size: 10px; color: #6B9EE8; }
+    details.qa-item[open] summary.qa-summary::before { content: '▼  '; }
+    .qa-answer-block { padding: 8px 4px 12px 13px; }
+    .qa-answer-block h1, .qa-answer-block h2, .qa-answer-block h3 {
+      font-size: 16px; font-weight: 700; margin-top: 10px; color: #222;
+    }
+    .qa-answer-block p  { font-size: 14px; line-height: 1.6; color: #333; margin: 6px 0; }
+    .qa-answer-block ul, .qa-answer-block ol { padding-left: 20px; margin: 6px 0; }
+    .qa-answer-block li { font-size: 14px; line-height: 1.6; color: #333; }
+    .qa-answer-block code {
+      background: #f0f0f0; padding: 1px 5px;
+      border-radius: 3px; font-size: 13px; font-family: monospace;
+    }
+    .qa-answer-block pre {
+      background: #f5f5f5; border: 1px solid #ddd;
+      border-radius: 4px; padding: 10px; overflow-x: auto;
+    }
+    .qa-answer-block pre code { background: none; padding: 0; }
+    .qa-answer-block strong { color: #111; }
 
     /* FAQ. Custom class */
     .faq-answer {
       display: none; padding-left: 10px; font-size: 18px;
     }
     .faq-question {
-      cursor: pointer;padding: 7px;border: 1px solid #90BD8C;
-      background-color: #F6FFF5;font-size: 18px;
+      cursor: pointer;padding: 7px;border: 1px solid #6B9EE8;
+      background-color: #F0F6FF;font-size: 18px;
     }
 
 
@@ -335,50 +379,50 @@ mod_01_styles_ui <- function(id) {
     #send_request-submit_button {
       font-size: 18px;
       color: green !important;
-      background-color: #F6FFF5;
-      border-color: #90BD8C;
+      background-color: #ffffff;
+      border-color: #6B9EE8;
       }
 
     #send_request-reset_button {
       font-size: 18px;
       color: red !important;
-      background-color: #F6FFF5;
-      border-color: #90BD8C;
+      background-color: #ffffff;
+      border-color: #6B9EE8;
       }
 
     #send_request-input_text {
       width: 100%;
-      background-color: #F6FFF5;
-      border-color: #90BD8C;
+      background-color: #F0F6FF;
+      border-color: #6B9EE8;
       font-size: 16px;
       resize: vertical;
       }
     
     /* Module 4 */
         /* Quick start */
-    [class*=first-user]{font-size: 16px;color: #000;background-color: #90BD8C;
+    [class*=first-user]{font-size: 16px;color: #000;background-color: #96BFFF;
     transition: background-color 0.3s, box-shadow 0.3s;}
     [class*=first-user]:hover {
-      background-color: #66AFFF;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      background-color: #5A96FF;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     /* Module 12 */
     [class*=site-updates-wrapper] table
-      {background-color: #f3faf3;border-top: 2px solid #90BD8C;}
+      {background-color: #F5F9FF;border-top: 2px solid #6B9EE8;}
     [class*=site-updates-wrapper] table thead th,
       [class*=site-updates-wrapper] table td
-        {border: 2px solid #90BD8C;}
+        {border: 2px solid #6B9EE8;}
     [class*=site-updates-wrapper] table tbody tr:nth-child(odd)
-      {background-color: #f3faf3;}
+      {background-color: #F5F9FF;}
     [class*=site-updates-wrapper] table tbody tr:nth-child(even)
       {background-color: #ffffff;}
 
 
     /* Welcome Banner */
     #rtutor-banner {
-      background: linear-gradient(to right, #afd0ad, #deecdd, #afd0ad);
+      background: linear-gradient(to right, #7AABF0, #C8DAFF, #7AABF0);
       text-align: center;padding: 20px;border-radius: 10px;
-      margin-right: 30px;margin-bottom: 20px;border: 1px solid #90BD8C;
+      margin-right: 30px;margin-bottom: 20px;border: 1px solid #6B9EE8;
     }
     #rtutor-banner img {height: 50px;margin-bottom: 15px;vertical-align:middle;}
     #rtutor-banner h2 {font-size: 24px;margin: 0;padding-bottom: 10px;}
