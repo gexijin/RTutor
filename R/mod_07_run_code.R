@@ -58,16 +58,80 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
 
         run_env_start(as.list(run_env())) # keep a copy of the crime scene
 
+        # Inject an S4-aware summary into run_env so packages that register summary
+        # only as an S4 method (e.g. lavaan) dispatch correctly — no S3 bridge needed.
+        s4_aware_summary <- function(object, ...) {
+          cl <- class(object)[1L]
+          s3 <- getS3method("summary", cl, optional = TRUE)
+          if (!is.null(s3)) return(s3(object, ...))
+          if (isS4(object)) {
+            m <- tryCatch(
+              methods::selectMethod("summary", cl, optional = TRUE),
+              error = function(e) NULL
+            )
+            if (!is.null(m)) return(m(object, ...))
+          }
+          base::summary(object, ...)
+        }
+        had_summary_pre <- exists("summary", envir = run_env(), inherits = FALSE)
+        if (!had_summary_pre) assign("summary", s4_aware_summary, envir = run_env())
+
         result <- tryCatch({
-          eval_result <- eval(
-            parse(text = clean_cmd(logs$code, selected_dataset_name(), file.exists(on_server))),
-            envir = run_env()
+          cleaned_code <- clean_cmd(logs$code, selected_dataset_name(), file.exists(on_server))
+
+          # Pre-attach packages used via 'pkg::fn()' so S3/S4 methods dispatch correctly.
+          # Using pkg:: only loads the namespace; S3 methods require the package to be attached.
+          ns_pkgs <- unique(regmatches(
+            cleaned_code,
+            gregexpr("[A-Za-z][A-Za-z0-9.]*(?=:::?)", cleaned_code, perl = TRUE)
+          )[[1]])
+          for (pkg in setdiff(ns_pkgs, c("base", "utils", "methods", "stats",
+                                          "graphics", "grDevices", "datasets",
+                                          "tools", "compiler"))) {
+            if (!paste0("package:", pkg) %in% search()) {
+              suppressMessages(suppressWarnings(tryCatch(
+                require(pkg, character.only = TRUE, quietly = TRUE),
+                error = function(e) NULL
+              )))
+            }
+          }
+
+          # Eval each expression individually, replicating R's top-level auto-print behavior.
+          # This captures output from ALL expressions (not just the last one), and avoids
+          # printing "NULL" for invisible returns like pie() / ggplot side-effect draws.
+          parsed_exprs <- parse(text = cleaned_code)
+          eval_result  <- NULL
+
+          all_output <- capture.output({
+            for (i in seq_along(parsed_exprs)) {
+              vis        <- withVisible(eval(parsed_exprs[[i]], envir = run_env()))
+              eval_result <- vis$value
+              if (vis$visible) print(vis$value)
+            }
+          })
+
+          # NULL signals "no text output — may be a plot" to mod_04's plot_ui condition
+          console_output <- if (length(all_output) > 0) all_output else NULL
+
+          # TEMPORARY DIAGNOSTIC — remove after debugging
+          message(
+            "[DEBUG] class=", paste(class(eval_result), collapse = ","),
+            " | nlines=", length(all_output),
+            " | console_null=", is.null(console_output),
+            " | line1=", if (length(all_output) > 0) substr(all_output[1], 1, 60) else "EMPTY"
           )
-          console_output <- capture.output(print(eval_result))
+
           eval_result                # without this, interactive plots don't work
         }, error = function(e) {
           list(error_message = e$message)  # won't work if not inside a list!
         })
+
+        # Remove the temporary S4 summary shim if user code didn't redefine it
+        if (!had_summary_pre &&
+            exists("summary", envir = run_env(), inherits = FALSE) &&
+            identical(get("summary", envir = run_env(), inherits = FALSE), s4_aware_summary)) {
+          rm("summary", envir = run_env())
+        }
 
         # update the error message, if any
         if (length(names(result)) != 0) {

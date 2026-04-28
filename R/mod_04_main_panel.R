@@ -741,6 +741,15 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       }
     })
 
+    # Returns TRUE if a ggplot uses coord_polar (pie charts).
+    # plotly cannot convert coord_polar plots; they must fall back to renderPlot.
+    is_polar_ggplot <- function(g) {
+      if (!inherits(g, "ggplot")) return(FALSE)
+      coord <- tryCatch(g$coordinates, error = function(e) NULL)
+      if (is.null(coord)) coord <- tryCatch(g$coord, error = function(e) NULL)
+      inherits(coord, "CoordPolar")
+    }
+
     # Plot results - plotly
     output$result_plotly <- plotly::renderPlotly({
       req(!code_error())
@@ -752,6 +761,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       )
 
       g <- run_result()$result
+      # coord_polar (ggplot pie charts) cannot be converted to plotly — skip
+      req(!is_polar_ggplot(g))
       # still errors some times, when the returned list is not a plot
       if (is.character(g) || is.data.frame(g) || is.numeric(g)) {
         return(NULL)
@@ -788,8 +799,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       req(logs$code)
 
       if (
-        is_interactive_plot() ||   # natively interactive
-          turned_on(input$make_ggplot_interactive) # converted
+        (is_interactive_plot() || turned_on(input$make_ggplot_interactive)) &&
+          !is_polar_ggplot(run_result()$result)   # coord_polar can't be plotly-ified
       ) {
         plotly::plotlyOutput(ns("result_plotly"))
       } else if (
@@ -891,6 +902,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
 
       if (inherits(run_result()$result, "ggplot") && # if ggplot2, and it is
           !is_interactive_plot() && # not already an interactive plot, show
+          !is_polar_ggplot(run_result()$result) && # coord_polar can't be plotly-ified
           # if there are too many data points, don't do the interactive
           !(dim(df)[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
       ) {
@@ -922,6 +934,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
 
       if (inherits(run_result()$result, "ggplot") && # if canvasXpress, and it is
          !is_interactive_plot() && # not already an interactive plot, show
+         !is_polar_ggplot(run_result()$result) && # coord_polar can't be cx-ified
          # if there are too many data points, don't do the interactive
          !(dim(df)[1] > max_data_points && grepl("geom_point|geom_jitter", txt))
       ) {
