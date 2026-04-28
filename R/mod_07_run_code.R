@@ -113,14 +113,6 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
           # NULL signals "no text output — may be a plot" to mod_04's plot_ui condition
           console_output <- if (length(all_output) > 0) all_output else NULL
 
-          # TEMPORARY DIAGNOSTIC — remove after debugging
-          message(
-            "[DEBUG] class=", paste(class(eval_result), collapse = ","),
-            " | nlines=", length(all_output),
-            " | console_null=", is.null(console_output),
-            " | line1=", if (length(all_output) > 0) substr(all_output[1], 1, 60) else "EMPTY"
-          )
-
           eval_result                # without this, interactive plots don't work
         }, error = function(e) {
           list(error_message = e$message)  # won't work if not inside a list!

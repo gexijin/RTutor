@@ -55,7 +55,10 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
     output$data_upload_ui <- renderUI({
 
       # LHS: Hide after first run; RHS: For when submitted accidentally
-      req(submit_button() == 0 || input$user_selected_dataset == data_placeholder)
+      # Third condition: keep visible when upload is selected but no file provided yet
+      req(submit_button() == 0 ||
+          input$user_selected_dataset == data_placeholder ||
+          (input$user_selected_dataset == user_upload && is.null(input$user_file)))
       req(is.null(input$user_file)) # Hide after user inputs data
 
       fileInput(
@@ -338,7 +341,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
 
       if (input$user_selected_dataset == user_upload) {
         if (is.null(input$user_file)) {
-          txt <- "No file uploaded! Please Reset and upload your data first."
+          return(NULL)  # show_option1 keeps the data section visible; no label needed
         } else {
           txt <- "Dataset: Upload"
         }
@@ -359,10 +362,23 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
     })
 
 
+    # Popup notification when submit is clicked with upload selected but no file present
+    observeEvent(submit_button(), {
+      req(input$user_selected_dataset == user_upload)
+      req(is.null(input$user_file))
+      showNotification(
+        "No file uploaded! Please upload your data first.",
+        type = "warning",
+        duration = 8
+      )
+    })
+
     # Condition based on input from mod_03 for UI conditional panel
     output$show_option1 <- renderText({
-      # Check both conditions: submit_button() from mod_03 and user_selected_dataset from this module
-      if (submit_button() == 0 || input$user_selected_dataset == data_placeholder) {
+      # Keep the data section visible if user chose Upload but hasn't provided a file
+      if (submit_button() == 0 ||
+          input$user_selected_dataset == data_placeholder ||
+          (input$user_selected_dataset == user_upload && is.null(input$user_file))) {
         return("show")  # Show dataset dropdown
       } else {
         return("hide")  # Show selected dataset

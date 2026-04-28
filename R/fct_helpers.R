@@ -118,8 +118,12 @@ available_datasets <- c(
   setdiff(available_datasets, order)
 )
 data_placeholder <- "Demo:"
+
+# use uiuc available dataset list instead
+uiuc_datasets <- c("mpg")
+
 # Append dummy values for user-uploaded data & no data
-available_datasets <- c(data_placeholder, no_data, available_datasets,
+available_datasets <- c(data_placeholder, no_data, uiuc_datasets, # was available_datasets
   user_upload
 )
 
@@ -148,7 +152,7 @@ available_datasets <- setNames(
 
 
 # load demo requests for different datasets (demo questions)
-demo <- read.csv(app_sys("app", "www", "demo_questions.csv"))
+demo <- read.csv(app_sys("app", "www", "uiuc_demo_questions.csv"))
 
 # load jokes
 jokes <- demo[

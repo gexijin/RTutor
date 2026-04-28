@@ -106,15 +106,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
       # Filter examples based on selected dataset
       choices <- switch(selected_dataset_name(),
         "no_data" = demo$requests[demo$data == "No Data"],
-        "iris" = demo$requests[demo$data == "Iris (examples)"],
         "mpg" = demo$requests[demo$data == "MPG (examples)"],
-        "airquality" = demo$requests[demo$data == "Air Quality (examples)"],
-        "diamonds" = demo$requests[demo$data == "Diamonds (examples)"],
-        "CO2" = demo$requests[demo$data == "CO2 (examples)"],
-        "ToothGrowth" = demo$requests[demo$data == "Tooth Growth (examples)"],
-        "pressure" = demo$requests[demo$data == "Pressure (examples)"],
-        "ChickWeight" = demo$requests[demo$data == "Chick Weights (examples)"],
-        "rna_seq" = demo$requests[demo$data == "RNA Seq (examples)"],
         demo$requests[demo$data == "Select a Dataset:"]
       )
 
