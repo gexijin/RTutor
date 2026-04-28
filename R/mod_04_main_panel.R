@@ -405,9 +405,9 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       current_code <- input$code_display
       if (is.null(current_code)) return(FALSE)
       sel <- chunk_selection$selected_chunk
-      if (is.null(sel)) return(FALSE)
-      id <- as.integer(sel)
-      if (id < 1 || id > length(ch$code_history)) return(FALSE)
+      if (is.null(sel) || !nzchar(sel)) return(FALSE)
+      id <- suppressWarnings(as.integer(sel))
+      if (is.na(id) || id < 1 || id > length(ch$code_history)) return(FALSE)
       stored <- gsub("```", "", ch$code_history[[id]]$raw)
       trimws(current_code, "right") != trimws(stored, "right")
     })
@@ -619,8 +619,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
       if (!isTRUE(as.character(chunk_selection$selected_chunk) == input$selected_chunk)) {
         # Set past_prompt before selected_chunk so mod_03 reads the correct prompt
         # when it reacts to the selected_chunk change
-        new_id <- as.integer(input$selected_chunk)
-        if (new_id >= 1 && new_id <= length(ch$code_history)) {
+        new_id <- suppressWarnings(as.integer(input$selected_chunk))
+        if (!is.na(new_id) && new_id >= 1 && new_id <= length(ch$code_history)) {
           chunk_selection$past_prompt <- ch$code_history[[new_id]]$prompt
         }
         chunk_selection$selected_chunk <- input$selected_chunk
