@@ -153,6 +153,9 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
         eval(parse(text = paste0("df <- user_data()$df")))
       } else if (input$user_selected_dataset %in% c(no_data, data_placeholder)) {
         df <- NULL
+      } else if (input$user_selected_dataset %in% uiuc_datasets) { # load data from www/demo_data
+        df <- read.csv(app_sys("app", "www", "demo_data",
+                paste0(input$user_selected_dataset, ".csv")))
       } else if (input$user_selected_dataset == rna_seq) {
         df <- rna_seq_data()
       } else {
