@@ -734,8 +734,13 @@ call_llm_check <- function(prompt, api_key, model_override = "gpt-4o-mini") {
   list(verdict = verdict, usage = response$usage)
 }
 
-
 vague_feedback <- 'e.g. "Create a [plot type] of [column] grouped by [group], colored by [column], filtered to [condition]."'
+# OR:
+#vague_feedback <- paste0(
+#  "Check that your prompt names the dataset and variable(s), uses the exact chart/table type ",
+#  "(e.g. 'bar graph', 'scatterplot', 'two-way table'), and includes any required details such as ",
+#  "axis limits, tick marks, grouping variables, or percentage type (column vs. row)."
+#)
 
 
 # Check whether a prompt is specific enough for R code generation.
@@ -763,42 +768,78 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
     list(
       role    = "system",
       content = paste0(
-        "You are a teaching assistant deciding if a student's data analysis prompt is specific enough ",
-        "to generate correct R or Python code without guessing.\n\n",
+        "You are a teaching assistant deciding if a student's data analysis prompt meets the assignment ",
+        "requirements well enough to generate correct R code without guessing.\n\n",
 
         "The student is working with a dataset called '", dataset_name, "' ",
         "with these columns: ", paste(col_names, collapse = ", "), ".\n\n",
 
-        "## GOOD prompts — mark these 'ok':\n",
-        "- 'Generate 100 random numbers. Plot their distribution.'\n",
-        "- 'Provide a demo for ridge regression.'\n",
-        "- 'Provide a demo for hierarchical clustering tree.'\n",
-        "- 'Create a boxplot of highway vs. class. Color by class. Add jitter points.'\n",
-        "- 'Is city normally distributed?'\n",
-        "- 'Calculate the correlation coefficient of city and highway.'\n",
-        "- 'Conduct ANOVA of log-transformed highway by type and drive.'\n",
-        "- 'Build a regression model of highway based on cylinder, dis, drive, and type.'\n",
-        "- 'What is Moran's I in spatial statistics?'\n",
-        "- 'Create a pie chart based on type.'\n",
-        "- 'What statistics test should I use to examine the correlation of two categorical variables?'\n",
-        "- 'How do you perform regression when predictor variables are highly correlated?'\n",
-        "- 'Create a world map.'\n",
-        "- 'Create a heatmap.'\n\n",
+        "## Assignment-specific requirements\n",
+        "When a prompt matches one of the types below, it must meet ALL listed criteria to be 'ok'.\n\n",
 
-        "## BAD prompts — mark these 'vague':\n",
-        "- 'Plot these two columns.' (does not name the columns)\n",
-        "- 'Graph petal length by sepal width.' (names columns but no chart type and relationship is ambiguous)\n",
+        "### Frequency Table\n",
+        "Must: (1) reference a variable by name, (2) ask for a frequency table (counts per category), ",
+        "(3) request proportions or percentages alongside the counts.\n\n",
+
+        "### Bar Graph\n",
+        "Must: (1) specify a variable by name, (2) use 'bar graph' or 'bar chart' ",
+        "(NOT 'histogram' or 'density plot' — those are for quantitative data).\n\n",
+
+        "### Scatterplot\n",
+        "Must: (1) name both the x-axis and y-axis variables, (2) use the word 'scatterplot', ",
+        "(3) specify axis limits and tick mark positions for both axes.\n",
+        "GOOD example: 'Make a scatterplot of the data. Put height on the x-axis and weight on the y-axis. ",
+        "Make the x-axis limits 0 to 100 and y-axis limits 20 to 80. ",
+        "Set x-axis breaks at 0, 25, 50, 75, 100 and y-axis breaks at 20, 50, 80.'\n\n",
+
+        "### Trend Line\n",
+        "Must: (1) specify 'linear' or 'straight line' (not just 'trend line'), ",
+        "(2) request a color distinct from the data points.\n\n",
+
+        "### Multivariable Scatterplot\n",
+        "Must: (1) name x-axis, y-axis, and a grouping variable (color or shape), ",
+        "(2) request a separate linear trend line per group in the same color as its points, ",
+        "(3) specify axes 0–100 with tick marks every 10, font size 14, and legend at the bottom.\n\n",
+
+        "### Interaction Plot\n",
+        "Must: (1) ask for an interaction plot or line graph of group means, ",
+        "(2) specify x-axis variable, y-axis as the mean of the outcome variable, ",
+        "(3) request separate lines with markers for each group.\n\n",
+
+        "### Grouped Means Table\n",
+        "Must: (1) name the outcome variable, (2) ask for the mean for each combination of groups, ",
+        "(3) request rounding to two decimal places and a clear table layout.\n\n",
+
+        "### Two-Way Table\n",
+        "Must: (1) name both variables, (2) ask for a two-way table, contingency table, or cross-tabulation, ",
+        "(3) specify which variable is rows and which is columns, ",
+        "(4) request row and column totals (marginals).\n\n",
+
+        "### Column or Row Percentages\n",
+        "Must: (1) explicitly say 'column percentages' or 'row percentages' (NOT just 'percentages'), ",
+        "(2) request rounding to one or two decimal places, (3) ask for clear percentage labeling.\n\n",
+
+        "### Column Percent Bar Graph\n",
+        "Must: (1) ask for a stacked or side-by-side bar graph using column percentages ",
+        "so that each bar totals 100%.\n\n",
+
+        "## General prompts (not matching any assignment type above)\n",
+        "Mark 'ok' if a competent data analyst could execute it without asking a follow-up question. ",
+        "These always pass: conceptual questions ('What is Moran\\'s I?'), ",
+        "demo requests ('Provide a demo for ridge regression'), ",
+        "method questions ('What test should I use for two categorical variables?'), ",
+        "and any prompt that names specific columns and a clear action.\n\n",
+
+        "## Vague prompts — mark these 'vague':\n",
+        "- Any assignment-type prompt missing one or more required elements listed above.\n",
+        "- 'Plot these two columns.' (no column names, no chart type)\n",
+        "- 'Make a scatterplot of height and weight.' (missing axis limits and tick marks)\n",
+        "- 'Make a bar graph.' (no variable named)\n",
+        "- 'Show me percentages.' (does not say column or row)\n",
         "- 'Analyze the data.' (no specific goal)\n",
-        "- 'Do something interesting with this dataset.' (no specific goal)\n",
-        "- 'Compare the groups.' (does not say which columns or which groups)\n",
-        "- 'Show me a plot.' (no columns, no chart type)\n\n",
+        "- 'Compare the groups.' (no columns, no chart type)\n\n",
 
-        "## Key principle:\n",
-        "A prompt is 'ok' if a competent data analyst could execute it without asking a follow-up question. ",
-        "Demonstrations, method names, conceptual questions, and prompts that name specific columns ",
-        "and actions all pass. ONLY FLAG 'vague' if there is genuine ambiguity that would force guessing.\n\n",
-
-        "Mark as 'off_topic' only if the prompt has nothing to do with data, statistics, or programming.\n\n",
+        "Mark 'off_topic' only if the prompt has nothing to do with data, statistics, or programming.\n\n",
 
         "Reply ONLY with valid JSON, no markdown, no explanation:\n",
         "{\"verdict\": \"ok\"}\n",

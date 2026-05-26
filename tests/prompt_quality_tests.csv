@@ -1,0 +1,67 @@
+id,plot_type,dataset,prompt,expected_verdict,actual_verdict,match,notes
+1,Frequency Table,grade_interaction,Create a frequency table of the Format variable showing the count of students in each category along with the proportion of students in each group.,ok,ok,TRUE,All 3 requirements met: variable named + frequency table + proportions
+2,Frequency Table,grade_interaction,Create a frequency table of the Major variable showing the count of students in each category along with the percentage of students in each group.,ok,ok,TRUE,All 3 requirements met: variable named + frequency table + percentages
+3,Frequency Table,grade_interaction,Create a frequency table of the Format variable.,vague,vague,TRUE,Missing proportions/percentages alongside counts
+4,Frequency Table,grade_interaction,Show me a frequency table of the data.,vague,ok,FALSE,No variable named + no proportions requested
+5,Frequency Table,grade_interaction,How many students are in each Format group? Show counts and percentages.,ok,ok,TRUE,Satisfies all 3 criteria even without exact phrase 'frequency table'
+6,Frequency Table,grade_interaction,Summarize the dataset.,vague,vague,TRUE,No variable named + no specific table type + no proportions
+7,Bar Graph,grade_interaction,Create a bar graph of the Major variable.,ok,ok,TRUE,Variable named + exact phrase 'bar graph'
+8,Bar Graph,grade_interaction,Create a bar graph of the Format variable showing how many students are in each format.,ok,ok,TRUE,Variable named + exact phrase 'bar graph'
+9,Bar Graph,grade_interaction,Create a histogram of the Format variable.,vague,vague,TRUE,Uses 'histogram' not 'bar graph'; histogram is wrong chart type for categorical data
+10,Bar Graph,grade_interaction,Make a bar chart of Major.,vague,ok,FALSE,Says 'bar chart' not 'bar graph' — borderline; test how strict the LLM is
+11,Bar Graph,grade_interaction,Plot the Format variable.,vague,vague,TRUE,No chart type + no dataset reference
+12,Bar Graph,grade_interaction,Create a density plot of the Major variable.,vague,ok,FALSE,Uses 'density plot' not 'bar graph'
+13,Scatterplot,exam_grades,"Make a scatterplot of the data. Put the Practice Exam Grade variable on the x-axis and the Actual Exam Grade variable on the y-axis. Make the x-axis limits 0 to 100 and the y-axis limits 0 to 100. Set x-axis breaks at 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 and y-axis breaks at 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100.",ok,ok,TRUE,All 3 requirements: 2 named variables + 'scatterplot' + axis limits and tick marks
+14,Scatterplot,exam_grades,Make a scatterplot of the data. Put the Practice Exam Grade on the x-axis and the Actual Exam Grade on the y-axis. Make the x-axis limits 0 to 100 and y-axis limits 0 to 100. Set x-axis and y-axis breaks every 10 points.,ok,ok,TRUE,All 3 requirements met
+15,Scatterplot,exam_grades,Make a scatterplot of Practice Exam Grade vs. Actual Exam Grade.,vague,vague,TRUE,Missing axis limits and tick mark specifications
+16,Scatterplot,exam_grades,Make a scatterplot of the data with Practice Exam Grade on x and Actual Exam Grade on y. Set both axes from 0 to 100.,vague,ok,FALSE,Has axis limits but missing tick mark/break specifications
+17,Scatterplot,exam_grades,Create a line graph of Practice Exam Grade vs. Actual Exam Grade.,vague,vague,TRUE,Wrong chart type ('line graph') + missing axis specs
+18,Scatterplot,exam_grades,Plot the data.,vague,vague,TRUE,No variables + no chart type + no axis specs
+19,Trend Line,exam_grades (after scatterplot),Add a linear trend line to the scatterplot. Make the trend line red so it stands out from the blue data points.,ok,vague,FALSE,Specifies 'linear' + distinct color from points — submit after row 13 or 14
+20,Trend Line,exam_grades (after scatterplot),"Add a straight line of best fit to the scatterplot in green, which is different from the color of the points.",ok,ok,TRUE,Specifies 'straight line' + distinct color — submit after row 13 or 14
+21,Trend Line,exam_grades (after scatterplot),Add a trend line to the scatterplot.,vague,vague,TRUE,Does not say 'linear' or 'straight line' + no distinct color requested
+22,Trend Line,exam_grades (after scatterplot),Add a linear trend line to the scatterplot.,vague,vague,TRUE,Specifies 'linear' but no distinct color from points requested
+23,Trend Line,exam_grades (after scatterplot),Add a curved trend line to the scatterplot in a different color from the points.,vague,ok,FALSE,Does not say 'linear' or 'straight line' (says 'curved')
+24,Multivariable Scatterplot,exam_grades,Make a scatterplot with Practice Exam Grade on the x-axis and Actual Exam Grade on the y-axis. Color the points by Year In School. Add a separate linear trend line for each Year In School group in the same color as its points. Set both axes from 0 to 100 with tick marks every 10. Use font size 14 and place the legend at the bottom.,ok,ok,TRUE,All requirements met: x/y/grouping var + per-group trend lines in matching color + axes + font + legend
+25,Multivariable Scatterplot,exam_grades,"Make a scatterplot of Practice Exam Grade (x) vs. Actual Exam Grade (y), color points by Year In School, with a separate linear trend line per group in matching colors, axes 0 to 100 with tick marks every 10, font size 14, legend at bottom.",ok,ok,TRUE,All requirements met
+26,Multivariable Scatterplot,exam_grades,"Make a scatterplot of Practice Exam Grade vs. Actual Exam Grade, color points by Year In School, with a linear trend line for each group. Axes 0 to 100 with tick marks every 10.",vague,ok,FALSE,Missing font size 14 and legend at bottom
+27,Multivariable Scatterplot,exam_grades,Make a scatterplot of Practice Exam Grade vs. Actual Exam Grade colored by Year In School with a trend line.,vague,vague,TRUE,Missing per-group trend lines in matching color + axis specs + font + legend
+28,Interaction Plot,grade_interaction,"Create an interaction plot with Format on the x-axis, mean Grade on the y-axis, and separate lines with markers for STEM and Non-STEM majors.",ok,ok,TRUE,All requirements: 'interaction plot' + x-axis var + y-axis as mean of outcome + separate lines with markers per group
+29,Interaction Plot,grade_interaction,"Create a line graph of mean Grade by Format, with separate lines and markers for each Major group.",ok,ok,TRUE,Acceptable rephrasing per guidelines + all elements present
+30,Interaction Plot,grade_interaction,Create an interaction plot of Grade by Format.,vague,vague,TRUE,Missing y-axis as mean + no separate lines per group specified
+31,Interaction Plot,grade_interaction,Make a line graph of Grade by Format.,vague,vague,TRUE,No 'mean' + no separate lines per group + no markers
+32,Interaction Plot,grade_interaction,Show how Grade changes by Format.,vague,vague,TRUE,No chart type + no mean + no group lines
+33,Grouped Means Table,grade_interaction,Calculate the mean Grade for each combination of Format and Major. Round to two decimal places and display in a clear table.,ok,ok,TRUE,All requirements: outcome variable + mean per combination + rounding + clear table
+34,Grouped Means Table,grade_interaction,"Show the mean Grade for each Format and Major combination, rounded to 2 decimal places.",ok,ok,TRUE,All requirements met
+35,Grouped Means Table,grade_interaction,Show the average Grade for each Format group.,vague,ok,FALSE,Missing 'each combination' (only one grouping) + no rounding specified
+36,Grouped Means Table,grade_interaction,Summarize the Grade variable by group.,vague,vague,TRUE,No outcome variable named explicitly + no rounding + no table layout requested
+37,Two-Way Table,grade_interaction,Create a two-way table with Format as the rows and Major as the columns. Include row and column totals.,ok,ok,TRUE,All requirements: 2 variables + two-way table + rows/cols specified + marginals
+38,Two-Way Table,grade_interaction,Create a contingency table of Format (rows) by Major (columns). Show row and column totals.,ok,ok,TRUE,Uses 'contingency table' synonym + all requirements met
+39,Two-Way Table,grade_interaction,Create a two-way table of Format and Major.,vague,vague,TRUE,Missing row/column assignment + missing marginals
+40,Two-Way Table,grade_interaction,Cross-tabulate Format and Major.,vague,vague,TRUE,No row/column assignment + no marginals
+41,Two-Way Table,grade_interaction,Show a table of Format and Major.,vague,vague,TRUE,No table type specified + no marginals
+42,Column Percentages,grade_interaction,"Using the two-way table of Format and Major, convert to column percentages rounded to two decimal places. Label each cell as a percentage.",ok,ok,TRUE,All requirements: 'column percentages' explicitly + rounding + clear labeling
+43,Column Percentages,grade_interaction,"Show the row percentages for the Format by Major table, rounded to one decimal place, with each cell labeled as a percentage.",ok,ok,TRUE,All requirements met using 'row percentages'
+44,Column Percentages,grade_interaction,"Show percentages for the Format by Major table, rounded to two decimal places.",vague,ok,FALSE,Says 'percentages' but not 'column' or 'row' — fails the explicit direction requirement
+45,Column Percentages,grade_interaction,Convert the two-way table to column percentages.,vague,ok,FALSE,No rounding + no clear labeling requested
+46,Column Percentages,grade_interaction,Show me what percent of each Format group is STEM vs. Non-STEM.,vague,vague,TRUE,Does not explicitly say 'column percentages' + no rounding + no labeling
+47,Column Percent Bar Graph,grade_interaction,Create a stacked bar graph using column percentages of the Format by Major table so that each Format bar totals 100%.,ok,ok,TRUE,All requirements: stacked bar graph + column percentages + each bar totals 100%
+48,Column Percent Bar Graph,grade_interaction,"Make a side-by-side bar graph showing column percentages for Format and Major, so each Format bar totals 100%.",ok,ok,TRUE,Uses side-by-side variant + all requirements met
+49,Column Percent Bar Graph,grade_interaction,Create a stacked bar graph of Format by Major.,vague,vague,TRUE,No column percentages + no 100% total requirement
+50,Column Percent Bar Graph,grade_interaction,Make a bar graph showing the percentage breakdown of Major within each Format.,vague,vague,TRUE,Does not say 'column percentages' + does not say each bar totals 100%
+51,General - Conceptual,none,What is a p-value and how do I interpret it?,ok,ok,TRUE,Conceptual stats question — always ok
+52,General - Conceptual,none,What is the difference between a t-test and an ANOVA?,ok,vague,FALSE,Conceptual stats question
+53,General - Conceptual,none,What statistics test should I use to examine the relationship between two categorical variables?,ok,ok,TRUE,Method question — always ok
+54,General - Conceptual,none,How do you perform regression when predictor variables are highly correlated?,ok,vague,FALSE,Method question — always ok
+55,General - Demo,none,Provide a demo for ridge regression.,ok,ok,TRUE,Demo request — always ok
+56,General - Demo,none,Show me a demo of hierarchical clustering.,ok,ok,TRUE,Demo request — always ok
+57,General - Named columns,exam_grades,Calculate the correlation between Practice Exam Grade and Actual Exam Grade.,ok,ok,TRUE,Named columns + clear action — no chart type needed for this
+58,General - Vague,grade_interaction,Analyze the data.,vague,vague,TRUE,No specific goal
+59,General - Vague,grade_interaction,Do something interesting with this dataset.,vague,off_topic,FALSE,No specific goal
+60,General - Vague,grade_interaction,Compare the groups.,vague,off_topic,FALSE,No columns named + no method specified
+61,Off-topic,none,What is a good recipe for banana bread?,off_topic,off_topic,TRUE,Nothing to do with data or statistics
+62,Off-topic,none,Write me a poem about statistics.,off_topic,off_topic,TRUE,Not a data analysis task (creative writing)
+63,Off-topic,none,Who won the 2024 US presidential election?,off_topic,off_topic,TRUE,Nothing to do with data analysis or programming
+64,Off-topic - Borderline,none,What is the weather like in Atlanta?,off_topic,off_topic,TRUE,Not related to data analysis or programming
+65,Off-topic - Borderline,none,Can you help me write an email to my professor?,off_topic,off_topic,TRUE,Not related to data analysis or programming
+66,Off-topic - Borderline,none,Explain what p-hacking is.,ok,ok,TRUE,Statistics/research methods concept — should NOT be off_topic
