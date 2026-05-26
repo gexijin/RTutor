@@ -40,7 +40,7 @@ mod_09_report_ui <- function(id) {
         width = 4,
         div(
           uiOutput(ns("html_report")),
-          style = "padding-left: 20px;"
+          style = "margin-top: 15px;padding-left: 20px;"
         )
       ),
       column(
@@ -48,7 +48,8 @@ mod_09_report_ui <- function(id) {
         downloadButton(
           outputId = ns("Rmd_source"),
           label = strong("RMarkdown"),
-          class = "custom-download-button"
+          class = "custom-download-button",
+          style = "margin-top: 15px;"
         ),
         tippy::tippy_this(
           ns("Rmd_source"),
@@ -124,7 +125,7 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name
         [chat completion](https://platform.openai.com/docs/api-reference/chat/create) package to
         [OpenAI's](https://openai.com/) \"",
         names(language_models)[language_models == selected_model()], "\" model.",
-        "\n\nRTutor Website: [https://RTutor.ai](https://RTutor.ai)\n",
+        "\n\nRTutor Website: [https://rtutor.ai](https://rtutor.ai)\n",
         "Source code: [GitHub.](https://github.com/gexijin/RTutor)\n\n"
       )
 
@@ -320,7 +321,7 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name
           # Header
           # ensure spacing & indentation is in YAML format
           "---\n",
-          "title: \"RTutor.ai report\"\n",
+          "title: \"RTutor.ai Report\"\n",
           "author: \"RTutor v.", release, ", Powered by ChatGPT\"\n",
           "date: \"", date(), "\"\n",
           "output: html_document\n",
@@ -406,7 +407,7 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name
             # Header
             # ensure spacing & indentation is in YAML format
             "---\n",
-            "title: \"RTutor.ai report\"\n",
+            "title: \"RTutor.ai Report\"\n",
             "author: \"RTutor v.", release, ", Powered by ChatGPT\"\n",
             "date: \"", date(), "\"\n",
             "output: html_document\n",

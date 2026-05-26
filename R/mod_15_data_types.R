@@ -74,7 +74,7 @@ mod_15_data_types_serv <- function(id, modal_closed, run_env, run_env_start,
                 label = HTML('
                   <span style="font-weight:bold;font-size:16px;">What are Data Types?</span>
                 '),
-                style = "margin-right:10px;background-color:#afd0ac;"
+                style = "margin-right:10px;background-color:#96BFFF;"
               )
             )
           ),
