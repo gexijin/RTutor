@@ -120,7 +120,18 @@ available_datasets <- c(
 data_placeholder <- "Demo:"
 
 # use uiuc available dataset list instead
-uiuc_datasets <- c("mpg")
+uiuc_datasets <- tools::file_path_sans_ext(                                                                                                                                  
+    list.files(app_sys("app", "www", "demo_data"), pattern = "\\.csv$")                                                                                                        
+)
+
+uiuc_priority <- c(                                                                                                                                   
+    "acupuncture", "diet_interaction", "exam_grades", "fertilizer",
+    "grade_interaction", "movie_release", "mutual_funds", "salary_main"                                                                                 
+)                                                                                                                                                     
+uiuc_datasets <- c(
+  intersect(uiuc_priority, uiuc_datasets),                                                                                                            
+  setdiff(uiuc_datasets, uiuc_priority)                   
+)
 
 # Append dummy values for user-uploaded data & no data
 available_datasets <- c(data_placeholder, no_data, uiuc_datasets, # was available_datasets
@@ -129,17 +140,23 @@ available_datasets <- c(data_placeholder, no_data, uiuc_datasets, # was availabl
 
 # Define the datasets to rename & their desired display names
 rename_map <- c(
-  "no_data" = "No Data",
-  "iris" = "Iris",
-  "mpg" = "MPG",
-  "diamonds" = "Diamonds",
-  "airquality" = "Air Quality",
-  "CO2" = "CO2",
-  "ToothGrowth" = "Tooth Growth",
-  "pressure" = "Pressure",
-  "ChickWeight" = "Chick Weights",
-  "rna_seq" = "RNA Seq",
-  "Upload" = "Upload"
+  "no_data"           = "No Data",
+  "acupuncture"       = "Acupuncture",
+  "cellphone"         = "Cell Phone Use",
+  "college_gpa"       = "College GPA",
+  "diet_interaction"  = "Diet Interaction",
+  "exam_grades"       = "Exam Grades",
+  "fertilizer"        = "Fertilizer",
+  "grade_interaction" = "Grade Interaction",
+  "movie_release"     = "Movie Release",
+  "mutual_funds"      = "Mutual Funds",
+  "reaction_time"     = "Reaction Time",
+  "salary"            = "Salary",
+  "salary_comparison" = "Salary Comparison",
+  "salary_interaction"= "Salary Interaction",
+  "salary_main"       = "Salary (Main)",
+  "work_experience"   = "Work Experience",
+  "Upload"            = "Upload"
 )
 
 # Update the names of `available_datasets` using the mapping

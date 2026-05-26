@@ -105,8 +105,15 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
 
       # Filter examples based on selected dataset
       choices <- switch(selected_dataset_name(),
-        "no_data" = demo$requests[demo$data == "No Data"],
-        "mpg" = demo$requests[demo$data == "MPG (examples)"],
+        "no_data"          = demo$requests[demo$data == "No Data"],
+        "fertilizer"       = demo$requests[demo$data == "Fertilizer (examples)"],
+        "salary_main"      = demo$requests[demo$data == "Salary Main (examples)"],
+        "diet_interaction" = demo$requests[demo$data == "Diet Interaction (examples)"],
+        "grade_interaction"= demo$requests[demo$data == "Grade Interaction (examples)"],
+        "exam_grades"      = demo$requests[demo$data == "Exam Grades (examples)"],
+        "movie_release"    = demo$requests[demo$data == "Movie Release (examples)"],
+        "mutual_funds"     = demo$requests[demo$data == "Mutual Funds (examples)"],
+        "acupuncture"      = demo$requests[demo$data == "Acupuncture (examples)"],
         demo$requests[demo$data == "Select a Dataset:"]
       )
 
