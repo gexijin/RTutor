@@ -102,6 +102,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
     # Display demo prompts (example requests)
     output$prompt_ui <- renderUI({
       req(is.null(user_file()))
+      req(selected_dataset_name() == "no_data")
 
       # Filter examples based on selected dataset
       choices <- switch(selected_dataset_name(),
