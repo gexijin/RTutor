@@ -17,11 +17,12 @@ user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_d
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
-language_models <- c("o4-mini") #, "gpt-5.1-chat", "gpt-5-mini")
-names(language_models) <- c("O4 Mini") #, "GPT 5.1", "GPT-5 mini")
-default_model <- "O4 Mini"  # "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
+language_models <- c("gpt-5.4-mini") #, "o4-mini", "gpt-5.1-chat", "gpt-5-mini")
+names(language_models) <- c("GPT 5.4 Mini") #, "O4 Mini", "GPT 5.1", "GPT-5 mini")
+default_model <- "GPT 5.4 Mini"  # "O4 Mini" "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 api_versions <- list(  # API version list corresponding to selected model, may need adjusting
-  "o4-mini" = "2025-01-01"
+  "gpt-5.4-mini" = "2026-03-17"
+  #"o4-mini" = "2025-01-01"
   #, "gpt-5.1-chat" = "2025-04-01",
   #"gpt-5-mini" = "2025-04-01"
 )
