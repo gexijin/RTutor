@@ -1439,7 +1439,7 @@ create_chat_completion_azure <- function(
   #---------------------------------------------------------------------------
   # Build path parameters/API URL
 
-  api_call <- glue::glue("{endpoint}openai/deployments/{model}/chat/completions?api-version={api_version}-preview")
+  api_call <- glue::glue("{endpoint}openai/responses?api-version={api_version}-preview")
 
   headers <- httr::add_headers(
     `Content-Type` = "application/json",
