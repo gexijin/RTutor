@@ -21,7 +21,7 @@ language_models <- c("gpt-5.4-mini") #, "o4-mini", "gpt-5.1-chat", "gpt-5-mini")
 names(language_models) <- c("GPT 5.4 Mini") #, "O4 Mini", "GPT 5.1", "GPT-5 mini")
 default_model <- "GPT 5.4 Mini"  # "O4 Mini"  "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 api_versions <- list(  # API version list corresponding to selected model, may need adjusting
-  "gpt-5.4-mini" = "2026-04-01"
+  "gpt-5.4-mini" = "2025-04-01"
   #, "o4-mini" = "2025-01-01"
   #, "gpt-5.1-chat" = "2025-04-01",
   #"gpt-5-mini" = "2025-04-01"
