@@ -375,35 +375,16 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       # OpenAI ChatGPT API function
       openAI_agent <- function(messages) {
-        #print("OpenAI")
-
-        # Check if the selected model is "gpt-5.4-mini"
-        model_name <- selected_model()
-
         response <- tryCatch(
-          {
-            if (model_name == "gpt-5.4-mini") {
-              # Call API without temperature
-              res <- openai::create_chat_completion(
-                model = model_name,
-                openai_api_key = api_key$key,
-                messages = messages
-              )
-            } else {
-              # Call API with temperature
-              res <- openai::create_chat_completion(
-                model = model_name,
-                openai_api_key = api_key$key,
-                temperature = sample_temp(),
-                messages = messages
-              )
-            }
-            # print(res)  # Uncomment for debugging
-            res  # Return response
-          },
+          create_chat_completion_openai(
+            model          = selected_model(),
+            messages       = messages,
+            temperature    = sample_temp(),
+            openai_api_key = api_key$key
+          ),
           error = function(e) {
-            print(e)  # Print error details
-            stop(e$message, call. = FALSE)  # re-throw so outer tryCatch sees the real HTTP error
+            print(e)
+            stop(e$message, call. = FALSE)
           }
         )
         return(response)

@@ -17,12 +17,12 @@ user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_d
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
-language_models <- c("gpt-5.4-mini") #, "o4-mini", "gpt-5.1-chat", "gpt-5-mini")
-names(language_models) <- c("GPT 5.4 Mini") #, "O4 Mini", "GPT 5.1", "GPT-5 mini")
-default_model <- "GPT 5.4 Mini"  # "O4 Mini"  "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
+language_models <- c("o4-mini") # "gpt-5.4-mini", "gpt-5.1-chat", "gpt-5-mini"
+names(language_models) <- c("O4 Mini") # "GPT 5.4 Mini", "GPT 5.1", "GPT-5 mini"
+default_model <- "O4 Mini"  # "GPT 5.4 Mini"  "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
 api_versions <- list(  # API version list corresponding to selected model, may need adjusting
-  "gpt-5.4-mini" = "2026-03-17"
-  #, "o4-mini" = "2025-01-01"
+  "o4-mini" = "2025-01-01"
+  #"gpt-5.4-mini" = "2026-03-17"
   #, "gpt-5.1-chat" = "2025-04-01",
   #"gpt-5-mini" = "2025-04-01"
 )
@@ -674,7 +674,7 @@ diff_is_significant <- function(original_code, edited_code, n_chars = 40) {
 # model_override defaults to "gpt-4o-mini" for OpenAI. For Azure, api_versions does not
 # include "gpt-4o-mini", so the fallback uses api_versions[[1]] (currently "o4-mini" / 2025-01-01).
 # If the Azure deployment does not have gpt-4o-mini, the call will error and return NULL.
-call_llm_check <- function(prompt, api_key, model_override = "gpt-4o-mini") {
+call_llm_check <- function(prompt, api_key, model_override = names(api_versions)[1]) {
   # System message enforces a strict YES/NO reply — no explanations.
   messages <- list(
     list(
@@ -684,14 +684,16 @@ call_llm_check <- function(prompt, api_key, model_override = "gpt-4o-mini") {
     list(role = "user", content = prompt)
   )
 
+  message("[fct1] api_key$key present: ", !is.null(api_key$key) && nchar(api_key$key) > 0)
+  message("[fct1] api_key$switch_on: ", isTRUE(api_key$switch_on))
   if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
     # OpenAI path
     response <- tryCatch(
-      openai::create_chat_completion(
+      create_chat_completion_openai(
         model          = model_override,
-        openai_api_key = api_key$key,
+        messages       = messages,
         temperature    = 0,
-        messages       = messages
+        openai_api_key = api_key$key
       ),
       error = function(e) {
         message("[SECURITY] call_llm_check OpenAI error: ", e$message)
@@ -862,13 +864,14 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
 
   fail_open <- list(verdict = "ok", feedback = "", usage = NULL)
 
+  default_model <- names(api_versions)[1]
   if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
     response <- tryCatch(
-      openai::create_chat_completion(
-        model          = "gpt-4o-mini",
-        openai_api_key = api_key$key,
+      create_chat_completion_openai(
+        model          = default_model,
+        messages       = messages,
         temperature    = 0,
-        messages       = messages
+        openai_api_key = api_key$key
       ),
       error = function(e) {
         message("[QUALITY] OpenAI error: ", e$message)
@@ -876,15 +879,10 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
       }
     )
   } else {
-    az_version <- if (!is.null(api_versions[["gpt-4o-mini"]])) {
-      api_versions[["gpt-4o-mini"]]
-    } else {
-      api_versions[[1]]
-    }
     response <- tryCatch(
       create_chat_completion_azure(
-        model       = "gpt-4o-mini",
-        api_version = az_version,
+        model       = default_model,
+        api_version = api_versions[[1]],
         temperature = 0,
         messages    = messages
       ),
@@ -963,13 +961,14 @@ explain_error <- function(error_message, code, prompt, api_key,
 
   fail_open <- list(explanation = NULL, suggestions = character(0), usage = NULL)
 
+  default_model <- names(api_versions)[1]
   if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
     response <- tryCatch(
-      openai::create_chat_completion(
-        model          = "gpt-4o-mini",
-        openai_api_key = api_key$key,
+      create_chat_completion_openai(
+        model          = default_model,
+        messages       = messages,
         temperature    = 0,
-        messages       = messages
+        openai_api_key = api_key$key
       ),
       error = function(e) {
         message("[EXPLAIN] explain_error OpenAI error: ", e$message)
@@ -977,15 +976,10 @@ explain_error <- function(error_message, code, prompt, api_key,
       }
     )
   } else {
-    az_version <- if (!is.null(api_versions[["gpt-4o-mini"]])) {
-      api_versions[["gpt-4o-mini"]]
-    } else {
-      api_versions[[1]]
-    }
     response <- tryCatch(
       create_chat_completion_azure(
-        model       = "gpt-4o-mini",
-        api_version = az_version,
+        model       = default_model,
+        api_version = api_versions[[1]],
         temperature = 0,
         messages    = messages
       ),
@@ -1342,6 +1336,47 @@ python_html <- function(python_code, select_data, current_data) {
 }
 
 
+### OpenAI API Calling ###
+
+create_chat_completion_openai <- function(
+  model,
+  messages,
+  temperature    = 0.2,
+  openai_api_key = Sys.getenv("OPENAI_API_KEY")
+) {
+  # ponytail: gpt-5.4-mini rejects the temperature param
+  body <- if (model %in% c("gpt-5.4-mini", "o4-mini")) {
+    list(model = model, messages = messages)
+  } else {
+    list(model = model, messages = messages, temperature = temperature)
+  }
+
+  response <- httr::POST(
+    "https://api.openai.com/v1/chat/completions",
+    httr::add_headers(
+      `Content-Type`  = "application/json",
+      `Authorization` = paste("Bearer", openai_api_key)
+    ),
+    body   = body,
+    encode = "json"
+  )
+
+  parsed <- response %>%
+    httr::content(as = "text", encoding = "UTF-8") %>%
+    jsonlite::fromJSON(flatten = TRUE)
+
+  if (httr::http_error(response)) {
+    stop(paste0(
+      "OpenAI API request failed [",
+      httr::status_code(response),
+      "]:\n\n",
+      parsed$error$message
+    ), call. = FALSE)
+  }
+  parsed
+}
+
+
 ### Azure API Calling ###
 
 #' Create Chat Completion Azure
@@ -1449,7 +1484,7 @@ create_chat_completion_azure <- function(
   #---------------------------------------------------------------------------
   # Build Request Body Based on Model
 
-  if (model == "gpt-5.4-mini") {
+  if (model %in% c("gpt-5.4-mini", "o4-mini")) {
     # Use max_completion_tokens instead of max_tokens & exclude temperature
     body <- list(
       model = model,
