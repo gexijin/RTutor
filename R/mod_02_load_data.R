@@ -22,8 +22,6 @@ mod_02_load_data_ui <- function(id) {
             multiple = FALSE
           )
         ),
-        # Azure env var debug display
-        uiOutput(ns("azure_debug")),
         # Display selected dataset
         conditionalPanel(
           condition = paste0("output['", ns("show_option1"), "'] === 'hide'"),
@@ -336,21 +334,6 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
         run_env(list2env(existing_vars))
         run_env_start(as.list(run_env()))
       })
-    })
-
-
-    # Azure env var debug display (last 4 chars only)
-    output$azure_debug <- renderUI({
-      key      <- Sys.getenv("AZURE_OPENAI_API_KEY")
-      endpoint <- Sys.getenv("AZURE_OPENAI_API_ENDPOINT")
-      mask_key      <- function(s) if (nchar(s) >= 4) paste0("...", substr(s, nchar(s) - 3, nchar(s))) else "(not set)"
-      mask_endpoint <- function(s) if (nchar(s) >= 20) paste0(substr(s, 1, 20), "...") else if (nchar(s) > 0) s else "(not set)"
-      HTML(paste0(
-        "<small style='color:gray;'>",
-        "Key: ", mask_key(key), "<br>",
-        "Endpoint: ", mask_endpoint(endpoint),
-        "</small>"
-      ))
     })
 
     # Display selected dataset
