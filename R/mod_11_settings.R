@@ -71,7 +71,7 @@ mod_11_settings_ui <- function(id) {
                   shinyWidgets::materialSwitch(
                     inputId = ns("show_api_settings"),
                     label = "",
-                    value = TRUE,
+                    value = FALSE,
                     status = "primary"
                   )
                 ),
@@ -292,7 +292,7 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
     api_key <- reactiveValues(
       key = "",
       source = "",
-      switch_on = TRUE # default to OpenAI key
+      switch_on = FALSE # default to Azure
     )
 
     # Update API Key
