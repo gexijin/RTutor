@@ -19,7 +19,7 @@ app_server <- function(input, output, session) {
 
   if(file.exists(on_server)){ #server
     options(shiny.maxRequestSize = 50 * 1024^2) # 50 MB
-    output$on_server <- renderText({"File Exists on Server"})
+    #output$on_server <- renderText({"File Exists on Server"})
   } else { # local
     options(shiny.maxRequestSize = 10000 * 1024^2) # 10 GB
   }

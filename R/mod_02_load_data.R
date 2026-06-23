@@ -336,6 +336,7 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
       })
     })
 
+
     # Display selected dataset
     output$selected_dataset <- renderUI({
       req(submit_button())
