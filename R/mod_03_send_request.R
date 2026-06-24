@@ -203,7 +203,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
 
       # Track cost of this mini call
       if (!is.null(result$usage)) {
-        mini_cost <- api_cost(result$usage$prompt_tokens, result$usage$completion_tokens, "gpt-4o-mini")
+        mini_cost <- api_cost(result$usage$prompt_tokens, result$usage$completion_tokens, language_models[[default_model]])
         counter$costs_total <- counter$costs_total + mini_cost
         message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Prompt quality check", mini_cost, counter$costs_total))
       }

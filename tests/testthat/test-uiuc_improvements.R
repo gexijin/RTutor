@@ -40,12 +40,6 @@ test_that("fct_helpers.R defines default_temperature as 0.2", {
   expect_match(src, "default_temperature\\s*<-\\s*0\\.2")
 })
 
-test_that("fct_helpers.R defines api_versions with an gpt-5.4-mini entry", {
-  src <- r_file("fct_helpers.R")
-  expect_match(src, '"gpt-5.4-mini"', fixed = TRUE)
-  expect_match(src, "api_versions\\s*<-")
-})
-
 test_that("fct_helpers.R defines language_models containing gpt-5.4-mini", {
   src <- r_file("fct_helpers.R")
   expect_match(src, 'language_models\\s*<-\\s*c\\("gpt-5.4-mini"\\)')

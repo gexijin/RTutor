@@ -17,15 +17,18 @@ user_upload <- "Upload" # data is uploaded by user, used to be called uploaded_d
 rna_seq <- "rna_seq"
 min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
-language_models <- c("o4-mini") # "gpt-5.4-mini", "gpt-5.1-chat", "gpt-5-mini"
-names(language_models) <- c("O4 Mini") # "GPT 5.4 Mini", "GPT 5.1", "GPT-5 mini"
-default_model <- "O4 Mini"  # "GPT 5.4 Mini"  "GPT-4 Turbo"   # "ChatGPT"   # "GPT-4 (03/23)"
-api_versions <- list(  # API version list corresponding to selected model, may need adjusting
-  "o4-mini" = "2025-01-01"
-  #"gpt-5.4-mini" = "2026-03-17"
-  #, "gpt-5.1-chat" = "2025-04-01",
-  #"gpt-5-mini" = "2025-04-01"
-)
+
+# Switch these 3 to the model you want to use
+language_models <- c("gpt-5.4-mini") # "o4-mini"
+names(language_models) <- c("GPT 5.4 Mini") # "O4 Mini"
+default_model <- "GPT 5.4 Mini"  # "O4 Mini"
+
+# Debug line, printed at startup
+message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=%s",
+  language_models[[default_model]],
+  if (nchar(Sys.getenv("AZURE_OPENAI_API_ENDPOINT")) > 0) "Azure" else "OpenAI"
+))
+
 max_content_length <- 3000 # max tokens:  Change according to model !!!!
 max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
 default_temperature <- 0.2
@@ -669,12 +672,7 @@ diff_is_significant <- function(original_code, edited_code, n_chars = 40) {
 }
 
 
-# Lightweight LLM security check. Sends prompt to OpenAI (gpt-4o-mini) or Azure.
-# Returns "YES" or "NO" (trimmed), or NULL on API failure (caller should fail closed).
-# model_override defaults to "gpt-4o-mini" for OpenAI. For Azure, api_versions does not
-# include "gpt-4o-mini", so the fallback uses api_versions[[1]] (currently "o4-mini" / 2025-01-01).
-# If the Azure deployment does not have gpt-4o-mini, the call will error and return NULL.
-call_llm_check <- function(prompt, api_key, model_override = names(api_versions)[1]) {
+call_llm_check <- function(prompt, api_key) {
   # System message enforces a strict YES/NO reply — no explanations.
   messages <- list(
     list(
@@ -684,42 +682,14 @@ call_llm_check <- function(prompt, api_key, model_override = names(api_versions)
     list(role = "user", content = prompt)
   )
 
-  message("[fct1] api_key$key present: ", !is.null(api_key$key) && nchar(api_key$key) > 0)
-  message("[fct1] api_key$switch_on: ", isTRUE(api_key$switch_on))
-  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-    # OpenAI path
-    response <- tryCatch(
-      create_chat_completion_openai(
-        model          = model_override,
-        messages       = messages,
-        temperature    = 0,
-        openai_api_key = api_key$key
-      ),
-      error = function(e) {
-        message("[SECURITY] call_llm_check OpenAI error: ", e$message)
-        NULL
-      }
-    )
-  } else {
-    # Azure path — look up api_version for this model; fall back to the first configured entry
-    az_version <- if (!is.null(api_versions[[model_override]])) {
-      api_versions[[model_override]]
-    } else {
-      api_versions[[1]]
+  p <- resolve_provider(api_key)
+  response <- tryCatch(
+    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    error = function(e) {
+      message("[SECURITY] Responses API error: ", e$message)
+      NULL
     }
-    response <- tryCatch(
-      create_chat_completion_azure(
-        model       = model_override,
-        api_version = az_version,
-        temperature = 0,
-        messages    = messages
-      ),
-      error = function(e) {
-        message("[SECURITY] call_llm_check Azure error: ", e$message)
-        NULL
-      }
-    )
-  }
+  )
 
   if (is.null(response)) return(NULL)
 
@@ -756,14 +726,6 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
     "Prompt: ", prompt, "\n",
     if (nchar(dataset_name) > 0) paste0("Dataset: ", dataset_name, "\n") else "",
     if (length(col_names) > 0) paste0("Columns: ", paste(head(col_names, 10), collapse = ", "), "\n") else ""
-  )
-
-  # Log what we are sending
-  message(
-    "[QUALITY] --- check_prompt_quality ---\n",
-    "  Prompt   : ", prompt, "\n",
-    "  Dataset  : ", if (nchar(dataset_name) > 0) dataset_name else "(none)", "\n",
-    "  Columns  : ", if (length(col_names) > 0) paste(head(col_names, 10), collapse = ", ") else "(none)"
   )
 
   messages <- list(
@@ -864,34 +826,14 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
 
   fail_open <- list(verdict = "ok", feedback = "", usage = NULL)
 
-  default_model <- names(api_versions)[1]
-  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-    response <- tryCatch(
-      create_chat_completion_openai(
-        model          = default_model,
-        messages       = messages,
-        temperature    = 0,
-        openai_api_key = api_key$key
-      ),
-      error = function(e) {
-        message("[QUALITY] OpenAI error: ", e$message)
-        NULL
-      }
-    )
-  } else {
-    response <- tryCatch(
-      create_chat_completion_azure(
-        model       = default_model,
-        api_version = api_versions[[1]],
-        temperature = 0,
-        messages    = messages
-      ),
-      error = function(e) {
-        message("[QUALITY] Azure error: ", e$message)
-        NULL
-      }
-    )
-  }
+  p <- resolve_provider(api_key)
+  response <- tryCatch(
+    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    error = function(e) {
+      message("[QUALITY] Responses API error: ", e$message)
+      NULL
+    }
+  )
 
   if (is.null(response)) {
     message("[QUALITY] Response: NULL (fail open)")
@@ -905,7 +847,7 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
 
   message("[QUALITY] Raw response: ", if (is.null(raw_text)) "NULL" else raw_text)
 
-  if (is.null(raw_text) || nchar(raw_text) == 0) return(fail_open)
+  if (is.null(raw_text) || is.na(raw_text) || nchar(raw_text) == 0) return(fail_open)
 
   parsed <- tryCatch(
     jsonlite::fromJSON(raw_text, simplifyVector = TRUE),
@@ -921,11 +863,6 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
     verdict = verdict,
     feedback = if (verdict == "vague") vague_feedback else "",
     usage   = response$usage
-  )
-
-  message(
-    "[QUALITY] Verdict: ", result$verdict, "\n",
-    "  feedback: ", if (nchar(result$feedback) > 0) result$feedback else "(none)"
   )
 
   result
@@ -961,34 +898,14 @@ explain_error <- function(error_message, code, prompt, api_key,
 
   fail_open <- list(explanation = NULL, suggestions = character(0), usage = NULL)
 
-  default_model <- names(api_versions)[1]
-  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-    response <- tryCatch(
-      create_chat_completion_openai(
-        model          = default_model,
-        messages       = messages,
-        temperature    = 0,
-        openai_api_key = api_key$key
-      ),
-      error = function(e) {
-        message("[EXPLAIN] explain_error OpenAI error: ", e$message)
-        NULL
-      }
-    )
-  } else {
-    response <- tryCatch(
-      create_chat_completion_azure(
-        model       = default_model,
-        api_version = api_versions[[1]],
-        temperature = 0,
-        messages    = messages
-      ),
-      error = function(e) {
-        message("[EXPLAIN] explain_error Azure error: ", e$message)
-        NULL
-      }
-    )
-  }
+  p <- resolve_provider(api_key)
+  response <- tryCatch(
+    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    error = function(e) {
+      message("[EXPLAIN] Responses API error: ", e$message)
+      NULL
+    }
+  )
 
   if (is.null(response)) return(fail_open)
 
@@ -996,7 +913,7 @@ explain_error <- function(error_message, code, prompt, api_key,
     trimws(response$choices[[1, "message.content"]]),
     error = function(e) NULL
   )
-  if (is.null(raw_text) || nchar(raw_text) == 0) return(fail_open)
+  if (is.null(raw_text) || is.na(raw_text) || nchar(raw_text) == 0) return(fail_open)
 
   parsed <- tryCatch(
     jsonlite::fromJSON(raw_text, simplifyVector = TRUE),
@@ -1336,213 +1253,66 @@ python_html <- function(python_code, select_data, current_data) {
 }
 
 
-### OpenAI API Calling ###
+### LLM API Functions ###
 
-create_chat_completion_openai <- function(
-  model,
-  messages,
-  temperature    = 0.2,
-  openai_api_key = Sys.getenv("OPENAI_API_KEY")
-) {
-  # ponytail: gpt-5.4-mini rejects the temperature param
-  body <- if (model %in% c("gpt-5.4-mini", "o4-mini")) {
-    list(model = model, messages = messages)
-  } else {
-    list(model = model, messages = messages, temperature = temperature)
-  }
-
-  response <- httr::POST(
-    "https://api.openai.com/v1/chat/completions",
-    httr::add_headers(
-      `Content-Type`  = "application/json",
-      `Authorization` = paste("Bearer", openai_api_key)
-    ),
-    body   = body,
-    encode = "json"
-  )
-
-  parsed <- response %>%
-    httr::content(as = "text", encoding = "UTF-8") %>%
-    jsonlite::fromJSON(flatten = TRUE)
-
-  if (httr::http_error(response)) {
-    stop(paste0(
-      "OpenAI API request failed [",
-      httr::status_code(response),
-      "]:\n\n",
-      parsed$error$message
-    ), call. = FALSE)
-  }
-  parsed
+resolve_provider <- function(api_key) {
+  # If = OpenAI provider
+  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && isTRUE(api_key$switch_on))
+    list(key = api_key$key, endpoint = NULL)
+  # else = Azure OpenAI provider
+  else
+    list(key      = Sys.getenv("AZURE_OPENAI_API_KEY"),
+         endpoint = Sys.getenv("AZURE_OPENAI_API_ENDPOINT"))
 }
 
 
-### Azure API Calling ###
-
-#' Create Chat Completion Azure
-#'
-#' Creates a completion for the chat message. See [this
-#' page](https://platform.openai.com/docs/api-reference/chat/create) for
-#' details.
-#'
-#' For arguments description please refer to the [official
-#' documentation](https://platform.openai.com/docs/api-reference/chat/create).
-#'
-#' @param model required; a length one character vector.
-#' @param messages required; defaults to `NULL`; a list in the following
-#'   format: `list(list("role" = "user", "content" = "Hey! How old are you?")`
-#' @param temperature required; defaults to `1`; a length one numeric vector
-#'   with the value between `0` and `2`.
-#' @param top_p required; defaults to `1`; a length one numeric vector with the
-#'   value between `0` and `1`.
-#' @param n required; defaults to `1`; a length one numeric vector with the
-#'   integer value greater than `0`.
-#' @param stream required; defaults to `FALSE`; a length one logical vector.
-#'   **Currently is not implemented.**
-#' @param stop optional; defaults to `NULL`; a character vector of length
-#'   between one and four.
-#' @param max_tokens required; defaults to `(4096 - prompt tokens)`; a length
-#'   one numeric vector with the integer value greater than `0`.
-#' @param presence_penalty required; defaults to `0`; a length one numeric
-#'   vector with a value between `-2` and `2`.
-#' @param frequency_penalty required; defaults to `0`; a length one numeric
-#'   vector with a value between `-2` and `2`.
-#' @param logit_bias optional; defaults to `NULL`; a named list.
-#' @param user optional; defaults to `NULL`; a length one character vector.
-#' @param openai_api_key required; defaults to `Sys.getenv("OPENAI_API_KEY")`
-#'   (i.e., the value is retrieved from the `.Renviron` file); a length one
-#'   character vector. Specifies OpenAI API key.
-#' @param openai_organization optional; defaults to `NULL`; a length one
-#'   character vector. Specifies OpenAI organization.
-#' @param seed optional; defaults to `NULL`; a length one
-#'   numeric vector with integer values. Attempts deterministic sampling.
-#' @return Returns a list, elements of which contain chat completion(s) and
-#'   supplementary information.
-#' @examples \dontrun{
-#' create_chat_completion_azure(
-#'    model = "gpt-4o-mini",
-#'    api_version = "2023-03-15",
-#'    messages = list(
-#'        list(
-#'            "role" = "system",
-#'            "content" = "You are a helpful assistant."
-#'        ),
-#'        list(
-#'            "role" = "user",
-#'            "content" = "Who won the world series in 2020?"
-#'        ),
-#'        list(
-#'            "role" = "assistant",
-#'            "content" = "The LA Dodgers won the World Series in 2020."
-#'        ),
-#'        list(
-#'            "role" = "user",
-#'            "content" = "Where was it played?"
-#'        )
-#'    )
-#' )
-#' }
-#' #export
-create_chat_completion_azure <- function(
-  model,
-  api_version,
-  messages = NULL,
-  temperature = 0.2,
-  top_p = 0.95,
-  n = 1,
-  stream = FALSE,
-  stop = NULL,
-  max_tokens = NULL,
-  presence_penalty = 0,
-  frequency_penalty = 0,
-  logit_bias = NULL,
-  user = NULL,
-  openai_api_key = Sys.getenv("AZURE_OPENAI_API_KEY"),
-  endpoint = Sys.getenv("AZURE_OPENAI_API_ENDPOINT"),
-  seed = NULL
-) {
-
-  #---------------------------------------------------------------------------
-  # Validate Arguments
-  if (is.null(openai_api_key) || openai_api_key == "") {
-    stop("Error: AZURE_OPENAI_API_KEY is missing. Set it in your environment variables.", call. = FALSE)
-  }
-  if (is.null(endpoint) || endpoint == "") {
-    stop("Error: AZURE_OPENAI_API_ENDPOINT is missing. Set it in your environment variables.", call. = FALSE)
-  }
-
-  #---------------------------------------------------------------------------
-  # Build path parameters/API URL
-
-  api_call <- glue::glue("{endpoint}openai/deployments/{model}/chat/completions?api-version={api_version}-preview")
-
-  headers <- httr::add_headers(
-    `Content-Type` = "application/json",
-    `api-key` = openai_api_key
-  )
-
-  #---------------------------------------------------------------------------
-  # Build Request Body Based on Model
-
-  if (model %in% c("gpt-5.4-mini", "o4-mini")) {
-    # Use max_completion_tokens instead of max_tokens & exclude temperature
-    body <- list(
-      model = model,
-      messages = messages,
-      n = n,
-      stream = stream,
-      stop = stop,
-      max_completion_tokens = max_tokens,
-      presence_penalty = presence_penalty,
-      frequency_penalty = frequency_penalty,
-      logit_bias = logit_bias,
-      user = user,
-      seed = seed
-    )
+create_response <- function(model, messages, key, endpoint = NULL) {
+  url <- if (is.null(endpoint)) {
+    "https://api.openai.com/v1/responses"
   } else {
-    # Default case: Include temperature & max_tokens
-    body <- list(
-      model = model,
-      messages = messages,
-      temperature = temperature,
-      top_p = top_p,
-      n = n,
-      stream = stream,
-      stop = stop,
-      max_tokens = max_tokens,
-      presence_penalty = presence_penalty,
-      frequency_penalty = frequency_penalty,
-      logit_bias = logit_bias,
-      user = user,
-      seed = seed
-    )
+    paste0(endpoint, "openai/v1/responses")
+  }
+  headers <- if (is.null(endpoint)) {
+    httr::add_headers(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))
+  } else {
+    httr::add_headers(`Content-Type` = "application/json", `api-key` = key)
   }
 
-  #---------------------------------------------------------------------------
-  # Make a request and parse it
-  response <- httr::POST(
-    api_call,
-    headers,
-    body = body,
-    encode = "json"
-  )
+  response <- httr::POST(url, headers, body = list(model = model, input = messages), encode = "json")
 
   parsed <- response %>%
     httr::content(as = "text", encoding = "UTF-8") %>%
-    jsonlite::fromJSON(flatten = TRUE)
+    jsonlite::fromJSON(flatten = FALSE)
 
-  #---------------------------------------------------------------------------
-  # Check whether request failed and return parsed
   if (httr::http_error(response)) {
     stop(paste0(
-      "OpenAI API request failed [",
-      httr::status_code(response),
-      "]:\n\n",
+      "Responses API request failed [", httr::status_code(response), "]:\n\n",
       parsed$error$message
     ), call. = FALSE)
   }
-  parsed
+
+  # Normalize to chat-completions shape so all downstream consumers are unchanged
+  # Reasoning models (o4-mini) prepend a reasoning item; find the message item by type
+  output_df  <- parsed$output
+  msg_idx    <- which(output_df$type == "message")
+  if (length(msg_idx) == 0) stop("No message item in Responses API output", call. = FALSE)
+  content_df <- output_df$content[[msg_idx[1]]]
+  text_idx   <- which(content_df$type == "output_text")
+  if (length(text_idx) == 0) stop("No output_text in Responses API message", call. = FALSE)
+  text <- content_df$text[text_idx[1]]
+  list(
+    model   = parsed$model,
+    choices = data.frame(message.content = text, stringsAsFactors = FALSE),
+    usage   = list(
+      prompt_tokens     = parsed$usage$input_tokens,
+      completion_tokens = parsed$usage$output_tokens
+    )
+  )
 }
+
+
+
+
 
 
 
