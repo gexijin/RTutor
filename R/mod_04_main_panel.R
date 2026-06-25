@@ -724,23 +724,24 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     output$result_plot <- renderPlot({
       req(!code_error())
       req(logs$code)
-      req(!is.null(run_result()$result) || !is.null(run_result()$console_output))
       # ggplot: return object so print.ggplot draws it.
       # Everything else (base R hist/plot, lattice, corrplot, etc.): re-evaluate
       # so the plot is drawn as a side-effect — returning an invisible result
       # (e.g. the histogram list from hist()) draws nothing.
       if (inherits(run_result()$result, "ggplot")) {
         return(run_result()$result)
-      } else {
-        # If the result is not a ggplot (e.g., corrplot), re-evaluate the command_string,
-        # under the parent environment of the run_env()
-        tmp_env <- list2env(run_env_start())
-        tryCatch({
-          eval_result <- eval(
-            parse(text = clean_cmd(logs$code, selected_dataset_name(), file.exists(on_server))),
-            envir = tmp_env
-          )
-        })
+      } else if (!inherits(run_result()$result, "htmlwidget")) {
+        # Re-evaluate so side-effect plots (hist, corrplot, etc.) draw into the
+        # Shiny device, and visible-return plots (lattice trellis) get auto-printed.
+        # Use run_env()'s parent so the search path (ggplot2 data, etc.) is reachable.
+        # htmlwidgets (plotly, etc.) are excluded — renderPlotly handles them, and
+        # calling print() on a widget opens a browser tab instead of drawing here.
+        tmp_env <- list2env(run_env_start(), parent = parent.env(run_env()))
+        parsed  <- parse(text = clean_cmd(logs$code, selected_dataset_name(), file.exists(on_server)))
+        for (expr in parsed) {
+          vis <- withVisible(eval(expr, envir = tmp_env))
+          if (vis$visible && !inherits(vis$value, "htmlwidget")) print(vis$value)
+        }
       }
     })
 
