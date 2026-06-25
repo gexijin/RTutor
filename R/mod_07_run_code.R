@@ -106,7 +106,7 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
             for (i in seq_along(parsed_exprs)) {
               vis        <- withVisible(eval(parsed_exprs[[i]], envir = run_env()))
               eval_result <- vis$value
-              if (vis$visible) print(vis$value)
+              if (vis$visible && !inherits(vis$value, "htmlwidget")) print(vis$value)
             }
           })
 
