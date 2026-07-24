@@ -13,7 +13,6 @@ Imports:
     golem,
     tippy,
     gridExtra,
-    openai,
     DT,
     shinybusy,
     shinyjs,

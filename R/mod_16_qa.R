@@ -37,7 +37,7 @@ mod_16_qa_ui <- function(id) {
 
 
 mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_error_modal, counter,
-  selected_model, api_key, sample_temp, selected_dataset_name) {
+  selected_model, api_key, selected_dataset_name) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -214,19 +214,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
       return(prompt_total)
     }
 
-    # Format prompt content based on API key status & toggle status
-    format_content <- function(text) {
-      if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-        # 1. Format for OpenAI
-        return(paste(text))
-      } else {
-        # 2. Format for Azure
-        return(list(list(
-          type = "text",
-          text = text
-        )))
-      }
-    }
+    format_content <- function(text) paste(text)
 
 
     ### Update Components ###
@@ -267,12 +255,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           content = formatted_request
         )))
 
-        # Send request to appropriate agent
-        response <- if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-          openAI_agent(prompt_total)
-        } else {
-          azure_openAI_agent(prompt_total)
-        }
+        response <- llm_agent(prompt_total)
 
         return(response)
       }
@@ -329,52 +312,9 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       ### LLM Functions ###
 
-      # OpenAI ChatGPT API function
-      openAI_agent <- function(messages) {
-        print("OpenAI")
-
-        # Check if the selected model is "o4-mini"
-        model_name <- selected_model()
-
-        response <- tryCatch(
-          {
-            if (model_name == "o4-mini") {
-              # Call API without temperature
-              res <- openai::create_chat_completion(
-                model = model_name,
-                openai_api_key = api_key$key,
-                messages = messages
-              )
-            } else {
-              # Call API with temperature
-              res <- openai::create_chat_completion(
-                model = model_name,
-                openai_api_key = api_key$key,
-                temperature = sample_temp(),
-                messages = messages
-              )
-            }
-            # print(res)  # Uncomment for debugging
-            res  # Return response
-          },
-          error = function(e) {
-            print(e)  # Print error details
-            return(NULL)
-          }
-        )
-        return(response)
-      }
-
-      # Azure OpenAI ChatGPT API function
-      azure_openAI_agent <- function(messages) {
-        print("Azure")
-
-        create_chat_completion_azure(
-          model = selected_model(),
-          api_version = api_versions[[selected_model()]],
-          temperature = sample_temp(),
-          messages = messages
-        )
+      llm_agent <- function(messages) {
+        p <- resolve_provider(api_key)
+        create_response(language_models[[default_model]], messages, p$key, p$endpoint)
       }
 
   })

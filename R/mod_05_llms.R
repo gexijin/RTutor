@@ -2,7 +2,7 @@
 
 
 mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_name,
-                             api_key, sample_temp, selected_model, logs, ch,
+                             api_key, selected_model, logs, ch,
                              counter, api_error_modal, code_error, current_data,
                              current_data_2, run_env, run_env_start, run_result,
                              use_python, send_head) {
@@ -160,19 +160,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
       return(prompt_total)
     }
 
-    # Format prompt content based on API key status & toggle status
-    format_content <- function(text) {
-      if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-        # 1. Format for OpenAI
-        return(paste(text))
-      } else {
-        # 2. Format for Azure
-        return(list(list(
-          type = "text",
-          text = text
-        )))
-      }
-    }
+    format_content <- function(text) paste(text)
 
     # Process response & return all response info
     process_response <- function(response, start_time) {
@@ -232,12 +220,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         list(role = "user", content = user_content)
       )
 
-      # Send relevancy prompt to appropriate agent
-      response <- if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-        openAI_agent(relevancy_prompt)
-      } else {
-        azure_openAI_agent(relevancy_prompt)
-      }
+      response <- llm_agent(relevancy_prompt)
 
       tf <- tolower(response$choices$message.content) == "true"
       return(tf)
@@ -286,14 +269,9 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         append(prompt_total, list(list(role = "user", content = prepared_content)))
       }
 
-      # Send request to appropriate agent
-      if (!is.null(api_key$key) && nchar(api_key$key) > 0 && api_key$switch_on) {
-        response <- openAI_agent(prompt_total)
-        agent_name("OpenAI")
-      } else {
-        response <- azure_openAI_agent(prompt_total)
-        agent_name("Azure")
-      }
+      p <- resolve_provider(api_key)
+      response <- llm_agent(prompt_total)
+      agent_name(if (is.null(p$endpoint)) "OpenAI" else "Azure")
 
       return(response)
     }
@@ -302,52 +280,9 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     ### LLM Functions ###
 
-    # OpenAI ChatGPT API function
-    openAI_agent <- function(messages) {
-      print("OpenAI")
-
-      # Check if the selected model is "o4-mini"
-      model_name <- selected_model()
-
-      response <- tryCatch(
-        {
-          if (model_name == "o4-mini") {
-            # Call API without temperature
-            res <- openai::create_chat_completion(
-              model = model_name,
-              openai_api_key = api_key$key,
-              messages = messages
-            )
-          } else {
-            # Call API with temperature
-            res <- openai::create_chat_completion(
-              model = model_name,
-              openai_api_key = api_key$key,
-              temperature = sample_temp(),
-              messages = messages
-            )
-          }
-          # print(res)  # Uncomment for debugging
-          res  # Return response
-        },
-        error = function(e) {
-          print(e)  # Print error details
-          return(NULL)
-        }
-      )
-      return(response)
-    }
-
-    # Azure OpenAI ChatGPT API function
-    azure_openAI_agent <- function(messages) {
-      print("Azure")
-
-      create_chat_completion_azure(
-        model = selected_model(),
-        api_version = api_versions[[selected_model()]],
-        temperature = sample_temp(),
-        messages = messages
-      )
+    llm_agent <- function(messages) {
+      p <- resolve_provider(api_key)
+      create_response(language_models[[default_model]], messages, p$key, p$endpoint)
     }
 
 
