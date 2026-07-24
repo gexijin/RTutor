@@ -53,7 +53,7 @@ mod_16_qa_ui <- function(id) {
 
 
 mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_error_modal, counter,
-  selected_model, api_key, sample_temp, selected_dataset_name, qa_by_chunk, chunk_selection) {
+  selected_model, api_key, selected_dataset_name, qa_by_chunk, chunk_selection) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

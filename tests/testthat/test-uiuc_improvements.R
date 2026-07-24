@@ -35,14 +35,14 @@ r_file <- function(filename) {
 # 1. Global constants — fct_helpers.R
 # =============================================================================
 
-test_that("fct_helpers.R defines default_temperature as 0.2", {
+test_that("fct_helpers.R no longer defines default_temperature", {
   src <- r_file("fct_helpers.R")
-  expect_match(src, "default_temperature\\s*<-\\s*0\\.2")
+  expect_no_match(src, "default_temperature")
 })
 
-test_that("fct_helpers.R defines language_models containing gpt-5.4-mini", {
+test_that("fct_helpers.R defines language_models containing gpt-5.6-luna", {
   src <- r_file("fct_helpers.R")
-  expect_match(src, 'language_models\\s*<-\\s*c\\("gpt-5.4-mini"\\)')
+  expect_match(src, 'language_models\\s*<-\\s*c\\("gpt-5.6-luna"\\)')
 })
 
 

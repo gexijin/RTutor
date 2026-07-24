@@ -33,7 +33,7 @@ mod_11_settings_ui <- function(id) {
             hr(class = "custom-hr-thick")
           ),
 
-          # AI Model and Temperature Settings
+          # AI Model Settings
           column(
             width = 4,
             fluidRow(
@@ -43,18 +43,7 @@ mod_11_settings_ui <- function(id) {
                 div(
                   uiOutput(ns("language_model")),
                   style = common_styles$div_style
-                ),
-                br(),
-                div(
-                  uiOutput(ns("change_temperature")),
-                  style = paste(common_styles$div_style, "padding-top: 10px;")
-                ),
-                h4("This controls the AI's behavior in choosing among possible answers.
-                  A higher sampling temperature makes the AI take more risks, giving different,
-                  more creative answers each time. A lower temperature (like 0) makes the AI
-                  more cautious, giving more conservative and well-defined solutions, but
-                  less variety when repeated.",
-                   style = common_styles$h3_style)
+                )
               )
             )
           ),
@@ -242,7 +231,7 @@ mod_11_settings_ui <- function(id) {
 
 
 mod_11_settings_serv <- function(id, submit_button, llm_prompt,
-                                 code_error, sample_temp) {
+                                 code_error) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -327,38 +316,6 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
 
 
     ## Other Settings ##
-    # Sample temperature
-    sample_temp <- reactive({
-      temp <- 0 # was default_temperature, changed for uiuc usage
-      if (!is.null(input$temperature)) {
-        temp <- input$temperature
-      }
-      return(temp)
-    })
-
-    output$change_temperature <- renderUI({
-      tagList(
-        tags$style(HTML("
-        .irs--shiny .irs-bar {
-          border-top: 1px solid #6B9EE8;border-bottom: 1px solid #6B9EE8;
-          background: #7AABF0;
-        }
-        .irs--shiny .irs-single {background-color: #7AABF0; color: #000}
-      ")),
-        sliderInput(
-          inputId = ns("temperature"),
-          label = h3(strong("Sampling Temperature")),
-          min = 0,
-          max = 1,
-          value = 0,
-          step = .1,
-          round = FALSE,
-          width = "100%"
-        )
-      )
-    })
-
-
     # Selected model
     selected_model <- reactive({
       model <- language_models[default_model]  # name: 5.4 mini, value: "gpt-5.4-mini"
@@ -520,7 +477,6 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
     return(
       list(
         api_key = api_key,
-        sample_temp = sample_temp,
         selected_model = selected_model,
         use_python = use_python,
         convert_to_factor = convert_to_factor,

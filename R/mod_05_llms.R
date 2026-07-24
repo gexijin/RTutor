@@ -2,7 +2,7 @@
 
 
 mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_name,
-                             api_key, sample_temp, selected_model, logs, ch,
+                             api_key, selected_model, logs, ch,
                              counter, api_error_modal, code_error, current_data,
                              current_data_2, run_env, run_env_start, run_result,
                              use_python, send_head) {

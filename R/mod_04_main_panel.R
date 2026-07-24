@@ -495,7 +495,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
         }
 
         if (!is.null(result$usage)) {
-          sec_cost <- api_cost(result$usage$prompt_tokens, result$usage$completion_tokens, "gpt-4o-mini")
+          sec_cost <- api_cost(result$usage$prompt_tokens, result$usage$completion_tokens, language_models[[default_model]])
           counter$costs_total <- counter$costs_total + sec_cost
           message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Security check", sec_cost, counter$costs_total))
         }

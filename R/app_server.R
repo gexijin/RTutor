@@ -223,7 +223,6 @@ app_server <- function(input, output, session) {
     input_text = input_text,
     selected_dataset_name = selected_dataset_name,
     api_key = api_key,
-    sample_temp = sample_temp,
     selected_model = selected_model,
     logs = logs,
     ch = ch,
@@ -310,7 +309,6 @@ app_server <- function(input, output, session) {
     input_text = input_text,
     use_python = use_python,
     logs = logs,
-    sample_temp = sample_temp,
     code_error = code_error,
     python_to_html = python_to_html,
     current_data = current_data,
@@ -353,7 +351,6 @@ app_server <- function(input, output, session) {
   api_key <- mod_11$api_key
   selected_model <- mod_11$selected_model
 
-  sample_temp <- mod_11$sample_temp
   use_python <- mod_11$use_python
   convert_to_factor <- mod_11$convert_to_factor
   max_proportion_factor <- mod_11$max_proportion_factor
@@ -369,7 +366,6 @@ app_server <- function(input, output, session) {
       shinyjs::runjs(paste0(
         'console.group("RTutor Settings");',
         'console.log("Model:             ', selected_model(),       '");',
-        'console.log("Temperature:       ', sample_temp(),          '");',
         'console.log("API key:           ', key_disp,               '");',
         'console.log("API key source:    ', api_key$source,         '");',
         'console.log("Use Python:        ', use_python(),           '");',
@@ -429,7 +425,6 @@ app_server <- function(input, output, session) {
     counter = counter,
     selected_model = selected_model,
     api_key = api_key,
-    sample_temp = sample_temp,
     selected_dataset_name = selected_dataset_name,
     qa_by_chunk = qa_by_chunk,
     chunk_selection = chunk_selection

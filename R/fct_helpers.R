@@ -19,9 +19,9 @@ min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 
 # Switch these 3 to the model you want to use
-language_models <- c("gpt-5.4-mini") # "o4-mini"
-names(language_models) <- c("GPT 5.4 Mini") # "O4 Mini"
-default_model <- "GPT 5.4 Mini"  # "O4 Mini"
+language_models <- c("gpt-5.6-luna") # "o4-mini"
+names(language_models) <- c("GPT 5.6 Luna") # "O4 Mini"
+default_model <- "GPT 5.6 Luna"  # "O4 Mini"
 
 # Debug line, printed at startup
 message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=%s",
@@ -29,9 +29,10 @@ message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=%s",
   if (nchar(Sys.getenv("AZURE_OPENAI_API_ENDPOINT")) > 0) "Azure" else "OpenAI"
 ))
 
-max_content_length <- 3000 # max tokens:  Change according to model !!!!
-max_content_length_ask <- 3000 # max tokens:  Change according to model !!!!
-default_temperature <- 0.2
+# Token budget for chat history included per request. Not a model limit
+# (gpt-5.6-luna context is ~1M tokens) — this is a cost control: input costs ~$1/1M tokens.
+max_content_length <- 30000     # code generation history
+max_content_length_ask <- 30000 # Q&A history
 pre_text <- "Write correct, efficient R code to analyze data."
 pre_text_python <- "Write correct, efficient Python code."
 after_text <- "Use the df data frame."
@@ -1035,16 +1036,13 @@ tokens <- function(text) {
 #' @return a number
 #'
 api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
-  if (grepl("gpt-5.4-mini", selected_model)) { # gpt-5.4-mini — must come before general gpt-4 check
-    # input $0.75/1M, output $4.50/1M
-    completion_tokens * 4.5e-6 + prompt_tokens * 7.5e-7
-  } else if (grepl("gpt-4", selected_model)) { # gpt4
-    # input $0.03/1K, output $0.06/1K
-    completion_tokens * 6e-5 + prompt_tokens * 3e-5
-  } else {
-    # ChatGPT
-    completion_tokens * 2e-6 + prompt_tokens * 1.5e-6
-  }
+  # $ per 1M tokens: c(input, output). Add a row when switching models.
+  prices <- list(
+    "gpt-5.6-luna" = c(1, 6)
+  )
+  p <- prices[[selected_model]]
+  if (is.null(p)) p <- c(1, 6) # unknown model: assume current default rates
+  (prompt_tokens * p[1] + completion_tokens * p[2]) / 1e6
 }
 
 
