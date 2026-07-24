@@ -172,7 +172,6 @@ app_server <- function(input, output, session) {
     input_text = input_text,
     selected_dataset_name = selected_dataset_name,
     api_key = api_key,
-    sample_temp = sample_temp,
     selected_model = selected_model,
     logs = logs,
     ch = ch,
@@ -259,7 +258,6 @@ app_server <- function(input, output, session) {
     input_text = input_text,
     use_python = use_python,
     logs = logs,
-    sample_temp = sample_temp,
     code_error = code_error,
     python_to_html = python_to_html,
     current_data = current_data,
@@ -300,7 +298,6 @@ app_server <- function(input, output, session) {
 
   # Module 11 - Outputs
   api_key <- mod_11$api_key
-  sample_temp <- mod_11$sample_temp
   selected_model <- mod_11$selected_model
   use_python <- mod_11$use_python
   convert_to_factor <- mod_11$convert_to_factor
@@ -357,7 +354,6 @@ app_server <- function(input, output, session) {
     counter = counter,
     selected_model = selected_model,
     api_key = api_key,
-    sample_temp = sample_temp,
     selected_dataset_name = selected_dataset_name
   )
 
