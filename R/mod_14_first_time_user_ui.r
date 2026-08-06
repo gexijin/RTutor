@@ -43,8 +43,8 @@ mod_14_first_time_user_ui <- function(id) {
         ),
         h4("Also try ",
           a(
-            "Chatlize.ai,",
-            href = "https://chatlize.ai",
+            "Datably.ai,",
+            href = "https://datably.ai",
             target = "_blank"
           ),
           " a more general platform for analyzing data through chats.
@@ -97,7 +97,7 @@ mod_14_first_time_user_ui <- function(id) {
           tags$li(
             "RTutor can only analyze traditional statistics data, where
             rows are observations and columns are variables. For complex
-            data, try https://chatlize.ai."
+            data, try https://datably.ai."
           ),
           tags$li(
             "Once uploaded, your data is automatically loaded into R as a

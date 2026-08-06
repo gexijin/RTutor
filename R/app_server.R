@@ -1,7 +1,7 @@
 ##########################################################
 # RTutor.AI | A Shiny app for chatting with your data.
 # Author: Xijin Ge | ge@orditus.com
-# © 2024 Orditus LLC
+# © 2025 Orditus LLC
 # No warranty & not for commercial use without a license.
 ##########################################################
 

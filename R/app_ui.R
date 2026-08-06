@@ -1,7 +1,7 @@
 ##########################################################
 # RTutor.AI | A Shiny app for chatting with your data.
 # Author: Xijin Ge | ge@orditus.com
-# © 2024 Orditus LLC
+# © 2025 Orditus LLC
 # No warranty & not for commercial use without a license.
 ##########################################################
 
@@ -25,7 +25,7 @@ app_ui <- function(request) {
     tags$footer(
       style = "position: fixed;bottom: 0;width: 100%;background-color: #F6FFF5;
         padding: 10px;text-align: center;z-index: 99;",
-      span("© 2024 Orditus LLC"),
+      span("© 2025 Orditus LLC"),
       HTML("&nbsp;"),  # Adds space
       actionLink(inputId = "ppolicy", "Privacy Policy"),
       HTML("&nbsp;"),
