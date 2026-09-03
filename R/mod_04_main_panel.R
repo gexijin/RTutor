@@ -48,8 +48,8 @@ mod_04_main_panel_ui <- function(id) {
                 p(
                   "Also try ",
                   a(
-                    "Chatlize.ai,",
-                    href = "https://chatlize.ai",
+                    "Datably.ai,",
+                    href = "https://datably.ai",
                     target = "_blank"
                   ),
                   " a more flexible AI platform."
