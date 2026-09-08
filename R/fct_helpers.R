@@ -715,6 +715,9 @@ vague_feedback <- 'e.g. "Create a [plot type] of [column] grouped by [group], co
 #  "axis limits, tick marks, grouping variables, or percentage type (column vs. row)."
 #)
 
+# Master switch for the "vague prompt" gate. FALSE: students are never flagged as vague;
+# the off_topic check still runs.
+vague_check_enabled <- FALSE
 
 # Check whether a prompt is specific enough for R code generation.
 # Returns list(verdict = "ok"|"vague"|"off_topic", feedback = character(1), usage).
@@ -860,6 +863,7 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
   if (is.null(parsed) || !("verdict" %in% names(parsed))) return(fail_open)
 
   verdict <- as.character(parsed$verdict)
+  if (verdict == "vague" && !vague_check_enabled) verdict <- "ok"
   result  <- list(
     verdict = verdict,
     feedback = if (verdict == "vague") vague_feedback else "",
