@@ -177,7 +177,8 @@ app_server <- function(input, output, session) {
     api_key = api_key,
     current_data = current_data,
     do_soft_reset = do_soft_reset,
-    counter = counter
+    counter = counter,
+    is_follow_up = reactive(length(ch$code_history) > 0)
   )
 
   # Module 03 - Outputs
