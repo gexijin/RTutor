@@ -50,7 +50,8 @@ sqltable2 <- "feedback"
 # additional prompts to send to ChatGPT
 system_role <- "Act as a experienced data scientist and statistician. You will write code following instructions. Do not provide explanation. 
 If the goal can be achieved by showing quantitative results, do not produce a plot. When a plot is required, ggplot2 is preferred. 
-If multiple plots are generated, try to combine them into one."
+If multiple plots are generated, try to combine them into one.
+Use only the variables the user names. Do not add other columns from the dataset to a table, plot, or model unless the user asks for them."
 system_role_tutor <- "Act as a professor of statistics, computer science, coding, and math. You will respond like answering questions by students.
 If the question is in languages other than English, respond in that language. If the question is not remotely related to your expertise, respond with 'No comment'.
 Format your entire response in Markdown only. Use headers, bullet points, bold, italics, inline code, code blocks, and other Markdown elements as appropriate. Do not use HTML tags."
@@ -707,170 +708,184 @@ call_llm_check <- function(prompt, api_key) {
   list(verdict = verdict, usage = response$usage)
 }
 
-vague_feedback <- 'e.g. "Create a [plot type] of [column] grouped by [group], colored by [column], filtered to [condition]."'
-# OR:
-#vague_feedback <- paste0(
-#  "Check that your prompt names the dataset and variable(s), uses the exact chart/table type ",
-#  "(e.g. 'bar graph', 'scatterplot', 'two-way table'), and includes any required details such as ",
-#  "axis limits, tick marks, grouping variables, or percentage type (column vs. row)."
-#)
+# Master switch for the prompt-detail gate. TRUE: a first prompt missing a core element is
+# blocked once (Submit again overrides) and complete prompts may get a 10-second suggestion note.
+# FALSE: neither happens. The off_topic check always runs regardless of this switch.
+vague_check_enabled <- TRUE
 
-# Master switch for the "vague prompt" gate. FALSE: students are never flagged as vague;
-# the off_topic check still runs.
-vague_check_enabled <- FALSE
+# ponytail: this model rejects `temperature` unless reasoning is off. Reasoning off + temp 0
+# gives repeatable verdicts; switch to list(reasoning = list(effort = "low")) if accuracy drops.
+quality_check_params <- list(reasoning = list(effort = "none"), temperature = 0)
 
-# Check whether a prompt is specific enough for R code generation.
-# Returns list(verdict = "ok"|"vague"|"off_topic", feedback = character(1), usage).
-# When verdict is "vague", feedback holds a fill-in-the-blank template built from
-# the dataset's column names; otherwise feedback is "".
-# Fails open: on any API or parse error returns verdict "ok" so students are never blocked.
-# Logs all inputs, raw API response, and parsed result to the console for tuning.
-check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names = character(0)) {
-  user_content <- paste0(
-    "Prompt: ", prompt, "\n",
-    if (nchar(dataset_name) > 0) paste0("Dataset: ", dataset_name, "\n") else "",
-    if (length(col_names) > 0) paste0("Columns: ", paste(head(col_names, 10), collapse = ", "), "\n") else ""
+quality_off_topic_rules <- paste0(
+  "A prompt is ON-topic only if it (a) asks for an analysis, table, plot, model, or transformation ",
+  "of the loaded dataset, or (b) asks about a statistics, data science, or programming concept ",
+  "(e.g. 'What is Moran\'s I?', 'What test should I use for two categorical variables?', ",
+  "'Provide a demo for ridge regression'). Everything else is OFF-topic.\n",
+  "Judge what is actually being asked for. Words like 'stats', 'data', 'class', 'UIUC', or 'campus' ",
+  "appearing in a prompt do NOT make it on-topic. Jokes, poems, pickup lines, stories, and other creative ",
+  "writing are off-topic even when they are about statistics. These are all off-topic:\n",
+  "- 'What are some good study spots on campus?'\n",
+  "- 'What are the best restaurants near UIUC\'s campus for a birthday dinner?'\n",
+  "- 'What movies are playing in theaters today?'\n",
+  "- 'Give me a list of the best stats classes at UIUC.'\n",
+  "- 'How do I change a flat tire?'\n",
+  "- 'Come up with a stats-related pickup line for me.'\n",
+  "- 'Who is Taylor Swift?'\n"
+)
+
+# Screen a prompt before it goes to the code generator.
+# Returns list(verdict = "ok"|"vague"|"off_topic", missing = chr, suggestions = chr, usage).
+#   off_topic   -> caller blocks with no override
+#   vague       -> `missing` lists the absent core elements; caller blocks once
+#   ok          -> `suggestions` may hold optional, non-blocking improvements
+# off_topic_only = TRUE (follow-up prompts) checks nothing but topic.
+# Fails open: any API or parse error returns "ok" so students are never blocked by an outage.
+check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names = character(0),
+                                 col_types = character(0), off_topic_only = FALSE) {
+  fail_open <- list(verdict = "ok", missing = character(0), suggestions = character(0), usage = NULL)
+
+  columns <- if (length(col_types) == length(col_names)) paste0(col_names, " (", col_types, ")") else col_names
+  context <- paste0(
+    "You screen a student's prompt before it is sent to an R code generator in a statistics course.\n",
+    "The loaded dataset is '", dataset_name, "' with columns: ", paste(columns, collapse = ", "), ".\n\n"
+  )
+
+  system_prompt <- if (off_topic_only) paste0(
+    context,
+    "Decide only whether the prompt is off-topic.\n", quality_off_topic_rules,
+    "The prompt may be a short follow-up that tweaks earlier output, such as 'make it red', ",
+    "'add a title', 'bigger font', 'use a log scale', or 'remove the legend'. Those are ON-topic.\n\n",
+    "Reply ONLY with valid JSON, no markdown:\n{\"off_topic\": false}"
+  ) else paste0(
+    context,
+    "Decide three things.\n\n",
+
+    "## 1. off_topic (true or false)\n", quality_off_topic_rules, "\n",
+
+    "## 2. missing: core elements that are absent\n",
+    "Applies only to prompts asking for a plot or table from the dataset. For anything else ",
+    "(concept questions, fitting a model, creating or filtering variables, running a test) return [].\n",
+    "Be lenient. List an element ONLY if it is truly absent. If a competent analyst could tell what ",
+    "the student means, the element is present. There are exactly three core elements:\n",
+    "- OUTPUT TYPE: the prompt names a kind of chart or table (scatterplot, bar graph, histogram, boxplot, ",
+    "line graph, interaction plot, frequency table, two-way table, table of means, table of percentages, ",
+    "a table with counts, ...). 'Plot X', 'graph X', or 'analyze X' with no kind is missing it.\n",
+    "- VARIABLE NAMES: the prompt names the specific column(s) to use. Match loosely: ignore case, quotes, ",
+    "and spaces vs underscores vs periods vs hyphens ('practice exam grade' matches Practice.Exam.Grade, ",
+    "'year-in-school' matches Year.In.School, 'country' matches Country). Never ask the student to fix the ",
+    "capitalization or punctuation of a column name. ",
+    "'these two columns', 'the data', or 'the groups' with no column is missing it.\n",
+    "- VARIABLE ROLES: only when two or more variables are named AND the output depends on which is which: ",
+    "x vs y for scatterplots and line graphs, rows vs columns for two-way tables, 'row' vs 'column' for ",
+    "percentage tables, outcome vs grouping for means tables and interaction plots. Accept any clear ",
+    "phrasing: 'A vs B', 'A by B', 'A based on B', 'A on the x-axis', 'mean of A for each B', 'color by C'. ",
+    "'Scatterplot of A and B' or 'scatterplot with variables A and B' gives no roles, so it is missing. ",
+    "'Table of percentages' with neither 'row' nor 'column' is missing it.\n",
+    "Never list anything else as missing. Axis limits, tick marks, font size, legend position, titles, ",
+    "colors, rounding, totals, and 'linear' wording are NOT core.\n",
+    "Write each missing element as one short instruction to the student that names their variables where ",
+    "possible, e.g. 'Say which variable goes on the x-axis and which on the y-axis.'\n\n",
+
+    "## 3. suggestions: optional polish, never blocking\n",
+    "Decide `missing` first. Anything about output type, variable names, or variable roles (which variable ",
+    "is x or y, rows or columns, row or column percentages) belongs in `missing` and must never appear here.\n",
+    "At most 2 short, generic tips. Check the usual details for the kind of output requested and suggest ",
+    "only the ones that apply to what was asked and that the prompt does not already cover:\n",
+    "- scatterplot or line graph: axis limits and tick marks; if a trend line is requested, whether it is linear\n",
+    "- frequency table: percentages alongside the counts\n",
+    "- two-way table: row and column totals\n",
+    "- percentage table or table of means: how many decimal places to round to\n",
+    "- bar graph that uses two variables: whether bars show counts or percentages, and stacked or side by side\n",
+    "Always add a suggestion when the chart type does not fit the variable's type, e.g. 'Year.In.School is ",
+    "categorical, so a bar graph may fit better than a histogram.' (histograms, density plots, and scatterplot ",
+    "axes expect numeric variables; bar graphs and frequency tables expect categorical ones). This is a ",
+    "suggestion, never a missing element.\n",
+    "Word tips generically, like 'Specify axis limits and tick marks.' Do not give specific numbers. ",
+    "Return [] only when the prompt already covers the usual details for its kind of output.\n\n",
+
+    "## Examples\n",
+    "- 'Plot these two columns.' -> missing output type and variable names\n",
+    "- 'Make a bar graph.' -> missing variable names\n",
+    "- 'Make a scatterplot with variables age and severity baseline. Add a line.' -> missing variable roles\n",
+    "- 'Make a table of percentages for Season and Holiday.' -> missing variable roles (row or column percentages)\n",
+    "- 'Analyze the data.' -> missing output type and variable names\n",
+    "- 'line graph of protein by diet, with separate lines for each country' -> missing [] (complete)\n",
+    "- 'Build a scatterplot. Put Country on the x-axis and Protein on the y-axis. Add a straight line of best fit.' ",
+    "-> missing [] (complete; a categorical x-axis is at most a suggestion)\n",
+    "- 'Make a scatterplot. Put Practice.Exam.Grade on the x-axis and Actual.Exam.Grade on the y-axis. Color the ",
+    "points by Year.In.School.' -> missing [] (complete; no axis limits is only a suggestion)\n",
+    "- 'Make a table of investment_type by size_type. Turn the counts into column percentages. Round to one ",
+    "decimal place.' -> missing [] (complete)\n",
+    "- 'Create a boxplot of highway vs. class. Color by class.' -> missing [] (complete)\n\n",
+
+    "Reply ONLY with valid JSON, no markdown, with the fields in exactly this order:\n",
+    "{\"off_topic\": false, ",
+    "\"plot_or_table\": true, ",        # does the prompt ask for a plot or table from the dataset?
+    "\"output_type\": \"scatterplot\", ",  # the kind named in the prompt, or null if none is named
+    "\"variables\": [\"Exact.Column.Name\"], ",  # dataset columns the prompt refers to, loosely matched
+    "\"roles_needed\": true, ",         # two or more variables AND the output depends on which is which
+    "\"roles_given\": true, ",          # the prompt makes those roles clear
+    "\"missing\": [], \"suggestions\": []}\n",
+    "Fill the fact fields first and keep `missing` consistent with them: if you could identify the output ",
+    "type and the columns, they are present, so do not ask the student to confirm or clarify them."
   )
 
   messages <- list(
-    list(
-      role    = "system",
-      content = paste0(
-        "You are a teaching assistant deciding if a student's data analysis prompt meets the assignment ",
-        "requirements well enough to generate correct R code without guessing.\n\n",
-
-        "The student is working with a dataset called '", dataset_name, "' ",
-        "with these columns: ", paste(col_names, collapse = ", "), ".\n\n",
-
-        "## Assignment-specific requirements\n",
-        "When a prompt matches one of the types below, it must meet ALL listed criteria to be 'ok'.\n\n",
-
-        "### Frequency Table\n",
-        "Must: (1) reference a variable by name, (2) ask for a frequency table (counts per category), ",
-        "(3) request proportions or percentages alongside the counts.\n\n",
-
-        "### Bar Graph\n",
-        "Must: (1) specify a variable by name, (2) use 'bar graph' or 'bar chart' ",
-        "(NOT 'histogram' or 'density plot' — those are for quantitative data).\n\n",
-
-        "### Scatterplot\n",
-        "Must: (1) name both the x-axis and y-axis variables, (2) use the word 'scatterplot', ",
-        "(3) specify axis limits and tick mark positions for both axes.\n",
-        "GOOD example: 'Make a scatterplot of the data. Put height on the x-axis and weight on the y-axis. ",
-        "Make the x-axis limits 0 to 100 and y-axis limits 20 to 80. ",
-        "Set x-axis breaks at 0, 25, 50, 75, 100 and y-axis breaks at 20, 50, 80.'\n\n",
-
-        "### Trend Line\n",
-        "Must: (1) specify 'linear' or 'straight line' (not just 'trend line'), ",
-        "(2) request a color distinct from the data points.\n\n",
-
-        "### Multivariable Scatterplot\n",
-        "Must: (1) name x-axis, y-axis, and a grouping variable (color or shape), ",
-        "(2) request a separate linear trend line per group in the same color as its points, ",
-        "(3) specify axes 0–100 with tick marks every 10, font size 14, and legend at the bottom.\n\n",
-
-        "### Interaction Plot\n",
-        "Must: (1) ask for an interaction plot or line graph of group means, ",
-        "(2) specify x-axis variable, y-axis as the mean of the outcome variable, ",
-        "(3) request separate lines with markers for each group.\n\n",
-
-        "### Grouped Means Table\n",
-        "Must: (1) name the outcome variable, (2) ask for the mean for each combination of groups, ",
-        "(3) request rounding to two decimal places and a clear table layout.\n\n",
-
-        "### Two-Way Table\n",
-        "Must: (1) name both variables, (2) ask for a two-way table, contingency table, or cross-tabulation, ",
-        "(3) specify which variable is rows and which is columns, ",
-        "(4) request row and column totals (marginals).\n\n",
-
-        "### Column or Row Percentages\n",
-        "Must: (1) explicitly say 'column percentages' or 'row percentages' (NOT just 'percentages'), ",
-        "(2) request rounding to one or two decimal places, (3) ask for clear percentage labeling.\n\n",
-
-        "### Column Percent Bar Graph\n",
-        "Must: (1) ask for a stacked or side-by-side bar graph using column percentages ",
-        "so that each bar totals 100%.\n\n",
-
-        "## General prompts (not matching any assignment type above)\n",
-        "Mark 'ok' if a competent data analyst could execute it without asking a follow-up question. ",
-        "These always pass: conceptual questions ('What is Moran\\'s I?'), ",
-        "demo requests ('Provide a demo for ridge regression'), ",
-        "method questions ('What test should I use for two categorical variables?'), ",
-        "and any prompt that names specific columns and a clear action.\n\n",
-
-        "## Vague prompts — mark these 'vague':\n",
-        "- Any assignment-type prompt missing one or more required elements listed above.\n",
-        "- 'Plot these two columns.' (no column names, no chart type)\n",
-        "- 'Make a scatterplot of height and weight.' (missing axis limits and tick marks)\n",
-        "- 'Make a bar graph.' (no variable named)\n",
-        "- 'Show me percentages.' (does not say column or row)\n",
-        "- 'Analyze the data.' (no specific goal)\n",
-        "- 'Compare the groups.' (no columns, no chart type)\n\n",
-
-        "Mark 'off_topic' only if the prompt has nothing to do with data, statistics, or programming.\n\n",
-
-        "## Good prompt examples — these are all 'ok':\n",
-        "- 'Create a boxplot of highway vs. class. Color by class. Add jitter points.'\n",
-        "- 'Make a scatterplot of yield per acre based on soil quality. Only include farms in the \"Treatment\" study group. Add a smoothed trend line with estimation error. Use color blind friendly colors. Make all font sizes 18.'\n",
-        "- 'Create a new variable called Soil Quality Category. If average soil quality > 70, Soil Quality Category = \"High\". If average soil quality < 70, Soil Quality Category = \"Low\".'\n",
-        "- 'Make a scatter plot of salary as the response variable, experience on the horizontal axis, and degree as a third factor. Include a smoothed trend line with estimation error. Make all font sizes 18. Use color-blind friendly colors. Place the legend below the plot. Make the x-axis have breaks at every 1.'\n",
-        "- 'Make an interaction plot with protein as the response variable and diet and country as explanatory variables. Use Sweden as a reference group, and Vegetarian as a reference group. Only include the mean values with 95% interval estimate. Make all font sizes 18. Place the legend below the plot. Use color-blind friendly colors.'\n",
-        "- 'Fit a linear model with grade as the response variable and year in school and major as explanatory variables. Use Freshman as a reference group, and Non-STEM as a reference group.'\n",
-        "- 'Create a side-by-side density plot of practice exam grade by year in school. Have the x-axis go from 0 to 100. Add x-axis tick marks for every 5 points. Use a color-blind friendly color palette. Place the legend on the bottom of the plot.'\n",
-        "- 'Create a new data frame with just the observation with fund symbol BSPIX. Drop the ID and fund symbol from the data frame. Using the entire original data frame, fit a model for load adjusted return. Use all other variables as explanatory variables (except ID and fund symbol). Use cross validation. Use the model to make a prediction using the new data frame.'\n",
-        "- 'Create a two-way table for biological sex by study group. Compute column percents. Round to one decimal place.'\n\n",
-
-        "Reply ONLY with valid JSON, no markdown, no explanation:\n",
-        "{\"verdict\": \"ok\"}\n",
-        "verdict must be exactly one of: \"ok\", \"vague\", \"off_topic\"."
-      )
-    ),
-    list(role = "user", content = user_content)
+    list(role = "system", content = system_prompt),
+    list(role = "user",   content = paste0("Prompt: ", prompt))
   )
-
-  fail_open <- list(verdict = "ok", feedback = "", usage = NULL)
 
   p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    create_response(language_models[[default_model]], messages, p$key, p$endpoint,
+                    extra = quality_check_params),
     error = function(e) {
       message("[QUALITY] Responses API error: ", e$message)
       NULL
     }
   )
+  if (is.null(response)) return(fail_open)
 
-  if (is.null(response)) {
-    message("[QUALITY] Response: NULL (fail open)")
-    return(fail_open)
-  }
-
-  raw_text <- tryCatch(
-    trimws(response$choices[[1, "message.content"]]),
-    error = function(e) NULL
-  )
-
+  raw_text <- tryCatch(trimws(response$choices[[1, "message.content"]]), error = function(e) NULL)
   message("[QUALITY] Raw response: ", if (is.null(raw_text)) "NULL" else raw_text)
-
   if (is.null(raw_text) || is.na(raw_text) || nchar(raw_text) == 0) return(fail_open)
 
   parsed <- tryCatch(
-    jsonlite::fromJSON(raw_text, simplifyVector = TRUE),
+    # tolerate a ```json fence; simplifyVector = FALSE keeps [] and ["a"] both as lists
+    jsonlite::fromJSON(gsub("^```[a-z]*|```$", "", raw_text), simplifyVector = FALSE),
     error = function(e) {
       message("[QUALITY] JSON parse error: ", e$message)
       NULL
     }
   )
-  if (is.null(parsed) || !("verdict" %in% names(parsed))) return(fail_open)
+  if (is.null(parsed) || is.null(parsed$off_topic)) return(fail_open)
 
-  verdict <- as.character(parsed$verdict)
-  if (verdict == "vague" && !vague_check_enabled) verdict <- "ok"
-  result  <- list(
-    verdict = verdict,
-    feedback = if (verdict == "vague") vague_feedback else "",
-    usage   = response$usage
+  # The model extracts facts; R decides. A core element is missing only if the fact fields say so,
+  # so hedged wording in `missing` cannot block, and a roles problem cannot hide in `suggestions`.
+  gate_on <- vague_check_enabled && !off_topic_only && isTRUE(parsed$plot_or_table)
+  core <- c(
+    "Name the kind of plot or table you want (for example a scatterplot, bar graph, or two-way table)." =
+      is.null(parsed$output_type),
+    "Name the column(s) from your dataset to use." = length(parsed$variables) == 0,
+    "Say which variable plays which role: x-axis vs y-axis, rows vs columns, or row vs column percentages." =
+      isTRUE(parsed$roles_needed) && !isTRUE(parsed$roles_given)
   )
+  missing <- character(0)
+  if (gate_on && any(core)) {
+    # prefer the model's prompt-specific wording; fall back to the generic text above
+    missing <- as.character(unlist(parsed$missing))
+    if (length(missing) == 0) missing <- names(core)[core]
+  }
+  suggestions <- if (gate_on) as.character(unlist(parsed$suggestions)) else character(0)
+  verdict <- if (isTRUE(parsed$off_topic)) "off_topic" else if (length(missing) > 0) "vague" else "ok"
 
-  result
+  list(
+    verdict     = verdict,
+    missing     = missing,
+    suggestions = if (verdict == "ok") suggestions else character(0),
+    usage       = response$usage
+  )
 }
 
 
@@ -884,7 +899,8 @@ explain_error <- function(error_message, code, prompt, api_key,
     "Code that failed:\n", code, "\n\n",
     "Student's original prompt: ", prompt, "\n",
     if (nchar(dataset_name) > 0) paste0("Dataset: ", dataset_name, "\n") else "",
-    if (length(col_names) > 0) paste0("Columns: ", paste(head(col_names, 10), collapse = ", "), "\n") else ""
+    # all columns: truncating made the tutor claim real columns (past the 10th) did not exist
+    if (length(col_names) > 0) paste0("Columns: ", paste(col_names, collapse = ", "), "\n") else ""
   )
 
   messages <- list(
@@ -892,6 +908,7 @@ explain_error <- function(error_message, code, prompt, api_key,
       role    = "system",
       content = paste0(
         "You are a statistics tutor for undergraduate students using R for the first time. ",
+        "The student's dataset is always loaded as the data frame `df`; never suggest another name for it. ",
         "Explain the R error message in plain English in 2-3 sentences — no jargon. ",
         "Then give 1-2 short, specific, actionable suggestions for fixing it. ",
         "Reply ONLY with valid JSON in this exact format: ",
@@ -1268,7 +1285,8 @@ resolve_provider <- function(api_key) {
 }
 
 
-create_response <- function(model, messages, key, endpoint = NULL) {
+# `extra` is a named list of additional request-body fields (e.g. list(temperature = 0)).
+create_response <- function(model, messages, key, endpoint = NULL, extra = list()) {
   url <- if (is.null(endpoint)) {
     "https://api.openai.com/v1/responses"
   } else {
@@ -1280,7 +1298,7 @@ create_response <- function(model, messages, key, endpoint = NULL) {
     httr::add_headers(`Content-Type` = "application/json", `api-key` = key)
   }
 
-  response <- httr::POST(url, headers, body = list(model = model, input = messages), encode = "json")
+  response <- httr::POST(url, headers, body = c(list(model = model, input = messages), extra), encode = "json")
 
   parsed <- response %>%
     httr::content(as = "text", encoding = "UTF-8") %>%

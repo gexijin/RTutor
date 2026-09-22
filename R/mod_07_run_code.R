@@ -115,7 +115,10 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
 
           eval_result                # without this, interactive plots don't work
         }, error = function(e) {
-          list(error_message = e$message)  # won't work if not inside a list!
+          # not e$message: tidyverse errors leave it "", which made failed code look successful
+          msg <- conditionMessage(e)
+          if (!nzchar(msg)) msg <- "The code stopped with an error."
+          list(error_message = msg)  # won't work if not inside a list!
         })
 
         # Remove the temporary S4 summary shim if user code didn't redefine it

@@ -69,13 +69,15 @@ mod_03_send_request_ui <- function(id) {
 mod_03_send_request_serv <- function(id, chunk_selection, user_file,
                                      selected_dataset_name, use_python,
                                      quality_cleared, api_key, current_data,
-                                     do_soft_reset, counter) {
+                                     do_soft_reset, counter, is_follow_up) {
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # Tracks whether the user has already seen a quality warning for the current prompt
     quality_warned <- reactiveVal(FALSE)
+    # The exact prompt text that was warned about; Submit overrides only if it is unchanged
+    warned_prompt  <- reactiveVal("")
 
     # Load previous prompts based on selected chunk
     observeEvent(chunk_selection$selected_chunk, {
@@ -177,26 +179,32 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         return()
       }
 
-      # If user already saw the quality warning and is re-clicking Submit to bypass
-      if (quality_warned()) {
+      # Re-clicking Submit on the same warned prompt overrides the (one-time) detail block
+      if (quality_warned() && identical(input$input_text, warned_prompt())) {
         quality_warned(FALSE)
         output$quality_feedback_ui <- renderUI(NULL)
         quality_cleared(quality_cleared() + 1)
         return()
       }
 
-      # Run quality check before calling the LLM wrapped in tryCatch
+      # Follow-ups tweak existing output, so they are only screened for off-topic.
+      # An edited prompt after a warning is treated the same way: never block for detail twice.
+      off_topic_only <- is_follow_up() || quality_warned()
+      quality_warned(FALSE)
+
       notif_id <- showNotification("Checking prompt...", duration = NULL)
       result <- tryCatch(
         check_prompt_quality(
-          prompt       = input$input_text,
-          api_key      = api_key,
-          dataset_name = selected_dataset_name(),
-          col_names    = colnames(current_data())
+          prompt         = input$input_text,
+          api_key        = api_key,
+          dataset_name   = selected_dataset_name(),
+          col_names      = colnames(current_data()),
+          col_types      = vapply(current_data(), function(x) class(x)[1], character(1)),
+          off_topic_only = off_topic_only
         ),
         error = function(e) {
           message("[QUALITY] check_prompt_quality failed: ", e$message)
-          list(verdict = "ok", feedback = "")
+          list(verdict = "ok", missing = character(0), suggestions = character(0))
         }
       )
       removeNotification(notif_id)
@@ -208,39 +216,39 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Prompt quality check", mini_cost, counter$costs_total))
       }
 
-      if (result$verdict == "ok") {
-        output$quality_feedback_ui <- renderUI(NULL)
-        quality_cleared(quality_cleared() + 1)
-      } else {
+      box_style <- "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-top: 8px; margin-bottom: 10px;"
+
+      if (result$verdict == "off_topic") {
+        # No override: off-topic prompts never reach the code generator
+        output$quality_feedback_ui <- renderUI(div(
+          style = box_style,
+          tags$p(strong("⚠️ Your prompt appears to be off-topic.")),
+          tags$p(
+            "RTutor only runs prompts about your dataset, statistics, or data science. ",
+            "Please rewrite your prompt so it is on topic, then click Submit."
+          )
+        ))
+      } else if (result$verdict == "vague") {
         quality_warned(TRUE)
-        verdict <- result$verdict
-        feedback <- result$feedback
-        output$quality_feedback_ui <- renderUI({
-          box_style <- "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-top: 8px; margin-bottom: 10px;"
-          if (verdict == "off_topic") {
-            div(
-              style = box_style,
-              tags$p(strong("\u26a0\ufe0f Your prompt appears to be off-topic.")),
-              tags$p(
-                "RTutor is designed for data analysis, statistics, and R coding questions. ",
-                "Please revise your prompt to ask about your dataset, a statistical method, or a coding task.",
-                tags$br(),
-                "(or click Submit again to proceed anyway)"
-              )
-            )
-          } else {
-            div(
-              style = box_style,
-              tags$p(strong("\u26a0\ufe0f Your prompt may need more detail.")),
-              tags$p("Try adding a chart type, column names, or a condition. For example:"),
-              tags$p(style = "font-style: italic; margin-left: 10px;", feedback),
-              tags$p(
-                style = "margin-top: 6px; color: #666;",
-                "(or click Submit again to proceed with your original prompt)"
-              )
-            )
-          }
-        })
+        warned_prompt(input$input_text)
+        output$quality_feedback_ui <- renderUI(div(
+          style = box_style,
+          tags$p(strong("⚠️ Your prompt is missing something the code needs:")),
+          tags$ul(lapply(result$missing, tags$li)),
+          tags$p(
+            style = "margin-top: 6px; color: #666;",
+            "(or click Submit again to run your original prompt anyway)"
+          )
+        ))
+      } else {
+        output$quality_feedback_ui <- renderUI(NULL)
+        if (length(result$suggestions) > 0) {
+          showNotification(
+            tagList(strong("Tip for next time:"), tags$ul(lapply(result$suggestions, tags$li))),
+            duration = 12, type = "message", id = "quality_tip"  # styled in mod_01_styles.R
+          )
+        }
+        quality_cleared(quality_cleared() + 1)
       }
     })
 

@@ -154,8 +154,10 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
       } else if (input$user_selected_dataset %in% c(no_data, data_placeholder)) {
         df <- NULL
       } else if (input$user_selected_dataset %in% uiuc_datasets) { # load data from www/demo_data
+        # blank cells are missing values; as "" they broke generated code (e.g. pivot_wider
+        # building a column with an empty name) and slipped past drop_na() / na.rm
         df <- read.csv(app_sys("app", "www", "demo_data",
-                paste0(input$user_selected_dataset, ".csv")))
+                paste0(input$user_selected_dataset, ".csv")), na.strings = c("NA", ""))
       } else if (input$user_selected_dataset == rna_seq) {
         df <- rna_seq_data()
       } else {

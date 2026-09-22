@@ -39,6 +39,34 @@ mod_01_styles_ui <- function(id) {
       display: none;
     } */
 
+    /* Prompt tip: the suggestion note from the prompt gate (mod_03). */
+    [id$='quality_tip'].shiny-notification {
+      position: fixed;
+      /* reset the global .shiny-notification top/left below, or they override bottom/right */
+      top: auto;
+      left: auto;
+      /* clear space under the box; it is bottom-anchored, so long tips grow upward */
+      --tip-gap: 110px;
+      bottom: var(--tip-gap);
+      /* short windows: scroll inside the box instead of running under the navbar */
+      max-height: calc(100vh - var(--tip-gap) - 70px);
+      overflow-y: auto;
+      right: 20px;
+      width: min(480px, 90vw);
+      background-color: #638cc9d8;
+      color: #000;
+      font-size: 17px;
+      line-height: 1.4;
+      padding: 16px 20px;
+      border: none;
+      border-left: 6px solid #f9a777c0;
+      border-radius: 6px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      opacity: 1;
+    }
+    [id$='quality_tip'] ul { margin: 6px 0 0 0; padding-left: 22px; }
+    [id$='quality_tip'] .shiny-notification-close { color: #ffffff; opacity: 0.8; }
+
     /* active tab */
     .navbar-default .navbar-nav > .active > a,
     .navbar-default .navbar-nav > .active > a:focus,
