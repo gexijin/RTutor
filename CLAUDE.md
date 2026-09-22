@@ -102,6 +102,8 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 - `test-uiuc_improvements.R` — large integration-style suite that verifies UI structure and module behavior by reading source files with `readLines()`
 - `test-r_code_security.R` — tests for `validate_r_code()` / `BLOCKED_FNS`; inlines the security logic so it runs without loading the full package
 - Snapshot tests use `tests/testthat/_snaps/`
+- `test-prompt_quality.R` — offline tests for the prompt gate (`check_prompt_quality()` verdict logic and the mod_03 submit flow); the LLM is mocked
+- `tests/eval_prompt_quality.R` — live accuracy check of the prompt gate against labeled prompts. Calls the real LLM (~150 short calls, under $1), so it sits outside `testthat/` and is run by hand: `Rscript tests/eval_prompt_quality.R`. Run it after any edit to the gate's system prompt
 
 ## Configuration
 

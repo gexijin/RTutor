@@ -53,7 +53,7 @@ mod_01_styles_ui <- function(id) {
       overflow-y: auto;
       right: 20px;
       width: min(480px, 90vw);
-      background-color: #527ab5e2;
+      background-color: #638cc9d8;
       color: #000;
       font-size: 17px;
       line-height: 1.4;
