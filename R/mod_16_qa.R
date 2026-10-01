@@ -359,7 +359,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
       llm_agent <- function(messages) {
         p <- resolve_provider(api_key)
-        create_response(language_models[[default_model]], messages, p$key, p$endpoint)
+        create_response(language_models[[default_model]], messages, p$key, p$endpoint, extra = effort_low)
       }
 
   })

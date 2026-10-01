@@ -27,7 +27,7 @@
       detail <- switch(if (is.null(status_code)) "" else status_code,
         "401" = tagList(
           tags$h4("Your API key was rejected (401).", style = "color:red"),
-          tags$p("Go to the Settings tab and check that your key is correct and active.")
+          tags$p("Click API Key at the top of the page and check that your key is correct and active.")
         ),
         "403" = tagList(
           tags$h4("Access denied (403).", style = "color:red"),

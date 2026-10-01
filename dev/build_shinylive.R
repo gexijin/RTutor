@@ -8,13 +8,6 @@ unlink(app, recursive = TRUE)
 dir.create(app)
 file.copy(c("app.R", "R", "inst"), app, recursive = TRUE)
 
-# The browser has no env vars, so write the Azure endpoint into the copied code.
-# In CI it comes from the AZURE_OPENAI_API_ENDPOINT repository secret.
-endpoint <- Sys.getenv("AZURE_OPENAI_API_ENDPOINT")
-if (!nzchar(endpoint)) warning("AZURE_OPENAI_API_ENDPOINT is not set: Azure keys won't work in this build.")
-helpers <- file.path(app, "R", "fct_helpers.R")
-writeLines(sub("__AZURE_OPENAI_API_ENDPOINT__", endpoint, readLines(helpers), fixed = TRUE), helpers)
-
 shinylive::export(app, "site")
 
 # Replace shinylive's default loading animation with our progress screen

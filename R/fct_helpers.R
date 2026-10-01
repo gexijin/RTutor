@@ -19,18 +19,22 @@ min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 
 # Switch these 3 to the model you want to use
-language_models <- c("gpt-5.6-luna") # "o4-mini"
-names(language_models) <- c("GPT 5.6 Luna") # "O4 Mini"
-default_model <- "GPT 5.6 Luna"  # "O4 Mini"
+language_models <- c("gpt-6-luna") # "gpt-5.6-luna"
+names(language_models) <- c("GPT 6 Luna") # "GPT 5.6 Luna"
+default_model <- "GPT 6 Luna"  # "GPT 5.6 Luna"
+
+# Reasoning effort, passed as `extra` to create_response(). "none" for the yes/no
+# checks; "low" elsewhere: enough for correct code, faster and cheaper than the default.
+effort_none <- list(reasoning = list(effort = "none"))
+effort_low  <- list(reasoning = list(effort = "low"))
 
 # Debug line, printed at startup
-message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=%s",
-  language_models[[default_model]],
-  if (nchar(Sys.getenv("AZURE_OPENAI_API_ENDPOINT")) > 0) "Azure" else "OpenAI"
+message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=OpenAI",
+  language_models[[default_model]]
 ))
 
 # Token budget for chat history included per request. Not a model limit
-# (gpt-5.6-luna context is ~1M tokens) — this is a cost control: input costs ~$1/1M tokens.
+# (gpt-6-luna context is ~1M tokens) — this is a cost control on input tokens.
 max_content_length <- 30000     # code generation history
 max_content_length_ask <- 30000 # Q&A history
 pre_text <- "Write correct, efficient R code to analyze data."
@@ -61,12 +65,6 @@ on_server <- "on_server.txt"
 
 # TRUE when running in the browser via shinylive/webR (no server, no pandoc, no sockets)
 in_browser <- R.version$os == "emscripten"
-
-# Azure endpoint used for pasted non-OpenAI keys. On a server it comes from the
-# AZURE_OPENAI_API_ENDPOINT env var. The browser has no env vars, so
-# dev/build_shinylive.R writes the build machine's value (the repo's Actions secret
-# in CI) over the placeholder below. Never commit the real URL here.
-azure_endpoint <- Sys.getenv("AZURE_OPENAI_API_ENDPOINT", "__AZURE_OPENAI_API_ENDPOINT__")
 
 # Named character vector: function name -> reason it is blocked.
 # Used by validate_r_code() for AST-based pre-execution security checks.
@@ -695,7 +693,8 @@ call_llm_check <- function(prompt, api_key) {
 
   p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    create_response(language_models[[default_model]], messages, p$key, p$endpoint,
+                    extra = effort_low),
     error = function(e) {
       message("[SECURITY] Responses API error: ", e$message)
       NULL
@@ -724,7 +723,7 @@ vague_check_enabled <- TRUE
 
 # ponytail: this model rejects `temperature` unless reasoning is off. Reasoning off + temp 0
 # gives repeatable verdicts; switch to list(reasoning = list(effort = "low")) if accuracy drops.
-quality_check_params <- list(reasoning = list(effort = "none"), temperature = 0)
+quality_check_params <- c(effort_none, list(temperature = 0))
 
 quality_off_topic_rules <- paste0(
   "A prompt is ON-topic only if it (a) asks for an analysis, table, plot, model, or transformation ",
@@ -931,7 +930,8 @@ explain_error <- function(error_message, code, prompt, api_key,
 
   p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    create_response(language_models[[default_model]], messages, p$key, p$endpoint,
+                    extra = effort_low),
     error = function(e) {
       message("[EXPLAIN] Responses API error: ", e$message)
       NULL
@@ -1069,10 +1069,11 @@ tokens <- function(text) {
 api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
   # $ per 1M tokens: c(input, output). Add a row when switching models.
   prices <- list(
-    "gpt-5.6-luna" = c(1, 6)
+    "gpt-5.6-luna" = c(1, 6),
+    "gpt-6-luna"   = c(0.10, 0.50)  # standard, short context
   )
   p <- prices[[selected_model]]
-  if (is.null(p)) p <- c(1, 6) # unknown model: assume current default rates
+  if (is.null(p)) p <- prices[[language_models[[default_model]]]] # unknown model: current default's rates
   (prompt_tokens * p[1] + completion_tokens * p[2]) / 1e6
 }
 
@@ -1285,17 +1286,9 @@ python_html <- function(python_code, select_data, current_data) {
 ### LLM API Functions ###
 
 resolve_provider <- function(api_key) {
-  key <- api_key$key
-  # Pasted OpenAI key (sk-...)
-  if (!is.null(key) && startsWith(key, "sk-"))
-    list(key = key, endpoint = NULL)
-  # Any other pasted key is an Azure key for azure_endpoint
-  else if (!is.null(key) && nchar(key) > 0)
-    list(key = key, endpoint = azure_endpoint)
-  # Nothing pasted: server's own Azure credentials
-  else
-    list(key      = Sys.getenv("AZURE_OPENAI_API_KEY"),
-         endpoint = azure_endpoint)
+  # shinylive branch: OpenAI only (keys are budget/model/expiry-limited in the OpenAI
+  # portal). endpoint = NULL means OpenAI's base URL in create_response().
+  list(key = api_key$key, endpoint = NULL)
 }
 
 # In the browser (shinylive/webR) httr can't open sockets. webR runs in a web
@@ -1316,8 +1309,8 @@ browser_post <- function(url, headers, body) {
     # install it (CRAN's unrelated "webr" package would be picked up instead)
     jsonlite::fromJSON(getExportedValue("webr", "eval_js")(js)),
     # OpenAI omits CORS headers on auth errors, so a wrong key also lands here
-    error = function(e) stop("Could not reach the AI service. Check that your API key ",
-                             "in the Settings tab is correct. (", conditionMessage(e), ")",
+    error = function(e) stop("Could not reach the AI service. Check that the key you pasted ",
+                             "under API Key is correct. (", conditionMessage(e), ")",
                              call. = FALSE)
   )
 }
@@ -1350,7 +1343,7 @@ create_response <- function(model, messages, key, endpoint = NULL, extra = list(
     paste0(sub("/?$", "/", endpoint), "openai/v1/responses")  # with or without trailing /
   }
   if (is.null(key) || !nzchar(key)) {
-    stop("No API key found. Paste your API key in the Settings tab.", call. = FALSE)
+    stop("No API key found. Click API Key at the top of the page and paste your key.", call. = FALSE)
   }
   headers <- if (is.null(endpoint)) {
     list(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))

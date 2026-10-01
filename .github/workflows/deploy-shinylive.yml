@@ -2,7 +2,7 @@
 # it to GitHub Pages. Based on posit-dev/r-shinylive's deploy-app workflow, which
 # only deploys from main.
 # Repo setup (admin): Pages source = GitHub Actions; allow uiuc_shinylive in the
-# github-pages environment's deployment branches; secret AZURE_OPENAI_API_ENDPOINT.
+# github-pages environment's deployment branches.
 name: Deploy UIUC RTutor (shinylive)
 
 on:
@@ -39,8 +39,6 @@ jobs:
           pak::pak(unique(renv::dependencies(c("app.R", "R", "inst"))$Package))
 
       - name: Build site
-        env:
-          AZURE_OPENAI_API_ENDPOINT: ${{ secrets.AZURE_OPENAI_API_ENDPOINT }}
         run: Rscript dev/build_shinylive.R
 
       - uses: actions/upload-pages-artifact@v5

@@ -40,9 +40,9 @@ test_that("fct_helpers.R no longer defines default_temperature", {
   expect_no_match(src, "default_temperature")
 })
 
-test_that("fct_helpers.R defines language_models containing gpt-5.6-luna", {
+test_that("fct_helpers.R defines language_models containing gpt-6-luna", {
   src <- r_file("fct_helpers.R")
-  expect_match(src, 'language_models\\s*<-\\s*c\\("gpt-5.6-luna"\\)')
+  expect_match(src, 'language_models\\s*<-\\s*c\\("gpt-6-luna"\\)')
 })
 
 
