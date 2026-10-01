@@ -24,6 +24,13 @@ devtools::test()
 testthat::test_file("tests/testthat/test-fct_helpers.R")
 ```
 
+**Build and serve the shinylive (browser-only) version** (`uiuc_shinylive` branch):
+```bash
+Rscript dev/build_shinylive.R   # copies app.R, R/, inst/ to a temp dir and exports to site/
+Rscript -e 'httpuv::runStaticServer("site")'
+```
+In the browser `in_browser` is TRUE: LLM calls go through `browser_post()` (sync XHR via webR), downloads use a fetch-to-blob workaround (`app_ui.R`), and server-only features (HTML report, EDA report, feedback form) are hidden. The loading screen is `dev/shinylive_loading.html`, injected into `site/index.html` by the build script. The API key is entered in a popup (`mod_11`), opened on startup and from the navbar's API Key button. Packages that student code uses but the build didn't bundle are installed from the webR repo on first use (`install_missing_packages()`). To keep the API key popup fast, the tidyverse is attached, the plotly output created, and the EDA module started only after the first flush (`app.R`, `mod_04`, `app_server.R`).
+
 **Regenerate documentation (roxygen2) and reload package:**
 ```r
 golem::document_and_reload()

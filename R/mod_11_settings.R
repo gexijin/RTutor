@@ -231,7 +231,7 @@ mod_11_settings_ui <- function(id) {
 
 
 mod_11_settings_serv <- function(id, submit_button, llm_prompt,
-                                 code_error) {
+                                 code_error, open_key_modal) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -291,6 +291,8 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
       if (!is.null(new_key) && nchar(new_key) > 0) {
         api_key$key <- new_key
         api_key$source <- "from user."
+      } else if (identical(isolate(api_key$source), "from user.")) {
+        # The popup reopens with an empty box; keep the key already pasted
       } else if (file.exists(file.path(getwd(), "api_key.txt"))) {
         api_key_file <- readLines(file.path(getwd(), "api_key.txt"))
         api_key_temp <- clean_api_key(api_key_file)
@@ -341,6 +343,7 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
     output$session_api_source <- renderText({
       key <- api_key$key
       source <- api_key$source
+      if (!nzchar(key)) return("No key entered yet.")
       paste0(
         substr(key, 1, 4),
         ".....",
@@ -348,6 +351,33 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
         " (", source, ")"
       )
     })
+
+    # API key popup: shown on startup and from the navbar's 'API Key' button.
+    # The key applies as it is pasted; Save just closes the popup.
+    key_modal <- function() {
+      modalDialog(
+        title = "API Key",
+        # Masked and always empty on open; 'Current API Key' shows which key is in use
+        passwordInput(
+          inputId = ns("api_key"),
+          label = h4("Paste your API key:"),
+          value = "",
+          placeholder = "Paste key here",
+          width = "100%"
+        ),
+        h4("Current API Key:"),
+        verbatimTextOutput(ns("session_api_source")),
+        footer = tagList(
+          modalButton("Close"),
+          actionButton(ns("save_key"), "Save", class = "custom-action-button",
+                       style = "font-size: inherit;")  # same size as Close
+        ),
+        easyClose = TRUE
+      )
+    }
+    showModal(key_modal())
+    observeEvent(open_key_modal(), showModal(key_modal()), ignoreInit = TRUE)
+    observeEvent(input$save_key, removeModal())
 
 
     # Use Python for results

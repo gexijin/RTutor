@@ -8,3 +8,5 @@ $run_dev.*
 ^README\.Rmd$
 ^doc$
 ^Meta$
+^app\.R$
+^\.github$

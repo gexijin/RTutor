@@ -129,7 +129,7 @@ mod_01_styles_ui <- function(id) {
       padding-top: 0px;
       display: flex;
       justify-content: center;
-      border: 50px solid #8FBBFF;
+      border: 50px solid #6B9EE8;
       color: #262626;
       text-align: left;
       flex-direction: column;

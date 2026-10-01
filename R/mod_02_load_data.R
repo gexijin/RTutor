@@ -49,7 +49,9 @@ mod_02_load_data_serv <- function(id, chunk_selection, current_data,
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    library(tidyverse) # otherwise built-in data is unavailable when running from R package.
+    # otherwise built-in data is unavailable when running from R package.
+    # In the browser this takes ~3s, so app.R attaches it after the page shows instead.
+    if (!in_browser) library(tidyverse)
 
     # First Dataset Upload ----------------------
     output$data_upload_ui <- renderUI({

@@ -1,0 +1,63 @@
+<!-- Loading screen for the shinylive build. dev/build_shinylive.R injects this into
+     site/index.html. The browser gives no real progress, so the bar moves on a timer,
+     slows as it nears 95%, and the overlay fades out once the app has connected. -->
+<style>
+  #rt-loading {
+    position: fixed; inset: 0; z-index: 9999; background: #F5F9FF;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 0 16px; text-align: center; transition: opacity 0.6s;
+  }
+  #rt-loading img { height: 90px; width: auto; margin-bottom: 12px; }
+  #rt-loading h1 { font-size: 28px; color: #13294B; margin: 0 0 24px; }
+  #rt-bar { width: min(420px, 100%); height: 12px; background: #dde3ec; border-radius: 6px; overflow: hidden; }
+  #rt-bar-fill { height: 100%; width: 2%; background: #E84A27; border-radius: 6px; transition: width 1s ease; }
+  #rt-msg { margin-top: 14px; font-size: 17px; color: #333; min-height: 1.4em; }
+  #rt-note { margin-top: 28px; font-size: 14px; color: #666; }
+</style>
+<div id="rt-loading">
+  <img src="logo_no_bckgrd.png" alt="">
+  <h1>UIUC RTutor</h1>
+  <div id="rt-bar"><div id="rt-bar-fill"></div></div>
+  <div id="rt-msg">Starting up…</div>
+  <div id="rt-note">RTutor runs entirely in your browser. Loading usually takes 15–30 seconds.</div>
+</div>
+<script>
+  (function () {
+    var steps = [
+      "Starting R in your browser…",
+      "Downloading the R engine…",
+      "Loading Shiny…",
+      "Loading the tidyverse…",
+      "Loading ggplot2 for plots…",
+      "Loading table tools…",
+      "Loading interactive plot tools…",
+      "Loading the code editor…",
+      "Preparing demo datasets…",
+      "Building the interface…",
+      "Connecting to R…",
+      "Almost ready…"
+    ];
+    var fill = document.getElementById("rt-bar-fill");
+    var msg = document.getElementById("rt-msg");
+    var i = 0, pct = 2;
+    var timer = setInterval(function () {
+      pct += (95 - pct) * 0.12;
+      fill.style.width = pct + "%";
+      if (i < steps.length) msg.textContent = steps[i++];
+    }, 3000);
+    var check = setInterval(function () {
+      var f = document.querySelector("iframe");
+      var w = f && f.contentWindow;
+      var ready = false;
+      try { ready = !!(w && w.Shiny && w.Shiny.shinyapp && w.Shiny.shinyapp.isConnected()); } catch (e) {}
+      if (!ready) return;
+      clearInterval(timer); clearInterval(check);
+      fill.style.width = "100%";
+      msg.textContent = "Ready!";
+      var o = document.getElementById("rt-loading");
+      setTimeout(function () { o.style.opacity = "0"; }, 400);
+      setTimeout(function () { o.remove(); }, 1100);
+    }, 500);
+  })();
+</script>

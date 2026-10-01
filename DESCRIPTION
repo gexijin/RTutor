@@ -18,7 +18,6 @@ Imports:
     shinybusy,
     shinyjs,
     plotly,
-    summarytools,
     DataExplorer,
     corrplot,
     tableone,

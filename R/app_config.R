@@ -9,7 +9,11 @@
 #'
 #' @noRd
 app_sys <- function(...) {
-  system.file(..., package = "RTutor")
+  # Not installed (shinylive runs from source via app.R): read from inst/ directly
+  # (package name in a variable so renv/shinylive don't treat RTutor as a dependency)
+  pkg <- "RTutor"
+  if (!nzchar(system.file(package = pkg))) return(file.path("inst", ...))
+  system.file(..., package = pkg)
 }
 
 

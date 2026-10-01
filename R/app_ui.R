@@ -59,8 +59,8 @@ app_ui <- function(request) {
             mod_02_load_data_ui("load_data"),
             mod_15_data_types_ui("data_edit_modal"),
             mod_03_send_request_ui("send_request"),
-            mod_16_qa_ui("qa")
-            #mod_17_policies_ui("policies")
+            mod_16_qa_ui("qa"),
+            mod_17_policies_ui("policies")  # footer Privacy Policy / Terms of Use links
           ),
 
           ### Main Panel ###
@@ -132,15 +132,13 @@ app_ui <- function(request) {
           title = HTML('<span style="color: black;font-size: 18px;">FAQ</span>'),
           value = "FAQ",
           mod_13_faq_ui("faq")
-        ),
-
-        ### 'Settings' Tab Panel ###
-        tabPanel(
-          title = HTML('<span style="color: black;font-size: 18px;">Settings</span>'),
-          value = "Settings",
-          ### Settings Module ###
-          mod_11_settings_ui("sett")
         )
+      ),
+
+      ### 'API Key' navbar button ###
+      # Opens the API key popup (mod_11) instead of a tab
+      bslib::nav_item(
+        actionLink("api_key_btn", HTML('<span style="color: black;font-size: 18px;">API Key</span>'))
       ),
 
       ### Hidden Policies Tabs ###
@@ -148,7 +146,24 @@ app_ui <- function(request) {
       tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content())
     ),
 
-    tags$head(includeHTML(app_sys("app", "www", "ga.html")))
+    tags$head(includeHTML(app_sys("app", "www", "ga.html"))),
+
+    # shinylive: a download link's native navigation bypasses the service worker
+    # and fails, so fetch the file (which does go through it) and save it as a blob.
+    if (in_browser) tags$script(HTML("
+      $(document).on('click', 'a.shiny-download-link', function (e) {
+        e.preventDefault();
+        fetch(this.href).then(function (r) {
+          var m = /filename=\"?([^\";]+)/.exec(r.headers.get('content-disposition') || '');
+          return r.blob().then(function (b) {
+            var u = URL.createObjectURL(b), t = document.createElement('a');
+            t.href = u; t.download = m ? m[1] : 'download';
+            document.body.appendChild(t); t.click(); t.remove();
+            setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
+          });
+        });
+      });
+    "))
   )
 }
 

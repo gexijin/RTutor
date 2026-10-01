@@ -59,6 +59,15 @@ Format your entire response in Markdown only. Use headers, bullet points, bold, 
 # If this file exists, running on the server. Otherwise local. This is used to change app behavior.
 on_server <- "on_server.txt"
 
+# TRUE when running in the browser via shinylive/webR (no server, no pandoc, no sockets)
+in_browser <- R.version$os == "emscripten"
+
+# Azure endpoint used for pasted non-OpenAI keys. On a server it comes from the
+# AZURE_OPENAI_API_ENDPOINT env var. The browser has no env vars, so
+# dev/build_shinylive.R writes the build machine's value (the repo's Actions secret
+# in CI) over the placeholder below. Never commit the real URL here.
+azure_endpoint <- Sys.getenv("AZURE_OPENAI_API_ENDPOINT", "__AZURE_OPENAI_API_ENDPOINT__")
+
 # Named character vector: function name -> reason it is blocked.
 # Used by validate_r_code() for AST-based pre-execution security checks.
 BLOCKED_FNS <- c(
@@ -989,7 +998,8 @@ clean_cmd <- function(cmd, selected_data, on_server = FALSE) {
   )
 
   # use pacman, load if installed; otherwise install it first then load.
-  if (!on_server) {
+  # Not in the browser: pacman installs from CRAN source, which webR can't build.
+  if (!on_server && !in_browser) {
     cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
   }
   #if (selected_data != no_data) {
@@ -1275,13 +1285,60 @@ python_html <- function(python_code, select_data, current_data) {
 ### LLM API Functions ###
 
 resolve_provider <- function(api_key) {
-  # If = OpenAI provider
-  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && isTRUE(api_key$switch_on))
-    list(key = api_key$key, endpoint = NULL)
-  # else = Azure OpenAI provider
+  key <- api_key$key
+  # Pasted OpenAI key (sk-...)
+  if (!is.null(key) && startsWith(key, "sk-"))
+    list(key = key, endpoint = NULL)
+  # Any other pasted key is an Azure key for azure_endpoint
+  else if (!is.null(key) && nchar(key) > 0)
+    list(key = key, endpoint = azure_endpoint)
+  # Nothing pasted: server's own Azure credentials
   else
     list(key      = Sys.getenv("AZURE_OPENAI_API_KEY"),
-         endpoint = Sys.getenv("AZURE_OPENAI_API_ENDPOINT"))
+         endpoint = azure_endpoint)
+}
+
+# In the browser (shinylive/webR) httr can't open sockets. webR runs in a web
+# worker, where a synchronous XMLHttpRequest is allowed, so callers stay synchronous.
+browser_post <- function(url, headers, body) {
+  js <- paste0(
+    "(() => {",
+    "const x = new XMLHttpRequest();",
+    "x.open('POST', ", jsonlite::toJSON(url, auto_unbox = TRUE), ", false);",
+    "const h = ", jsonlite::toJSON(headers, auto_unbox = TRUE), ";",
+    "for (const k in h) x.setRequestHeader(k, h[k]);",
+    "x.send(", jsonlite::toJSON(as.character(body), auto_unbox = TRUE), ");",
+    "return JSON.stringify({status: x.status, body: x.responseText});",
+    "})()"
+  )
+  tryCatch(
+    # webr ships inside webR; looked up by name so renv/shinylive don't try to
+    # install it (CRAN's unrelated "webr" package would be picked up instead)
+    jsonlite::fromJSON(getExportedValue("webr", "eval_js")(js)),
+    # OpenAI omits CORS headers on auth errors, so a wrong key also lands here
+    error = function(e) stop("Could not reach the AI service. Check that your API key ",
+                             "in the Settings tab is correct. (", conditionMessage(e), ")",
+                             call. = FALSE)
+  )
+}
+
+# The browser only has the packages bundled at build time. Packages that student
+# code names via library()/require()/pkg:: and that aren't installed are downloaded
+# from the webR repo, which costs a few seconds the first time in a visit.
+install_missing_packages <- function(code) {
+  code <- paste(code, collapse = "\n")
+  pkgs <- c(
+    regmatches(code, gregexpr("[A-Za-z][A-Za-z0-9.]*(?=:::?)", code, perl = TRUE))[[1]],
+    sub(".*\\(\\s*[\"']?", "", regmatches(code, gregexpr(
+      "\\b(library|require|requireNamespace)\\s*\\(\\s*[\"']?[A-Za-z][A-Za-z0-9.]*", code, perl = TRUE))[[1]])
+  )
+  missing <- setdiff(unique(pkgs), rownames(utils::installed.packages()))
+  if (length(missing) == 0) return(invisible())
+  message("[PKG] installing from webR repo: ", paste(missing, collapse = ", "))
+  # webr ships inside webR; looked up by name for the same reason as in browser_post()
+  tryCatch(getExportedValue("webr", "install")(missing, quiet = TRUE),
+           error = function(e) message("[PKG] install failed: ", conditionMessage(e)))
+  invisible()
 }
 
 
@@ -1290,23 +1347,30 @@ create_response <- function(model, messages, key, endpoint = NULL, extra = list(
   url <- if (is.null(endpoint)) {
     "https://api.openai.com/v1/responses"
   } else {
-    paste0(endpoint, "openai/v1/responses")
+    paste0(sub("/?$", "/", endpoint), "openai/v1/responses")  # with or without trailing /
+  }
+  if (is.null(key) || !nzchar(key)) {
+    stop("No API key found. Paste your API key in the Settings tab.", call. = FALSE)
   }
   headers <- if (is.null(endpoint)) {
-    httr::add_headers(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))
+    list(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))
   } else {
-    httr::add_headers(`Content-Type` = "application/json", `api-key` = key)
+    list(`Content-Type` = "application/json", `api-key` = key)
+  }
+  body <- jsonlite::toJSON(c(list(model = model, input = messages), extra), auto_unbox = TRUE)
+
+  response <- if (in_browser) {
+    browser_post(url, headers, body)
+  } else {
+    r <- httr::POST(url, do.call(httr::add_headers, headers), body = body)
+    list(status = httr::status_code(r), body = httr::content(r, as = "text", encoding = "UTF-8"))
   }
 
-  response <- httr::POST(url, headers, body = c(list(model = model, input = messages), extra), encode = "json")
+  parsed <- jsonlite::fromJSON(response$body, flatten = FALSE)
 
-  parsed <- response %>%
-    httr::content(as = "text", encoding = "UTF-8") %>%
-    jsonlite::fromJSON(flatten = FALSE)
-
-  if (httr::http_error(response)) {
+  if (response$status >= 400) {
     stop(paste0(
-      "Responses API request failed [", httr::status_code(response), "]:\n\n",
+      "Responses API request failed [", response$status, "]:\n\n",
       parsed$error$message
     ), call. = FALSE)
   }

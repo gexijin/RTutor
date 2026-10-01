@@ -328,14 +328,18 @@ app_server <- function(input, output, session) {
 
   #         Module 10 - 'EDA'
   # __________________________________
-  mod_10 <- mod_10_eda_serv(
-    id = "eda",
-    selected_dataset_name = selected_dataset_name,
-    use_python = use_python,
-    current_data = current_data,
-    current_data_2 = current_data_2,
-    ch = ch
-  )
+  # Started after the first flush: its outputs load plotly & co., ~3s in the
+  # browser, which would otherwise delay the page and the API key popup.
+  session$onFlushed(function() {
+    mod_10_eda_serv(
+      id = "eda",
+      selected_dataset_name = selected_dataset_name,
+      use_python = use_python,
+      current_data = current_data,
+      current_data_2 = current_data_2,
+      ch = ch
+    )
+  }, once = TRUE)
 
 
 
@@ -345,7 +349,8 @@ app_server <- function(input, output, session) {
     id = "sett",
     submit_button = submit_button,
     llm_prompt = llm_prompt,
-    code_error = code_error
+    code_error = code_error,
+    open_key_modal = reactive(input$api_key_btn)
   )
 
   # Module 11 - Outputs

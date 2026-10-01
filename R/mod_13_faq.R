@@ -29,7 +29,8 @@ mod_13_faq_ui <- function(id) {
           });
         '))
       ),
-      column(
+      # Feedback is saved to the server's SQLite db, so there's nowhere to send it from the browser
+      if (!in_browser) column(
         width = 6,
         h2("Comments & Questions",
           style = "font-weight: bold;padding-left: 20px;color: black;"

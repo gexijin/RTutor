@@ -79,6 +79,9 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
         result <- tryCatch({
           cleaned_code <- clean_cmd(logs$code, selected_dataset_name(), file.exists(on_server))
 
+          # Browser: download packages the code uses that weren't bundled (first use only)
+          if (in_browser) install_missing_packages(cleaned_code)
+
           # Pre-attach packages used via 'pkg::fn()' so S3/S4 methods dispatch correctly.
           # Using pkg:: only loads the namespace; S3 methods require the package to be attached.
           ns_pkgs <- unique(regmatches(

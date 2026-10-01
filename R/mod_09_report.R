@@ -259,6 +259,7 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name
 
     output$html_report <- renderUI({
       req(llm_response()$cmd)
+      req(!in_browser)  # rmarkdown::render needs pandoc, which the browser doesn't have
       tagList(
         actionButton(
           inputId = ns("report"),

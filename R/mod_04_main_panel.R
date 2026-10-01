@@ -10,6 +10,11 @@ mod_04_main_panel_ui <- function(id) {
 
   tagList(
 
+    # Hidden editor so shinyAce's <head> scripts load with the page. When they first
+    # arrive via renderUI they're fetched with a synchronous XHR, which shinylive
+    # can't serve, and the code editor stays blank.
+    div(style = "display: none;", shinyAce::aceEditor(ns("ace_preload"))),
+
     # 'First Time User' tab redirect
     tags$script(HTML("
     /* Update the active tab to 'First Time User' within the 'More' navbarMenu */
@@ -755,25 +760,30 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
     }
 
     # Plot results - plotly
-    output$result_plotly <- plotly::renderPlotly({
-      req(!code_error())
-      req(!use_python())
-      req(!is.null(run_result()$result))
-      req(
-        is_interactive_plot() ||   # natively interactive
-          turned_on(input$make_ggplot_interactive)
-      )
+    # Creating this output loads plotly (and ggplot2/dplyr with it): ~3s in the
+    # browser. Defining it after the first flush lets the page and the API key
+    # popup appear first; no plot can exist before then anyway.
+    session$onFlushed(function() {
+      output$result_plotly <- plotly::renderPlotly({
+        req(!code_error())
+        req(!use_python())
+        req(!is.null(run_result()$result))
+        req(
+          is_interactive_plot() ||   # natively interactive
+            turned_on(input$make_ggplot_interactive)
+        )
 
-      g <- run_result()$result
-      # coord_polar (ggplot pie charts) cannot be converted to plotly — skip
-      req(!is_polar_ggplot(g))
-      # still errors some times, when the returned list is not a plot
-      if (is.character(g) || is.data.frame(g) || is.numeric(g)) {
-        return(NULL)
-      } else {
-        return(g)
-      }
-    })
+        g <- run_result()$result
+        # coord_polar (ggplot pie charts) cannot be converted to plotly — skip
+        req(!is_polar_ggplot(g))
+        # still errors some times, when the returned list is not a plot
+        if (is.character(g) || is.data.frame(g) || is.numeric(g)) {
+          return(NULL)
+        } else {
+          return(g)
+        }
+      })
+    }, once = TRUE)
 
     # Plot results - canvasXpress
     output$result_CanvasXpress <- canvasXpress::renderCanvasXpress({
