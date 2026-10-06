@@ -35,10 +35,10 @@ o <- read.csv("tests/prompt_quality_tests.csv", stringsAsFactors = FALSE)
 cases$old <- data.frame(
   source = "old", dataset = sub(" \\(.*", "", o$dataset), prompt = o$prompt,
   follow_up = grepl("after", o$dataset), expected = o$expected_verdict, stringsAsFactors = FALSE)
-# Professor Rao's feedback (Oct 2026): a bare "graph" must be flagged, but a prompt that names
+# feedback (Oct 2026): a bare "graph" must be flagged, but a prompt that names
 # the kind of plot must not be, even when it also uses the verb "graph".
-cases$rao <- data.frame(
-  source = "rao", dataset = c("Diet Interaction", "Acupuncture", "Diet Interaction"),
+cases$new_feedback <- data.frame(
+  source = "new_feedback", dataset = c("Diet Interaction", "Acupuncture", "Diet Interaction"),
   prompt = c("make a graph with 'Protein' attribute",
              "Please graph the headache severity baseline as a histogram.",
              "Graph a histogram of protein"),
