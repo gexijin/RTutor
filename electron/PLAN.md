@@ -79,7 +79,7 @@ on_desktop <- function() nzchar(Sys.getenv("RTUTOR_DESKTOP"))
   `pacman::p_load(x)`, which installs from CRAN. On desktop that would try to write into the read-only app folder.
   Change the condition to `if (!on_server && !on_desktop)`.
 - Missing-package message (`mod_07_run_code.R`, where `error_message` is set): if the error matches
-  `there is no package called ‘x’`, add *"Package x isn't included in the UIUC RTutor desktop app. Try asking for
+  `there is no package called ‘x’`, add *"Package x isn't available in the UIUC RTutor desktop app. Try asking for
   the analysis without it."* The error-explanation tutor (`explain_error`) still runs as usual.
 - Upload limit: desktop takes the existing non-server branch in `app_server.R:20` (10 GB). No change.
 
@@ -175,7 +175,7 @@ Rebrand to "UIUC RTutor", version from `app.getVersion()`, and the RTutor logo. 
 - `name`: `uiuc-rtutor-desktop`. This also names the userData folder.
 - `productName`: `UIUC RTutor`. `version`: `1.0.0`. `description`, `author`, `repository` →
   gexijin/RTutor. `license` taken from RTutor's DESCRIPTION.
-- dependencies: `dotenv` only. devDependencies: `electron` 39.8.4, `electron-builder` ^26.8.2.
+- dependencies: `dotenv` only. devDependencies: `electron` 43.7.8 (see §12), `electron-builder` ^26.8.2.
 - Scripts: `start`, `dist`. Drop `dev`.
 - `build.appId`: `ai.rtutor.uiuc.desktop`. `asar: false` (R needs real files).
 - `files`: `main.js`, `updater.js`, `bootstrap.R`, `splash.html`, `.env`, `package.json`, `node_modules/**`.
@@ -354,7 +354,7 @@ guide.
 Written step by step, with places marked `![screenshot: ...]` for Jenna's screenshots. Images go in
 `electron/install-images/`.
 
-**macOS** (Apple Silicon, macOS 12 Monterey or later, which Electron 39 requires):
+**macOS** (Apple Silicon, macOS 12 Monterey or later, which Electron 43 requires):
 1. Download `UIUC-RTutor-X-mac-arm64.dmg` from the release page.
 2. Open the DMG and drag UIUC RTutor to Applications.
 3. Open it from Applications. macOS says it "cannot verify UIUC RTutor is free of malware". Click **Done** (not
@@ -468,12 +468,19 @@ None. Repo access was confirmed on 2026-10-06:
   action-gh-release v3). `actionlint` reports no problems.
 - **The Mac runtime test hides the runner's R** (`/Library/Frameworks/R.framework` and `/opt/R`) while it runs, so it
   proves the bundle works on a Mac without R.
-- **`summarytools` may not load on Macs.** It imports `tcltk`, which needs CRAN's optional Tcl/Tk under `/opt/R`. Only
-  the EDA tab uses it, and that tab is hidden in UIUC RTutor. The runtime test reports it as a warning rather than a
-  failure.
+- **`summarytools` doesn't load on Macs** (confirmed by the first CI build). It imports `tcltk`, which needs Tcl/Tk
+  and XQuartz, and students' Macs have neither. Bundling them isn't worth it for one package. Only the EDA tab uses
+  it in the app, and that tab is hidden in UIUC RTutor. For generated code, `desktop_package_note()` also catches
+  packages that are installed but fail to load, so students get the "isn't available in the desktop app" message
+  instead of a tcltk error. The runtime test reports it as a warning, and the coverage check flags it.
 - **Coverage-check prompts:** `uiuc_demo_questions.csv` holds a single real prompt (the rest are jokes). The check
   therefore runs the ~118 prompts in `demo_questions.csv` plus 10 typical course requests against each of the 13 UIUC
   datasets, 243 prompts in all.
 - **External links open in the system browser** (`setWindowOpenHandler`), so the "expired" popup's link works.
   Links back to the app (report downloads) keep Electron's default behavior.
 - **Windows `R_USER`** points at the writable data folder (§3.2).
+- **Electron 43.7.8, not 39.8.4.** 39 is past end of life (only the newest three majors get fixes) and `npm audit`
+  flagged high-severity advisories in it. 43 fixes them all and still runs on macOS 12. **Electron 44 requires
+  macOS 13**, so moving past 43 raises the Mac minimum. When rebuilding each semester, bump to the newest 43.x
+  patch while it is supported. Remaining `npm audit` findings are in build tools only, which aren't shipped
+  (`npm audit --omit=dev` is clean).

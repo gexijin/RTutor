@@ -21,7 +21,7 @@
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "electron": "39.8.4",
+    "electron": "43.7.8",
     "electron-builder": "^26.8.2"
   },
   "build": {
