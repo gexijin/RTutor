@@ -748,6 +748,17 @@ quality_off_topic_rules <- paste0(
 #   ok          -> `suggestions` may hold optional, non-blocking improvements
 # off_topic_only = TRUE (follow-up prompts) checks nothing but topic.
 # Fails open: any API or parse error returns "ok" so students are never blocked by an outage.
+# TRUE when the model's output_type is only a generic word, as in "make a graph of Protein":
+# that names no kind of plot. A real kind ("histogram", "bar graph") passes even when the
+# prompt also says "graph" ("Graph a histogram of protein"). "table" is not listed: "a table
+# of X" usually means a frequency table, and blocking it would be too strict.
+is_generic_output_type <- function(output_type) {
+  type <- tolower(trimws(paste(unlist(output_type), collapse = " ")))
+  type <- sub("s$", "", sub("^(a|an|the|some)\\s+", "", type))  # "a graph", "plots"
+  type %in% c("graph", "plot", "chart", "figure", "visual", "visualization", "visualisation",
+              "diagram", "image", "picture", "graphic")
+}
+
 check_prompt_quality <- function(prompt, dataset_name = "", col_names = character(0),
                                  col_types = character(0), off_topic_only = FALSE) {
   fail_open <- list(verdict = "ok", missing = character(0), suggestions = character(0), usage = NULL)
@@ -872,7 +883,7 @@ check_prompt_quality <- function(prompt, dataset_name = "", col_names = characte
   gate_on <- vague_check_enabled && !off_topic_only && isTRUE(parsed$plot_or_table)
   core <- c(
     "Name the kind of plot or table you want (for example a scatterplot, bar graph, or two-way table)." =
-      is.null(parsed$output_type),
+      is.null(parsed$output_type) || is_generic_output_type(parsed$output_type),
     "Name the column(s) from your dataset to use." = length(parsed$variables) == 0,
     "Say which variable plays which role: x-axis vs y-axis, rows vs columns, or row vs column percentages." =
       isTRUE(parsed$roles_needed) && !isTRUE(parsed$roles_given)

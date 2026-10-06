@@ -67,6 +67,12 @@ mod_01_styles_ui <- function(id) {
     [id$='quality_tip'] ul { margin: 6px 0 0 0; padding-left: 22px; }
     [id$='quality_tip'] .shiny-notification-close { color: #ffffff; opacity: 0.8; }
 
+    /* Check Again (mod_03): yellow, matching the prompt-check feedback box */
+    .check-again-button { background-color: #ffc107; border-color: #e0a800; color: #000; }
+    .check-again-button:hover, .check-again-button:focus, .check-again-button:active {
+      background-color: #e0a800; border-color: #c69500; color: #000;
+    }
+
     /* active tab */
     .navbar-default .navbar-nav > .active > a,
     .navbar-default .navbar-nav > .active > a:focus,
