@@ -79,7 +79,8 @@ for (i in seq_len(nrow(cases))) {
   request <- prep_input(cases$prompt[i], cases$dataset[i], df, FALSE, 1, TRUE, NULL)
   messages <- list(list(role = "system", content = system_role), list(role = "user", content = request))
   code <- tryCatch(
-    create_response(language_models[[default_model]], messages)$choices[[1, "message.content"]],
+    # same reasoning effort as the app's code generation (mod_05 llm_agent)
+    create_response(language_models[[default_model]], messages, extra = effort_low)$choices[[1, "message.content"]],
     error = function(e) { message("  call failed: ", conditionMessage(e)); NA }
   )
   if (is.na(code)) { failed <- failed + 1; next }
