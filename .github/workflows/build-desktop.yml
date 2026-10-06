@@ -1,0 +1,470 @@
+name: Build UIUC RTutor Desktop
+
+# Pushes to uiuc_electron build test installers (downloadable from the run's Artifacts).
+# A uiuc-desktop-v* tag builds both installers and attaches them to ONE draft release,
+# which is published by hand after testing (see electron/README.md).
+on:
+  push:
+    branches: [uiuc_electron]
+    tags: ["uiuc-desktop-v*"]
+  workflow_dispatch:
+
+# A newer push to the same branch cancels the older build. Tag builds are never cancelled.
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  # R 4.5.x supports macOS 11+; R 4.6 needs macOS 14. Change in both get_r_* scripts too.
+  R_VERSION: "4.5.3"
+  PANDOC_VERSION: "3.11"
+  # GitHub's per-file release limit is 2 GB. If this trips, trim course_list in install_packages.R.
+  MAX_INSTALLER_MB: "1900"
+
+jobs:
+  mac:
+    name: macOS (Apple Silicon)
+    runs-on: macos-26
+    timeout-minutes: 150
+    defaults:
+      run:
+        shell: bash
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # The DMG step mounts a temporary volume and copies the entire .app into
+      # it, so it needs roughly TWICE the bundle size free. Keep the ACTIVE
+      # Xcode; only unused versions and simulator runtimes are removed.
+      - name: Free disk space
+        run: |
+          set -uo pipefail
+          df -h /
+          sudo rm -rf ~/Library/Developer/CoreSimulator/Caches || true
+          sudo rm -rf /Library/Developer/CoreSimulator/Profiles/Runtimes || true
+          ACTIVE_XCODE="$(xcode-select -p | sed 's|/Contents/Developer.*||')"
+          for x in /Applications/Xcode_*.app; do
+            [ -e "$x" ] || continue
+            if [ "$x" != "$ACTIVE_XCODE" ]; then sudo rm -rf "$x" || true; fi
+          done
+          df -h /
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
+
+      - name: Install npm deps
+        working-directory: electron
+        run: npm ci
+
+      # electron/package.json "version" is the release version; the tag must match it.
+      - name: Verify tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/uiuc-desktop-v')
+        working-directory: electron
+        run: |
+          set -euo pipefail
+          TAG_VER="${GITHUB_REF_NAME#uiuc-desktop-v}"
+          PKG_VER="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VER" != "$PKG_VER" ]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match electron/package.json version '$PKG_VER'. See electron/README.md."
+            exit 1
+          fi
+
+      # The class's OpenAI key. Passed through env (never interpolated into the
+      # script) and never echoed. Forks and missing secrets fail here.
+      - name: Write electron/.env from the DOG_LOVER secret
+        working-directory: electron
+        env:
+          OPENAI_API_KEY: ${{ secrets.DOG_LOVER }}
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "::error::The DOG_LOVER secret is empty or not available to this run."
+            exit 1
+          fi
+          umask 077
+          printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY" > .env
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ env.R_VERSION }}
+
+      # Mirror R.home() into runtime/R.framework/Resources, then patch
+      # hardcoded /Library/Frameworks paths in bin/R so the runtime is
+      # relocatable inside the .app bundle.
+      - name: Stage R.framework
+        run: |
+          set -euo pipefail
+          RHOME=$(Rscript -e "cat(R.home())")
+          dst="electron/runtime/R.framework/Resources"
+          mkdir -p "$dst"
+          rsync -a "${RHOME}/" "${dst}/"
+          chmod +x "${dst}/bin/Rscript"
+          bash electron/scripts/patch_r_mac.sh "$dst"
+
+      # rmarkdown shells out to pandoc, which is not an R package.
+      # main.js getRuntime() points RSTUDIO_PANDOC at this folder.
+      - name: Stage pandoc
+        run: |
+          set -euo pipefail
+          dest="electron/runtime/pandoc.mac"
+          tmp="$(mktemp -d)"
+          curl -fL --retry 3 -o "$tmp/pandoc.zip" \
+            "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-arm64-macOS.zip"
+          ditto -x -k "$tmp/pandoc.zip" "$tmp/extracted"
+          mkdir -p "$dest"
+          cp "$tmp/extracted/pandoc-${PANDOC_VERSION}-arm64/bin/pandoc" "$dest/pandoc"
+          chmod +x "$dest/pandoc"
+
+      # The restore-keys fallback keys on install_packages.R alone, so a DESCRIPTION
+      # change reuses the previous library and only installs what changed. Changing
+      # install_packages.R (list or snapshot date) reinstalls everything clean.
+      - name: Restore bundled R library cache
+        id: r-lib-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: electron/runtime/R.framework/Resources/library
+          key: rlib-mac-arm64-R${{ env.R_VERSION }}-${{ hashFiles('electron/scripts/install_packages.R') }}-${{ hashFiles('DESCRIPTION') }}
+          restore-keys: |
+            rlib-mac-arm64-R${{ env.R_VERSION }}-${{ hashFiles('electron/scripts/install_packages.R') }}-
+
+      # R_LIBS_USER=NULL (the literal string) means "no user library", so installs
+      # never skip packages that happen to exist elsewhere on the runner.
+      - name: Install R packages (PPM snapshot)
+        if: steps.r-lib-cache.outputs.cache-hit != 'true'
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          R_RES="$PWD/electron/runtime/R.framework/Resources"
+          R_LIBS_USER=NULL "$R_RES/bin/Rscript" --vanilla electron/scripts/install_packages.R "$R_RES/library"
+
+      # Saved before RTutor itself is installed, so the cache holds only dependencies.
+      # Tag builds cannot share branch caches (GitHub scoping), so they never save.
+      - name: Save bundled R library cache
+        if: steps.r-lib-cache.outputs.cache-hit != 'true' && !startsWith(github.ref, 'refs/tags/')
+        uses: actions/cache/save@v6
+        with:
+          path: electron/runtime/R.framework/Resources/library
+          key: ${{ steps.r-lib-cache.outputs.cache-primary-key }}
+
+      - name: Build and install RTutor into the bundled library
+        env:
+          _R_CHECK_FORCE_SUGGESTS_: "false"
+        run: |
+          set -euo pipefail
+          R_RES="$PWD/electron/runtime/R.framework/Resources"
+          "$R_RES/bin/R" CMD build . --no-build-vignettes --no-manual
+          tarball=$(ls -1t RTutor_*.tar.gz | head -n1)
+          R_LIBS="$R_RES/library" R_LIBS_USER="$R_RES/library" \
+            "$R_RES/bin/R" CMD INSTALL --library="$R_RES/library" "$tarball"
+
+      # CRAN bakes /Library/Frameworks paths into every Mach-O, and dyld tries
+      # those BEFORE any fallback. Rewrite them to bundle-relative paths, then
+      # fail on anything still pointing at the build machine.
+      - name: Sever host-framework references
+        run: |
+          set -euo pipefail
+          bash electron/scripts/relocate_install_names_mac.sh electron/runtime/R.framework/Resources
+          bash electron/scripts/verify_no_host_deps_mac.sh electron/runtime
+
+      # Hides the runner's own R and CRAN's /opt/R while the test runs, so it
+      # proves the bundle works on a Mac that has neither (like a student's).
+      - name: Test bundled R runtime (host R hidden)
+        run: |
+          set -euo pipefail
+          R_RES="$(cd electron/runtime/R.framework/Resources && pwd -P)"
+          PANDOC_DIR="$(cd electron/runtime/pandoc.mac && pwd -P)"
+          restore() {
+            sudo mv /Library/Frameworks/R.framework.hidden /Library/Frameworks/R.framework 2>/dev/null || true
+            sudo mv /opt/R.hidden /opt/R 2>/dev/null || true
+          }
+          trap restore EXIT
+          sudo mv /Library/Frameworks/R.framework /Library/Frameworks/R.framework.hidden
+          if [ -d /opt/R ]; then sudo mv /opt/R /opt/R.hidden; fi
+          RHOME="$R_RES" R_HOME="$R_RES" DYLD_FALLBACK_LIBRARY_PATH="$R_RES/lib" \
+          R_LIBS_USER="$R_RES/library" R_LIBS="" R_LIBS_SITE="" RSTUDIO_PANDOC="$PANDOC_DIR" \
+            "$R_RES/bin/Rscript" --vanilla electron/scripts/test_runtime.R "$R_RES/library"
+
+      - name: Prune R library (docs, examples, tests)
+        run: |
+          set -euxo pipefail
+          R_LIB="electron/runtime/R.framework/Resources/library"
+          find "$R_LIB" -type d \( \
+            -name help -o -name doc -o -name docs -o \
+            -name html -o -name examples -o -name demo -o \
+            -name tests -o -name testthat -o -name unitTests -o \
+            -name vignettes \
+          \) -prune -exec rm -rf {} +
+          find "$R_LIB" \( -name "*.so" -o -name "*.dylib" \) -exec strip -x {} \; || true
+
+      # Built in two phases to halve peak disk: package and ad-hoc sign the .app,
+      # delete the now-redundant staging copy, then build the DMG from the .app.
+      - name: Build phase 1 (package and ad-hoc sign the .app)
+        working-directory: electron
+        run: |
+          set -euxo pipefail
+          sudo sysctl -w kern.maxfiles=65536
+          sudo sysctl -w kern.maxfilesperproc=65536
+          ulimit -n 65536
+          npx electron-builder --mac --dir --publish=never
+
+      - name: Reclaim staging space before building the DMG
+        working-directory: electron
+        run: |
+          set -uo pipefail
+          APP_PATH="$(ls -d dist/mac*/*.app | head -n1)"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "::error::No packaged .app found; refusing to delete staging."
+            exit 1
+          fi
+          rm -rf runtime
+          df -h /
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+      # dmg.size must be set explicitly: dmgbuild sizes the image from file sizes
+      # alone and runs out of space with an R library's many small files.
+      # Oversizing is free; the image is shrunk before compression.
+      - name: Build phase 2 (DMG from the packaged app)
+        working-directory: electron
+        run: |
+          set -euxo pipefail
+          ulimit -n 65536
+          APP_MB=$(du -sm "$APP_PATH" | cut -f1)
+          DMG_MB=$(( APP_MB * 5 / 4 + 512 ))
+          npx electron-builder --mac dmg --prepackaged "$APP_PATH" \
+            -c.dmg.size="${DMG_MB}m" --publish=never
+          ls -lh dist/*.dmg
+
+      # Apple Silicon refuses to run unsigned code, so every nested binary must
+      # carry at least an ad-hoc signature.
+      - name: Verify ad-hoc signature and host dependencies
+        run: |
+          set -euo pipefail
+          APP="$(ls -d electron/dist/mac*/*.app | head -n1)"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          unsigned=0
+          checked=0
+          while IFS= read -r f; do
+            codesign --verify --strict "$f" 2>/dev/null || unsigned=$((unsigned + 1))
+            checked=$((checked + 1))
+            [ "$checked" -lt 50 ] || break
+          done < <(find "$APP" -name "*.so" -type f)
+          if [ "$unsigned" -gt 0 ]; then
+            echo "::error::${unsigned} of ${checked} sampled .so files are unsigned."
+            exit 1
+          fi
+          bash electron/scripts/verify_no_host_deps_mac.sh "$APP/Contents/Resources/runtime"
+
+      - name: Check installer size
+        run: |
+          set -euo pipefail
+          f="$(ls electron/dist/*.dmg | head -n1)"
+          mb=$(( $(stat -f%z "$f") / 1048576 ))
+          echo "macOS installer: $(basename "$f") = ${mb} MB" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$mb" -gt "$MAX_INSTALLER_MB" ]; then
+            echo "::error::Installer is ${mb} MB, over the ${MAX_INSTALLER_MB} MB limit. Trim course_list in electron/scripts/install_packages.R."
+            exit 1
+          fi
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v7
+        with:
+          name: mac-dmg
+          path: electron/dist/*.dmg
+          if-no-files-found: error
+          retention-days: 14
+
+  windows:
+    name: Windows (x64)
+    runs-on: windows-2025
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
+
+      - name: Install npm deps
+        working-directory: electron
+        run: npm ci
+
+      - name: Verify tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/uiuc-desktop-v')
+        shell: bash
+        working-directory: electron
+        run: |
+          set -euo pipefail
+          TAG_VER="${GITHUB_REF_NAME#uiuc-desktop-v}"
+          PKG_VER="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VER" != "$PKG_VER" ]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match electron/package.json version '$PKG_VER'. See electron/README.md."
+            exit 1
+          fi
+
+      - name: Write electron/.env from the DOG_LOVER secret
+        shell: bash
+        working-directory: electron
+        env:
+          OPENAI_API_KEY: ${{ secrets.DOG_LOVER }}
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "::error::The DOG_LOVER secret is empty or not available to this run."
+            exit 1
+          fi
+          printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY" > .env
+
+      - name: Setup R (with Rtools)
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ env.R_VERSION }}
+          rtools-version: '45'
+
+      - name: Stage R.win (mirror R.home into runtime/R.win)
+        run: |
+          $RHOME = & Rscript -e "cat(R.home())"
+          if (-not $RHOME) { throw "Could not get R.home()" }
+          $dst = "electron\runtime\R.win"
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          robocopy "$RHOME" "$dst" /MIR /NFL /NDL /NJH /NJS /NP /R:2 /W:2
+          if ($LASTEXITCODE -ge 8) { throw "robocopy failed with code $LASTEXITCODE" }
+          $global:LASTEXITCODE = 0
+
+      - name: Stage pandoc
+        run: |
+          $dest = "electron\runtime\pandoc.win"
+          $tmp = Join-Path $env:TEMP ("pandoc_" + [Guid]::NewGuid())
+          $zip = Join-Path $tmp "pandoc.zip"
+          New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+          Invoke-WebRequest -Uri "https://github.com/jgm/pandoc/releases/download/$env:PANDOC_VERSION/pandoc-$env:PANDOC_VERSION-windows-x86_64.zip" -OutFile $zip -UseBasicParsing
+          Expand-Archive -Path $zip -DestinationPath $tmp -Force
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Copy-Item -Force -Path (Join-Path $tmp "pandoc-$env:PANDOC_VERSION\pandoc.exe") -Destination (Join-Path $dest "pandoc.exe")
+
+      - name: Restore bundled R library cache
+        id: r-lib-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: electron/runtime/R.win/library
+          key: rlib-win-x64-R${{ env.R_VERSION }}-${{ hashFiles('electron/scripts/install_packages.R') }}-${{ hashFiles('DESCRIPTION') }}
+          restore-keys: |
+            rlib-win-x64-R${{ env.R_VERSION }}-${{ hashFiles('electron/scripts/install_packages.R') }}-
+
+      # R_LIBS_USER=NULL (the literal string) means "no user library", so installs
+      # never skip packages that happen to exist elsewhere on the runner.
+      - name: Install R packages (PPM snapshot)
+        if: steps.r-lib-cache.outputs.cache-hit != 'true'
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+          R_LIBS_USER: "NULL"
+        run: |
+          $rscript = "electron\runtime\R.win\bin\Rscript.exe"
+          $lib = (Resolve-Path "electron\runtime\R.win\library").Path -replace '\\','/'
+          & $rscript --vanilla electron/scripts/install_packages.R $lib
+          if ($LASTEXITCODE -ne 0) { throw "install_packages.R failed with exit code $LASTEXITCODE" }
+
+      - name: Save bundled R library cache
+        if: steps.r-lib-cache.outputs.cache-hit != 'true' && !startsWith(github.ref, 'refs/tags/')
+        uses: actions/cache/save@v6
+        with:
+          path: electron/runtime/R.win/library
+          key: ${{ steps.r-lib-cache.outputs.cache-primary-key }}
+
+      - name: Build and install RTutor into the bundled library
+        env:
+          _R_CHECK_FORCE_SUGGESTS_: "false"
+        run: |
+          $Rexe = (Resolve-Path "electron\runtime\R.win\bin\R.exe").Path
+          $lib  = (Resolve-Path "electron\runtime\R.win\library").Path
+          & $Rexe CMD build . --no-build-vignettes --no-manual
+          if ($LASTEXITCODE -ne 0) { throw "R CMD build failed" }
+          $tar = (Get-ChildItem -Filter 'RTutor_*.tar.gz' | Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName
+          $env:R_LIBS = $lib -replace '\\','/'
+          $env:R_LIBS_USER = $env:R_LIBS
+          & $Rexe CMD INSTALL --library="$lib" $tar
+          if ($LASTEXITCODE -ne 0) { throw "R CMD INSTALL failed" }
+
+      - name: Test bundled R runtime
+        run: |
+          $rhome = (Resolve-Path "electron\runtime\R.win").Path
+          $lib = (Join-Path $rhome "library") -replace '\\','/'
+          $env:R_HOME = $rhome
+          $env:R_LIBS_USER = $lib
+          $env:R_LIBS = ""
+          $env:R_LIBS_SITE = ""
+          $env:RSTUDIO_PANDOC = (Resolve-Path "electron\runtime\pandoc.win").Path
+          & (Join-Path $rhome "bin\Rscript.exe") --vanilla electron/scripts/test_runtime.R $lib
+          if ($LASTEXITCODE -ne 0) { throw "Bundled R runtime test failed" }
+
+      - name: Build Windows installer
+        env:
+          CI: "true"
+        working-directory: electron
+        run: npx electron-builder --win --x64 --publish=never
+
+      - name: Check installer size
+        run: |
+          $f = Get-ChildItem "electron\dist\*.exe" | Select-Object -First 1
+          $mb = [math]::Floor($f.Length / 1MB)
+          "Windows installer: $($f.Name) = $mb MB" | Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          if ($mb -gt [int]$env:MAX_INSTALLER_MB) {
+            throw "Installer is $mb MB, over the $env:MAX_INSTALLER_MB MB limit. Trim course_list in electron/scripts/install_packages.R."
+          }
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: win-installer
+          path: electron/dist/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  # Runs only when BOTH builds succeed, so a release never has one platform missing.
+  release:
+    name: Draft release
+    needs: [mac, windows]
+    if: startsWith(github.ref, 'refs/tags/uiuc-desktop-v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download installers
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Release notes for this tag
+        run: |
+          echo "VERSION=${GITHUB_REF_NAME#uiuc-desktop-v}" >> "$GITHUB_ENV"
+          sed "s/{{TAG}}/${GITHUB_REF_NAME}/g" electron/RELEASE_NOTES.md > release_notes.md
+
+      # Draft, and not "Latest": Jenna tests both installers, then publishes by hand.
+      # Not marking it Latest keeps the web app's release on top of the releases page.
+      - name: Create draft release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: UIUC RTutor Desktop ${{ env.VERSION }}
+          body_path: release_notes.md
+          files: dist/*
+          fail_on_unmatched_files: true
+          draft: true
+          make_latest: "false"

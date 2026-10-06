@@ -10,3 +10,8 @@ api_key.txt
 RTutor UK 3_6_2023/
 RTutor_Tracking_data_Jan_2023.db
 .Renviron
+electron/.env
+electron/node_modules/
+electron/runtime/
+electron/app/
+electron/dist/

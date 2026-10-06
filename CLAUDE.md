@@ -102,6 +102,7 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 - `test-uiuc_improvements.R` — large integration-style suite that verifies UI structure and module behavior by reading source files with `readLines()`
 - `test-r_code_security.R` — tests for `validate_r_code()` / `BLOCKED_FNS`; inlines the security logic so it runs without loading the full package
 - Snapshot tests use `tests/testthat/_snaps/`
+- `test-desktop.R` — desktop-mode behavior (`RTUTOR_DESKTOP`) and that every `pkg::` in `R/` is declared in `DESCRIPTION`
 - `test-prompt_quality.R` — offline tests for the prompt gate (`check_prompt_quality()` verdict logic and the mod_03 submit flow); the LLM is mocked
 - `tests/eval_prompt_quality.R` — live accuracy check of the prompt gate against labeled prompts. Calls the real LLM (~150 short calls, under $1), so it sits outside `testthat/` and is run by hand: `Rscript tests/eval_prompt_quality.R`. Run it after any edit to the gate's system prompt
 
@@ -111,6 +112,16 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 - The only API key is an OpenAI `sk-` key read from the `OPENAI_API_KEY` environment variable (`create_response()` in `fct_helpers.R`). Users cannot enter their own key, and there is no Azure fallback
 - File upload limits: 50 MB in production, 10 GB locally (set in `app_server.R`)
 - Server vs. local detection: if `on_server.txt` exists in the working directory, the app treats itself as running on a server (affects upload limits and other behavior)
+- Desktop detection: `on_desktop()` is TRUE when `RTUTOR_DESKTOP` is set (by the Electron app). It is a function, not a constant, because package-level code runs at install time. On desktop, `library()` is not rewritten to `pacman::p_load()`, so nothing is installed at runtime, and a missing package gets a "not included in the desktop app" note (`desktop_package_note()`)
+
+## Desktop app (`electron/`)
+
+UIUC RTutor ships as an Electron desktop app for Apple Silicon Macs and Windows, with a portable R 4.5.x bundled inside. `main.js` starts `Rscript --vanilla bootstrap.R`, which runs `RTutor::run_app()` on localhost. Maintainer notes and the release runbook are in `electron/README.md`; the design and decisions are in `electron/PLAN.md`; the students' guide is `electron/INSTALL.md`.
+
+- **API key:** the `DOG_LOVER` GitHub secret is written into the app as `OPENAI_API_KEY` by `.github/workflows/build-desktop.yml`. A 401 from OpenAI shows an "expired" popup with `desktop_download_url`
+- **Packages:** the bundle holds `DESCRIPTION` Imports plus the lists in `electron/scripts/install_packages.R`, installed from a dated Posit Package Manager snapshot. Every `pkg::` used in `R/` must be in `DESCRIPTION` (enforced by `test-desktop.R`)
+- **Builds:** pushes to `uiuc_electron` build test installers; `uiuc-desktop-v*` tags draft a release
+- **Paid checks:** `electron/scripts/check_package_coverage.R` and `tests/eval_prompt_quality.R` call the real LLM. Run them only by hand
 
 ## Security
 

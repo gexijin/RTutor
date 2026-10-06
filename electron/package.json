@@ -1,0 +1,82 @@
+{
+  "name": "uiuc-rtutor-desktop",
+  "version": "1.0.0",
+  "description": "UIUC RTutor desktop app",
+  "private": true,
+  "main": "main.js",
+  "author": {
+    "name": "Steven Ge",
+    "email": "gexijin@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gexijin/RTutor.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --publish=never"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "electron": "39.8.4",
+    "electron-builder": "^26.8.2"
+  },
+  "build": {
+    "appId": "ai.rtutor.uiuc.desktop",
+    "productName": "UIUC RTutor",
+    "asar": false,
+    "compression": "maximum",
+    "files": [
+      "main.js",
+      "updater.js",
+      ".env",
+      "bootstrap.R",
+      "splash.html",
+      "package.json",
+      "node_modules/**"
+    ],
+    "extraResources": [
+      {
+        "from": "runtime",
+        "to": "runtime"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "UIUC-RTutor-${version}-win-x64.${ext}"
+    },
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon-mac.png",
+      "artifactName": "UIUC-RTutor-${version}-mac-arm64.${ext}",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "notarize": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "shortcutName": "UIUC RTutor"
+    }
+  }
+}

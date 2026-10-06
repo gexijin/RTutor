@@ -9,3 +9,5 @@ $run_dev.*
 ^doc$
 ^Meta$
 ^\.Renviron$
+^electron$
+^\.github$
