@@ -142,6 +142,16 @@ app_ui <- function(request) {
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html"))),
 
+    # shinylive: the loading popup (show_loading_modal) is centered with its top a quarter
+    # of the way down. mod_01_styles.R pins every .modal-dialog to the bottom; shinybusy's
+    # spinner escaped that with its own centering script, this popup needs this rule.
+    if (in_browser) tags$style(HTML("
+      .modal-dialog:has(.rtutor-loading-dots) {
+        position: fixed; top: 25vh; bottom: auto; left: 50%;
+        transform: translateX(-50%); margin: 0; width: min(300px, 90vw);
+      }
+    ")),
+
     # shinylive: cycle the dots after "Loading" in the loading popup (show_loading_modal).
     # Runs on the page itself, so it animates while R is busy with the AI call.
     if (in_browser) tags$script(HTML("

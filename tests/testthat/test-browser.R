@@ -34,4 +34,6 @@ test_that("the loading popup is plain HTML (shinybusy's spinner doesn't render i
     expect_match(src(f), "show_loading_modal(", fixed = TRUE)
   }
   expect_match(src("app_ui.R"), "$('.rtutor-loading-dots').text(dots[i])", fixed = TRUE)
+  # mod_01_styles.R pins all popups to the bottom; this one is positioned explicitly
+  expect_match(src("app_ui.R"), ".modal-dialog:has(.rtutor-loading-dots)", fixed = TRUE)
 })
