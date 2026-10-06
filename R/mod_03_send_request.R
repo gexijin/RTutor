@@ -42,6 +42,16 @@ mod_03_send_request_ui <- function(id) {
             )
           ),
           div(
+            # Check Again: hidden until a prompt has run (see the server). Checks, never runs.
+            shinyjs::hidden(actionButton(ns("check_button"), strong("Check Again"), class = "check-again-button")),
+
+            tippy::tippy_this(
+              ns("check_button"),
+              "Check this prompt for missing details without running it.",
+              theme = "light-border"
+            )
+          ),
+          div(
             # Submit Button
             actionButton(ns("submit_button"), strong("Submit")),
 
@@ -152,15 +162,15 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
     # Default quality feedback panel to empty
     output$quality_feedback_ui <- renderUI(NULL)
 
-    # User Request Handling
-    observeEvent(input$submit_button, {
+    # Input checks shared by Submit and Check Again. TRUE when the prompt can be checked.
+    prompt_ready <- function() {
       # if user's request too short, do not send
       if (nchar(input$input_text) < min_query_length) {
         showNotification(
           paste("Request too short! Should be more than", min_query_length, "characters."),
           duration = 10
         )
-        return()
+        return(FALSE)
       }
       # if user's request too long, do not send
       if (nchar(input$input_text) > max_query_length) {
@@ -168,7 +178,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
           paste("Request too long! Should be less than", max_query_length, "characters."),
           duration = 10
         )
-        return()
+        return(FALSE)
       }
       # if no file is selected, do not send
       if (selected_dataset_name() == data_placeholder) {
@@ -176,22 +186,14 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
           "Please select a dataset in Step 1 before submitting.",
           duration = 10
         )
-        return()
+        return(FALSE)
       }
+      TRUE
+    }
 
-      # Re-clicking Submit on the same warned prompt overrides the (one-time) detail block
-      if (quality_warned() && identical(input$input_text, warned_prompt())) {
-        quality_warned(FALSE)
-        output$quality_feedback_ui <- renderUI(NULL)
-        quality_cleared(quality_cleared() + 1)
-        return()
-      }
-
-      # Follow-ups tweak existing output, so they are only screened for off-topic.
-      # An edited prompt after a warning is treated the same way: never block for detail twice.
-      off_topic_only <- is_follow_up() || quality_warned()
-      quality_warned(FALSE)
-
+    # Runs the prompt gate on the current text and logs its cost. Fails open to "ok".
+    run_quality_check <- function(off_topic_only) {
+      removeNotification("quality_tip")  # a tip about the previous prompt no longer applies
       notif_id <- showNotification("Checking prompt...", duration = NULL)
       result <- tryCatch(
         check_prompt_quality(
@@ -214,41 +216,87 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
         counter$costs_total <- counter$costs_total + mini_cost
         message(sprintf("[COST] %-25s $%.6f  (total: $%.6f)", "Prompt quality check", mini_cost, counter$costs_total))
       }
+      result
+    }
 
-      box_style <- "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-top: 8px; margin-bottom: 10px;"
+    box_style <- "background-color: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; margin-top: 8px; margin-bottom: 10px;"
+    off_topic_box <- function() div(
+      style = box_style,
+      tags$p(strong("⚠️ Your prompt appears to be off-topic.")),
+      tags$p(
+        "RTutor only runs prompts about your dataset, statistics, or data science. ",
+        "Please rewrite your prompt so it is on topic, then click Submit."
+      )
+    )
+    missing_box <- function(missing, footnote) div(
+      style = box_style,
+      tags$p(strong("⚠️ Your prompt is missing something the code needs:")),
+      tags$ul(lapply(missing, tags$li)),
+      tags$p(style = "margin-top: 6px; color: #666;", footnote)
+    )
+    # Tips stay until the student closes them (or the next check replaces them)
+    show_tip <- function(suggestions) {
+      if (length(suggestions) == 0) return()
+      showNotification(
+        tagList(strong("Tip for next time:"), tags$ul(lapply(suggestions, tags$li))),
+        duration = NULL, type = "message", id = "quality_tip"  # styled in mod_01_styles.R
+      )
+    }
+
+    # User Request Handling
+    observeEvent(input$submit_button, {
+      if (!prompt_ready()) return()
+
+      # Re-clicking Submit on the same warned prompt overrides the (one-time) detail block
+      if (quality_warned() && identical(input$input_text, warned_prompt())) {
+        quality_warned(FALSE)
+        output$quality_feedback_ui <- renderUI(NULL)
+        quality_cleared(quality_cleared() + 1)
+        return()
+      }
+
+      # Follow-ups tweak existing output, so they are only screened for off-topic.
+      # An edited prompt after a warning is treated the same way: never block for detail twice.
+      off_topic_only <- is_follow_up() || quality_warned()
+      quality_warned(FALSE)
+
+      result <- run_quality_check(off_topic_only)
 
       if (result$verdict == "off_topic") {
         # No override: off-topic prompts never reach the code generator
-        output$quality_feedback_ui <- renderUI(div(
-          style = box_style,
-          tags$p(strong("⚠️ Your prompt appears to be off-topic.")),
-          tags$p(
-            "RTutor only runs prompts about your dataset, statistics, or data science. ",
-            "Please rewrite your prompt so it is on topic, then click Submit."
-          )
-        ))
+        output$quality_feedback_ui <- renderUI(off_topic_box())
       } else if (result$verdict == "vague") {
         quality_warned(TRUE)
         warned_prompt(input$input_text)
-        output$quality_feedback_ui <- renderUI(div(
-          style = box_style,
-          tags$p(strong("⚠️ Your prompt is missing something the code needs:")),
-          tags$ul(lapply(result$missing, tags$li)),
-          tags$p(
-            style = "margin-top: 6px; color: #666;",
-            "(or click Submit again to run your original prompt anyway)"
-          )
-        ))
+        output$quality_feedback_ui <- renderUI(
+          missing_box(result$missing, "(or click Submit again to run your original prompt anyway)")
+        )
       } else {
         output$quality_feedback_ui <- renderUI(NULL)
-        if (length(result$suggestions) > 0) {
-          showNotification(
-            tagList(strong("Tip for next time:"), tags$ul(lapply(result$suggestions, tags$li))),
-            duration = 12, type = "message", id = "quality_tip"  # styled in mod_01_styles.R
-          )
-        }
+        show_tip(result$suggestions)
         quality_cleared(quality_cleared() + 1)
       }
+    })
+
+    # Check Again appears once a prompt has run. Follow-up Submits are only screened for
+    # off-topic, so this runs the full check on demand. It never runs code: Submit does.
+    observe(shinyjs::toggle("check_button", condition = is_follow_up()))
+
+    observeEvent(input$check_button, {
+      if (!prompt_ready()) return()
+      quality_warned(FALSE)
+      result <- run_quality_check(off_topic_only = FALSE)
+
+      output$quality_feedback_ui <- renderUI(switch(result$verdict,
+        off_topic = off_topic_box(),
+        vague = missing_box(result$missing,
+                            "Fix these and click Check Again, or click Submit to run it as is."),
+        div(
+          style = "background-color: #e8f5e9; border-left: 3px solid #4caf50; padding: 10px; margin-top: 8px; margin-bottom: 10px;",
+          strong("✅ All clear! Hit Submit to make it!")
+        )
+      ))
+      if (result$verdict == "ok") show_tip(result$suggestions)
     })
 
     observeEvent(input$reset_button, {

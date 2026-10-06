@@ -24,6 +24,16 @@ test_that("verdict is computed from the fact fields", {
   expect_equal(check(facts(given = "false", missing = '["Say which is x."]'))$missing, "Say which is x.")
 })
 
+test_that("a bare generic output type ('make a graph of x') counts as missing; a real kind passes", {
+  for (t in c('"graph"', '"Graph"', '"a plot"', '"charts"', '"visualization"')) {
+    expect_equal(check(facts(type = t))$verdict, "vague", info = t)
+  }
+  # "Graph a histogram of protein": the model reports the kind, so the verb "graph" doesn't matter
+  for (t in c('"histogram"', '"bar graph"', '"line graph"', '"table"', '"frequency table"')) {
+    expect_equal(check(facts(type = t))$verdict, "ok", info = t)
+  }
+})
+
 test_that("hedged `missing` text cannot block when the facts are all present", {
   expect_equal(check(facts(missing = '["Clarify whether you mean a."]'))$verdict, "ok")
 })
@@ -52,7 +62,7 @@ test_that("switch off disables detail blocking and tips but keeps off-topic", {
 test_that("fails open on bad JSON or API error", {
   expect_equal(check("not json")$verdict, "ok")
   testthat::local_mocked_bindings(create_response = function(...) stop("down"))
-  expect_equal(suppressMessages(check_prompt_quality("p", list(key = ""), "ds", "a"))$verdict, "ok")
+  expect_equal(suppressMessages(check_prompt_quality("p", "ds", "a"))$verdict, "ok")
 })
 
 # ---- submit flow in mod_03 -------------------------------------------------
@@ -105,4 +115,35 @@ test_that("follow-up prompts are checked in off-topic-only mode", {
     submit(session, "make the line red please", 1); expect_equal(shiny::isolate(cleared()), 1)
   })
   expect_true(calls[[1]])
+})
+
+# ---- Check Again (shown after the first prompt has run) ---------------------
+check_again <- function(session, text, n) session$setInputs(input_text = text, check_button = n)
+feedback <- function(output) paste(unlist(output$quality_feedback_ui), collapse = " ")
+
+test_that("Check Again runs the full check but never runs code", {
+  calls <- run_flow(list("vague", "ok"), follow_up = TRUE, steps = function(session, cleared) {
+    check_again(session, "make a graph with Protein", 1)
+    expect_match(feedback(session$output), "Name the columns.", fixed = TRUE)
+    check_again(session, "make a histogram of Protein", 2)
+    expect_match(feedback(session$output), "All clear! Hit Submit to make it!", fixed = TRUE)
+    expect_equal(shiny::isolate(cleared()), 0)
+  })
+  expect_equal(unlist(calls), c(FALSE, FALSE))  # full check both times, not off-topic only
+})
+
+test_that("after Check Again flags a prompt, Submit still runs it (off-topic check only)", {
+  calls <- run_flow(list("vague", "ok"), follow_up = TRUE, steps = function(session, cleared) {
+    check_again(session, "make a graph with Protein", 1)
+    submit(session, "make a graph with Protein", 1); expect_equal(shiny::isolate(cleared()), 1)
+  })
+  expect_equal(unlist(calls), c(FALSE, TRUE))
+})
+
+test_that("Check Again stops off-topic prompts too, and Submit still never runs them", {
+  run_flow(list("off_topic"), follow_up = TRUE, steps = function(session, cleared) {
+    check_again(session, "How do I change a flat tire?", 1)
+    expect_match(feedback(session$output), "off-topic", fixed = TRUE)
+    submit(session, "How do I change a flat tire?", 1); expect_equal(shiny::isolate(cleared()), 0)
+  })
 })

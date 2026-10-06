@@ -103,7 +103,7 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 - `test-r_code_security.R` — tests for `validate_r_code()` / `BLOCKED_FNS`; inlines the security logic so it runs without loading the full package
 - Snapshot tests use `tests/testthat/_snaps/`
 - `test-desktop.R` — desktop-mode behavior (`RTUTOR_DESKTOP`) and that every `pkg::` in `R/` is declared in `DESCRIPTION`
-- `test-prompt_quality.R` — offline tests for the prompt gate (`check_prompt_quality()` verdict logic and the mod_03 submit flow); the LLM is mocked
+- `test-prompt_quality.R` — offline tests for the prompt gate (`check_prompt_quality()` verdict logic, the mod_03 submit flow, and the Check Again button that appears after the first prompt runs); the LLM is mocked
 - `tests/eval_prompt_quality.R` — live accuracy check of the prompt gate against labeled prompts. Calls the real LLM (~150 short calls, under $1), so it sits outside `testthat/` and is run by hand: `Rscript tests/eval_prompt_quality.R`. Run it after any edit to the gate's system prompt
 
 ## Configuration
