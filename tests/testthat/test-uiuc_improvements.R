@@ -12,8 +12,7 @@
 # Coverage:
 #   1.  Global constants            (fct_helpers.R)
 #   2.  system_role_tutor              (Markdown not HTML)
-#   3.  create_chat_completion_openai  (new direct-httr function)
-#   4.  create_chat_completion_azure   (missing-credential error messages)
+#   3-4. OpenAI only                   (OPENAI_API_KEY, no Azure / user key)
 #   5.  Q&A always visible             (mod_16_qa.R)
 #   6.  Q&A "4." label                 (mod_16_qa.R)
 #   7.  Q&A markdown rendering         (commonmark + file check)
@@ -84,71 +83,24 @@ test_that("system_role (code generation) is unaffected — no Markdown mention",
 
 
 # =============================================================================
-# 3. create_chat_completion_openai — new function (fct_helpers.R)
-#    NOTE: Implementation deferred — the direct-httr OpenAI function was written
-#    but not yet merged. These tests are skipped until the feature is added.
+# 3 & 4. OpenAI only — one sk- key from OPENAI_API_KEY, no Azure, no user key
 # =============================================================================
 
-test_that("create_chat_completion_openai function is defined in fct_helpers.R", {
-  skip("Deferred: create_chat_completion_openai not yet added to fct_helpers.R")
+test_that("create_response calls OpenAI with the OPENAI_API_KEY env var", {
   src <- r_file("fct_helpers.R")
-  expect_match(src, "create_chat_completion_openai\\s*<-\\s*function")
-})
-
-test_that("create_chat_completion_openai has model, messages, temperature, openai_api_key params", {
-  skip("Deferred: create_chat_completion_openai not yet added to fct_helpers.R")
-  src <- r_file("fct_helpers.R")
-  fn_start <- regexpr("create_chat_completion_openai\\s*<-\\s*function", src)
-  fn_sig   <- substring(src, fn_start, fn_start + 300)
-  for (param in c("model", "messages", "temperature", "openai_api_key")) {
-    expect_match(fn_sig, param, fixed = TRUE, label = paste("param:", param))
-  }
-})
-
-test_that("create_chat_completion_openai stops with 'OPENAI_API_KEY is missing' when key empty", {
-  skip("Deferred: create_chat_completion_openai not yet added to fct_helpers.R")
-  src <- r_file("fct_helpers.R")
-  fn_start <- regexpr("create_chat_completion_openai\\s*<-\\s*function", src)
-  fn_body  <- substring(src, fn_start, fn_start + 600)
-  expect_match(fn_body, "OPENAI_API_KEY is missing", fixed = TRUE)
-})
-
-test_that("create_chat_completion_openai excludes temperature for gpt-5.4-mini model", {
-  skip("Deferred: create_chat_completion_openai not yet added to fct_helpers.R")
-  src <- r_file("fct_helpers.R")
-  fn_start <- regexpr("create_chat_completion_openai\\s*<-\\s*function", src)
-  fn_body  <- substring(src, fn_start, fn_start + 1500)
-  # Should have an if (model == "gpt-5.4-mini") branch that omits temperature
-  expect_match(fn_body, 'model == "gpt-5.4-mini"', fixed = TRUE)
-})
-
-test_that("create_chat_completion_openai uses Bearer token auth header", {
-  skip("Deferred: create_chat_completion_openai not yet added to fct_helpers.R")
-  src <- r_file("fct_helpers.R")
-  fn_start <- regexpr("create_chat_completion_openai\\s*<-\\s*function", src)
-  fn_body  <- substring(src, fn_start, fn_start + 1500)
+  fn_start <- regexpr("create_response\\s*<-\\s*function", src)
+  fn_body  <- substring(src, fn_start, fn_start + 800)
+  expect_match(fn_body, 'Sys.getenv("OPENAI_API_KEY")', fixed = TRUE)
+  expect_match(fn_body, "OPENAI_API_KEY is not set", fixed = TRUE)
   expect_match(fn_body, "Bearer", fixed = TRUE)
-  expect_match(fn_body, "api.openai.com", fixed = TRUE)
+  expect_match(fn_body, "https://api.openai.com/v1/responses", fixed = TRUE)
 })
 
-
-# =============================================================================
-# 4. create_chat_completion_azure — error messages (fct_helpers.R)
-# =============================================================================
-
-test_that("create_chat_completion_azure stops with 'AZURE_OPENAI_API_KEY is missing'", {
-  src <- r_file("fct_helpers.R")
-  fn_start <- regexpr("create_chat_completion_azure\\s*<-\\s*function", src)
-  # Use 2000 chars — the function signature alone is ~600 chars
-  fn_body  <- substring(src, fn_start, fn_start + 2000)
-  expect_match(fn_body, "AZURE_OPENAI_API_KEY is missing", fixed = TRUE)
-})
-
-test_that("create_chat_completion_azure stops with 'AZURE_OPENAI_API_ENDPOINT is missing'", {
-  src <- r_file("fct_helpers.R")
-  fn_start <- regexpr("create_chat_completion_azure\\s*<-\\s*function", src)
-  fn_body  <- substring(src, fn_start, fn_start + 2000)
-  expect_match(fn_body, "AZURE_OPENAI_API_ENDPOINT is missing", fixed = TRUE)
+test_that("no Azure provider or user-entered API key remains in R/", {
+  root <- rprojroot::find_package_root_file()
+  src <- paste(unlist(lapply(list.files(file.path(root, "R"), full.names = TRUE), readLines, warn = FALSE)),
+               collapse = "\n")
+  expect_no_match(src, "AZURE_OPENAI|resolve_provider|switch_on|show_api_settings|api_key\\.txt|api_key_btn|key_modal")
 })
 
 

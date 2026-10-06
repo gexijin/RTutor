@@ -8,6 +8,13 @@ unlink(app, recursive = TRUE)
 dir.create(app)
 file.copy(c("app.R", "R", "inst"), app, recursive = TRUE)
 
+# The site has no server, so the class key has to ship inside it: app.R loads this file.
+# CI passes the DOG_LOVER secret in as OPENAI_API_KEY; locally it comes from .Renviron.
+# Anyone who opens the site can read the key; its spending cap and expiry limit the damage.
+key <- Sys.getenv("OPENAI_API_KEY")
+if (!nzchar(key)) stop("Set OPENAI_API_KEY (in CI: the DOG_LOVER secret) before building the site.")
+writeLines(key, file.path(app, "openai_key.txt"))
+
 shinylive::export(app, "site")
 
 # Replace shinylive's default loading animation with our progress screen

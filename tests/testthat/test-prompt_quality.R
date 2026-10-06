@@ -7,7 +7,7 @@ fake_llm <- function(json) function(...) list(
   usage = list(prompt_tokens = 1, completion_tokens = 1))
 check <- function(json, ...) {
   testthat::local_mocked_bindings(create_response = fake_llm(json))
-  suppressMessages(check_prompt_quality("p", list(key = "", switch_on = FALSE), "ds", c("a", "b"), ...))
+  suppressMessages(check_prompt_quality("p", "ds", c("a", "b"), ...))
 }
 facts <- function(off = "false", type = '"scatterplot"', vars = '["a","b"]', need = "true", given = "true",
                   missing = "[]", sugg = "[]", pt = "true")
@@ -68,7 +68,7 @@ run_flow <- function(verdicts, follow_up = FALSE, steps) {
   shiny::testServer(mod_03_send_request_serv, args = list(
     chunk_selection = shiny::reactiveValues(), user_file = shiny::reactive(NULL),
     selected_dataset_name = shiny::reactive("mpg"), use_python = shiny::reactive(FALSE),
-    quality_cleared = cleared, api_key = list(key = ""), current_data = shiny::reactive(mtcars),
+    quality_cleared = cleared, current_data = shiny::reactive(mtcars),
     do_soft_reset = function() NULL, counter = shiny::reactiveValues(costs_total = 0),
     is_follow_up = shiny::reactive(follow_up)), {
     steps(session, cleared)

@@ -389,7 +389,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
                                    run_result, run_env_start, submit_button,
                                    use_python, tabs, current_data, current_data_2,
                                    selected_dataset_name, chunk_selection,
-                                   run_env, reverted, api_key,
+                                   run_env, reverted,
                                    error_explanation, input_text, counter,
                                    qa_by_chunk) {
 
@@ -487,7 +487,7 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
           "or executing system commands?"
         )
 
-        result <- call_llm_check(review_prompt, api_key)
+        result <- call_llm_check(review_prompt)
         removeNotification(notify_id)
 
         if (is.null(result)) {
@@ -575,7 +575,6 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
             error_message = run_result()$error_message,
             code          = logs$code,
             prompt        = input_text(),
-            api_key       = api_key,
             dataset_name  = selected_dataset_name(),
             col_names     = colnames(current_data())
           ),
@@ -761,8 +760,8 @@ mod_04_main_panel_serv <- function(id, llm_response, logs, ch, code_error,
 
     # Plot results - plotly
     # Creating this output loads plotly (and ggplot2/dplyr with it): ~3s in the
-    # browser. Defining it after the first flush lets the page and the API key
-    # popup appear first; no plot can exist before then anyway.
+    # browser. Defining it after the first flush lets the page appear first;
+    # no plot can exist before then anyway.
     session$onFlushed(function() {
       output$result_plotly <- plotly::renderPlotly({
         req(!code_error())

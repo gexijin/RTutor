@@ -25,15 +25,20 @@
       status_code <- if (length(code_match) > 0) gsub("\\[|\\]", "", code_match) else NULL
 
       detail <- switch(if (is.null(status_code)) "" else status_code,
+        # The site's single class key (see create_response) is rejected once its semester expires.
         "401" = tagList(
-          tags$h4("Your API key was rejected (401).", style = "color:red"),
-          tags$p("Click API Key at the top of the page and check that your key is correct and active.")
+          tags$h4("The class's AI key was rejected or has expired (401).", style = "color:red"),
+          tags$p("RTutor can't make AI requests until it is renewed. Tell your instructor.")
         ),
         "403" = tagList(
           tags$h4("Access denied (403).", style = "color:red"),
-          tags$p("Your account may have a billing issue or exceeded its quota. Check your OpenAI account.")
+          tags$p("The AI service refused this request. If this keeps happening, tell your instructor.")
         ),
-        "429" = tagList(
+        # 429 means either a rate limit or the class's spending cap is used up (insufficient_quota)
+        "429" = if (grepl("quota", error_message, ignore.case = TRUE)) tagList(
+          tags$h4("The class's AI budget has been used up.", style = "color:red"),
+          tags$p("RTutor can't make AI requests until it is renewed. Tell your instructor.")
+        ) else tagList(
           tags$h4("Too many requests (429).", style = "color:red"),
           tags$p("You've hit the rate limit. Wait a moment, then try submitting again.")
         ),
@@ -49,7 +54,7 @@
         # Default: no recognisable status code
         tagList(
           tags$h4("Could not connect to the AI server.", style = "color:red"),
-          tags$p("Check your internet connection, and verify your API key in Settings."),
+          tags$p("Check your internet connection."),
           tags$p("If the problem continues, the OpenAI service may be temporarily unavailable.")
         )
       )

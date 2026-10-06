@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-RTutor is an R Shiny application built with the [golem](https://thinkr-open.github.io/golem/) framework. It lets users analyze data using natural language prompts that are translated into R code by LLMs (OpenAI/Azure). The app executes that code and displays results interactively.
+RTutor is an R Shiny application built with the [golem](https://thinkr-open.github.io/golem/) framework. It lets users analyze data using natural language prompts that are translated into R code by an OpenAI LLM. The app executes that code and displays results interactively.
 
 ## Common Commands
 
@@ -29,7 +29,7 @@ testthat::test_file("tests/testthat/test-fct_helpers.R")
 Rscript dev/build_shinylive.R   # copies app.R, R/, inst/ to a temp dir and exports to site/
 Rscript -e 'httpuv::runStaticServer("site")'
 ```
-In the browser `in_browser` is TRUE: LLM calls go through `browser_post()` (sync XHR via webR), downloads use a fetch-to-blob workaround (`app_ui.R`), and server-only features (HTML report, EDA report, feedback form) are hidden. The loading screen is `dev/shinylive_loading.html`, injected into `site/index.html` by the build script. The API key is entered in a popup (`mod_11`), opened on startup and from the navbar's API Key button. Packages that student code uses but the build didn't bundle are installed from the webR repo on first use (`install_missing_packages()`). To keep the API key popup fast, the tidyverse is attached, the plotly output created, and the EDA module started only after the first flush (`app.R`, `mod_04`, `app_server.R`).
+In the browser `in_browser` is TRUE: LLM calls go through `browser_post()` (sync XHR via webR), downloads use a fetch-to-blob workaround (`app_ui.R`), and server-only features (HTML report, EDA report, feedback form) are hidden. The loading screen is `dev/shinylive_loading.html`, injected into `site/index.html` by the build script. There is no key popup: the build writes the `DOG_LOVER` GitHub secret (locally: `OPENAI_API_KEY` from `.Renviron`) into the app as `openai_key.txt`, and `app.R` loads it into `OPENAI_API_KEY`. Anyone who opens the site can read that key; its spending cap and expiry limit the damage. Never commit `site/` (it is gitignored) or `.Renviron` (it is not, on this branch). Packages that student code uses but the build didn't bundle are installed from the webR repo on first use (`install_missing_packages()`). To keep the first page load fast, the tidyverse is attached, the plotly output created, and the EDA module started only after the first flush (`app.R`, `mod_04`, `app_server.R`).
 
 **Regenerate documentation (roxygen2) and reload package:**
 ```r
@@ -62,7 +62,7 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 1. **Data upload** (`mod_02`) — user uploads CSV/Excel or selects a built-in dataset; stored in `current_data` / `current_data_2` reactives
 2. **Request input** (`mod_03`) — user types a natural language prompt; triggers `submit_button`
 3. **Prompt preparation** (`fct_helpers.R: prep_input()`) — attaches data context (column names, types, head) to the prompt
-4. **LLM call** (`mod_05`) — sends HTTP request to OpenAI or Azure API; returns generated R code
+4. **LLM call** (`mod_05`) — sends HTTP request to the OpenAI Responses API; returns generated R code
 5. **Code execution** (`mod_07`) — runs code in an isolated `run_env` environment
 6. **Display** (`mod_04`) — renders code chunks, plots, tables, and output in the main panel
 7. **History/errors** (`mod_06`) — logs executed chunks, errors, and supports reverting
@@ -91,10 +91,10 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 |---|---|
 | `R/fct_helpers.R` | Global constants, `prep_input()`, system prompt construction, LLM API wrappers, `validate_r_code()` |
 | `R/mod_04_main_panel.R` | Code chunk display, result rendering, chunk management UI |
-| `R/mod_05_llms.R` | `create_chat_completion_openai()` / `_azure()` HTTP calls |
+| `R/mod_05_llms.R` | Builds the code-generation request; the HTTP call itself is `create_response()` in `fct_helpers.R` |
 | `R/mod_09_report.R` | R Markdown assembly and download |
 | `R/mod_10_eda.R` | Automated EDA using summarytools, DataExplorer, GGally, etc. |
-| `R/mod_11_settings.R` | API key input, model selection, LLM parameters |
+| `R/mod_11_settings.R` | Model selection, LLM parameters |
 | `R/mod_15_data_types.R` | Modal for editing column data types after upload |
 | `R/mod_16_qa.R` | Q&A tab — ask natural language questions about analysis results |
 
@@ -115,7 +115,7 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 ## Configuration
 
 - `inst/golem-config.yml` — golem environments (default / production / dev); `golem.app.prod` option switches modes
-- API keys can be set via: Settings tab in the UI, an `api_key.txt` file in the working directory, or the `OPEN_API_KEY` environment variable
+- The only API key is an OpenAI `sk-` key read from the `OPENAI_API_KEY` environment variable (`create_response()` in `fct_helpers.R`). Users cannot enter their own key, and there is no Azure fallback
 - File upload limits: 50 MB in production, 10 GB locally (set in `app_server.R`)
 - Server vs. local detection: if `on_server.txt` exists in the working directory, the app treats itself as running on a server (affects upload limits and other behavior)
 

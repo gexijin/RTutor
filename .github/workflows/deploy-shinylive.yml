@@ -38,7 +38,11 @@ jobs:
         run: |
           pak::pak(unique(renv::dependencies(c("app.R", "R", "inst"))$Package))
 
+      # The class's OpenAI key goes into the site (see dev/build_shinylive.R).
+      # Passed through env, never echoed; the build stops if the secret is empty.
       - name: Build site
+        env:
+          OPENAI_API_KEY: ${{ secrets.DOG_LOVER }}
         run: Rscript dev/build_shinylive.R
 
       - uses: actions/upload-pages-artifact@v5

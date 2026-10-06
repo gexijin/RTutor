@@ -1,10 +1,13 @@
-test_that("resolve_provider always uses OpenAI's base URL", {
-  expect_null(resolve_provider(list(key = "sk-abc"))$endpoint)
-  expect_equal(resolve_provider(list(key = "sk-abc"))$key, "sk-abc")
+test_that("create_response stops instead of sending an empty OPENAI_API_KEY", {
+  withr::local_envvar(OPENAI_API_KEY = "")
+  expect_error(create_response("m", list()), "OPENAI_API_KEY is not set")
 })
 
-test_that("create_response asks for a key instead of sending an empty one", {
-  expect_error(create_response("m", list(), key = ""), "API Key")
+test_that("app.R loads the key file the site build writes", {
+  src <- paste(readLines(file.path(rprojroot::find_package_root_file(), "app.R")), collapse = "\n")
+  expect_match(src, 'Sys.setenv(OPENAI_API_KEY = readLines("openai_key.txt"', fixed = TRUE)
+  build <- paste(readLines(file.path(rprojroot::find_package_root_file(), "dev", "build_shinylive.R")), collapse = "\n")
+  expect_match(build, 'writeLines(key, file.path(app, "openai_key.txt"))', fixed = TRUE)
 })
 
 test_that("install_missing_packages finds packages named in student code", {

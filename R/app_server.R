@@ -174,7 +174,6 @@ app_server <- function(input, output, session) {
     selected_dataset_name = selected_dataset_name,
     use_python = use_python,
     quality_cleared = quality_cleared,
-    api_key = api_key,
     current_data = current_data,
     do_soft_reset = do_soft_reset,
     counter = counter,
@@ -207,7 +206,6 @@ app_server <- function(input, output, session) {
     chunk_selection = chunk_selection,
     run_env = run_env,
     reverted = reverted,
-    api_key = api_key,
     error_explanation = error_explanation,
     input_text = input_text,
     counter = counter,
@@ -223,7 +221,6 @@ app_server <- function(input, output, session) {
     submit_button = quality_cleared,
     input_text = input_text,
     selected_dataset_name = selected_dataset_name,
-    api_key = api_key,
     selected_model = selected_model,
     logs = logs,
     ch = ch,
@@ -329,7 +326,7 @@ app_server <- function(input, output, session) {
   #         Module 10 - 'EDA'
   # __________________________________
   # Started after the first flush: its outputs load plotly & co., ~3s in the
-  # browser, which would otherwise delay the page and the API key popup.
+  # browser, which would otherwise delay the page.
   session$onFlushed(function() {
     mod_10_eda_serv(
       id = "eda",
@@ -347,14 +344,11 @@ app_server <- function(input, output, session) {
   # __________________________________
   mod_11 <- mod_11_settings_serv(
     id = "sett",
-    submit_button = submit_button,
     llm_prompt = llm_prompt,
-    code_error = code_error,
-    open_key_modal = reactive(input$api_key_btn)
+    code_error = code_error
   )
 
   # Module 11 - Outputs
-  api_key <- mod_11$api_key
   selected_model <- mod_11$selected_model
 
   use_python <- mod_11$use_python
@@ -367,13 +361,9 @@ app_server <- function(input, output, session) {
   # Log all settings to browser console once on session start
   session$onFlushed(function() {
     isolate({
-      key_val  <- api_key$key
-      key_disp <- if (nchar(key_val) > 4) paste0("****", substr(key_val, nchar(key_val) - 3, nchar(key_val))) else if (nchar(key_val) > 0) "****" else "(none)"
       shinyjs::runjs(paste0(
         'console.group("RTutor Settings");',
         'console.log("Model:             ', selected_model(),       '");',
-        'console.log("API key:           ', key_disp,               '");',
-        'console.log("API key source:    ', api_key$source,         '");',
         'console.log("Use Python:        ', use_python(),           '");',
         'console.log("Treat as factors:  ', convert_to_factor(),    '");',
         'console.log("Max factor levels: ', max_levels_factor(),    '");',
@@ -430,7 +420,6 @@ app_server <- function(input, output, session) {
     api_error_modal = api_error_modal,
     counter = counter,
     selected_model = selected_model,
-    api_key = api_key,
     selected_dataset_name = selected_dataset_name,
     qa_by_chunk = qa_by_chunk,
     chunk_selection = chunk_selection

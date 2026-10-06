@@ -2,7 +2,7 @@
 
 
 mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_name,
-                             api_key, selected_model, logs, ch,
+                             selected_model, logs, ch,
                              counter, api_error_modal, code_error, current_data,
                              current_data_2, run_env, run_env_start, run_result,
                              use_python, send_head) {
@@ -245,26 +245,6 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     # Send request
     send_request <- function(prompt_total, prepared_request, malicious) {
 
-      # If no API key but switch is on, notify user and switch to Azure
-      if ((is.null(api_key$key) || nchar(api_key$key) == 0) && api_key$switch_on) {
-        notification_html <- div(
-          style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; 
-                  justify-content: center; align-items: center; background: rgba(0,0,0,0.5); z-index: 9999;",
-          div(
-            style = "background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    width: 400px; text-align: center;font-size: 17px;font-style: bold;",
-            "You switched to using a personal API key but did not enter one. Switched back to Azure."
-          )
-        )
-        
-        showNotification(
-          HTML(as.character(notification_html)),
-          type = "warning",
-          duration = 6,
-          closeButton = FALSE
-        )
-      }
-
       # Format content based on API key status
       if_malicious <- format_content(paste(
         "Return this exact statement: print('Please ask a question related to dataset",
@@ -283,9 +263,8 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         append(prompt_total, list(list(role = "user", content = prepared_content)))
       }
 
-      p <- resolve_provider(api_key)
       response <- llm_agent(prompt_total)
-      agent_name(if (is.null(p$endpoint)) "OpenAI" else "Azure")
+      agent_name("OpenAI")
 
       return(response)
     }
@@ -295,8 +274,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
     ### LLM Functions ###
 
     llm_agent <- function(messages, extra = effort_low) {
-      p <- resolve_provider(api_key)
-      create_response(language_models[[default_model]], messages, p$key, p$endpoint, extra = extra)
+      create_response(language_models[[default_model]], messages, extra = extra)
     }
 
 

@@ -135,12 +135,6 @@ app_ui <- function(request) {
         )
       ),
 
-      ### 'API Key' navbar button ###
-      # Opens the API key popup (mod_11) instead of a tab
-      bslib::nav_item(
-        actionLink("api_key_btn", HTML('<span style="color: black;font-size: 18px;">API Key</span>'))
-      ),
-
       ### Hidden Policies Tabs ###
       tabPanel(title = "Privacy Policy", value = "privacy_policy", privacy_policy_content()),
       tabPanel(title = "Terms of Use", value = "terms_of_use", terms_of_use_content())

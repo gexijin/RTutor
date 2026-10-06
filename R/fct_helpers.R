@@ -681,7 +681,7 @@ diff_is_significant <- function(original_code, edited_code, n_chars = 40) {
 }
 
 
-call_llm_check <- function(prompt, api_key) {
+call_llm_check <- function(prompt) {
   # System message enforces a strict YES/NO reply — no explanations.
   messages <- list(
     list(
@@ -691,9 +691,8 @@ call_llm_check <- function(prompt, api_key) {
     list(role = "user", content = prompt)
   )
 
-  p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint,
+    create_response(language_models[[default_model]], messages,
                     extra = effort_low),
     error = function(e) {
       message("[SECURITY] Responses API error: ", e$message)
@@ -749,7 +748,7 @@ quality_off_topic_rules <- paste0(
 #   ok          -> `suggestions` may hold optional, non-blocking improvements
 # off_topic_only = TRUE (follow-up prompts) checks nothing but topic.
 # Fails open: any API or parse error returns "ok" so students are never blocked by an outage.
-check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names = character(0),
+check_prompt_quality <- function(prompt, dataset_name = "", col_names = character(0),
                                  col_types = character(0), off_topic_only = FALSE) {
   fail_open <- list(verdict = "ok", missing = character(0), suggestions = character(0), usage = NULL)
 
@@ -844,9 +843,8 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
     list(role = "user",   content = paste0("Prompt: ", prompt))
   )
 
-  p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint,
+    create_response(language_models[[default_model]], messages,
                     extra = quality_check_params),
     error = function(e) {
       message("[QUALITY] Responses API error: ", e$message)
@@ -900,7 +898,7 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
 # Generate a plain-English explanation for an R error
 # Returns list(explanation = character(1), suggestions = character(0..2))
 # Fails open: on any API or parse error returns list(explanation = NULL, suggestions = character(0))
-explain_error <- function(error_message, code, prompt, api_key,
+explain_error <- function(error_message, code, prompt,
                           dataset_name = "", col_names = character(0)) {
   user_content <- paste0(
     "Error: ", error_message, "\n\n",
@@ -928,9 +926,8 @@ explain_error <- function(error_message, code, prompt, api_key,
 
   fail_open <- list(explanation = NULL, suggestions = character(0), usage = NULL)
 
-  p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint,
+    create_response(language_models[[default_model]], messages,
                     extra = effort_low),
     error = function(e) {
       message("[EXPLAIN] Responses API error: ", e$message)
@@ -1285,12 +1282,6 @@ python_html <- function(python_code, select_data, current_data) {
 
 ### LLM API Functions ###
 
-resolve_provider <- function(api_key) {
-  # shinylive branch: OpenAI only (keys are budget/model/expiry-limited in the OpenAI
-  # portal). endpoint = NULL means OpenAI's base URL in create_response().
-  list(key = api_key$key, endpoint = NULL)
-}
-
 # In the browser (shinylive/webR) httr can't open sockets. webR runs in a web
 # worker, where a synchronous XMLHttpRequest is allowed, so callers stay synchronous.
 browser_post <- function(url, headers, body) {
@@ -1309,9 +1300,9 @@ browser_post <- function(url, headers, body) {
     # install it (CRAN's unrelated "webr" package would be picked up instead)
     jsonlite::fromJSON(getExportedValue("webr", "eval_js")(js)),
     # OpenAI omits CORS headers on auth errors, so a wrong key also lands here
-    error = function(e) stop("Could not reach the AI service. Check that the key you pasted ",
-                             "under API Key is correct. (", conditionMessage(e), ")",
-                             call. = FALSE)
+    error = function(e) stop("Could not reach the AI service. Check your internet connection. ",
+                             "If this keeps happening, the class key may have expired: tell your ",
+                             "instructor. (", conditionMessage(e), ")", call. = FALSE)
   )
 }
 
@@ -1336,20 +1327,13 @@ install_missing_packages <- function(code) {
 
 
 # `extra` is a named list of additional request-body fields (e.g. list(temperature = 0)).
-create_response <- function(model, messages, key, endpoint = NULL, extra = list()) {
-  url <- if (is.null(endpoint)) {
-    "https://api.openai.com/v1/responses"
-  } else {
-    paste0(sub("/?$", "/", endpoint), "openai/v1/responses")  # with or without trailing /
-  }
-  if (is.null(key) || !nzchar(key)) {
-    stop("No API key found. Click API Key at the top of the page and paste your key.", call. = FALSE)
-  }
-  headers <- if (is.null(endpoint)) {
-    list(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))
-  } else {
-    list(`Content-Type` = "application/json", `api-key` = key)
-  }
+# The only key the app uses: an OpenAI sk- key in OPENAI_API_KEY. On the shinylive site
+# app.R sets it from the file dev/build_shinylive.R writes from the DOG_LOVER secret.
+create_response <- function(model, messages, extra = list()) {
+  url <- "https://api.openai.com/v1/responses"
+  key <- Sys.getenv("OPENAI_API_KEY")
+  if (!nzchar(key)) stop("OPENAI_API_KEY is not set.", call. = FALSE)
+  headers <- list(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))
   body <- jsonlite::toJSON(c(list(model = model, input = messages), extra), auto_unbox = TRUE)
 
   response <- if (in_browser) {
