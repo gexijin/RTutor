@@ -25,7 +25,7 @@ the original plan, see "Changes made during implementation" at the end.
 | Expiry message | A 401 from OpenAI shows "this version has expired" with a download link. |
 | Build triggers | Every push to `uiuc_electron` produces test installers (Actions artifacts, not published). Every `uiuc-desktop-v*` tag produces a GitHub Release. |
 | Naming | Tags `uiuc-desktop-v1.0.0`. Releases are titled "UIUC RTutor Desktop 1.0.0" and are **not** marked Latest, so the web app's v0.98.3 release stays on top. |
-| Branch | `uiuc_electron`, cut from `uiuc_main`, and merged back once tested. |
+| Branch | `uiuc_electron`, cut from `uiuc_main`. **Kept as its own version** alongside `uiuc_main` (server) and `uiuc_shinylive` (browser) until UIUC picks one. Shared app changes are cherry-picked onto each branch; the branches are never merged into each other. |
 | Shinylive | `uiuc_shinylive` will be retired once this ships. Jenna will remove it. |
 | Icon | The RTutor hex sticker, padded onto a transparent square. |
 | Releases | Tag builds create a **draft**. Jenna tests it and publishes it by hand. |
@@ -332,7 +332,7 @@ Both build jobs:
 ## 6. Release process and the semester key swap (runbook, goes into `electron/README.md`)
 
 1. Your boss sets the new semester key as the value of the `DOG_LOVER` secret on gexijin/RTutor.
-2. On `uiuc_electron` (or `uiuc_main` after the merge): bump `electron/package.json`, commit, and tag
+2. On `uiuc_electron`: bump `electron/package.json`, commit, and tag
    `uiuc-desktop-vX.Y.Z`. The exact commands are in `electron/README.md` (see §12).
 3. Push the branch and the tag. This starts two builds, one for the branch push (test artifacts) and one for the
    tag (the release). The extra branch build is harmless and free on a public repo.
@@ -434,7 +434,7 @@ coverage check (§4) herself.
 5. Enable the `windows` job → same.
 6. §7 install guide, then Jenna's screenshots.
 7. First tag `uiuc-desktop-v1.0.0` → draft release → §9 checklist → publish.
-8. Merge `uiuc_electron` into `uiuc_main`. Retire `uiuc_shinylive`.
+8. ~~Merge `uiuc_electron` into `uiuc_main`~~: changed on 2026-10-06. The server, desktop and browser versions stay separate branches until UIUC chooses one; shared changes are cherry-picked onto each.
 
 ---
 

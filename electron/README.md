@@ -1,5 +1,8 @@
 # UIUC RTutor Desktop: maintainer notes
 
+> This branch is the **desktop version** of UIUC RTutor. `uiuc_main` (server) and `uiuc_shinylive` (browser) are
+> separate versions. Copy shared app changes between them with `git cherry-pick`; don't merge the branches.
+
 The desktop app is an Electron shell around a bundled, portable R with RTutor and a fixed set of packages
 installed. `main.js` starts `Rscript --vanilla bootstrap.R`, which serves `RTutor::run_app()` on
 `127.0.0.1:<free port>`, and shows it in a window. Students' guide: [INSTALL.md](INSTALL.md).
@@ -34,7 +37,7 @@ The key's spending cap and semester expiry are what limit the damage.
 
 1. For a new semester: your boss puts the new key into the `DOG_LOVER` secret (repo Settings → Secrets and
    variables → Actions).
-2. Commit any changes on `uiuc_electron` (or `uiuc_main` once merged). Then bump the version, commit it, and push
+2. Commit any changes on `uiuc_electron`. Then bump the version, commit it, and push
    a matching `uiuc-desktop-vX.Y.Z` tag. (`npm version` can't do the git part here, because `package.json` isn't at
    the repo root.)
    ```bash
