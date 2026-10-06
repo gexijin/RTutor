@@ -120,9 +120,8 @@ mod_09_report_serv <- function(id, submit_button, ch, selected_model, agent_name
       # Initialize script with model and credits
       Rmd_script <- ""
       Rmd_script <- paste0(
-        "\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) using API access via the
-        [OpenAI](https://cran.rstudio.com/web/packages/openai/index.html) package and custom
-        [chat completion](https://platform.openai.com/docs/api-reference/chat/create) package to
+        "\nDeveloped by [Steven Ge](https://twitter.com/StevenXGe) using the
+        [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses) with
         [OpenAI's](https://openai.com/) \"",
         names(language_models)[language_models == selected_model()], "\" model.",
         "\n\nRTutor Website: [https://rtutor.ai](https://rtutor.ai)\n",

@@ -59,6 +59,20 @@ Format your entire response in Markdown only. Use headers, bullet points, bold, 
 # If this file exists, running on the server. Otherwise local. This is used to change app behavior.
 on_server <- "on_server.txt"
 
+# Set by the desktop app (electron/main.js). A function, not a constant: package-level code runs at install time.
+on_desktop <- function() nzchar(Sys.getenv("RTUTOR_DESKTOP"))
+
+# Where students download a new desktop build (shown when the embedded key expires).
+desktop_download_url <- "https://github.com/gexijin/RTutor/releases?q=uiuc-desktop&expanded=true"
+
+# On desktop a missing package can't be installed, so say so plainly instead of a bare R error.
+desktop_package_note <- function(msg) {
+  pkg <- regmatches(msg, regexec("there is no package called .([A-Za-z0-9.]+).", msg))[[1]][2]
+  if (!on_desktop() || is.na(pkg)) return(msg)
+  paste0(msg, "\n\nPackage ", pkg, " isn't included in the UIUC RTutor desktop app. ",
+         "Try asking for the analysis without it.")
+}
+
 # Named character vector: function name -> reason it is blocked.
 # Used by validate_r_code() for AST-based pre-execution security checks.
 BLOCKED_FNS <- c(
@@ -986,7 +1000,8 @@ clean_cmd <- function(cmd, selected_data, on_server = FALSE) {
   )
 
   # use pacman, load if installed; otherwise install it first then load.
-  if (!on_server) {
+  # Not on desktop: its package library is read-only, so missing packages get a clear message instead.
+  if (!on_server && !on_desktop()) {
     cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
   }
   #if (selected_data != no_data) {

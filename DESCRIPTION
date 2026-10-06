@@ -9,14 +9,15 @@ Authors@R:
 Description: This package generates and tests R code from requests in English.
 License: MIT + file LICENSE
 Imports: 
+    shiny,
     config,
     golem,
     tippy,
     gridExtra,
-    openai,
     DT,
     shinybusy,
     shinyjs,
+    shinyalert,
     plotly,
     summarytools,
     DataExplorer,
@@ -28,15 +29,25 @@ Imports:
     canvasXpress,
     moments,
     hexbin,
-    shinyAce
+    shinyAce,
+    httr,
+    jsonlite,
+    lubridate,
+    readxl,
+    commonmark,
+    pacman,
+    htmltools,
+    rlang,
+    knitr,
+    rmarkdown,
+    e1071
 Depends:
     tidyverse
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
 Suggests: 
-    knitr,
-    rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
 VignetteBuilder: knitr

@@ -118,7 +118,7 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
           # not e$message: tidyverse errors leave it "", which made failed code look successful
           msg <- conditionMessage(e)
           if (!nzchar(msg)) msg <- "The code stopped with an error."
-          list(error_message = msg)  # won't work if not inside a list!
+          list(error_message = desktop_package_note(msg))  # won't work if not inside a list!
         })
 
         # Remove the temporary S4 summary shim if user code didn't redefine it
