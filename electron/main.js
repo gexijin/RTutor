@@ -202,6 +202,7 @@ const HEARTBEAT_JS = `(function () {
 
 function showSplash(appOrigin) {
   global.win = new BrowserWindow({
+    title: 'UIUC RTutor',
     width: 1200,
     height: 800,
     show: true,
@@ -213,6 +214,9 @@ function showSplash(appOrigin) {
     },
   });
   const wc = global.win.webContents;
+  // Keep "UIUC RTutor" as the window title. Otherwise Electron copies each page's <title>,
+  // and the app's is shared with the server version ("RTutor 2.00").
+  global.win.on('page-title-updated', (e) => e.preventDefault());
   wc.on('did-finish-load', () => wc.executeJavaScript(HEARTBEAT_JS).catch(() => {}));
 
   // External links (e.g. the "download the latest version" link) open in the system browser.
