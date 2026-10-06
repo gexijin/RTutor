@@ -147,8 +147,8 @@ app_ui <- function(request) {
     # spinner escaped that with its own centering script, this popup needs this rule.
     if (in_browser) tags$style(HTML("
       .modal-dialog:has(.rtutor-loading-dots) {
-        position: fixed; top: 25vh; bottom: auto; left: 50%;
-        transform: translateX(-50%); margin: 0; width: min(300px, 90vw);
+        position: fixed; top: 25vh; bottom: auto; left: 0; right: 0;
+        margin: 0 auto; width: min(300px, 90vw);
       }
     ")),
 
