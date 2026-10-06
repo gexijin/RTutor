@@ -65,11 +65,22 @@ on_desktop <- function() nzchar(Sys.getenv("RTUTOR_DESKTOP"))
 # Where students download a new desktop build (shown when the embedded key expires).
 desktop_download_url <- "https://github.com/gexijin/RTutor/releases?q=uiuc-desktop&expanded=true"
 
-# On desktop a missing package can't be installed, so say so plainly instead of a bare R error.
+# On desktop a package can't be installed or repaired, so say so plainly instead of a bare R error.
+# Covers packages that are missing and ones that are bundled but fail to load (e.g. summarytools
+# on macOS, which needs Tcl/Tk). library() names the requested package ("load failed for 'x'");
+# pkg:: names the package whose setup failed ("loadNamespace() for 'x'"), so try them in order.
 desktop_package_note <- function(msg) {
-  pkg <- regmatches(msg, regexec("there is no package called .([A-Za-z0-9.]+).", msg))[[1]][2]
-  if (!on_desktop() || is.na(pkg)) return(msg)
-  paste0(msg, "\n\nPackage ", pkg, " isn't included in the UIUC RTutor desktop app. ",
+  if (!on_desktop()) return(msg)
+  patterns <- c("there is no package called .([A-Za-z0-9.]+).",
+                "namespace load failed for .([A-Za-z0-9.]+).",
+                "loadNamespace\\(\\) for .([A-Za-z0-9.]+).")
+  pkg <- NA
+  for (p in patterns) {
+    pkg <- regmatches(msg, regexec(p, msg))[[1]][2]
+    if (!is.na(pkg)) break
+  }
+  if (is.na(pkg)) return(msg)
+  paste0(msg, "\n\nPackage ", pkg, " isn't available in the UIUC RTutor desktop app. ",
          "Try asking for the analysis without it.")
 }
 

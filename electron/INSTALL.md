@@ -111,7 +111,7 @@ expired"* with a link to the download page. The app may also tell you when a new
 | *"This version of UIUC RTutor has expired"* | Download and install the newest version from the [download page](https://github.com/gexijin/RTutor/releases?q=uiuc-desktop&expanded=true). |
 | *"The class's AI budget has been used up"* | Tell your instructor. |
 | *"Could not connect to the AI server"* | Check your internet connection and try again. |
-| *"Package … isn't included in the UIUC RTutor desktop app"* | The AI used an R package the app doesn't include. Ask for the same analysis in a different way, for example "using base R" or "using ggplot2". |
+| *"Package … isn't available in the UIUC RTutor desktop app"* | The AI used an R package the app doesn't include (or that doesn't work on your computer). Ask for the same analysis in a different way, for example "using base R" or "using ggplot2". |
 | *"UIUC RTutor stopped"* | Close and reopen the app. If it keeps happening, send your instructor the log file. |
 
 **Log file:** its location is shown at the bottom of the loading screen.

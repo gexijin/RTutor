@@ -101,4 +101,11 @@ if (nrow(missing) == 0) {
   cat("NOT in the bundle (package, times used):\n")
   print(missing[, c("package", "Freq")], row.names = FALSE)
 }
+# Bundled, but known not to load on macOS (needs Tcl/Tk + XQuartz); students there get the
+# "isn't available in the desktop app" message instead.
+mac_broken <- intersect(c("summarytools", "tcltk"), tab$package)
+if (length(mac_broken) > 0) {
+  cat("\nBundled but broken on Macs (times used):\n")
+  print(tab[tab$package %in% mac_broken, c("package", "Freq")], row.names = FALSE)
+}
 if (!is.na(out_file)) write.csv(tab, out_file, row.names = FALSE)

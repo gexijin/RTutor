@@ -23,8 +23,20 @@ test_that("a missing package gets a desktop-specific note only on desktop", {
   expect_identical(desktop_package_note(msg), msg)
 
   withr::local_envvar(RTUTOR_DESKTOP = "1")
-  expect_match(desktop_package_note(msg), "notARealPackage123 isn't included in the UIUC RTutor desktop app", fixed = TRUE)
+  expect_match(desktop_package_note(msg), "notARealPackage123 isn't available in the UIUC RTutor desktop app", fixed = TRUE)
   expect_identical(desktop_package_note("some other error"), "some other error")
+})
+
+test_that("a bundled package that fails to load gets the note too, naming the right package", {
+  withr::local_envvar(RTUTOR_DESKTOP = "1")
+  # Exact R wording when summarytools' dependency tcltk can't load (macOS without Tcl/Tk)
+  via_library <- paste0("package or namespace load failed for \u2018summarytools\u2019:\n",
+                        " .onLoad failed in loadNamespace() for 'tcltk', details:\n",
+                        "  call: dyn.load(file, DLLpath = DLLpath, ...)\n",
+                        "  error: unable to load shared object '/x/library/tcltk/libs/tcltk.so'")
+  via_colons <- sub("^[^\n]*\n ", "", via_library)  # pkg:: reports only the failing dependency
+  expect_match(desktop_package_note(via_library), "Package summarytools isn't available", fixed = TRUE)
+  expect_match(desktop_package_note(via_colons), "Package tcltk isn't available", fixed = TRUE)
 })
 
 test_that("a rejected key (401) tells students the version expired and links to the download page", {
