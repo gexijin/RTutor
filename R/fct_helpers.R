@@ -19,9 +19,14 @@ min_query_length <- 6  # minimum # of characters
 max_query_length <- 2000 # max # of characters
 
 # Switch these 3 to the model you want to use
-language_models <- c("gpt-5.6-luna") # "o4-mini"
-names(language_models) <- c("GPT 5.6 Luna") # "O4 Mini"
-default_model <- "GPT 5.6 Luna"  # "O4 Mini"
+language_models <- c("gpt-6-luna") # "gpt-5.6-luna"
+names(language_models) <- c("GPT 6 Luna") # "GPT 5.6 Luna"
+default_model <- "GPT 6 Luna"  # "GPT 5.6 Luna"
+
+# Reasoning effort, passed as `extra` to create_response(). "none" for the yes/no
+# checks; "low" elsewhere: enough for correct code, faster and cheaper than the default.
+effort_none <- list(reasoning = list(effort = "none"))
+effort_low  <- list(reasoning = list(effort = "low"))
 
 # Debug line, printed at startup
 message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=%s",
@@ -30,7 +35,7 @@ message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=%s",
 ))
 
 # Token budget for chat history included per request. Not a model limit
-# (gpt-5.6-luna context is ~1M tokens) — this is a cost control: input costs ~$1/1M tokens.
+# (gpt-6-luna context is ~1M tokens) — this is a cost control on input tokens.
 max_content_length <- 30000     # code generation history
 max_content_length_ask <- 30000 # Q&A history
 pre_text <- "Write correct, efficient R code to analyze data."
@@ -710,7 +715,7 @@ call_llm_check <- function(prompt) {
   )
 
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages),
+    create_response(language_models[[default_model]], messages, extra = effort_low),
     error = function(e) {
       message("[SECURITY] Responses API error: ", e$message)
       NULL
@@ -739,7 +744,7 @@ vague_check_enabled <- TRUE
 
 # ponytail: this model rejects `temperature` unless reasoning is off. Reasoning off + temp 0
 # gives repeatable verdicts; switch to list(reasoning = list(effort = "low")) if accuracy drops.
-quality_check_params <- list(reasoning = list(effort = "none"), temperature = 0)
+quality_check_params <- c(effort_none, list(temperature = 0))
 
 quality_off_topic_rules <- paste0(
   "A prompt is ON-topic only if it (a) asks for an analysis, table, plot, model, or transformation ",
@@ -955,7 +960,7 @@ explain_error <- function(error_message, code, prompt,
   fail_open <- list(explanation = NULL, suggestions = character(0), usage = NULL)
 
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages),
+    create_response(language_models[[default_model]], messages, extra = effort_low),
     error = function(e) {
       message("[EXPLAIN] Responses API error: ", e$message)
       NULL
@@ -1093,10 +1098,11 @@ tokens <- function(text) {
 api_cost <- function(prompt_tokens, completion_tokens, selected_model) {
   # $ per 1M tokens: c(input, output). Add a row when switching models.
   prices <- list(
-    "gpt-5.6-luna" = c(1, 6)
+    "gpt-5.6-luna" = c(1, 6),
+    "gpt-6-luna"   = c(0.10, 0.50)  # standard, short context
   )
   p <- prices[[selected_model]]
-  if (is.null(p)) p <- c(1, 6) # unknown model: assume current default rates
+  if (is.null(p)) p <- prices[[language_models[[default_model]]]] # unknown model: current default's rates
   (prompt_tokens * p[1] + completion_tokens * p[2]) / 1e6
 }
 

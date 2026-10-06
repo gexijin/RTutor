@@ -226,7 +226,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         list(role = "user", content = user_content)
       )
 
-      response <- llm_agent(relevancy_prompt)
+      response <- llm_agent(relevancy_prompt, extra = effort_none)  # True/False check
 
       if (is.null(response)) return(FALSE)
 
@@ -273,8 +273,8 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
     ### LLM Functions ###
 
-    llm_agent <- function(messages) {
-      create_response(language_models[[default_model]], messages)
+    llm_agent <- function(messages, extra = effort_low) {
+      create_response(language_models[[default_model]], messages, extra = extra)
     }
 
 
