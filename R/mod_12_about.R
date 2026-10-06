@@ -90,7 +90,7 @@ mod_12_about_ui <- function(id) {
         target = "_blank"
       ),
       "Now developed and maintained by",
-      a("Orditus LLC.",
+      a("Orditus.",
         href = "https://orditus.com/",
         target = "_blank"
       ),

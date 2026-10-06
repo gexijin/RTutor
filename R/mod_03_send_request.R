@@ -68,7 +68,7 @@ mod_03_send_request_ui <- function(id) {
 
 mod_03_send_request_serv <- function(id, chunk_selection, user_file,
                                      selected_dataset_name, use_python,
-                                     quality_cleared, api_key, current_data,
+                                     quality_cleared, current_data,
                                      do_soft_reset, counter, is_follow_up) {
 
   moduleServer(id, function(input, output, session) {
@@ -196,7 +196,6 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
       result <- tryCatch(
         check_prompt_quality(
           prompt         = input$input_text,
-          api_key        = api_key,
           dataset_name   = selected_dataset_name(),
           col_names      = colnames(current_data()),
           col_types      = vapply(current_data(), function(x) class(x)[1], character(1)),

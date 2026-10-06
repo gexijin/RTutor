@@ -26,7 +26,7 @@ default_model <- "GPT 5.6 Luna"  # "O4 Mini"
 # Debug line, printed at startup
 message(sprintf("[LLM] model=%-20s protocol=Responses API  provider=%s",
   language_models[[default_model]],
-  if (nchar(Sys.getenv("AZURE_OPENAI_API_ENDPOINT")) > 0) "Azure" else "OpenAI"
+  "OpenAI"
 ))
 
 # Token budget for chat history included per request. Not a model limit
@@ -674,7 +674,7 @@ diff_is_significant <- function(original_code, edited_code, n_chars = 40) {
 }
 
 
-call_llm_check <- function(prompt, api_key) {
+call_llm_check <- function(prompt) {
   # System message enforces a strict YES/NO reply — no explanations.
   messages <- list(
     list(
@@ -684,9 +684,8 @@ call_llm_check <- function(prompt, api_key) {
     list(role = "user", content = prompt)
   )
 
-  p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    create_response(language_models[[default_model]], messages),
     error = function(e) {
       message("[SECURITY] Responses API error: ", e$message)
       NULL
@@ -741,7 +740,7 @@ quality_off_topic_rules <- paste0(
 #   ok          -> `suggestions` may hold optional, non-blocking improvements
 # off_topic_only = TRUE (follow-up prompts) checks nothing but topic.
 # Fails open: any API or parse error returns "ok" so students are never blocked by an outage.
-check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names = character(0),
+check_prompt_quality <- function(prompt, dataset_name = "", col_names = character(0),
                                  col_types = character(0), off_topic_only = FALSE) {
   fail_open <- list(verdict = "ok", missing = character(0), suggestions = character(0), usage = NULL)
 
@@ -836,9 +835,8 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
     list(role = "user",   content = paste0("Prompt: ", prompt))
   )
 
-  p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint,
+    create_response(language_models[[default_model]], messages,
                     extra = quality_check_params),
     error = function(e) {
       message("[QUALITY] Responses API error: ", e$message)
@@ -892,7 +890,7 @@ check_prompt_quality <- function(prompt, api_key, dataset_name = "", col_names =
 # Generate a plain-English explanation for an R error
 # Returns list(explanation = character(1), suggestions = character(0..2))
 # Fails open: on any API or parse error returns list(explanation = NULL, suggestions = character(0))
-explain_error <- function(error_message, code, prompt, api_key,
+explain_error <- function(error_message, code, prompt,
                           dataset_name = "", col_names = character(0)) {
   user_content <- paste0(
     "Error: ", error_message, "\n\n",
@@ -920,9 +918,8 @@ explain_error <- function(error_message, code, prompt, api_key,
 
   fail_open <- list(explanation = NULL, suggestions = character(0), usage = NULL)
 
-  p <- resolve_provider(api_key)
   response <- tryCatch(
-    create_response(language_models[[default_model]], messages, p$key, p$endpoint),
+    create_response(language_models[[default_model]], messages),
     error = function(e) {
       message("[EXPLAIN] Responses API error: ", e$message)
       NULL
@@ -1274,31 +1271,14 @@ python_html <- function(python_code, select_data, current_data) {
 
 ### LLM API Functions ###
 
-resolve_provider <- function(api_key) {
-  # If = OpenAI provider
-  if (!is.null(api_key$key) && nchar(api_key$key) > 0 && isTRUE(api_key$switch_on))
-    list(key = api_key$key, endpoint = NULL)
-  # else = Azure OpenAI provider
-  else
-    list(key      = Sys.getenv("AZURE_OPENAI_API_KEY"),
-         endpoint = Sys.getenv("AZURE_OPENAI_API_ENDPOINT"))
-}
-
-
+# The only key the app uses: an OpenAI sk- key in OPENAI_API_KEY, set by whatever launches R.
 # `extra` is a named list of additional request-body fields (e.g. list(temperature = 0)).
-create_response <- function(model, messages, key, endpoint = NULL, extra = list()) {
-  url <- if (is.null(endpoint)) {
-    "https://api.openai.com/v1/responses"
-  } else {
-    paste0(endpoint, "openai/v1/responses")
-  }
-  headers <- if (is.null(endpoint)) {
-    httr::add_headers(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))
-  } else {
-    httr::add_headers(`Content-Type` = "application/json", `api-key` = key)
-  }
+create_response <- function(model, messages, extra = list()) {
+  key <- Sys.getenv("OPENAI_API_KEY")
+  if (!nzchar(key)) stop("OPENAI_API_KEY is not set.", call. = FALSE)
+  headers <- httr::add_headers(`Content-Type` = "application/json", `Authorization` = paste("Bearer", key))
 
-  response <- httr::POST(url, headers, body = c(list(model = model, input = messages), extra), encode = "json")
+  response <- httr::POST("https://api.openai.com/v1/responses", headers, body = c(list(model = model, input = messages), extra), encode = "json")
 
   parsed <- response %>%
     httr::content(as = "text", encoding = "UTF-8") %>%

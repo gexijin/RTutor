@@ -46,76 +46,6 @@ mod_11_settings_ui <- function(id) {
                 )
               )
             )
-          ),
-
-          # API Key Settings
-          column(
-            width = 8,
-            fluidRow(
-              column(
-                width = 12,
-                div(
-                  style = "padding-left: 85px;padding-right: 20px;padding-bottom: 10px;",
-                  h3(strong("Use Personal API Key")),
-                  shinyWidgets::materialSwitch(
-                    inputId = ns("show_api_settings"),
-                    label = "",
-                    value = FALSE,   # FALSE = default to Azure
-                    status = "primary"
-                  )
-                ),
-                div(
-                  h4("By default, RTutor uses Azure's OpenAI models which costs us a small fee per request.", 
-                    style = common_styles$right_div_style),
-                  h4("If you are a regular user, please toggle the button; and take a few minutes to create a personal API key at", a("OpenAI.", href = "https://openai.com/api/", target = "_blank"),
-                    style = common_styles$right_div_style)
-                ),
-                conditionalPanel(  # only shown when toggled
-                  condition = "input.show_api_settings == true",
-                  ns = NS(id),
-                  div(
-                    tags$ul(
-                      tags$li("Create a personal account at",
-                            a("OpenAI.", href = "https://openai.com/api/", target = "_blank")),
-                      tags$li("Once logged in, click \"Personal\" from top right."),
-                      tags$li("Click \"Manage Account\", then \"Billing\", where you can add
-                            \"Payment methods\" and set \"Usage limits\". $5 per month is more than enough."),
-                      tags$li("Click \"API keys\" to create a new key, which can be copied and pasted below."),
-                      uiOutput("save_api_ui")
-                    ),
-                    style = common_styles$right_div_style
-                  )
-                )
-              )
-            ),
-
-            # API Key Input,
-            conditionalPanel(  # only shown when toggled
-              condition = "input.show_api_settings == true",
-              ns = NS(id),
-              fluidRow(
-                column(
-                  width = 6,
-                  div(
-                    textInput(
-                      inputId = ns("api_key"),
-                      label = h4("Paste your API key from OpenAI:"),
-                      value = NULL,
-                      placeholder = "sk-......"
-                    ),
-                    style = common_styles$right_div_style
-                  ),
-                ),
-                column(
-                  width = 6,
-                  h4("Current API Key:", style = "padding-right: 20px;"),
-                  div(
-                    verbatimTextOutput(ns("session_api_source")),
-                    style = "padding-right: 20px; font-size: 18px;"
-                  )
-                )
-              )
-            )
           )
         ),
 
@@ -230,7 +160,7 @@ mod_11_settings_ui <- function(id) {
 }
 
 
-mod_11_settings_serv <- function(id, submit_button, llm_prompt,
+mod_11_settings_serv <- function(id, llm_prompt,
                                  code_error) {
 
   moduleServer(id, function(input, output, session) {
@@ -239,80 +169,6 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
 
 
     ### LLM Parameters ###
-
-    ## AI Model Toggle logic ##
-    # Update toggle switch variable within api_key
-    observeEvent(input$show_api_settings, {
-      api_key$switch_on <- input$show_api_settings
-    })
-
-    # Track previous submit button value
-    previous_submit <- reactiveVal(0)
-
-    # Handle toggle reset based on submit button
-    observe({
-      # Only proceed if all conditions are met:
-      # 1. Toggle is ON, 2. No API key,
-      # 3. Submit button was just pressed (value changed)
-      if (api_key$switch_on &&
-            (is.null(api_key$key) || nchar(api_key$key) == 0) &&
-            submit_button() != previous_submit()) {
-
-        # Update the material switch UI
-        shinyWidgets::updateMaterialSwitch(
-          session,
-          inputId = "show_api_settings",
-          value = FALSE
-        )
-
-        # Update our reactive values
-        api_key$switch_on <- FALSE
-
-        # Update previous submit value
-        previous_submit(submit_button())
-      } else {
-        # Always keep track of previous submit value
-        previous_submit(submit_button())
-      }
-    })
-
-    ## API Key ##
-    # Initialize API Key
-    api_key <- reactiveValues(
-      key = "",
-      source = "",
-      switch_on = FALSE # FALSE = default to Azure
-    )
-
-    # Update API Key
-    observe({
-      new_key <- clean_api_key(input$api_key)  # get user's api key, if any
-
-      if (!is.null(new_key) && nchar(new_key) > 0) {
-        api_key$key <- new_key
-        api_key$source <- "from user."
-      } else if (file.exists(file.path(getwd(), "api_key.txt"))) {
-        api_key_file <- readLines(file.path(getwd(), "api_key.txt"))
-        api_key_temp <- clean_api_key(api_key_file)
-        api_key$key <- api_key_temp
-        api_key$source <- "from file."
-      } else {
-        api_key$key <- Sys.getenv("OPEN_API_KEY")  # default api key
-        api_key$source <- "from OS environment variable."
-      }
-    })
-
-    # Clean up API key characters
-    clean_api_key <- function(api_key) {
-      # Remove spaces
-      cleaned <- gsub("[[:space:]]", "", api_key)
-
-      # Return NULL if empty or only whitespace
-      if (is.null(cleaned) || length(cleaned) == 0) {
-        return(NULL)
-      }
-      return(cleaned)
-    }
 
 
     ## Other Settings ##
@@ -336,18 +192,6 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
       )
     })
 
-
-    # Display current API key
-    output$session_api_source <- renderText({
-      key <- api_key$key
-      source <- api_key$source
-      paste0(
-        substr(key, 1, 4),
-        ".....",
-        substr(key, nchar(key) - 4, nchar(key)),
-        " (", source, ")"
-      )
-    })
 
 
     # Use Python for results
@@ -476,7 +320,6 @@ mod_11_settings_serv <- function(id, submit_button, llm_prompt,
     # Return reactive values so they can be used outside the module
     return(
       list(
-        api_key = api_key,
         selected_model = selected_model,
         use_python = use_python,
         convert_to_factor = convert_to_factor,
