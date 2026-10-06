@@ -358,7 +358,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
       ### LLM Functions ###
 
       llm_agent <- function(messages) {
-        create_response(language_models[[default_model]], messages)
+        create_response(language_models[[default_model]], messages, extra = effort_low)
       }
 
   })
