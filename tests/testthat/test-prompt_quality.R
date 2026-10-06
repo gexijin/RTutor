@@ -126,7 +126,7 @@ test_that("Check Again runs the full check but never runs code", {
     check_again(session, "make a graph with Protein", 1)
     expect_match(feedback(session$output), "Name the columns.", fixed = TRUE)
     check_again(session, "make a histogram of Protein", 2)
-    expect_match(feedback(session$output), "All clear! Hit Submit to make it!", fixed = TRUE)
+    expect_match(feedback(session$output), "All clear! 'Submit' to run the code!", fixed = TRUE)
     expect_equal(shiny::isolate(cleared()), 0)
   })
   expect_equal(unlist(calls), c(FALSE, FALSE))  # full check both times, not off-topic only

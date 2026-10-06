@@ -67,12 +67,6 @@ mod_01_styles_ui <- function(id) {
     [id$='quality_tip'] ul { margin: 6px 0 0 0; padding-left: 22px; }
     [id$='quality_tip'] .shiny-notification-close { color: #ffffff; opacity: 0.8; }
 
-    /* Check Again (mod_03): yellow, matching the prompt-check feedback box */
-    .check-again-button { background-color: #ffc107; border-color: #e0a800; color: #000; }
-    .check-again-button:hover, .check-again-button:focus, .check-again-button:active {
-      background-color: #e0a800; border-color: #c69500; color: #000;
-    }
-
     /* active tab */
     .navbar-default .navbar-nav > .active > a,
     .navbar-default .navbar-nav > .active > a:focus,
@@ -196,8 +190,9 @@ mod_01_styles_ui <- function(id) {
       #send_request-input_text::placeholder { font-size: 13px !important; }
       #qa-ask_question::placeholder { font-size: 13px !important; }
 
-      /* Submit and Reset buttons */
+      /* Submit, Check Again and Reset buttons */
       #send_request-submit_button,
+      #send_request-check_button,
       #send_request-reset_button { font-size: 14px !important; }
 
       /* Compact navbar tab labels */
@@ -421,6 +416,14 @@ mod_01_styles_ui <- function(id) {
       font-size: 18px;
       color: red !important;
       background-color: #ffffff;
+      border-color: #6B9EE8;
+      }
+
+    /* Same as Reset and Submit, but black text on pale yellow */
+    #send_request-check_button {
+      font-size: 18px;
+      color: #000000 !important;
+      background-color: #f9e177c0;
       border-color: #6B9EE8;
       }
 

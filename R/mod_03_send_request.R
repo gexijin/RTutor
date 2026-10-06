@@ -43,7 +43,7 @@ mod_03_send_request_ui <- function(id) {
           ),
           div(
             # Check Again: hidden until a prompt has run (see the server). Checks, never runs.
-            shinyjs::hidden(actionButton(ns("check_button"), strong("Check Again"), class = "check-again-button")),
+            shinyjs::hidden(actionButton(ns("check_button"), strong("Check Again"))),
 
             tippy::tippy_this(
               ns("check_button"),
@@ -290,10 +290,10 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
       output$quality_feedback_ui <- renderUI(switch(result$verdict,
         off_topic = off_topic_box(),
         vague = missing_box(result$missing,
-                            "Fix these and click Check Again, or click Submit to run it as is."),
+                            "Fix these and click 'Check Again', or 'Submit' to run it as is."),
         div(
           style = "background-color: #e8f5e9; border-left: 3px solid #4caf50; padding: 10px; margin-top: 8px; margin-bottom: 10px;",
-          strong("✅ All clear! Hit Submit to make it!")
+          strong("All clear! 'Submit' to run the code!")
         )
       ))
       if (result$verdict == "ok") show_tip(result$suggestions)
