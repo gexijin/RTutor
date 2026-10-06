@@ -1,6 +1,6 @@
 # Offline evaluation of check_prompt_quality() against labeled prompts. Calls the real LLM
 # (~150 short calls, well under $1), so it lives outside tests/testthat/ and never runs
-# with devtools::test(). Needs AZURE_OPENAI_API_KEY / AZURE_OPENAI_API_ENDPOINT (.Renviron).
+# with devtools::test(). Needs an OpenAI key in OPENAI_API_KEY (env var or .Renviron).
 #
 # Run from the repo root:   Rscript tests/eval_prompt_quality.R [results.csv]
 #
@@ -10,7 +10,8 @@
 #     strict rubric, so they are reported by bucket, not scored as pass/fail.
 suppressMessages(devtools::load_all(quiet = TRUE))
 out_file <- commandArgs(TRUE)[1]
-key <- list(key = "", switch_on = FALSE)  # -> Azure credentials from the environment
+# An empty key would make every check fail open as "ok" and look like a passing run
+if (!nzchar(Sys.getenv("OPENAI_API_KEY"))) stop("Set OPENAI_API_KEY to your sk-... key first.")
 
 cols_for <- function(dataset) {
   f <- file.path("inst/app/www/demo_data", paste0(gsub(" ", "_", tolower(dataset)), ".csv"))
@@ -47,7 +48,7 @@ cases <- do.call(rbind, cases)
 cases$got <- NA_character_; cases$detail <- ""
 for (i in seq_len(nrow(cases))) {
   cc <- cols_for(cases$dataset[i])
-  r <- suppressMessages(check_prompt_quality(cases$prompt[i], key, cases$dataset[i], cc$names, cc$types,
+  r <- suppressMessages(check_prompt_quality(cases$prompt[i], cases$dataset[i], cc$names, cc$types,
                                              off_topic_only = cases$follow_up[i]))
   cases$got[i] <- if (r$verdict == "ok" && length(r$suggestions) > 0) "ok+note" else r$verdict
   cases$detail[i] <- paste(c(r$missing, r$suggestions), collapse = " | ")
