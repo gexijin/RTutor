@@ -20,3 +20,18 @@ test_that("install_missing_packages finds packages named in student code", {
                              "fakepkgC::f(m)", "library(stats)"))
   expect_setequal(asked, c("fakepkgA", "fakepkgB", "fakepkgC"))
 })
+
+test_that("the loading popup is plain HTML (shinybusy's spinner doesn't render in the browser)", {
+  html <- as.character(loading_modal("A joke"))
+  expect_match(html, "Loading", fixed = TRUE)
+  expect_match(html, "rtutor-loading-dots", fixed = TRUE)
+  expect_match(html, "A joke", fixed = TRUE)
+
+  root <- rprojroot::find_package_root_file()
+  src <- function(f) paste(readLines(file.path(root, "R", f)), collapse = "\n")
+  for (f in c("mod_05_llms.R", "mod_16_qa.R")) {
+    expect_no_match(src(f), "shinybusy::", fixed = TRUE)
+    expect_match(src(f), "show_loading_modal(", fixed = TRUE)
+  }
+  expect_match(src("app_ui.R"), "$('.rtutor-loading-dots').text(dots[i])", fixed = TRUE)
+})

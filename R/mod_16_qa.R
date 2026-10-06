@@ -93,7 +93,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
         prepared_request <- txt
 
         #----------------------------Send request
-        shinybusy::show_modal_spinner(spin = "orbit", text = paste(sample(jokes, 1)),color = "#000000")
+        show_loading_modal(sample(jokes, 1))
 
         start_time <- Sys.time()
         api_error_occurred <- FALSE
@@ -110,7 +110,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
 
         }, error = function(e) {   # handle error, if any
           api_error_occurred <<- TRUE
-          shinybusy::remove_modal_spinner()   # close spinner first, then show error modal
+          removeModal()   # close the loading popup first, then show the error popup
           shiny::showModal(api_error_modal(e$message))
           list(
             error_value = -1,
@@ -119,7 +119,7 @@ mod_16_qa_serv <- function(id, submit_button, ch, code_error, run_result, api_er
           )
         })
 
-        if (!api_error_occurred) shinybusy::remove_modal_spinner()
+        if (!api_error_occurred) removeModal()
 
         final_response <- process_response(response, start_time)
       })

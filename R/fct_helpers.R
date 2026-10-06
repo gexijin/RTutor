@@ -1317,6 +1317,21 @@ browser_post <- function(url, headers, body) {
   )
 }
 
+# shinylive: shinybusy's spinner graphic doesn't render in the browser build, so the
+# loading popup is a plain modal: "Loading" with dots cycled by a script in app_ui.R,
+# and the joke underneath. Close it with removeModal().
+show_loading_modal <- function(text) showModal(loading_modal(text))
+loading_modal <- function(text) {
+  modalDialog(
+    div(style = "text-align: center; font-size: 20px; font-weight: bold;",
+        "Loading",
+        # fixed width so "Loading" doesn't shift as the dots change
+        span(class = "rtutor-loading-dots", style = "display: inline-block; width: 1.5em; text-align: left;", ".")),
+    div(style = "text-align: center; margin-top: 12px;", text),
+    footer = NULL, easyClose = FALSE, fade = FALSE, size = "s"
+  )
+}
+
 # The browser only has the packages bundled at build time. Packages that student
 # code names via library()/require()/pkg:: and that aren't installed are downloaded
 # from the webR repo, which costs a few seconds the first time in a visit.

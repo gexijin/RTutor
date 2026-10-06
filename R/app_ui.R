@@ -142,6 +142,18 @@ app_ui <- function(request) {
 
     tags$head(includeHTML(app_sys("app", "www", "ga.html"))),
 
+    # shinylive: cycle the dots after "Loading" in the loading popup (show_loading_modal).
+    # Runs on the page itself, so it animates while R is busy with the AI call.
+    if (in_browser) tags$script(HTML("
+      (function () {
+        var dots = ['.', '..', '...'], i = 0;
+        setInterval(function () {
+          i = (i + 1) % dots.length;
+          $('.rtutor-loading-dots').text(dots[i]);
+        }, 400);
+      })();
+    ")),
+
     # shinylive: a download link's native navigation bypasses the service worker
     # and fails, so fetch the file (which does go through it) and save it as a blob.
     if (in_browser) tags$script(HTML("

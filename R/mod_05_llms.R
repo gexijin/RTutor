@@ -36,7 +36,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
         prepared_request <- llm_prompt()
 
         # Loading modal
-        shinybusy::show_modal_spinner(spin = "orbit", text = sample(jokes, 1), color = "#000000")
+        show_loading_modal(sample(jokes, 1))
 
         start_time <- Sys.time()
         api_error_occurred <- FALSE
@@ -57,7 +57,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
 
         }, error = function(e) {   # handle error, if any
           api_error_occurred <<- TRUE
-          shinybusy::remove_modal_spinner()   # close spinner first, then show error modal
+          removeModal()   # close the loading popup first, then show the error popup
           shiny::showModal(api_error_modal(e$message))
           list(
             error_value = -1,
@@ -66,7 +66,7 @@ mod_05_llms_serv <- function(id, submit_button, input_text, selected_dataset_nam
           )
         })
 
-        if (!api_error_occurred) shinybusy::remove_modal_spinner()
+        if (!api_error_occurred) removeModal()
 
         final_response <- process_response(response, start_time)
       })
