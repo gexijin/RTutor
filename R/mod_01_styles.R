@@ -419,11 +419,11 @@ mod_01_styles_ui <- function(id) {
       border-color: #6B9EE8;
       }
 
-    /* Same as Reset and Submit, but black text on pale yellow */
+    /* Same as Reset and Submit, but dark grey text on pale yellow */
     #send_request-check_button {
-      font-size: 18px;
-      color: #000000 !important;
-      background-color: #f9e177c0;
+      font-size: 16px;
+      color: #3e3e3e !important;
+      background-color: #fffaba;
       border-color: #6B9EE8;
       }
 
