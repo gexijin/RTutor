@@ -75,14 +75,32 @@ small independent apps.
      <!-- SCREENSHOT: install-images/win-01-edge-keep.png: Edge download warning with Keep -->
    - **Chrome** may show a similar warning. Click **Keep** (or **Download suspicious file**).
      <!-- SCREENSHOT: install-images/win-02-chrome-keep.png: Chrome download warning -->
-2. Open the downloaded `.exe` file.
-3. A blue window says **"Windows protected your PC"**. Click **More info**, then **Run anyway**.
-   <!-- SCREENSHOT: install-images/win-03-smartscreen.png: SmartScreen with "More info" -->
-   <!-- SCREENSHOT: install-images/win-04-run-anyway.png: SmartScreen with "Run anyway" -->
+2. Open the downloaded `.exe` file (it's in your **Downloads** folder in File Explorer).
+
+   **If your download is a `.zip` file** (test builds come this way): double-click the `.zip` to open it, then
+   double-click **`UIUC-RTutor-<version>-win-x64.exe`** inside it.
+
+   ![The downloaded .zip file in the Downloads folder](pngs/win-1.png)
+
+   ![The UIUC RTutor installer (.exe) inside the .zip file](pngs/win-2.png)
+
+3. A window says **"Windows protected your PC"**. Click **More info**:
+
+   ![Windows protected your PC, with the More info link](pngs/win-3.png)
+
+   Then click **Run anyway**:
+
+   ![Windows protected your PC after More info, showing the Run anyway button](pngs/win-4.png)
+
 4. UIUC RTutor installs for your Windows account only (no administrator password needed) and opens by itself.
    Shortcuts named **UIUC RTutor** are added to the Start menu and the desktop.
-5. A loading screen appears. **The first launch can take up to a minute.** Later launches are faster.
-   <!-- SCREENSHOT: install-images/win-05-splash.png: the UIUC RTutor loading screen -->
+
+   ![The UIUC RTutor Setup window: Installing, please wait](pngs/win-5.png)
+
+5. A loading screen appears. **The first launch can take up to a minute.** Later launches are faster. Then
+   UIUC RTutor opens:
+
+   ![UIUC RTutor open on the Home tab](pngs/win-6.png)
 
 **If your antivirus removes or blocks the installer**, restore it or allow it in the antivirus program, then run it
 again. **School-managed PCs** may block it entirely. Use your own computer or ask your IT support.

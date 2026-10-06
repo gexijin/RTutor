@@ -86,5 +86,6 @@ the `Rscript` on your PATH and your own R library (development only).
 
 ## Screenshots for INSTALL.md
 
-The guide has `<!-- SCREENSHOT: ... -->` placeholders. Save each image in `electron/install-images/` under the name
-given, then replace the comment with `![description](install-images/<name>.png)`.
+The Windows steps use the screenshots in `electron/pngs/` (`win-1.png` to `win-6.png`). The Mac and browser-warning
+steps still have `<!-- SCREENSHOT: ... -->` placeholders. To add one, save the image in `electron/pngs/` and
+replace the comment with `![description](pngs/<name>.png)`.
