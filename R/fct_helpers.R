@@ -815,7 +815,10 @@ check_prompt_quality <- function(prompt, dataset_name = "", col_names = characte
     "- percentage table or table of means: how many decimal places to round to\n",
     "- bar graph that uses two variables: whether bars show counts or percentages, and stacked or side by side\n",
     # Check Again only: the student asked for a review, so cosmetic tips are welcome there
-    if (polish_tips) "- any plot: a title, axis labels, colors, or font size\n",
+    if (polish_tips) paste0(
+      "- any plot: a title, axis labels, colors, or font size. The student asked for a review, so for ",
+      "any plot always give at least one of these that the prompt does not already set, e.g. ",
+      "'You can add a title or change the font size.'\n"),
     "Always add a suggestion when the chart type does not fit the variable's type, e.g. 'Year.In.School is ",
     "categorical, so a bar graph may fit better than a histogram.' (histograms, density plots, and scatterplot ",
     "axes expect numeric variables; bar graphs and frequency tables expect categorical ones). This is a ",
