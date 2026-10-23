@@ -60,14 +60,7 @@ app_ui <- function(request) {
 
           ### Main Panel ###
           mainPanel(
-            mod_04_main_panel_ui("main_panel"),
-            fluidRow(
-              column(
-                width = 12,
-                textOutput(outputId = "on_server"),
-                align = "center"
-              )
-            )
+            mod_04_main_panel_ui("main_panel")
           )
         )
       ), #tabPanel
