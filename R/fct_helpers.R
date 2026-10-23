@@ -744,6 +744,7 @@ quality_off_topic_rules <- paste0(
 #   vague       -> `missing` lists the absent core elements; caller blocks once
 #   ok          -> `suggestions` may hold optional, non-blocking improvements
 # off_topic_only = TRUE (follow-up prompts) checks nothing but topic.
+# polish_tips = TRUE (Check Again) also allows cosmetic tips: title, axis labels, colors, font size.
 # Fails open: any API or parse error returns "ok" so students are never blocked by an outage.
 # TRUE when the model's output_type is only a generic word, as in "make a graph of Protein":
 # that names no kind of plot. A real kind ("histogram", "bar graph") passes even when the
@@ -757,7 +758,8 @@ is_generic_output_type <- function(output_type) {
 }
 
 check_prompt_quality <- function(prompt, dataset_name = "", col_names = character(0),
-                                 col_types = character(0), off_topic_only = FALSE) {
+                                 col_types = character(0), off_topic_only = FALSE,
+                                 polish_tips = FALSE) {
   fail_open <- list(verdict = "ok", missing = character(0), suggestions = character(0), usage = NULL)
 
   columns <- if (length(col_types) == length(col_names)) paste0(col_names, " (", col_types, ")") else col_names
@@ -812,6 +814,8 @@ check_prompt_quality <- function(prompt, dataset_name = "", col_names = characte
     "- two-way table: row and column totals\n",
     "- percentage table or table of means: how many decimal places to round to\n",
     "- bar graph that uses two variables: whether bars show counts or percentages, and stacked or side by side\n",
+    # Check Again only: the student asked for a review, so cosmetic tips are welcome there
+    if (polish_tips) "- any plot: a title, axis labels, colors, or font size\n",
     "Always add a suggestion when the chart type does not fit the variable's type, e.g. 'Year.In.School is ",
     "categorical, so a bar graph may fit better than a histogram.' (histograms, density plots, and scatterplot ",
     "axes expect numeric variables; bar graphs and frequency tables expect categorical ones). This is a ",

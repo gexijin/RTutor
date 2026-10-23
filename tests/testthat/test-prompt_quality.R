@@ -147,3 +147,32 @@ test_that("Check Again stops off-topic prompts too, and Submit still never runs 
     submit(session, "How do I change a flat tire?", 1); expect_equal(shiny::isolate(cleared()), 0)
   })
 })
+
+test_that("polish tips (title, colors, font size) are offered only when asked for", {
+  sys <- NULL
+  testthat::local_mocked_bindings(create_response = function(model, messages, ...) {
+    sys <<- messages[[1]]$content; fake_llm(facts())()
+  })
+  suppressMessages(check_prompt_quality("p", "ds", "a"))
+  expect_no_match(sys, "font size\n", fixed = TRUE)
+  suppressMessages(check_prompt_quality("p", "ds", "a", polish_tips = TRUE))
+  expect_match(sys, "- any plot: a title, axis labels, colors, or font size", fixed = TRUE)
+})
+
+test_that("Check Again asks for polish tips and shows them inside the All clear box", {
+  polish <- NULL
+  testthat::local_mocked_bindings(check_prompt_quality = function(..., polish_tips = FALSE) {
+    polish <<- polish_tips
+    list(verdict = "ok", missing = character(0), suggestions = "You can add a title.", usage = NULL)
+  })
+  shiny::testServer(mod_03_send_request_serv, args = list(
+    chunk_selection = shiny::reactiveValues(), user_file = shiny::reactive(NULL),
+    selected_dataset_name = shiny::reactive("mpg"), use_python = shiny::reactive(FALSE),
+    quality_cleared = shiny::reactiveVal(0), current_data = shiny::reactive(mtcars),
+    do_soft_reset = function() NULL, counter = shiny::reactiveValues(costs_total = 0),
+    is_follow_up = shiny::reactive(TRUE)), {
+    check_again(session, "make a boxplot of mpg", 1)
+    expect_match(feedback(session$output), "You can add a title.", fixed = TRUE)
+  })
+  expect_true(polish)
+})
