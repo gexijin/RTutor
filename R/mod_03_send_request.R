@@ -192,7 +192,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
     }
 
     # Runs the prompt gate on the current text and logs its cost. Fails open to "ok".
-    run_quality_check <- function(off_topic_only) {
+    run_quality_check <- function(off_topic_only, polish_tips = FALSE) {
       removeNotification("quality_tip")  # a tip about the previous prompt no longer applies
       notif_id <- showNotification("Checking prompt...", duration = NULL)
       result <- tryCatch(
@@ -201,7 +201,8 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
           dataset_name   = selected_dataset_name(),
           col_names      = colnames(current_data()),
           col_types      = vapply(current_data(), function(x) class(x)[1], character(1)),
-          off_topic_only = off_topic_only
+          off_topic_only = off_topic_only,
+          polish_tips    = polish_tips
         ),
         error = function(e) {
           message("[QUALITY] check_prompt_quality failed: ", e$message)
@@ -285,7 +286,7 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
     observeEvent(input$check_button, {
       if (!prompt_ready()) return()
       quality_warned(FALSE)
-      result <- run_quality_check(off_topic_only = FALSE)
+      result <- run_quality_check(off_topic_only = FALSE, polish_tips = TRUE)
 
       output$quality_feedback_ui <- renderUI(switch(result$verdict,
         off_topic = off_topic_box(),
@@ -293,10 +294,14 @@ mod_03_send_request_serv <- function(id, chunk_selection, user_file,
                             "Fix these and click 'Check Again', or 'Submit' to run it as is."),
         div(
           style = "background-color: #e8f5e9; border-left: 3px solid #4caf50; padding: 10px; margin-top: 8px; margin-bottom: 10px;",
-          strong("All clear! 'Submit' to run the code!")
+          strong("All clear! 'Submit' to run the code!"),
+          # tips sit inside the box here, not in the corner pop-up, so they are seen
+          if (length(result$suggestions) > 0) tagList(
+            tags$p(style = "margin: 6px 0 0;", "Optional tips:"),
+            tags$ul(style = "margin-bottom: 0;", lapply(result$suggestions, tags$li))
+          )
         )
       ))
-      if (result$verdict == "ok") show_tip(result$suggestions)
     })
 
     observeEvent(input$reset_button, {
