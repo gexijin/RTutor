@@ -17,6 +17,7 @@ Imports:
     DT,
     shinybusy,
     shinyjs,
+    shinyalert,
     plotly,
     DataExplorer,
     corrplot,
