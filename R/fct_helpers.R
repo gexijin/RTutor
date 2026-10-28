@@ -67,6 +67,11 @@ on_server <- "on_server.txt"
 # Set by the desktop app (electron/main.js). A function, not a constant: package-level code runs at install time.
 on_desktop <- function() nzchar(Sys.getenv("RTUTOR_DESKTOP"))
 
+# TRUE when the desktop app can install packages while it runs: Windows only, where CRAN
+# has prebuilt binaries for the bundled R. bootstrap.R gates the writable library on the
+# same condition. macOS is "unix", so the Mac bundle stays read-only.
+desktop_can_install <- function() on_desktop() && .Platform$OS.type == "windows"
+
 # Where students download a new desktop build (shown when the embedded key expires).
 desktop_download_url <- "https://github.com/gexijin/RTutor/releases?q=uiuc-desktop&expanded=true"
 
@@ -1034,8 +1039,9 @@ clean_cmd <- function(cmd, selected_data, on_server = FALSE) {
   )
 
   # use pacman, load if installed; otherwise install it first then load.
-  # Not on desktop: its package library is read-only, so missing packages get a clear message instead.
-  if (!on_server && !on_desktop()) {
+  # On desktop only where a writable library exists (Windows). The macOS bundle's library
+  # is read-only, so there a missing package gets a clear message instead.
+  if (!on_server && (!on_desktop() || desktop_can_install())) {
     cmd <- gsub("library\\(", "pacman::p_load\\(", cmd)
   }
   #if (selected_data != no_data) {

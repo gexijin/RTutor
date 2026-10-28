@@ -4,8 +4,9 @@
 # Usage:  Rscript install_packages.R <library_path>
 #
 # Installs RTutor's own dependencies (DESCRIPTION) plus the packages that LLM-generated
-# code is expected to use. The desktop app never installs packages at runtime, so anything
-# generated code needs must be here. electron/scripts/check_package_coverage.R reports gaps.
+# code is expected to use. The Windows app can download a missing one at runtime, but that
+# costs the student a wait on first use, and the macOS app cannot do it at all - so anything
+# generated code is likely to need still belongs here. check_package_coverage.R reports gaps.
 #
 # All packages come as prebuilt binaries from one dated Posit Package Manager snapshot, so
 # Mac and Windows get identical versions and every rebuild is reproducible.

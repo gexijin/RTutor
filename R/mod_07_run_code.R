@@ -53,7 +53,13 @@ mod_07_run_code_serv <- function(id, run_env, run_env_start, run_result, submit_
       console_output <- NULL
       error_message <- ""
 
-      withProgress(message = "Running the code ...", {
+      # Where a missing package downloads on the fly, the first run of a chunk is slow
+      # enough that the usual message looks like a freeze.
+      withProgress(message = if (desktop_can_install()) {
+        "Running the code (a new package may need to download) ..."
+      } else {
+        "Running the code ..."
+      }, {
         incProgress(0.4)
 
         run_env_start(as.list(run_env())) # keep a copy of the crime scene
