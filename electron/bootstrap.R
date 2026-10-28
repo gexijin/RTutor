@@ -17,19 +17,14 @@ port     <- as.integer(Sys.getenv("RTUTOR_PORT", unset = "7777"))
 if (nzchar(lib_dir)) .libPaths(normalizePath(lib_dir, winslash = "/", mustWork = FALSE))
 options(shiny.launch.browser = FALSE, golem.app.prod = TRUE)
 
-# Writable library for packages installed at runtime. Windows only, matching
-# desktop_can_install() in R/fct_helpers.R: CRAN has prebuilt binaries for this R, so no
-# toolchain is needed. The macOS bundle stays read-only - its package binaries need the
-# install-name relocation that only runs at build time (see README). Stamped with the R
-# version so a later bundle carrying a newer R starts clean instead of loading binaries
-# built against the old one.
+# Packages installed while the app runs go into the bundled library, alongside the ones that
+# shipped - one library, not two. Windows only, matching desktop_can_install() in
+# R/fct_helpers.R: the per-user install folder is writable without admin rights, and CRAN has
+# prebuilt binaries for this R so no toolchain is needed. The macOS bundle stays read-only -
+# its package binaries need the install-name relocation that only runs at build time (see
+# README). The .libPaths() call above already put the bundled library first, and that is
+# where install.packages() and pacman write by default, so all that is left is the repo.
 if (nzchar(lib_dir) && .Platform$OS.type == "windows") {
-  r_ver <- paste(strsplit(as.character(getRversion()), ".", fixed = TRUE)[[1]][1:2], collapse = ".")
-  user_lib <- file.path(data_dir, "library", r_ver)
-  dir.create(user_lib, recursive = TRUE, showWarnings = FALSE)
-  # .libPaths() silently drops paths that do not exist, hence the dir.create above.
-  # Position one is where install.packages() and pacman write by default.
-  .libPaths(c(normalizePath(user_lib, winslash = "/", mustWork = FALSE), .libPaths()))
   snapshot <- paste0("https://packagemanager.posit.co/cran/", CRAN_SNAPSHOT_DATE)
   options(
     # CRANextra is pinned to the same snapshot on purpose: pacman adds a long-dead Oxford
