@@ -29,8 +29,8 @@ Design and decisions: [PLAN.md](PLAN.md).
 
 The `DOG_LOVER` secret on gexijin/RTutor holds the class's OpenAI `sk-` key. The build writes it to `electron/.env`
 as `OPENAI_API_KEY`. That file is packaged into the app, and `main.js` passes it to R. The R code reads only
-`OPENAI_API_KEY` (`create_response()` in `R/fct_helpers.R`). `main.js` also sets `RTUTOR_DESKTOP=1`, which stops
-generated code from installing packages. A key embedded this way can be extracted by anyone with the installer.
+`OPENAI_API_KEY` (`create_response()` in `R/fct_helpers.R`). `main.js` also sets `RTUTOR_DESKTOP=1`, which puts the
+app into desktop mode. A key embedded this way can be extracted by anyone with the installer.
 The key's spending cap and semester expiry are what limit the damage.
 
 ## Release a new version (each semester, or for a fix)
@@ -73,6 +73,28 @@ Then check coverage (paid, about $2–3 on the class key), from the repo root:
 Rscript electron/scripts/check_package_coverage.R coverage.csv
 ```
 It prints every package the generated code used that isn't bundled. Add those to `course_list`.
+
+## Packages installed while the app runs (Windows only)
+
+On Windows a package that isn't bundled is downloaded on demand instead of failing. `bootstrap.R` creates
+`%APPDATA%\UIUC RTutor\rtutor\library\<R x.y>`, puts it *ahead of* the bundled library on `.libPaths()`, and pins
+`repos` to the same `CRAN_SNAPSHOT_DATE` the bundle was built from, so a package downloaded today still fits
+dependencies frozen months ago. `clean_cmd()` already rewrites `library()` to `pacman::p_load()`, which installs
+what is missing — on desktop that rewrite is now gated on `desktop_can_install()` instead of being switched off.
+Installs are `pkgType = "binary"`, so no Rtools is needed; the per-user folder means no admin rights; and the
+library sits outside `resources/`, so an app update does not wipe it. The R version stamp means a future bundle
+carrying a newer R starts from an empty library rather than loading binaries built against the old one.
+
+**macOS deliberately does not do this**, and the switch is `.Platform$OS.type` rather than anything `main.js`
+passes, so the Mac path cannot be turned on by accident. CRAN's Mac binaries bake
+`/Library/Frameworks/R.framework/...` into every `.so`, and `relocate_install_names_mac.sh` rewrites exactly those
+references to `@loader_path` at build time. A package downloaded on a student's Mac would miss that pass: it would
+load only through the `DYLD_FALLBACK_LIBRARY_PATH` that `main.js` sets, and on a Mac that already has R it would
+silently bind to the *host's* `libR` — the failure that relocation script exists to prevent. Switching it on there
+means re-running `install_name_tool` over each newly installed package.
+
+Known rough edge: `pacman::p_load()` only *warns* when an install fails, so a student who is offline sees the
+downstream `could not find function` error rather than a note about the package.
 
 ## Run locally (Mac or Windows)
 

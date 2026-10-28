@@ -6,14 +6,28 @@ r_src <- function(file) {
   paste(readLines(file.path(rprojroot::find_package_root_file(), "R", file), warn = FALSE), collapse = "\n")
 }
 
-test_that("library() is rewritten to pacman::p_load() off desktop but kept on desktop", {
+test_that("library() becomes pacman::p_load() except where the library is read-only", {
   withr::local_envvar(RTUTOR_DESKTOP = "")
   expect_match(paste(clean_cmd("library(ggplot2)", "mpg"), collapse = "\n"), "pacman::p_load(ggplot2)", fixed = TRUE)
 
+  # On desktop this splits by platform: Windows installs what is missing, macOS cannot.
   withr::local_envvar(RTUTOR_DESKTOP = "1")
   out <- paste(clean_cmd("library(ggplot2)", "mpg"), collapse = "\n")
-  expect_match(out, "library(ggplot2)", fixed = TRUE)
-  expect_no_match(out, "p_load", fixed = TRUE)
+  if (.Platform$OS.type == "windows") {
+    expect_match(out, "pacman::p_load(ggplot2)", fixed = TRUE)
+  } else {
+    expect_match(out, "library(ggplot2)", fixed = TRUE)
+    expect_no_match(out, "p_load", fixed = TRUE)
+  }
+})
+
+test_that("desktop_can_install() is the desktop app on Windows and nothing else", {
+  withr::local_envvar(RTUTOR_DESKTOP = "1")
+  expect_identical(desktop_can_install(), .Platform$OS.type == "windows")
+
+  # The browser build never installs through this path, whatever the platform.
+  withr::local_envvar(RTUTOR_DESKTOP = "")
+  expect_false(desktop_can_install())
 })
 
 test_that("a missing package gets a desktop-specific note only on desktop", {
@@ -59,3 +73,17 @@ test_that("every pkg:: used in R/ is declared in DESCRIPTION, so the desktop bun
   not_packages <- c("pkg", "summary", "question", "text")  # matched inside strings, not package calls
   expect_setequal(setdiff(used, c(declared, base_pkgs, not_packages)), character(0))
 })
+
+# ---- Windows runtime installs ----
+
+test_that("the runtime install repo is pinned to the snapshot the bundle was built from", {
+  root <- rprojroot::find_package_root_file()
+  snapshot <- function(path) {
+    line <- grep("^CRAN_SNAPSHOT_DATE <-", readLines(file.path(root, path), warn = FALSE), value = TRUE)
+    expect_length(line, 1)
+    regmatches(line, regexpr("[0-9]{4}-[0-9]{2}-[0-9]{2}", line))
+  }
+  expect_identical(snapshot("electron/bootstrap.R"), snapshot("electron/scripts/install_packages.R"))
+})
+
+

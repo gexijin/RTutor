@@ -112,7 +112,8 @@ Modules are called in `app_server.R` with shared reactives passed as arguments.
 - The only API key is an OpenAI `sk-` key read from the `OPENAI_API_KEY` environment variable (`create_response()` in `fct_helpers.R`). Users cannot enter their own key, and there is no Azure fallback
 - File upload limits: 50 MB in production, 10 GB locally (set in `app_server.R`)
 - Server vs. local detection: if `on_server.txt` exists in the working directory, the app treats itself as running on a server (affects upload limits and other behavior)
-- Desktop detection: `on_desktop()` is TRUE when `RTUTOR_DESKTOP` is set (by the Electron app). It is a function, not a constant, because package-level code runs at install time. On desktop, `library()` is not rewritten to `pacman::p_load()`, so nothing is installed at runtime, and a missing package gets a "not included in the desktop app" note (`desktop_package_note()`)
+- Desktop detection: `on_desktop()` is TRUE when `RTUTOR_DESKTOP` is set (by the Electron app). It is a function, not a constant, because package-level code runs at install time
+- Runtime package installs: `desktop_can_install()` is `on_desktop() && .Platform$OS.type == "windows"`. On Windows `clean_cmd()` rewrites `library()` to `pacman::p_load()`, and a missing package downloads into a writable per-user library that `bootstrap.R` creates and prepends to `.libPaths()` (pinned to the build's CRAN snapshot, `pkgType = "binary"`). macOS is `"unix"`, so there the bundled library stays read-only, nothing is installed at runtime, and a missing package gets a "not included in the desktop app" note (`desktop_package_note()`). See `electron/README.md` for why macOS is excluded
 
 ## Desktop app (`electron/`)
 
