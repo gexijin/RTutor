@@ -76,14 +76,31 @@ It prints every package the generated code used that isn't bundled. Add those to
 
 ## Packages installed while the app runs (Windows only)
 
-On Windows a package that isn't bundled is downloaded on demand instead of failing. `bootstrap.R` creates
-`%APPDATA%\UIUC RTutor\rtutor\library\<R x.y>`, puts it *ahead of* the bundled library on `.libPaths()`, and pins
-`repos` to the same `CRAN_SNAPSHOT_DATE` the bundle was built from, so a package downloaded today still fits
-dependencies frozen months ago. `clean_cmd()` already rewrites `library()` to `pacman::p_load()`, which installs
-what is missing — on desktop that rewrite is now gated on `desktop_can_install()` instead of being switched off.
-Installs are `pkgType = "binary"`, so no Rtools is needed; the per-user folder means no admin rights; and the
-library sits outside `resources/`, so an app update does not wipe it. The R version stamp means a future bundle
-carrying a newer R starts from an empty library rather than loading binaries built against the old one.
+On Windows a package that isn't bundled is downloaded on demand instead of failing. It lands in the **bundled
+library itself** — `resources/runtime/R.win/library`, next to the packages that shipped — so there is one library
+on disk, not two. That folder is writable without admin rights because the NSIS config is `oneClick: true,
+perMachine: false`, which installs the whole app under `%LOCALAPPDATA%`. `main.js` already points `R_LIBS_USER` at
+it and `bootstrap.R` already makes it `.libPaths()[1]`, which is where `install.packages()` and `pacman` write by
+default, so the only thing `bootstrap.R` adds is the repository: `repos` pinned to the same `CRAN_SNAPSHOT_DATE`
+the bundle was built from, so a package downloaded today still fits dependencies frozen months ago, plus
+`pkgType = "binary"` so no Rtools is needed. `clean_cmd()` already rewrites `library()` to `pacman::p_load()`,
+which installs what is missing — on desktop that rewrite is gated on `desktop_can_install()`.
+
+Consequences of the single-library choice, which was made deliberately:
+
+- **An app update wipes the downloaded packages.** `updater.js` sends the student to the release page to install
+  over the top, and the NSIS uninstaller removes the install directory. Everything installed at runtime goes with
+  it and is re-downloaded on demand afterwards. A separate folder under `%APPDATA%` would have survived, at the
+  cost of two libraries to reason about.
+- **There is no record of what students needed.** When the two libraries were separate, the runtime one *was* the
+  report — everything in it was something worth adding to `install_packages.R`. Now that signal has to come from
+  `check_package_coverage.R` instead.
+- **Upgrading a bundled package is a real risk.** If a dependency resolution ever decides a shipped package needs a
+  newer version, `install.packages()` will try to replace it in place. On Windows that fails against a DLL held by
+  the running R process and can leave a `00LOCK` directory or a half-swapped package behind — damaging a *shipped*
+  package rather than a disposable cache. Pinning `repos` to the build snapshot is what keeps this unlikely, since
+  the resolver sees the same versions the bundle was built from. Worth watching if a student ever reports a
+  package breaking after an install.
 
 **macOS deliberately does not do this**, and the switch is `.Platform$OS.type` rather than anything `main.js`
 passes, so the Mac path cannot be turned on by accident. CRAN's Mac binaries bake
